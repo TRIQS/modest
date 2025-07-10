@@ -1,0 +1,141 @@
+name: build
+
+on:
+  push:
+    branches: [ unstable, clair, '[0-9]+.[0-9]+.x' ]
+  pull_request:
+    branches: [ unstable, clair, '[0-9]+.[0-9]+.x' ]
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  CMAKE_C_COMPILER_LAUNCHER: ccache
+  CMAKE_CXX_COMPILER_LAUNCHER: ccache
+  CCACHE_COMPILERCHECK: content
+  CCACHE_BASEDIR: ${{ github.workspace }}
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+  CCACHE_MAXSIZE: 500M
+  CCACHE_SLOPPINESS: pch_defines,time_macros,include_file_mtime,include_file_ctime
+  CCACHE_COMPRESS: "1"
+  CCACHE_COMPRESSLEVEL: "1"
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, cc: gcc, cxx: g++}
+          - {os: ubuntu-24.04, cc: clang, cxx: clang++}
+          - {os: macos-14, cc: gcc-14, cxx: g++-14}
+          - {os: macos-14, cc: clang, cxx: clang++}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/cache/restore@v4
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: ccache-${{ matrix.os }}-${{ matrix.cc }}-${{ github.run_id }}
+        restore-keys:
+          ccache-${{ matrix.os }}-${{ matrix.cc }}-
+
+    - name: Install ubuntu dependencies
+      if: ${{ contains(matrix.os, 'ubuntu') }}
+      run: >
+        sudo apt-get update &&
+        sudo apt-get install lsb-release wget software-properties-common &&
+        sudo apt-get install
+        ccache
+        clang
+        g++
+        gfortran
+        hdf5-tools
+        libboost-dev
+        libclang-dev
+        libc++-dev
+        libc++abi-dev
+        libomp-dev
+        libfftw3-dev
+        libgfortran5
+        libgmp-dev
+        libhdf5-dev
+        libopenblas-dev
+        libopenmpi-dev
+        openmpi-bin
+        openmpi-common
+        openmpi-doc
+        python3-clang
+        python3-dev
+        python3-mako
+        python3-matplotlib
+        python3-mpi4py
+        python3-numpy
+        python3-pip
+        python3-scipy
+        python3-ipython
+
+    - name: Set up virtualenv
+      run: |
+        mkdir $HOME/.venv
+        python3 -m venv --system-site-packages $HOME/.venv/my_python
+        source $HOME/.venv/my_python/bin/activate
+        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+        echo "PATH=$PATH" >> $GITHUB_ENV
+
+    - name: Install homebrew dependencies
+      if: ${{ contains(matrix.os, 'macos') }}
+      run: |
+        brew update
+        brew install ccache gcc llvm boost fftw hdf5 open-mpi openblas
+        pip install mako numpy scipy mpi4py
+        pip install -r requirements.txt
+        echo "PATH=$(brew --prefix llvm)/bin:$(brew --prefix gcc)/bin:$PATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=$(brew --prefix llvm)/lib/python3.13/site-packages" >> $GITHUB_ENV
+
+    - name: Add clang CXXFLAGS
+      if: ${{ contains(matrix.cxx, 'clang') }}
+      run: |
+        echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
+
+    - name: Build & Install TRIQS
+      env:
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
+        TRIQS_BRANCH: ${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
+      run: |
+        git clone https://github.com/TRIQS/triqs --branch $TRIQS_BRANCH
+        mkdir triqs/build && cd triqs/build
+        cmake .. -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
+        make -j1 install VERBOSE=1
+        cd ../
+
+    - name: Build app4triqs
+      env:
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
+      run: |
+        source $HOME/install/share/triqs/triqsvars.sh
+        mkdir build && cd build && cmake ..
+        make -j2 || make -j1 VERBOSE=1
+
+    - name: Test app4triqs
+      env:
+        OPENBLAS_NUM_THREADS: "1"
+      run: |
+        source $HOME/install/share/triqs/triqsvars.sh
+        cd build
+        ctest -j2 --output-on-failure
+
+    - name: ccache statistics
+      if: always()
+      run: ccache -sv
+
+    - uses: actions/cache/save@v4
+      if: always()
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: ccache-${{ matrix.os }}-${{ matrix.cc }}-${{ github.run_id }}
