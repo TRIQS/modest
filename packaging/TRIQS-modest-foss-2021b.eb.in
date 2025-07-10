@@ -1,21 +1,21 @@
 easyblock = 'CMakeMake'
 
-name = 'TRIQS-app4triqs'
+name = 'TRIQS-modest'
 version = '@PROJECT_VERSION@'
 
-homepage = 'https://triqs.github.io/app4triqs/'
+homepage = 'https://triqs.github.io/modest/'
 description = """
  PROVIDE HERE A DESCRIPTION OF YOUR APPLICATION
 """
 
-docurls = ['https://triqs.github.io/app4triqs/%(version_major_minor)s.x/']
+docurls = ['https://triqs.github.io/modest/%(version_major_minor)s.x/']
 software_license = 'LicenseGPLv3'
 
 toolchain = {'name': 'foss', 'version': '2021b'}
 toolchainopts = {'pic': True, 'usempi': True}
 
-source_urls = ['https://github.com/TRIQS/app4triqs/releases/download/%(version)s/']
-sources = ['app4triqs-%(version)s.tar.gz']
+source_urls = ['https://github.com/TRIQS/modest/releases/download/%(version)s/']
+sources = ['modest-%(version)s.tar.gz']
 checksums = ['PUT HERE THE SHA256 OF THE RELEASE TARBALL']
 
 dependencies = [
@@ -40,21 +40,21 @@ separate_build_dir = True
 runtest = 'test'
 
 sanity_check_paths = {
-    'files': ['lib/libapp4triqs_c.a'],
-    'dirs': ['include/app4triqs', 'lib', 'share',
-             'lib/python%(pyshortver)s/site-packages/app4triqs'],
+    'files': ['lib/libtriqs_modest_c.a'],
+    'dirs': ['include/triqs_modest', 'lib', 'share',
+             'lib/python%(pyshortver)s/site-packages/triqs_modest'],
 }
 
-sanity_check_commands = ["python -c 'import app4triqs'"]
+sanity_check_commands = ["python -c 'import triqs_modest'"]
 
 modextrapaths = {
     'CPLUS_INCLUDE_PATH': 'include',
     'PYTHONPATH': 'lib/python%(pyshortver)s/site-packages',
-    'CMAKE_PREFIX_PATH': 'lib/cmake/app4triqs',
+    'CMAKE_PREFIX_PATH': 'lib/cmake/triqs_modest',
 }
 modextravars = {
-    'APP4TRIQS_ROOT': '%(installdir)s',
-    'APP4TRIQS_VERSION': '%(version)s',
+    'TRIQS_MODEST_ROOT': '%(installdir)s',
+    'TRIQS_MODEST_VERSION': '%(version)s',
 }
 
 moduleclass = 'phys'

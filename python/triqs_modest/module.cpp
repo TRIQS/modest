@@ -1,15 +1,15 @@
-#include "app4triqs/app4triqs.hpp"
+#include "triqs_modest/triqs_modest.hpp"
 
 #include <c2py/c2py.hpp>
 
 using namespace std::string_literals;
-using app4triqs::toto;
+using triqs_modest::toto;
 template <> struct c2py::arithmetic<toto, c2py::OpName::Add> : std::tuple<triplet<toto, toto, toto>> {};
 
 namespace c2py_module {
 
-  auto documentation = "Sample documentation for app4triqs module";
-  auto match_names   = "app4triqs::";
-  auto package_name  = "app4triqs";
+  auto documentation = "Sample documentation for triqs_modest module";
+  auto match_names   = "triqs_modest::";
+  auto package_name  = "triqs_modest";
 
 } // namespace c2py_module

@@ -1,13 +1,13 @@
 #pragma once
 #include <h5/h5.hpp>
 
-namespace app4triqs {
+namespace triqs_modest {
 
   /**
    * A very useful and important class
    *
    * @note A Useful note
-   * @include app4triqs/app4triqs.hpp
+   * @include triqs_modest/triqs_modest.hpp
    */
   class toto {
 
@@ -75,4 +75,4 @@ namespace app4triqs {
    */
   int chain(int i, int j);
 
-} // namespace app4triqs
+} // namespace triqs_modest
