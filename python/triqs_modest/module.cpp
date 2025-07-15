@@ -1,6 +1,6 @@
-#include "triqs_modest/triqs_modest.hpp"
-
 #include <c2py/c2py.hpp>
+
+#include "triqs_modest/triqs_modest.hpp"
 
 using namespace std::string_literals;
 using triqs_modest::toto;
@@ -13,3 +13,5 @@ namespace c2py_module {
   auto package_name  = "triqs_modest";
 
 } // namespace c2py_module
+
+#include "module.wrap.cxx"

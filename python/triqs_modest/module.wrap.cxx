@@ -1,6 +1,7 @@
 
 // C.f. https://numpy.org/doc/1.21/reference/c-api/array.html#importing-the-api
 #define PY_ARRAY_UNIQUE_SYMBOL _cpp2py_ARRAY_API
+#ifndef CLAIR_C2PY_WRAP_GEN
 #ifdef __clang__
 // #pragma clang diagnostic ignored "-W#warnings"
 #endif
@@ -12,8 +13,6 @@
 
 #define C2PY_VERSION_MAJOR 0
 #define C2PY_VERSION_MINOR 1
-
-#include "module.cpp"
 
 #include <c2py/c2py.hpp>
 #include <c2py/serialization/h5.hpp>
@@ -32,7 +31,7 @@ template <> inline const std::string c2py::cpp_name<triqs_modest::toto>   = "tri
 template <> inline constexpr auto c2py::tp_name<triqs_modest::toto>       = "triqs_modest.module.Toto";
 template <> inline constexpr const char *c2py::tp_doc<triqs_modest::toto> = R"DOC(   A very useful and important class)DOC";
 
-static auto init_0                                               = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs_modest::toto>(), c2py::c_constructor<triqs_modest::toto, int>("i_")};
+static auto init_0 = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs_modest::toto>(), c2py::c_constructor<triqs_modest::toto, int>("i_")};
 template <> constexpr initproc c2py::tp_init<triqs_modest::toto> = c2py::pyfkw_constructor<init_0>;
 // f
 static auto const fun_0 = c2py::dispatcher_f_kw_t{c2py::cmethod([](triqs_modest::toto &self, int u) { return self.f(u); }, "self", "u")};
@@ -148,3 +147,5 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_module() {
 
   return m;
 }
+#endif
+// CLAIR_WRAP_GEN
