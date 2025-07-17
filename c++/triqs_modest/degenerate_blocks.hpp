@@ -37,6 +37,7 @@ namespace triqs::modest {
   // 5. Rotate all blocks using the eigenvectors which constitute a unitary transformation.
   // Do we agree with this algorithm and want the same?
   /**
+   * @ingroup deg
    * @brief Find the generate blocks of a BlockGf by analyzing G(τ=0) or G(iω₀) using the union-find algorithm.
    * 
    * @details We use the union-find algorithm to group the blocks of the BlockGf (matrices) into equivalence
@@ -79,6 +80,16 @@ namespace triqs::modest {
        | tl::to<std::vector>();
   }
 
+  /**
+   * @ingroup deg
+   * @brief Symmetrize the blocks of a Green's function given a list of it's degenerate blocks.
+   * 
+   * @details Average the degenerate blocks and replace the degenerate ones with their average.
+   *
+   * @param Gin Block Green's function
+   * @param degenerate_blocks a list of the degenerate blocks.
+   * @return The symmetrized Green's function.
+   */
   inline block_gf<imfreq, matrix_valued> symmetrize_gf(block_gf<imfreq, matrix_valued> const &Gin,
                                                        std::vector<std::vector<long>> degenerate_blocks) {
     auto Gsymm = Gin;

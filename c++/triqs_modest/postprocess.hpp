@@ -35,6 +35,7 @@ namespace triqs::modest {
   };
 
   /**
+ * @ingroup post
  * @brief Compute momentum-resolved spectral function A(k, ω) along high-symmetry path.
  * 
  * @param obe  one-body elements on grid created from one_body_elements_on_high_symmetry_path (see obe factories)
@@ -54,6 +55,7 @@ namespace triqs::modest {
   };
 
   /**
+ * @ingroup post
  * @brief  Compute the atom- and orbital-resolved spectral function (interacting density of states).
  * 
  * @param obe_theta one-body elements on grid created from one_body_elements_with_theta_projectors (see obe factories).

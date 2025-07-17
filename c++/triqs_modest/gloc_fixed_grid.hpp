@@ -7,24 +7,25 @@
 namespace triqs::modest {
 
 // omp reduction operation for block2_gf
-#pragma omp declare reduction(block2_gf_sum : block2_gf<imfreq, matrix_valued> : omp_out += omp_in)                    \
+#pragma omp declare reduction(block2_gf_sum : block2_gf<imfreq, matrix_valued> : omp_out += omp_in)                                                  \
    initializer(omp_priv = make_block2_gf(omp_orig(0, 0).mesh(), get_struct(omp_orig)))
-#pragma omp declare reduction(block2_gf_sum : block2_gf<dlr_imfreq, matrix_valued> : omp_out += omp_in)                \
+#pragma omp declare reduction(block2_gf_sum : block2_gf<dlr_imfreq, matrix_valued> : omp_out += omp_in)                                              \
    initializer(omp_priv = make_block2_gf(omp_orig(0, 0).mesh(), get_struct(omp_orig)))
 
   // ------------------------------------------------------------------
   /**
+ * @ingroup gloc_fixed
  * @brief compute G𝓒 local Green's function on Mesh(MxM) 
  * 
  * @tparam Mesh triqs::mesh::{dlr_imfreq,imfreq}
  * @param obe one_body_elements_on_grid
  * @param mu chemical potential
- * @param Sigma Embedded self-energy TODO: {Σ∞, ΣDLR }
+ * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view.
+ * @param Sigma_hartree The static part of the embedded self-energy in the embedded view.
  * @return block2_gf<Mesh, matrix_valued> 
  */
   template <typename Mesh>
-  block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu,
-                                      block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
+  block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree) {
 
     //std::optional<nda::array<nda::matrix<double>, 2>> const &Sigma_dc)
@@ -45,7 +46,7 @@ namespace triqs::modest {
     // NOTE: Is there any reason why sigma loop should be the external one?
     // Internal is favorable for maximum parallelization.
     mpi::communicator comm = {};
-#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                              \
+#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                                                            \
    shared(comm, r_all, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_hartree)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
       for (auto sigma : range(n_sigma)) {
@@ -62,14 +63,14 @@ namespace triqs::modest {
 
     // FIXME :: the IBZ should work on a proper gf_view with atomic decomposition
     // CHANGE IBZ accordingly ...
-    if (auto const &S = obe.ibz_symm_ops; S)
-      gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition());
+    if (auto const &S = obe.ibz_symm_ops; S) gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition());
 
     return gloc_result;
   }
 
   //TODO: Port to Woodbury? Wrap one gloc function?
   /**
+   * @ingroup gloc_fixed
    * @brief  Compute G𝓒 on with a Mesh with no self-energy.
    *
    * @details This implementation does not use the Woodbury formula.
@@ -80,8 +81,7 @@ namespace triqs::modest {
    * @param mu chemical potential
    * @return block2_gf<Mesh, matrix_valued> 
    */
-  template <typename Mesh>
-  block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements_on_grid const &obe, double mu) {
+  template <typename Mesh> block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements_on_grid const &obe, double mu) {
 
     auto n_sigma = obe.C_space.n_sigma();
     auto n_M     = obe.C_space.dim();
@@ -90,33 +90,36 @@ namespace triqs::modest {
     auto gloc_k = [&](auto &k_idx, auto &sigma) {
       auto out = gf{mesh, {n_M, n_M}};
       auto P   = obe.P.P(sigma, k_idx);
-      for (auto &&[n, w] : enumerate(mesh)) {
-        out.data()(n, r_all, r_all) = P * inverse(w + mu - obe.H.H(sigma, k_idx)) * dagger(P);
-      }
+      for (auto &&[n, w] : enumerate(mesh)) { out.data()(n, r_all, r_all) = P * inverse(w + mu - obe.H.H(sigma, k_idx)) * dagger(P); }
       return out;
     };
 
     auto gloc_result       = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
     mpi::communicator comm = {};
-#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                              \
-   shared(comm, r_all, gloc_k, n_kpts, n_sigma, obe)
+#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none) shared(comm, r_all, gloc_k, n_kpts, n_sigma, obe)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
-      for (auto sigma : range(n_sigma)) {
-        gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data();
-      }
+      for (auto sigma : range(n_sigma)) { gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data(); }
     }
     gloc_result = mpi::all_reduce(gloc_result);
 
-    if (auto const &S = obe.ibz_symm_ops; S) {
-      gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition());
-    }
+    if (auto const &S = obe.ibz_symm_ops; S) { gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition()); }
 
     return gloc_result;
   }
 
+  /**
+   * @ingroup hybridization
+   * @brief Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
+   * 
+   * @tparam Mesh 
+   * @param epsilon_levels The effective impurity levels.
+   * @param Gloc The local Green's function of the impurity.
+   * @param Sigma_dynamic The frequency dependent part of the impurity self-energy.
+   * @param Sigma_hartree The Hartree term of the impurity self-energy.
+   * @return block_gf<Mesh, matrix_valued> 
+   */
   template <typename Mesh>
-  block_gf<Mesh, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
-                                              block_gf<Mesh, matrix_valued> const &Gloc,
+  block_gf<Mesh, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc,
                                               block_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                               std::vector<nda::matrix<dcomplex>> const &Sigma_hartree) {
     auto gf_struct = get_struct(Gloc);
@@ -125,17 +128,24 @@ namespace triqs::modest {
     auto n_blocks  = gf_struct.size();
     for (auto bl : range(n_blocks)) {
       for (auto &&[n, w] : enumerate(mesh))
-        Delta[bl].data()(n, r_all, r_all) = (w - epsilon_levels[bl] - inverse(Gloc[bl]).data()(n, r_all, r_all)
-                                             - (Sigma_dynamic[bl].data()(n, r_all, r_all) + Sigma_hartree[bl]));
+        Delta[bl].data()(n, r_all, r_all) =
+           (w - epsilon_levels[bl] - inverse(Gloc[bl]).data()(n, r_all, r_all) - (Sigma_dynamic[bl].data()(n, r_all, r_all) + Sigma_hartree[bl]));
     }
     return Delta;
   }
 
+  /**
+   * @ingroup hybridization
+   * @brief Compute the hybridization function from the effective impurity levels and the local Green's function.
+   * 
+   * @tparam Mesh 
+   * @param epsilon_levels The effective impurity levels.
+   * @param Gloc The local Green's function of the impurity.
+   * @return block_gf<Mesh, matrix_valued> 
+   */
   template <typename Mesh>
-  block_gf<Mesh, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
-                                              block_gf<Mesh, matrix_valued> const &Gloc) {
-    auto Sigma_hartree = get_struct(Gloc)
-       | stdv::transform([](auto &x) { return nda::zeros<dcomplex>(x.second, x.second); })
+  block_gf<Mesh, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc) {
+    auto Sigma_hartree = get_struct(Gloc) | stdv::transform([](auto &x) { return nda::zeros<dcomplex>(x.second, x.second); })
        | tl::to<std::vector<nda::matrix<dcomplex>>>();
     auto Sigma_dynamic = block_gf{Gloc[0].mesh(), get_struct(Gloc)};
     return extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_hartree);
@@ -153,8 +163,7 @@ namespace triqs::modest {
   template block2_gf<dlr_imfreq, matrix_valued> gloc(one_body_elements_on_grid const &one_body, double mu,
                                                      block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
                                                      nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree);
-  template block2_gf<dlr_imfreq, matrix_valued> gloc(dlr_imfreq const &mesh, one_body_elements_on_grid const &obe,
-                                                     double mu);
+  template block2_gf<dlr_imfreq, matrix_valued> gloc(dlr_imfreq const &mesh, one_body_elements_on_grid const &obe, double mu);
   template block_gf<imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                          block_gf<imfreq, matrix_valued> const &Gloc);
   template block_gf<imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,

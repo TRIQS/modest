@@ -8,6 +8,13 @@ namespace triqs::modest {
 
   namespace fs = std::filesystem;
 
+  /**
+ * @ingroup checkpoint
+ * @brief 
+ * 
+ * @tparam InitialData 
+ * @tparam IterationData 
+ */
   template <typename InitialData, typename IterationData> class checkpoint {
 
     fs::path _dirname;
@@ -111,8 +118,9 @@ namespace triqs::modest {
   }
 
   // ------------------------------------------------------
-  using self_energy_t = block_gf<imfreq, matrix_valued>;
-  //using self_energy_t = std::variant<block_gf<dlr_imfreq, matrix_valued>, block_gf<imfreq, matrix_valued>>;
+  using block_gf_imfreq_t = block_gf<imfreq, matrix_valued>;
+  using block_gf_imtime_t = block_gf<imtime, matrix_valued>;
+  using block_mat_t       = std::vector<nda::matrix<dcomplex>>;
 
   struct iteration_data {
 
@@ -120,25 +128,44 @@ namespace triqs::modest {
     double mu;
 
     /// Impurities self-energies
-    std::vector<self_energy_t> Sigma_imp_list;
+    std::vector<block_gf_imfreq_t> Sigma_imp_list;
+
+    /// Sigma Hartree
+    block_mat_t Sigma_hartree_list;
+
+    /// Impurities Green's functions
+    std::vector<block_gf_imfreq_t> Gimp_freq_list;
+
+    /// Impurities Green's functions
+    std::vector<block_gf_imtime_t> Gimp_time_list;
 
     /// Impurities self-energies
-    std::vector<self_energy_t> Sigma_dc_list;
+    std::vector<block_gf_imfreq_t> Sigma_dc_list;
   };
 
   // HDF5 read and write for iteration_data
   void h5_write(h5::group g, std::string const &name, iteration_data const &data) {
     auto g2 = g.create_group(name);
     h5::write(g2, "mu", data.mu);
+
     h5::write(g2, "Sigma_imp_list", data.Sigma_imp_list);
+    h5::write(g2, "Sigma_hartree_list", data.Sigma_hartree_list);
     h5::write(g2, "Sigma_dc_list", data.Sigma_dc_list);
+
+    h5::write(g2, "Gimp_freq_list", data.Gimp_freq_list);
+    h5::write(g2, "Gimp_time_list", data.Gimp_time_list);
   }
 
   void h5_read(h5::group g, std::string const &name, iteration_data &data) {
     auto g2 = g.open_group(name);
     h5::read(g2, "mu", data.mu);
+
     h5::read(g2, "Sigma_imp_list", data.Sigma_imp_list);
+    h5::read(g2, "Sigma_hartree_list", data.Sigma_hartree_list);
     h5::read(g2, "Sigma_dc_list", data.Sigma_dc_list);
+
+    h5::read(g2, "Gimp_freq_list", data.Gimp_freq_list);
+    h5::read(g2, "Gimp_time_list", data.Gimp_time_list);
   }
   // ===========================================================
 

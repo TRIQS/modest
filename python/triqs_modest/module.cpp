@@ -3,7 +3,7 @@
 #include "triqs_modest/downfolding.hpp"
 #include "triqs_modest/loaders.hpp"
 #include "triqs_modest/embedding.hpp"
-#include "triqs_modest/impurity_model.hpp"
+#include "triqs_modest/hamiltonians.hpp"
 #include "triqs_modest/root_finder.hpp"
 #include "triqs_modest/double_counting.hpp"
 #include "triqs_modest/gloc_fixed_grid.hpp"

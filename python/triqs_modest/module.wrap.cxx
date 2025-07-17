@@ -686,8 +686,26 @@ static auto const fun_15 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::dc_solver &self,
                     const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) { return self.dc_self_energy(gimp); },
                  "self", "gimp")};
-static const auto doc_d_14 = fun_14.doc({R"DOC(   )DOC"});
-static const auto doc_d_15 = fun_15.doc({R"DOC(   )DOC"});
+static const auto doc_d_14 = fun_14.doc({R"DOC(   Parameters
+   ----------
+   
+   gimp:
+      The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
+   
+   Returns
+   -------
+   
+      nda::array<double, 2>)DOC"});
+static const auto doc_d_15 = fun_15.doc({R"DOC(   Parameters
+   ----------
+   
+   gimp:
+      The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
+   
+   Returns
+   -------
+   
+      block_gf<imfreq, matrix_valued>)DOC"});
 
 // ----- Method table ----
 template <>
@@ -697,19 +715,10 @@ PyMethodDef c2py::tp_methods<triqs::modest::dc_solver>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_17 = R"DOC()DOC";
-constexpr auto doc_member_18 = R"DOC()DOC";
-constexpr auto doc_member_19 = R"DOC()DOC";
-constexpr auto doc_member_20 = R"DOC()DOC";
-
 // ----- Method table ----
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::dc_solver>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::dc_solver::spin_names, triqs::modest::dc_solver>("spin_names", doc_member_17),
-   c2py::getsetdef_from_member<&triqs::modest::dc_solver::method, triqs::modest::dc_solver>("method", doc_member_18),
-   c2py::getsetdef_from_member<&triqs::modest::dc_solver::U_int, triqs::modest::dc_solver>("U_int", doc_member_19),
-   c2py::getsetdef_from_member<&triqs::modest::dc_solver::J_hund, triqs::modest::dc_solver>("J_hund", doc_member_20),
 
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -744,7 +753,7 @@ PyMethodDef c2py::tp_methods<triqs::modest::spectral_function_kw>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_21 = R"DOC()DOC";
+constexpr auto doc_member_17 = R"DOC()DOC";
 static PyObject *prop_get_dict_3(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_kw> *)self)->_c);
   c2py::pydict dic;
@@ -756,7 +765,7 @@ static PyObject *prop_get_dict_3(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_kw>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::spectral_function_kw::data, triqs::modest::spectral_function_kw>("data", doc_member_21),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_kw::data, triqs::modest::spectral_function_kw>("data", doc_member_17),
    {"__dict__", (getter)prop_get_dict_3, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -796,8 +805,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::spectral_function_w>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_22 = R"DOC()DOC";
-constexpr auto doc_member_23 = R"DOC()DOC";
+constexpr auto doc_member_18 = R"DOC()DOC";
+constexpr auto doc_member_19 = R"DOC()DOC";
 static PyObject *prop_get_dict_4(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_w> *)self)->_c);
   c2py::pydict dic;
@@ -810,8 +819,8 @@ static PyObject *prop_get_dict_4(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_w>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::total, triqs::modest::spectral_function_w>("total", doc_member_22),
-   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::per_theta, triqs::modest::spectral_function_w>("per_theta", doc_member_23),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::total, triqs::modest::spectral_function_w>("total", doc_member_18),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::per_theta, triqs::modest::spectral_function_w>("per_theta", doc_member_19),
    {"__dict__", (getter)prop_get_dict_4, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -852,8 +861,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::initial_data>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_24 = R"DOC(/// One body elements)DOC";
-constexpr auto doc_member_25 = R"DOC(/// Embedding)DOC";
+constexpr auto doc_member_20 = R"DOC(/// One body elements)DOC";
+constexpr auto doc_member_21 = R"DOC(/// Embedding)DOC";
 static PyObject *prop_get_dict_5(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::initial_data> *)self)->_c);
   c2py::pydict dic;
@@ -866,8 +875,8 @@ static PyObject *prop_get_dict_5(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::initial_data>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::initial_data::obe, triqs::modest::initial_data>("obe", doc_member_24),
-   c2py::getsetdef_from_member<&triqs::modest::initial_data::embed, triqs::modest::initial_data>("embed", doc_member_25),
+   c2py::getsetdef_from_member<&triqs::modest::initial_data::obe, triqs::modest::initial_data>("obe", doc_member_20),
+   c2py::getsetdef_from_member<&triqs::modest::initial_data::embed, triqs::modest::initial_data>("embed", doc_member_21),
    {"__dict__", (getter)prop_get_dict_5, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -877,10 +886,19 @@ template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::iteration_data> = R"DOC(   * mu: double
       Chemical potential
    
-   * Sigma_imp_list: std::vector<triqs::modest::self_energy_t>
+   * Sigma_imp_list: std::vector<triqs::modest::block_gf_imfreq_t>
       Impurities self-energies
    
-   * Sigma_dc_list: std::vector<triqs::modest::self_energy_t>
+   * Sigma_hartree_list: triqs::modest::block_mat_t
+      Sigma Hartree
+   
+   * Gimp_freq_list: std::vector<triqs::modest::block_gf_imfreq_t>
+      Impurities Green's functions
+   
+   * Gimp_time_list: std::vector<triqs::modest::block_gf_imtime_t>
+      Impurities Green's functions
+   
+   * Sigma_dc_list: std::vector<triqs::modest::block_gf_imfreq_t>
       Impurities self-energies)DOC";
 
 static int synth_constructor_6(PyObject *self, PyObject *args, PyObject *kwargs) {
@@ -899,6 +917,9 @@ static int synth_constructor_6(PyObject *self, PyObject *args, PyObject *kwargs)
   auto &self_c = *(((c2py::wrap<triqs::modest::iteration_data> *)self)->_c);
   de("mu", self_c.mu, false);
   de("Sigma_imp_list", self_c.Sigma_imp_list, false);
+  de("Sigma_hartree_list", self_c.Sigma_hartree_list, false);
+  de("Gimp_freq_list", self_c.Gimp_freq_list, false);
+  de("Gimp_time_list", self_c.Gimp_time_list, false);
   de("Sigma_dc_list", self_c.Sigma_dc_list, false);
   return de.check();
 }
@@ -912,15 +933,21 @@ PyMethodDef c2py::tp_methods<triqs::modest::iteration_data>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_26 = R"DOC(/// Chemical potential)DOC";
+constexpr auto doc_member_22 = R"DOC(/// Chemical potential)DOC";
+constexpr auto doc_member_23 = R"DOC(/// Impurities self-energies)DOC";
+constexpr auto doc_member_24 = R"DOC(/// Sigma Hartree)DOC";
+constexpr auto doc_member_25 = R"DOC(/// Impurities Green's functions)DOC";
+constexpr auto doc_member_26 = R"DOC(/// Impurities Green's functions)DOC";
 constexpr auto doc_member_27 = R"DOC(/// Impurities self-energies)DOC";
-constexpr auto doc_member_28 = R"DOC(/// Impurities self-energies)DOC";
 static PyObject *prop_get_dict_6(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::iteration_data> *)self)->_c);
   c2py::pydict dic;
-  dic["mu"]             = self_c.mu;
-  dic["Sigma_imp_list"] = self_c.Sigma_imp_list;
-  dic["Sigma_dc_list"]  = self_c.Sigma_dc_list;
+  dic["mu"]                 = self_c.mu;
+  dic["Sigma_imp_list"]     = self_c.Sigma_imp_list;
+  dic["Sigma_hartree_list"] = self_c.Sigma_hartree_list;
+  dic["Gimp_freq_list"]     = self_c.Gimp_freq_list;
+  dic["Gimp_time_list"]     = self_c.Gimp_time_list;
+  dic["Sigma_dc_list"]      = self_c.Sigma_dc_list;
   return dic.new_ref();
 }
 
@@ -928,9 +955,13 @@ static PyObject *prop_get_dict_6(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::iteration_data>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::iteration_data::mu, triqs::modest::iteration_data>("mu", doc_member_26),
-   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_imp_list, triqs::modest::iteration_data>("Sigma_imp_list", doc_member_27),
-   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_dc_list, triqs::modest::iteration_data>("Sigma_dc_list", doc_member_28),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::mu, triqs::modest::iteration_data>("mu", doc_member_22),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_imp_list, triqs::modest::iteration_data>("Sigma_imp_list", doc_member_23),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_hartree_list, triqs::modest::iteration_data>("Sigma_hartree_list",
+                                                                                                                  doc_member_24),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Gimp_freq_list, triqs::modest::iteration_data>("Gimp_freq_list", doc_member_25),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Gimp_time_list, triqs::modest::iteration_data>("Gimp_time_list", doc_member_26),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_dc_list, triqs::modest::iteration_data>("Sigma_dc_list", doc_member_27),
    {"__dict__", (getter)prop_get_dict_6, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -960,13 +991,13 @@ PyMethodDef c2py::tp_methods<triqs::modest::detail::union_find>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_29 = R"DOC()DOC";
+constexpr auto doc_member_28 = R"DOC()DOC";
 
 // ----- Method table ----
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::detail::union_find>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::detail::union_find::parent, triqs::modest::detail::union_find>("parent", doc_member_29),
+   c2py::getsetdef_from_member<&triqs::modest::detail::union_find::parent, triqs::modest::detail::union_find>("parent", doc_member_28),
 
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -1267,11 +1298,11 @@ static const auto doc_d_20       = fun_20.doc({R"DOC(   Parameters
    ----------
    
    l:
-      
+      angular quantum number
    U_int:
-      
+      screend Hubbard interaction
    J_hund:
-      
+      Hund's coupling
    
    Returns
    -------
@@ -1289,16 +1320,37 @@ static const auto doc_d_21       = fun_21.doc({R"DOC(   Parameters
    -------
    
       A list of equivalent blocks)DOC"});
-static const auto doc_d_22       = fun_22.doc({R"DOC(   double counting formulas parameterized by density, U, and J)DOC"});
+static const auto doc_d_22       = fun_22.doc({R"DOC(   Parameters
+   ----------
+   
+   method:
+      the double counting formula to use.
+   N_tot:
+      the total density
+   N_sigma:
+      the total density per spin
+   n_orb:
+      the number of orbitals
+   U:
+      the Hubbard U
+   J:
+      the Hund's coupling J
+   
+   Returns
+   -------
+   
+      std::pair<double, double>)DOC"});
 static const auto doc_d_23       = fun_23.doc({R"DOC(   Parameters
    ----------
    
    obe:
-      one body elements on grid
+      The one-body elements.
    mu:
-      chemical potential
-   Sigma:
-      Embedded self-energy
+      The chemical potential.
+   Sigma_dynamic:
+      The dynamic part of the embedded self-energy.
+   Sigma_hartree:
+      The static part of the embedded self-energy.
    
    Returns
    -------
@@ -1309,11 +1361,13 @@ static const auto doc_d_25       = fun_25.doc({R"DOC(   Parameters
    ----------
    
    obe:
-      one_body_elements_on_grid
+      The one-body elements.
    mu:
-      chemical potential
-   Sigma:
-      Embedded self-energy
+      The chemical potential.
+   Sigma_dynamic:
+      The dynamic part of the embedded self-energy.
+   Sigma_hartree:
+      The static part of the embedded self-energy.
    
    Returns
    -------
@@ -1335,14 +1389,157 @@ static const auto doc_d_26       = fun_26.doc({R"DOC(   Parameters
    -------
    
       H_DC nda::array<dc_t, 2>)DOC"});
-static constexpr auto doc_f_27_0 = R"DOC(   )DOC";
-static constexpr auto doc_f_27_1 = R"DOC(   )DOC";
-static constexpr auto doc_f_27_2 = R"DOC(   )DOC";
-static constexpr auto doc_f_27_3 = R"DOC(   )DOC";
+static constexpr auto doc_f_27_0 = R"DOC(   Parameters
+   ----------
+   
+   epsilon_levels:
+      The effective impurity levels.
+   Gloc:
+      The local Green's function of the impurity.
+   Sigma_dynamic:
+      The frequency dependent part of the impurity self-energy.
+   Sigma_hartree:
+      The Hartree term of the impurity self-energy.
+   
+   Returns
+   -------
+   
+      block_gf<Mesh, matrix_valued>)DOC";
+static constexpr auto doc_f_27_1 = R"DOC(   Parameters
+   ----------
+   
+   epsilon_levels:
+      The effective impurity levels.
+   Gloc:
+      The local Green's function of the impurity.
+   Sigma_dynamic:
+      The frequency dependent part of the impurity self-energy.
+   Sigma_hartree:
+      The Hartree term of the impurity self-energy.
+   
+   Returns
+   -------
+   
+      block_gf<Mesh, matrix_valued>)DOC";
+static constexpr auto doc_f_27_2 = R"DOC(   Parameters
+   ----------
+   
+   epsilon_levels:
+      The effective impurity levels.
+   Gloc:
+      The local Green's function of the impurity.
+   
+   Returns
+   -------
+   
+      block_gf<Mesh, matrix_valued>)DOC";
+static constexpr auto doc_f_27_3 = R"DOC(   Parameters
+   ----------
+   
+   epsilon_levels:
+      The effective impurity levels.
+   Gloc:
+      The local Green's function of the impurity.
+   
+   Returns
+   -------
+   
+      block_gf<Mesh, matrix_valued>)DOC";
 static const auto doc_d_27       = fun_27.doc({doc_f_27_0, doc_f_27_1, doc_f_27_2, doc_f_27_3});
-static constexpr auto doc_f_28_0 = R"DOC(   )DOC";
-static constexpr auto doc_f_28_1 = R"DOC(   )DOC";
-static constexpr auto doc_f_28_2 = R"DOC(   )DOC";
+static constexpr auto doc_f_28_0 = R"DOC(   Parameters
+   ----------
+   
+   target_density:
+      The total electron density.
+   obe:
+      The one-body elements.
+   beta:
+      The inverse temperature (units 1/eV).
+   method:
+      The root finding method to use (default = dichotomy).
+   x_init:
+      The initial guess (default = 0.0).
+   precision:
+      The precision to end search (default = 1e-5).
+   delta_x:
+      The increment to guess when finding upper and lower bounds (default = 0.5).
+   max_loops:
+      The maximum number of iterations (default = 1000).
+   x_name:
+      default = Chemical Potential
+   y_name:
+      default = Total Density
+   verbosity:
+      Printing of the root finder's progress (default = true).
+   
+   Returns
+   -------
+   
+      double)DOC";
+static constexpr auto doc_f_28_1 = R"DOC(   Parameters
+   ----------
+   
+   target_density:
+      The total electron density.
+   obe:
+      The one-body elements.
+   Sigma_dynamic:
+      The dynamic part of the embedded self-energy.
+   Sigma_hartree:
+      The static part of the embedded self-energy.
+   method:
+      The root finding method to use (default = dichotomy).
+   x_init:
+      The initial guess (default = 0.0).
+   precision:
+      The precision to end search (default = 1e-5).
+   delta_x:
+      The increment to guess when finding upper and lower bounds (default = 0.5).
+   max_loops:
+      The maximum number of iterations (default = 1000).
+   x_name:
+      default = Chemical Potential
+   y_name:
+      default = Total Density
+   verbosity:
+      Printing of the root finder's progress (default = true).
+   
+   Returns
+   -------
+   
+      double)DOC";
+static constexpr auto doc_f_28_2 = R"DOC(   Parameters
+   ----------
+   
+   target_density:
+      The total electron density.
+   obe:
+      The one-body elements.
+   Sigma_dynamic:
+      The dynamic part of the embedded self-energy.
+   Sigma_hartree:
+      The static part of the embedded self-energy.
+   method:
+      The root finding method to use (default = dichotomy).
+   x_init:
+      The initial guess (default = 0.0).
+   precision:
+      The precision to end search (default = 1e-5).
+   delta_x:
+      The increment to guess when finding upper and lower bounds (default = 0.5).
+   max_loops:
+      The maximum number of iterations (default = 1000).
+   x_name:
+      default = Chemical Potential
+   y_name:
+      default = Total Density
+   verbosity:
+      Printing of the root finder's progress (default = true).
+   
+   Returns
+   -------
+   
+      double)DOC";
 static const auto doc_d_28       = fun_28.doc({doc_f_28_0, doc_f_28_1, doc_f_28_2});
 static constexpr auto doc_f_29_0 = R"DOC(   Parameters
    ----------
@@ -1351,8 +1548,10 @@ static constexpr auto doc_f_29_0 = R"DOC(   Parameters
       one_body_elements_on_grid
    mu:
       chemical potential
-   Sigma:
-      Embedded self-energy TODO: {Σ∞, ΣDLR }
+   Sigma_dynamic:
+      The dynamic part of the embedded self-energy in the embedded view.
+   Sigma_hartree:
+      The static part of the embedded self-energy in the embedded view.
    
    Returns
    -------
@@ -1365,8 +1564,10 @@ static constexpr auto doc_f_29_1 = R"DOC(   Parameters
       one_body_elements_on_grid
    mu:
       chemical potential
-   Sigma:
-      Embedded self-energy TODO: {Σ∞, ΣDLR }
+   Sigma_dynamic:
+      The dynamic part of the embedded self-energy in the embedded view.
+   Sigma_hartree:
+      The static part of the embedded self-energy in the embedded view.
    
    Returns
    -------
@@ -1582,7 +1783,18 @@ static const auto doc_d_44       = fun_44.doc({R"DOC(   Parameters
    -------
    
       spectral_function_kw)DOC"});
-static const auto doc_d_45       = fun_45.doc({R"DOC(   )DOC"});
+static const auto doc_d_45       = fun_45.doc({R"DOC(   Parameters
+   ----------
+   
+   Gin:
+      Block Green's function
+   degenerate_blocks:
+      a list of the degenerate blocks.
+   
+   Returns
+   -------
+   
+      The symmetrized Green's function.)DOC"});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

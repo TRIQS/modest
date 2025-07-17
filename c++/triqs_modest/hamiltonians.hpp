@@ -7,7 +7,7 @@ using namespace triqs::gfs;
 
 namespace triqs {
   /**
- * @ingroup impurity
+ * @ingroup den_den
  * @brief Construct a density-density interation
  * 
  * @param tau_names names of tau indices ['up', 'down']
@@ -21,7 +21,7 @@ namespace triqs {
                                                      double J_hund);
 
   /**
- * @ingroup impurity
+ * @ingroup hubb_kan
  * @brief Construct a Hubbard-Kanamori Hamiltonian
  * 
  * @param tau_names names of tau indices ['up', 'down']
@@ -36,7 +36,7 @@ namespace triqs {
                                               std::vector<long> const &dim_gamma, double U_int, double U_prime,
                                               double J_hund, bool spin_flip = true, bool pair_hopping = true);
   /**
-  * @ingroup impurity
+ * @ingroup slater
   * @brief Construct a new operators::many body operator make slater object
   * 
   * @param tau_names 
@@ -51,24 +51,24 @@ namespace triqs {
                                             nda::matrix<dcomplex> const &spherical_to_dft,
                                             std::optional<nda::matrix<dcomplex>> const &dft_to_local);
   /**
- * @ingroup impurity_utilities
- * @brief 
+ * @ingroup Utensor
+ * @brief Construct a four-index Coulomb tensor in the basis of spherical harmonics.
  * 
- * @param l 
- * @param U_int 
- * @param J_hund 
+ * @param l angular quantum number
+ * @param U_int screend Hubbard interaction
+ * @param J_hund Hund's coupling
  * @return nda::array<double, 4> 
  */
   nda::array<double, 4> U_matrix_in_spherical_basis(long l, double U_int, double J_hund);
 
   /**
- * @ingroup impurity_utilities
- * @brief 
+ * @ingroup Utensor
+ * @brief Construct a four-index Coulomb tensor in a specific orbital basis.
  * 
- * @param l 
- * @param s2l 
- * @param U_int 
- * @param J_hund 
+ * @param l  angular quantum number
+ * @param s2l spherical to local basis rotation
+ * @param U_int screened Hubbard interaction
+ * @param J_hund Hund's coupling
  * @return nda::array<dcomplex, 4> 
  */
   nda::array<dcomplex, 4> U_matrix_in_local_basis(long l, nda::matrix<dcomplex> s2l, double U_int, double J_hund);

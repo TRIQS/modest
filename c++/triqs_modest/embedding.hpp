@@ -102,8 +102,8 @@ namespace triqs::modest {
      * @param psi                        The mapping ψ[α,σ] -> n_imp, γ, τ
      * @param sigma_names                Names for the values of the σ index (e.g., "up", "down")
      */
-    embedding(std::vector<long> sigma_embed_decomposition, std::vector<std::vector<long>> imp_decompositions,
-              nda::array<imp_block_t, 2> psi, std::vector<std::string> sigma_names);
+    embedding(std::vector<long> sigma_embed_decomposition, std::vector<std::vector<long>> imp_decompositions, nda::array<imp_block_t, 2> psi,
+              std::vector<std::string> sigma_names);
 
     public:
     // --------------------------------------------------------
@@ -193,16 +193,13 @@ namespace triqs::modest {
     //--------------------- Embed -----------------------------------------
 
     /// embed single-particle quantities
-    template <typename Mesh>
-    block2_gf<Mesh, matrix_valued> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const;
+    template <typename Mesh> block2_gf<Mesh, matrix_valued> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const;
 
     /// embed two-particle quantities
-    template <typename Mesh>
-    block2_gf<Mesh, tensor_valued<4>> embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const;
+    template <typename Mesh> block2_gf<Mesh, tensor_valued<4>> embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const;
 
     /// embed block matrices
-    nda::array<nda::matrix<dcomplex>, 2>
-    embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_hartree_vec) const;
+    nda::array<nda::matrix<dcomplex>, 2> embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_hartree_vec) const;
 
     /// embed tensors
     // nda::array<dcomplex, 4> embed(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const;
@@ -210,16 +207,13 @@ namespace triqs::modest {
     //--------------------- Extract ---------------------------------------
 
     /// extract single-particle quantities (ModEST)
-    template <typename Mesh>
-    std::vector<block_gf<Mesh, matrix_valued>> extract(block2_gf<Mesh, matrix_valued> const &g_loc) const;
+    template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block2_gf<Mesh, matrix_valued> const &g_loc) const;
 
     /// extract single-particle quantities (CoQui)
-    template <typename Mesh>
-    std::vector<block_gf<Mesh, matrix_valued>> extract(block_gf<Mesh, matrix_valued> const &g_loc) const;
+    template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block_gf<Mesh, matrix_valued> const &g_loc) const;
 
     /// extract two-particle quantities (CoQui)
-    template <typename Mesh>
-    std::vector<block_gf<Mesh, tensor_valued<4>>> extract(block_gf<Mesh, tensor_valued<4>> const &Pi_loc) const;
+    template <typename Mesh> std::vector<block_gf<Mesh, tensor_valued<4>>> extract(block_gf<Mesh, tensor_valued<4>> const &Pi_loc) const;
 
     /// extract matrices
     std::vector<std::vector<nda::matrix<dcomplex>>> extract(nda::array<nda::matrix<dcomplex>, 2> const &matrix_C) const;
@@ -272,9 +266,7 @@ namespace triqs::modest {
     * @param Sigma_imp_vec 
     * @return Σ_embed in C space
     */
-  template <typename Mesh>
-  block2_gf<Mesh, matrix_valued>
-  embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const {
+  template <typename Mesh> block2_gf<Mesh, matrix_valued> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const {
     // Check that all meshes are the same for Sigma_imp_vec
     if (not all_equal(Sigma_imp_vec | stdv::transform([](auto &&x) -> decltype(auto) { return x[0].mesh(); })))
       throw std::runtime_error{"[embedding_desc::embed]: meshes of solvers are not all equal"};
@@ -299,9 +291,7 @@ namespace triqs::modest {
     * @param Pi_imp_vec 
     * @return Π_embed in C space
     */
-  template <typename Mesh>
-  block2_gf<Mesh, tensor_valued<4>>
-  embedding::embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const {
+  template <typename Mesh> block2_gf<Mesh, tensor_valued<4>> embedding::embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const {
     // Check that all meshes are the same for Sigma_imp_vec
     if (not all_equal(Pi_imp_vec | stdv::transform([](auto &&x) -> decltype(auto) { return x[0].mesh(); })))
       throw std::runtime_error{"[embedding_desc::embed]: meshes of solvers are not all equal"};
@@ -327,8 +317,7 @@ namespace triqs::modest {
  * @param g_loc  Block2Gf of gloc in MxM space
  * @return local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>> 
  */
-  template <typename Mesh>
-  std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block2_gf<Mesh, matrix_valued> const &g) const {
+  template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block2_gf<Mesh, matrix_valued> const &g) const {
 
     if (auto decomp = get_struct(g).dims(r_all, 0) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
       if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
@@ -357,8 +346,7 @@ namespace triqs::modest {
  * @param g_loc  BlockGf of gloc in MxM space
  * @return local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>> 
  */
-  template <typename Mesh>
-  std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block_gf<Mesh, matrix_valued> const &g) const {
+  template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block_gf<Mesh, matrix_valued> const &g) const {
 
     if (auto decomp = get_struct(g) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
       if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
@@ -386,9 +374,7 @@ namespace triqs::modest {
  * @param g_loc  BlockGf of gloc in MxM space
  * @return local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>> 
  */
-  template <typename Mesh>
-  std::vector<block_gf<Mesh, tensor_valued<4>>>
-  embedding::extract(block_gf<Mesh, tensor_valued<4>> const &pi_loc) const {
+  template <typename Mesh> std::vector<block_gf<Mesh, tensor_valued<4>>> embedding::extract(block_gf<Mesh, tensor_valued<4>> const &pi_loc) const {
 
     if (auto decomp = get_struct(pi_loc) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
       if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
@@ -411,8 +397,8 @@ namespace triqs::modest {
 // ------------------------------------------------------------------------------
 
 /** @cond DOXYGEN_SKIP_THIS */
-#define INSTANTIATE(Mesh)                                                                                              \
-  template block2_gf<Mesh, matrix_valued> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &) const;  \
+#define INSTANTIATE(Mesh)                                                                                                                            \
+  template block2_gf<Mesh, matrix_valued> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &) const;                                \
   template std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block2_gf<Mesh, matrix_valued> const &) const;
   INSTANTIATE(imfreq);
   INSTANTIATE(refreq);

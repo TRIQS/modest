@@ -6,6 +6,7 @@ namespace triqs {
   using std::abs;
   //------------------------------------------------------
   /**
+ * @ingroup root
  * @brief find upper and lower bounds of f(x)
  * 
  * @param f 
@@ -48,6 +49,7 @@ namespace triqs {
   //------------------------------------------------------
 
   /**
+ * @ingroup root
  * @brief dichotomy algorithm
  * 
  * @param f 
@@ -106,6 +108,7 @@ namespace triqs {
   //------------------------------------------------------
 
   /**
+ * @ingroup root
  * @brief bisection algorithm
  * 
  * @param f 

@@ -76,13 +76,15 @@ namespace triqs::modest {
 
   //-------------------------------------------------------------------------------------------
   /**
- * @brief  Compute the density of the lattice Green's function (Woodbury)
- * 
- * @param obe one body elements on grid 
- * @param mu chemical potential
- * @param Sigma Embedded self-energy
- * @return double 
- */
+   * @ingroup mu
+   * @brief Compute the density of the lattice Green's function with a self-energy using Woodbury.
+   * 
+   * @param obe The one-body elements.
+   * @param mu The chemical potential.
+   * @param Sigma_dynamic The dynamic part of the embedded self-energy.
+   * @param Sigma_hartree The static part of the embedded self-energy.
+   * @return double 
+   */
   double density(one_body_elements_on_grid const &obe, double mu,
                  // add magnetic field,
                  block2_gf<mesh::dlr_imfreq, matrix_valued> const &Sigma_dynamic,
@@ -94,14 +96,16 @@ namespace triqs::modest {
 
   // ------------------------------------------------------------------------------------
   /**
- * @brief  compute density of lattice Green's function (slowly)
- * 
- * @tparam Mesh 
- * @param obe one_body_elements_on_grid
- * @param mu chemical potential
- * @param Sigma Embedded self-energy
- * @return double 
- */
+   * @ingroup mu
+   * @brief  Compute the density of the lattice Green's function with a self-energy.
+   * 
+   * @tparam Mesh 
+   * @param obe The one-body elements.
+   * @param mu The chemical potential.
+   * @param Sigma_dynamic The dynamic part of the embedded self-energy.
+   * @param Sigma_hartree The static part of the embedded self-energy.
+   * @return double 
+   */
   template <typename Mesh>
   double density_slow(one_body_elements_on_grid const &obe, double mu,
                       block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
@@ -142,19 +146,69 @@ namespace triqs::modest {
 
     return density_nk(obe, mu, beta) + real(density(result));
   }
-
+  /**
+ * @ingroup mu
+ * @brief Find the chemical potenital from the local Green's function given a target density.
+ * 
+ * @param target_density The total electron density.
+ * @param obe The one-body elements.
+ * @param beta The inverse temperature (units 1/eV).
+ * @param method The root finding method to use (default = dichotomy).
+ * @param x_init The initial guess (default = 0.0).
+ * @param precision The precision to end search (default = 1e-5).
+ * @param delta_x The increment to guess when finding upper and lower bounds (default = 0.5).
+ * @param max_loops The maximum number of iterations (default = 1000).
+ * @param x_name default = Chemical Potential
+ * @param y_name default = Total Density
+ * @param verbosity Printing of the root finder's progress (default = true).
+ * @return double 
+ */
   double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe, double beta,
                                  std::string method = "dichotomy", double x_init = 0.0, double precision = 1.e-5,
                                  double delta_x = 0.5, long max_loops = 1000, std::string x_name = "Chemical Potential",
                                  std::string y_name = "Total Density", bool verbosity = true);
-
+  /**
+ * @ingroup mu
+ * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
+ * 
+ * @param target_density The total electron density.
+ * @param obe The one-body elements.
+ * @param Sigma_dynamic The dynamic part of the embedded self-energy.
+ * @param Sigma_hartree The static part of the embedded self-energy.
+ * @param method The root finding method to use (default = dichotomy).
+ * @param x_init The initial guess (default = 0.0).
+ * @param precision The precision to end search (default = 1e-5).
+ * @param delta_x The increment to guess when finding upper and lower bounds (default = 0.5).
+ * @param max_loops The maximum number of iterations (default = 1000).
+ * @param x_name default = Chemical Potential
+ * @param y_name default = Total Density
+ * @param verbosity Printing of the root finder's progress (default = true).
+ * @return double 
+ */
   double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
                                  block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
                                  nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree,
                                  std::string method = "dichotomy", double x_init = 0.0, double precision = 1.e-5,
                                  double delta_x = 0.5, long max_loops = 1000, std::string x_name = "Chemical Potential",
                                  std::string y_name = "Total Density", bool verbosity = true);
-
+  /**
+ * @ingroup mu
+ * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
+ * 
+ * @param target_density The total electron density.
+ * @param obe The one-body elements.
+ * @param Sigma_dynamic The dynamic part of the embedded self-energy.
+ * @param Sigma_hartree The static part of the embedded self-energy.
+ * @param method The root finding method to use (default = dichotomy).
+ * @param x_init The initial guess (default = 0.0).
+ * @param precision The precision to end search (default = 1e-5).
+ * @param delta_x The increment to guess when finding upper and lower bounds (default = 0.5).
+ * @param max_loops The maximum number of iterations (default = 1000).
+ * @param x_name default = Chemical Potential
+ * @param y_name default = Total Density
+ * @param verbosity Printing of the root finder's progress (default = true).
+ * @return double 
+ */
   double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
                                  block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
                                  nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree,

@@ -1,6 +1,6 @@
 /**
  * @defgroup one_body_elements One-body elements
- * @brief The one-body elements abstraction in modEST.
+ * @brief The one-body elements abstraction in ModEST.
  * 
  */
 
@@ -128,7 +128,7 @@
  /**
  * @defgroup embedding Embedding
  * 
- * @brief The embedding abstraction in modEST. The embedding class describes a mapping between the impurity solvers and the the local correlated space 𝓒. We provide factory functions to construct the embedding from the @ref local_space within a @ref one_body_elements.
+ * @brief The embedding abstraction in ModEST. The embedding class describes a mapping between the impurity solvers and the the local correlated space 𝓒. We provide factory functions to construct the embedding from the @ref local_space within a @ref one_body_elements.
  * The embedding class has operations (@ref embedding_ops) that allow the user to modify/describe their embedding task and methods (@ref embedding_methods) that act on Green's functions and self-energies.
  *
  * @details The embedded self-energy is constructed from \f$n_{\mathrm{imp}}\f$ impurity model self-energies.  We denote by \f$[\Sigma_{\mathrm{imp}}]^{n_{\mathrm{imp}}, \tau}\f$ 
@@ -137,7 +137,7 @@
  * 
  * $$ [\Sigma_{\mathrm{embed}}]^{\sigma}_{(\alpha, m_{\alpha}), (\alpha, m_{\alpha}')} = [\Sigma_{\mathrm{imp}}]^{n_{\mathrm{imp}(\alpha)},\tau(\sigma)}_{(\gamma(\alpha), m_{\alpha}),(\gamma(\alpha), m_{\alpha}')}.$$
 
- * In simple words, the self-energy of the block \f$\alpha, \sigma\f$ is given by impurity self-energy of the impurity \f$n_{\mathrm{imp}}(\alpha)\f$, block \f$\gamma(\alpha),\tau(\sigma)\f$. This naturally requires that the blocks $\alpha$ (embedding) and $\gamma$ (impurity) have the same dimensions.
+ * In simple words, the self-energy of the block \f$\alpha, \sigma\f$ is given by impurity self-energy of the impurity \f$n_{\mathrm{imp}}(\alpha)\f$, block \f$\gamma(\alpha),\tau(\sigma)\f$. This naturally requires that the blocks \f$\alpha\f$ (embedding) and \f$\gamma\f$ (impurity) have the same dimensions.
  * The embedding is therefore completely characterized by a function :
  * $$\psi (\alpha, \sigma) \rightarrow (n_\mathrm{imp}, \gamma, \tau)$$
  * 
@@ -156,15 +156,19 @@
 
  /**
  * @defgroup embedding_factories Emebdding factories
+ * @brief Embedding makers which allow you to construct different embeddings tailored to your embedding scenario. 
+ * Most of the makers require the @ref local_space plus some additional information regarding how to decompose that local space into
+ * impurities.
  * \ingroup embedding
  */
 
 
  /**
  * @defgroup embedding_ops Emebdding operations
+ * @brief The embedding operations are your interface to adapt and modify any embedding at will. Each operation returns a new Embedding, 
+ * so you can string ops together or apply them iteratively. The embedding object is interactive, so we encourage "playing" with the ops to modify it's structure
+ * until your happy with the embedding description. 
  * \ingroup embedding
- *
- * @brief Operations that manipulate the embedding class.
  *
  * @details The embedding mapping must be flexible and modifable to be able to describe arbitrary DMFT problems. To this end, we provide several operations (ops)
  * that allow you to describe your embedding scenario with a powerful and intuitive syntax. All of these ops change the underlying table inside of embedding:
@@ -176,15 +180,127 @@
 
  /**
  * @defgroup embedding_methods Emebdding methods
+ * @brief The embedding methods are functions that can be used to manipulate the block structures of matrices, tensors, or TRIQS Green's functions. The two methods are:
+ * (1) embed and (2) extact.
+ * 
+ * Embed (embedding) maps a list of objects from the impurity to the full "embedded space".
+ *
+ * Extract (extracting) maps the object from the "embedded space" to a list of unique impurities that can be solved with an impurity solver.
  * \ingroup embedding
  */
 
 
  /**
- * @defgroup impurity Impurity
+ * @defgroup hamiltonian Hamiltonians
+ * @brief Functions and utilities to construct interaction Hamiltonians using TRIQS many-body operators.
  */
 
  /**
- * @defgroup impurity_utilities Impurity Utilities
- * \ingroup impurity
+ * @defgroup hubb_kan Hubbard-Kanamori
+ * @brief Create a Hubbard-Kanamori Hamiltonian using the density-density, spin-flip, and pair-hopping interactions,
+ * $$ H_{\mathrm{int}} = \frac{1}{2} \sum_{(i\sigma)\neq(j\sigma^{\prime})} U_{ij}^{\sigma\sigma^{\prime}}n_{i\sigma}n_{j\sigma^{\prime}} - \sum_{i\neq j}Jc_{i\uparrow}^{\dagger}c_{i\downarrow}c_{j\downarrow}^{\dagger}c_{j\uparrow} + \sum_{i\neq j} J c_{i\uparrow}^{\dagger}c_{i\downarrow}^{\dagger}c_{j\downarrow}c_{j\uparrow}.$$
+ * \ingroup hamiltonian
+ */
+
+ /**
+ * @defgroup slater Slater
+ * @brief Create a Slater Hamiltonian using fully rotationally-invariant four-index interactions:
+ * $$H_{\mathrm{int}} = \frac{1}{2} \sum_{ijkl, \sigma\sigma^{\prime}} U_{ijkl}c^{\dagger}_{i\sigma}c^{\dagger}_{j\sigma^{\prime}}c_{l\sigma^{\prime}}c_{k\sigma}.$$
+ * \ingroup hamiltonian
+ */
+
+ /**
+ * @defgroup den_den Density-density
+ * @brief Create a density-density Hamiltonian
+ * $$ H_{\mathrm{int}} = \frac{1}{2} \sum_{(i\sigma)\neq(j\sigma^{\prime})} U_{ij}^{\sigma\sigma^{\prime}}n_{i\sigma}n_{j\sigma^{\prime}}.$$
+ * \ingroup hamiltonian
+ */
+
+
+ /**
+ * @defgroup Utensor Coulomb tensors
+ * @brief Utility functions for creating the four-index Coulomb tensor.
+ * We typically construct the four-index Coulomb tensor in the basis of spherical harmonics,
+ * $$ U_{m_{1}m_{2}m_{3}m_{4}}^{\mathrm{spherical}} = \sum_{k=0}^{2l} F_{k} \alpha (l, k, m_{1}, m_{2}, m_{3}, m_{4}),$$
+ * where \f$F_{k}\f$ are radial Slater integrals and \f$\alpha(l, k, m_{1}, m_{2}, m_{3}, m_{4})\f$ denote angular Racah-Wigner numbers for a spherically symmetric
+ * interaction tensor.
+ * \ingroup hamiltonian
+ */
+
+ /**
+ * @defgroup gloc Local Green's function
+
+ * @brief Compute the local Green's function defined as:
+ * $$ [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big  [ (\omega + \mu)\delta_{\nu\nu'} - H^{\sigma}_{\nu\nu'}(\mathbf{k}) - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger},$$
+ * where \f$\omega\f$ is a frequency (either real- or Matsubra), \f$\mu\f$ is the chemical potential, \f$H(\mathbf{k})\f$ is the one-body Hamiltonian, \f$P(\mathbf{k})\f$ are the projectors from the band to the orbital basis, and \f$\Sigma_{\mathrm{embed}}\f$ is the embedded self-energy.
+ */
+
+ /**
+ * @defgroup hybridization Hybridization function
+
+ * @brief Compute the hybridziation function
+ * $$ [ \Delta^{\sigma} ]_{m m'} = \omega  -\tilde{\varepsilon} - G_{\mathrm{loc}}^{-1}(\omega) - \Sigma_{\mathrm{imp}}(\omega),$$
+ * where \f$\omega\f$ is a frequency, \f$\tilde{\varepsilon}\f$ are the effective local levels of the impurity, and \f$\Sigma_{\mathrm{imp}}\f$ is the impurity self-energy.
+ * The effecitve local levels are defined as:
+ * $$ \tilde{\varepsilon} = \varepsilon - \mu - \Sigma_{\mathrm{DC}}, $$
+ * where \f$\mu\f$ is the chemical potential and \f$\Sigma_{\mathrm{DC}}\f$ is the double counting self-energy.
+ */
+
+ /**
+ * @defgroup gloc_fixed Local Green's function on a fixed k-grid
+ * \ingroup gloc
+ *
+ * @brief When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes (e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, \f$H(\mathbf{k})\f$ is diagonal in the band basis and reduces to \f$\varepsilon_{\nu}^{\sigma}(\mathbf{k})\f$. The local Green's function becomes: 
+ * $$ [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big  [ (\omega + \mu - \varepsilon_{\nu}^{\sigma}(\mathbf{k}))\delta_{\nu\nu'} - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger}.$$
+ * For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (\f$N_{\nu}\f$) using the Woodbury formula which allows us to perform the matrix inversion in the smaller orbital basis \f$N_{M}\f$.
+ */
+
+ /**
+ * @defgroup mu Densities and Chemical Potentials
+ * @brief Functions to calculate the total electron density of lattice Green's functions using different methods and methods
+ * for chemical potenital searching given a target density.
+ */
+
+ /**
+ * @defgroup double_counting Double Counting
+ * @brief The implementation of the double counting correction within DFT+DMFT. We abstract phenomenological term into an additional "solver" 
+ * that takes as input a Green's function and returns the double counting correction to the self-energy and/or the doube counting correction to the total energy.
+ * This solver is useful for cases when the double counting can not be absorbed into the chemical potential (e.g., charge self-consistent DFT+DMFT d-p models, etc.).
+ */
+
+ /**
+ * @defgroup dc_formula Double counting formulas
+ * \ingroup double_counting
+ */
+
+ /**
+ * @defgroup checkpoint File I/O
+ * @brief The checkpoint object allows users to seamlessly save their results within their DMFT calculation to an organized HDF5 file.
+ */
+
+ /**
+ * @defgroup utils Utilities
+ */
+ 
+ /**
+ * @defgroup root Root finders
+ * @brief Generic root finder methods for finding the roots of a scalar function \f$f(x)\f$.
+ * \ingroup utils
+ */
+
+ /**
+ * @defgroup deg Analyze Green's functions
+ * @brief Methods to analyze the degenerate blocks of a Green's function and use those blocks to symmetrize the Green's function object.
+ * \ingroup utils
+ */
+
+ /**
+ * @defgroup post Post processing
+ * @brief Methods to compute spectral functions.
+ *
+ * The momentum-resolved spectral function from the lattice Green's function:
+ * $$ A(\mathbf{k}, \omega) = -\frac{1}{\pi} \mathrm{Im} \mathrm{Tr}G_{\nu\nu'}(\mathbf{k}, \omega).$$
+ *
+ * The atom- and orbital-resolved \f$k\f$-summed spectral function:
+ * $$ [A(\omega)]_{mm'} = -\frac{1}{\pi} \mathrm{Im} \Big [ \sum_{\mathbf{k}} \Theta_{m\nu}G_{\nu\nu'}(\mathbf{k}, \omega)\Theta_{m'\nu'}^{\dagger} \Big ].$$
  */
