@@ -1,4 +1,4 @@
-#include "./impurity_model.hpp"
+#include "./hamiltonians.hpp"
 #include <itertools/enumerate.hpp>
 #include <triqs/operators/many_body_operator.hpp>
 #include <algorithm>

@@ -1,25 +1,23 @@
 #include <nda/gtest_tools.hpp>
 #include <string>
 #include "./common.hpp"
-#include "triqs_modest/impurity_model.hpp"
+#include "triqs_modest/hamiltonians.hpp"
 #include "triqs_modest/utils/h5_proxy.hpp"
 #include "triqs_modest/dft_code_specific.hpp"
 
-using namespace triqs;
-
-TEST(impurity_model_tests, imp_model_kanamori) { // NOLINT
+TEST(hamiltonian_tests, imp_model_kanamori) { // NOLINT
   auto spin_names = std::vector<std::string>{"up", "down"};
   auto dim_gamma  = std::vector<long>{3};
   auto model      = make_kanamori(spin_names, dim_gamma, 3.0, 1.0, 1.0);
 }
 
-TEST(impurity_model_tests, imp_model_kanamori2) { // NOLINT
+TEST(hamiltonian_tests, imp_model_kanamori2) { // NOLINT
   auto spin_names = std::vector<std::string>{"up", "down"};
   auto dim_gamma  = std::vector<long>{1, 1, 1};
   auto model      = make_kanamori(spin_names, dim_gamma, 3.0, 1.0, 1.0);
 }
 
-TEST(impurity_model_tests, imp_model_from_embedding) {
+TEST(hamiltonian_tests, imp_model_from_embedding) {
   std::string filename = "ref_data/svo-wien2k.ref.h5";
   for (auto threshold : std::vector<double>{1.e-5, 1.e-3}) {
     auto [_, obe] = one_body_elements_from_dft_converter(filename, threshold);
@@ -28,7 +26,7 @@ TEST(impurity_model_tests, imp_model_from_embedding) {
   }
 }
 
-TEST(impurity_model_tests, slater_model_from_embedding) {
+TEST(hamiltonian_tests, slater_model_from_embedding) {
   auto [_, obe] = one_body_elements_from_dft_converter("ref_data/la5ni3o11-wien2k.ref.h5", 1e-2);
   auto E        = make_embedding_with_equivalences(obe.C_space);
   // FIXME: is this the cleanest way to map from atom_idx to imp_idx?
@@ -41,7 +39,7 @@ TEST(impurity_model_tests, slater_model_from_embedding) {
   }
 }
 
-TEST(impurity_model_tests, spherical_umatrix_slater_construction) {
+TEST(hamiltonian_tests, spherical_umatrix_slater_construction) {
   // auto spherical_to_cubic_conventions = {"wien2k", "qe", "vasp", "wannier90"};
   auto root   = h5::proxy{"ref_data/u_matrix_slater.ref.h5", 'r'};
   auto U_int  = as<double>(root["U_int"]);
@@ -54,7 +52,7 @@ TEST(impurity_model_tests, spherical_umatrix_slater_construction) {
   }
 }
 
-TEST(impurity_model_tests, wien2k_umatrix_slater_construction) {
+TEST(hamiltonian_tests, wien2k_umatrix_slater_construction) {
   // auto spherical_to_cubic_conventions = {"wien2k", "qe", "vasp", "wannier90"};
   auto root   = h5::proxy{"ref_data/u_matrix_slater.ref.h5", 'r'};
   auto U_int  = as<double>(root["U_int"]);
