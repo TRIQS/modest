@@ -1,0 +1,129 @@
+#include "./downfolding.hpp"
+//#include "triqs_modest/ibz_symmetry_ops.hpp"
+#include <ranges>
+#include "utils/defs.hpp"
+//#include "utils/to_vector.hpp"
+//#include "utils/h5_proxy.hpp"
+//#include "utils/graph_algo.hpp"
+//#include "utils/unitary_matrix.hpp"
+// ranges::to : gcc >= 14 https://godbolt.org/z/8TofKvb5a
+
+using namespace triqs;
+
+namespace triqs::modest {
+
+  // -------------------------------------------------------------------------------------------
+
+  // FIXME : we can easily avoid the copy with deducing this : pass self and forward it to res.
+  downfolding_projector downfolding_projector::rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U) const {
+    auto res     = *this;
+    auto n_k     = res.P_k.extent(0);
+    auto n_sigma = res.P_k.extent(1);
+    for (auto isig : range(n_sigma)) {
+      auto decomp = range(U.extent(0)) | stdv::transform([&](auto &&m) { return U(m, isig).extent(0); })
+         | std::ranges::to<std::vector>();
+      for (auto ik : range(n_k)) {
+        for (auto const &[a, sli] : enumerated_sub_slices(decomp)) {
+          // P <- dagger(U) * P
+          res.P_k(ik, isig, sli, r_all) =
+             dagger(U(a, isig)) * matrix_const_view<dcomplex>{this->P_k(ik, isig, sli, r_all)};
+          // I can not use x.P(isig,k)(sli, r_all) because of the slice on the n_bands_per_k in this P
+        }
+      }
+    }
+    return res;
+  }
+
+  // -------------------------------------------------------------------------------------------
+
+  one_body_elements_on_grid rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U,
+                                               one_body_elements_on_grid const &x) {
+    auto res = x;
+    res.P    = x.P.rotate_local_basis(U);
+    if (res.ibz_symm_ops) res.ibz_symm_ops = rotate_local_basis(U, x.ibz_symm_ops.value());
+    return res;
+  }
+  // -------------------------------------------------------------------------------------------
+
+  nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_on_grid const &obe) {
+    auto n_atoms          = obe.C_space.n_atoms();
+    auto n_sigma          = obe.C_space.n_sigma();
+    auto results_per_atom = nda::array<nda::matrix<dcomplex>, 2>{n_atoms, n_sigma};
+    // Hloc^{σ} = \sum_{k} P^{σ}_{mν}(k) H^{σ}_{νν'} P^{σ}_{m'ν'}(k)
+    for (auto const &[atom_idx, R_atom] : enumerated_sub_slices(obe.C_space.atomic_decomposition())) {
+      auto sh  = obe.C_space.atomic_shells()[atom_idx];
+      auto M_a = sh.dim;
+      for (auto sigma : range(n_sigma)) {
+        auto hloc0 = nda::zeros<dcomplex>(M_a, M_a);
+        for (auto ik : range(obe.H.n_k())) { // loop over k-points
+          auto P = obe.P.P(sigma, ik)(R_atom, r_all);
+          hloc0 += obe.H.k_weights(ik) * P * obe.H.H(sigma, ik) * dagger(P);
+        }
+        results_per_atom(atom_idx, sigma) = hloc0;
+      }
+    }
+    if (auto const &S = obe.ibz_symm_ops; S) results_per_atom = S->symmetrize(results_per_atom);
+    // FIXME : why are we doing this ? If so, why did we compute all of them before ?
+    for (auto atom_idx : range(n_atoms)) {
+      if (auto inequiv = obe.C_space.first_shell_of_its_equiv_cls(atom_idx); atom_idx != inequiv) {
+        results_per_atom(atom_idx, r_all) = results_per_atom(inequiv, r_all);
+      }
+    }
+    auto result = nda::array<nda::matrix<dcomplex>, 2>{1, n_sigma};
+    for (auto sigma : range(n_sigma)) {
+      result(0, sigma) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim());
+      for (auto const &[atm, r_atom] : enumerated_sub_slices(obe.C_space.atomic_decomposition())) {
+        result(0, sigma)(r_atom, r_atom) = results_per_atom(atm, sigma);
+      }
+    }
+    return result;
+  }
+  // -------------------------------------------------------------------------------------------
+
+  // fnt case to be implemented
+  //nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements const &one_body) {
+  //   // return H_k.get_R({0, 0, 0}); // GET R = 0 member.
+  // }
+
+  // -------------------------------------------------------------------------
+
+  nda::array<dcomplex, 3> detail::G0_C_k_sigma(one_body_elements_on_grid const &obe, double mu, long k_idx, long sigma,
+                                               std::vector<dcomplex> const &omegas, bool mu_derivative) {
+    // Using Woodbury formula
+
+    auto n_nu = obe.H.N_nu(sigma, k_idx);
+    auto R_nu = nda::range(n_nu);
+    auto M    = obe.C_space.dim();
+
+    // Compute Dinv(omega, nu) = 1/(om + mu - Hk(nu))
+    auto n_omega       = omegas.size();
+    auto Dinv          = nda::matrix<dcomplex>(n_omega, n_nu);
+    auto Hk            = obe.H.H(sigma, k_idx); // Hk[nu,nu']
+    constexpr auto sqr = [](auto x) { return x * x; };
+
+    // avoid the if in the inner loop
+    if (not mu_derivative) {
+      for (auto [n, om] : enumerate(omegas))
+        for (auto nu : R_nu) Dinv(n, nu) = 1 / (om + mu - Hk(nu, nu));
+    } else {
+      for (auto [n, om] : enumerate(omegas))
+        for (auto nu : R_nu) Dinv(n, nu) = -1 / sqr(om + mu - Hk(nu, nu));
+    }
+    // Compute M[nu, (alpha, m), (alpha', m')] = P[(alpha, m), nu ] conj(P)[(alpha', m'), nu ]
+    // Compute M[nu, m, m'] = P[m, nu ] conj(P)[m', nu ]
+    auto PP = nda::zeros<dcomplex>(n_nu, M, M);
+    auto P  = obe.P.P(sigma, k_idx);
+    for (auto m : range(M))
+      for (auto mp : range(M))
+        for (auto nu : R_nu) PP(nu, m, mp) = P(m, nu) * conj(P(mp, nu));
+
+    // Compute Y [ w, m, m'] = D[w, nu] * PP[nu, m,  m']
+    // Sum over nu  = matmul.
+    auto Y       = nda::zeros<dcomplex>(n_omega, M, M);
+    auto M_asmat = cmat_vt{nda::group_indices_view(PP, nda::idx_group<0>, nda::idx_group<1, 2>)};
+    auto Y_asmat = cmat_vt{nda::group_indices_view(Y, nda::idx_group<0>, nda::idx_group<1, 2>)};
+    nda::blas::gemm(1, Dinv, M_asmat, 0, Y_asmat);
+    return Y;
+  }
+
+} // namespace triqs::modest
