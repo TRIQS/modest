@@ -1,0 +1,20 @@
+@mainpage Overview
+
+[TOC]
+
+> This is the homepage of **TRIQS/bzSummation v@PROJECT_VERSION@**. The source code can be found on [GitHub](https://github.com/jcoulter12/bzSummation).
+
+Provide an overview of **bzSummation**.
+
+@section start Where to start?
+
+The @ref installation section tells you how to get the library and make it available on your system.
+
+@ref integration explains how to integrate **bzSummation** in your own C++ code.
+
+Then, you can start with the @ref examples section to get an overview of the library's features and how
+**bzSummation** can be used in practice.
+
+Furthermore, we provide a detailed reference @ref documentation to answer your questions.
+
+If you experience any problem with the library, you can post an @ref issues "Issue" on GitHub.
