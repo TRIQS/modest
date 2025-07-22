@@ -9,7 +9,7 @@ COPY --chown=build . $SRC/$APPNAME
 RUN mkdir $BUILD/$APPNAME && chown build $BUILD/$APPNAME
 
 RUN if echo "$CXX" | grep -q "clang"; then \
-        git clone https://github.com/flatironinstitute/clair --branch tool $SRC/clair && \
+        git clone https://github.com/flatironinstitute/clair --branch unstable $SRC/clair && \
         mkdir $BUILD/clair && \
         CXXFLAGS="" cmake -S $SRC/clair -B $BUILD/clair -DCMAKE_INSTALL_PREFIX=$INSTALL $CMAKE_ARGS && \
         cmake --build $BUILD/clair && cmake --install $BUILD/clair; \

@@ -34,8 +34,7 @@ foreach(module_src ${module_sources})
     add_custom_command(
       OUTPUT ${wrap_src}
       COMMAND ${clair-c2py} -p ${PROJECT_BINARY_DIR} ${module_src}
-      DEPENDS ${module_src}
-      DEPENDS ${clair-c2py}
+      DEPENDS ${module_src} ${clair-c2py} ${module_name}.toml
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
     add_custom_target(wrap_gen_${module_name} DEPENDS ${wrap_src})

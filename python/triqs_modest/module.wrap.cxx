@@ -48,7 +48,7 @@ static const auto doc_d_0 = fun_0.doc({R"DOC(   A simple function with :math:`G(
    ----------
    
    u:
-   Nothing useful)DOC"});
+      Nothing useful)DOC"});
 static const auto doc_d_1 = fun_1.doc({R"DOC(   Simple accessor)DOC"});
 static const auto doc_d_2 = fun_2.doc({R"DOC(   HDF5)DOC"});
 
@@ -93,7 +93,7 @@ static const auto doc_d_3 = fun_3.doc({R"DOC(   Chain digits of two integers
    Returns
    -------
    
-   An integer containing the digits of both i and j)DOC"});
+      An integer containing the digits of both i and j)DOC"});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
@@ -106,8 +106,8 @@ static PyMethodDef module_methods[] = {
 //// module doc directly in the code or "" if not present...
 /// Or mandatory ?
 static struct PyModuleDef module_def = {PyModuleDef_HEAD_INIT,
-                                        "module",                                                      /* name of module */
-                                        R"RAWDOC(Sample documentation for triqs_modest module)RAWDOC", /* module documentation, may be NULL */
+                                        "module",                                                    /* name of module */
+                                        R"RAWDOC(TRIQS Modular electronic structure toolkit)RAWDOC", /* module documentation, may be NULL */
                                         -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
                                         module_methods,
                                         NULL,
