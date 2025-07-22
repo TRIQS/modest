@@ -33,8 +33,8 @@ namespace triqs::modest {
       auto n_sigma = T.extent(1);
       auto Tembed  = nda::array<std::vector<long>, 2>(n_atoms, n_sigma);
 
-      auto old_indices = old_space | stdv::transform([](auto &x) { return x.dft_idx; }) | stdr::to<std::vector>();
-      auto new_indices = new_space | stdv::transform([](auto &x) { return x.dft_idx; }) | stdr::to<std::vector>();
+      auto old_indices = old_space | stdv::transform([](auto &x) { return x.dft_idx; }) | tl::to<std::vector>();
+      auto new_indices = new_space | stdv::transform([](auto &x) { return x.dft_idx; }) | tl::to<std::vector>();
 
       for (auto const &[n, nidx] : enumerate(new_indices)) {
         if (auto it = std::find(begin(old_indices), end(old_indices), nidx); it != end(old_indices)) {
@@ -64,7 +64,7 @@ namespace triqs::modest {
         auto D                  = find_blocks(nda::matrix<double>{abs(Hloc0(atom, sigma))}, block_threshold);
         U_rotation(atom, sigma) = nda::make_matrix_from_permutation<dcomplex>(flatten(D));
         decomposition(atom, sigma) =
-           D | stdv::transform([](auto &x) { return long(x.size()); }) | stdr::to<std::vector>();
+           D | stdv::transform([](auto &x) { return long(x.size()); }) | tl::to<std::vector>();
 
         // diagonalize the hloc0 to find a new basis of orbitals
         if (diagonalize_hloc) {
@@ -99,14 +99,14 @@ namespace triqs::modest {
       auto mats             = to_vector<cmat_t>(sort_keys_as_int(group[name1]));
       auto mats_tinv        = to_vector<long>(sort_keys_as_int(group[name2]));
       auto mats_tinv_and_SO = mats_tinv | stdv::transform([SO](long const &x) { return (x == 1 && SO == 1) ? 1 : 0; })
-         | stdr::to<std::vector<long>>();
+         | tl::to<std::vector<long>>();
 
       // NB: mat = D(R_{\alpaha})
       // if mat has time inversion symmetry (T), then T*D(R_{\alpha}) = -D(R_{\alpha})
       return mats | stdv::transform([mats_tinv_and_SO, i = 0](cmat_t const &x) mutable {
                return (mats_tinv_and_SO[i++] == 1) ? -conj(svd(x)) : svd(x);
              })
-         | stdr::to<std::vector<cmat_t>>();
+         | tl::to<std::vector<cmat_t>>();
     };
     return (mode == ReadMode::Correlated) ?
        read_mats(root["dft_input"], "rot_mat", "rot_mat_time_inv") :
@@ -138,7 +138,7 @@ namespace triqs::modest {
     auto n_atoms  = P_k_tmp.extent(2);
     auto P_k_list = range(n_atoms)
        | stdv::transform([&](auto atom) { return P_k_tmp(r_all, r_all, atom, r_all, r_all); })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
 
     // Merge the rotation matrices R into the Ps: P <- dagger(R) * P
     auto [n_k, n_sigma, n_m, n_nu] = P_k_list[0].shape(); // NOLINT
@@ -195,7 +195,7 @@ namespace triqs::modest {
              //NB: as<long>(g["atom"]), as<long>(g["dim"]), as<long>(g["equiv_cls_idx"]) );
              return atomic_shell_t{long(g["dim"]), long(g["l"]), long(g["sort"]), long(g["atom"])};
            })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
   }
 
   //-------------------------------------------------------
@@ -241,13 +241,13 @@ namespace triqs::modest {
     // read the symmetrization matrices (Q) for each symmetry operation S in the space group G.
     auto symm_ops_mats = sort_keys_as_int(g_symm["mat"])
        | stdv::transform([](auto const &g) { return to_vector<cmat_t>(sort_keys_as_int(g)); })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
 
     // read the permutation table which contains: for each symmetry op S in space group G,
     // the permutations of all atoms in the crystal structure under S.
     // dim(perm_table_all) = [number of sym ops][number of atoms in crystal]
     auto perm_table_all = sort_keys_as_int(g_symm["perm"])
-       | stdv::transform([](auto const &g) { return to_vector<long>(sort_keys_as_int(g)); }) | stdr::to<std::vector>();
+       | stdv::transform([](auto const &g) { return to_vector<long>(sort_keys_as_int(g)); }) | tl::to<std::vector>();
 
     // The permutation table is written for all atoms in the crystal. We must filter to obtain only the correlated atoms.
     auto corr_atom_to_alpha = std::unordered_map<long, long>{};
@@ -260,9 +260,9 @@ namespace triqs::modest {
        perm_table_all | stdv::transform([&](auto const &sym) {
          return atomic_shells
             | stdv::transform([&](auto corr_atom) { return corr_atom_to_alpha[sym[corr_atom.dft_idx - 1]]; })
-            | stdr::to<std::vector>();
+            | tl::to<std::vector>();
        })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
 
     // Merge the rotation matrices R into the symmetrization matrices (Qs).
     for (auto const &[iq, perm] : enumerate(perm_table_correlated)) {
@@ -278,7 +278,7 @@ namespace triqs::modest {
        | stdv::transform([symm_ops_mats, perm_table_correlated, time_inv_op](auto const &isym) {
                      return ibz_symmetry_ops::op{symm_ops_mats[isym], perm_table_correlated[isym], time_inv_op[isym]};
                    })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
 
     return symm_ops;
   };
@@ -311,7 +311,7 @@ namespace triqs::modest {
     auto rot_mats = read_rotation_matrices(filename, ReadMode::Correlated);
 
     /// read and rotate projectors
-    auto atom_decomp = atomic_shells | stdv::transform([](auto &x) { return x.dim; }) | stdr::to<std::vector<long>>();
+    auto atom_decomp = atomic_shells | stdv::transform([](auto &x) { return x.dim; }) | tl::to<std::vector<long>>();
     auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::Correlated, rot_mats, atom_decomp);
 
     /// read symmetry ops
@@ -383,7 +383,7 @@ namespace triqs::modest {
     auto rot_mats = read_rotation_matrices(filename, ReadMode::ThetaProjectors);
 
     /// read and rotate projectors
-    auto atom_decomp = W_space.atomic_decomposition() | stdr::to<std::vector<long>>();
+    auto atom_decomp = W_space.atomic_decomposition() | tl::to<std::vector<long>>();
     auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::ThetaProjectors, rot_mats, atom_decomp);
     auto theta_proj  = downfolding_projector{obe.C_space.spin_kind(), std::move(P_k), obe.H.n_bands_per_k};
 
@@ -412,7 +412,7 @@ namespace triqs::modest {
     auto rot_mats = read_rotation_matrices(filename, ReadMode::Correlated);
 
     /// read and rotate projectors
-    auto atom_decomp = obe.C_space.atomic_decomposition() | stdr::to<std::vector<long>>();
+    auto atom_decomp = obe.C_space.atomic_decomposition() | tl::to<std::vector<long>>();
     auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::Bands, rot_mats, atom_decomp);
 
     /// construct one-body elements (ibz_symm_ops are needed so we drop)

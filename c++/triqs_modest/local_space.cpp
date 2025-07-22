@@ -17,7 +17,7 @@ namespace triqs::modest {
 
     // Pre-compute the atom names
     _atom_names = range(_atomic_shells.size()) | stdv::transform([](auto i) { return std::to_string(i); })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
   };
 
   [[nodiscard]] long local_space::first_shell_of_its_equiv_cls(long idx) const {

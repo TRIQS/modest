@@ -45,8 +45,8 @@ namespace triqs::modest {
 
       auto M                = obe.C_space.dim();
       auto &mesh            = Sigma_dynamic(0, 0).mesh();
-      auto omegas           = mesh | stdr::to<std::vector<dcomplex>>();
-      auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | stdr::to<std::vector>();
+      auto omegas           = mesh | tl::to<std::vector<dcomplex>>();
+      auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
 
       return [=, &obe, &Sigma_dynamic, &Sigma_hartree](long sigma, long k_idx) {
         auto result = nda::zeros<dcomplex>(omegas.size());
@@ -115,7 +115,7 @@ namespace triqs::modest {
     auto PSP = [&](auto &iw, auto &k_idx, auto &sigma) {
       auto N_nu             = obe.H.N_nu(sigma, k_idx);
       auto out              = nda::zeros<dcomplex>(N_nu, N_nu);
-      auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | stdr::to<std::vector>();
+      auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
       for (auto &&[alpha, R] : enumerated_sub_slices(embedding_decomp)) {
         auto P = obe.P.P(sigma, k_idx)(R, r_all);
         out(r_all, r_all) += dagger(P)

@@ -63,7 +63,7 @@ namespace triqs::modest {
       auto n_symm  = double(this->ops.size());
 
       auto range_list = enumerated_sub_slices(atomic_decomposition)
-         | stdv::transform([](auto &x) { return std::get<1>(x); }) | stdr::to<std::vector>();
+         | stdv::transform([](auto &x) { return std::get<1>(x); }) | tl::to<std::vector>();
 
       for (auto [alpha, R_alpha] : enumerated_sub_slices(atomic_decomposition)) { // loop on alpha
         for (auto sigma : range(n_sigma)) {                                       // loop on sigma

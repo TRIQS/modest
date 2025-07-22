@@ -330,7 +330,7 @@ namespace triqs::modest {
   template <typename Mesh>
   std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block2_gf<Mesh, matrix_valued> const &g) const {
 
-    if (auto decomp = get_struct(g).dims(r_all, 0) | stdr::to<std::vector>(); decomp != this->sigma_embed_decomp) {
+    if (auto decomp = get_struct(g).dims(r_all, 0) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
       if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
       return extract(decomposition_view(g, this->sigma_embed_block_shape()));
     }
@@ -346,7 +346,7 @@ namespace triqs::modest {
       }
       return gimp;
     };
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | stdr::to<std::vector>();
+    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }
 
   /**
@@ -360,7 +360,7 @@ namespace triqs::modest {
   template <typename Mesh>
   std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block_gf<Mesh, matrix_valued> const &g) const {
 
-    if (auto decomp = get_struct(g) | stdr::to<std::vector>(); decomp != this->sigma_embed_decomp) {
+    if (auto decomp = get_struct(g) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
       if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
       return extract(decomposition_view(g, this->sigma_embed_block_shape()));
     }
@@ -375,7 +375,7 @@ namespace triqs::modest {
       }
       return gimp;
     };
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | stdr::to<std::vector>();
+    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }
 
   /**
@@ -390,7 +390,7 @@ namespace triqs::modest {
   std::vector<block_gf<Mesh, tensor_valued<4>>>
   embedding::extract(block_gf<Mesh, tensor_valued<4>> const &pi_loc) const {
 
-    if (auto decomp = get_struct(pi_loc) | stdr::to<std::vector>(); decomp != this->sigma_embed_decomp) {
+    if (auto decomp = get_struct(pi_loc) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
       if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
       return extract(decomposition_view(pi_loc, this->sigma_embed_block_shape()));
     }
@@ -405,7 +405,7 @@ namespace triqs::modest {
       }
       return pi_imp;
     };
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | stdr::to<std::vector>();
+    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }
 
 // ------------------------------------------------------------------------------

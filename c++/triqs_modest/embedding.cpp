@@ -16,12 +16,12 @@ namespace triqs::modest {
        psi{std::move(psi)} {
 
     alpha_names = range(n_alpha()) | //
-       stdv::transform([](auto i) { return std::to_string(i); }) | stdr::to<std::vector>();
+       stdv::transform([](auto i) { return std::to_string(i); }) | tl::to<std::vector>();
 
     // Compute reverse_psi
     reverse_psi = imp_decomps
        | stdv::transform([&](auto &v) { return nda::array<std::vector<std::array<long, 2>>, 2>(v.size(), n_sigma()); })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
 
     for (auto [alpha, sigma] : this->psi.indices()) { // beware the psi (argument) has been moved. use 2 names ?
       auto const &y = this->psi(alpha, sigma);
@@ -43,7 +43,7 @@ namespace triqs::modest {
     auto psi                = nda::array<embedding::imp_block_t, 2>(n_alpha, C_space.n_sigma());
 
     auto const &atom_imp_map =
-       (atom_to_imp) ? *atom_to_imp : range(C_space.atomic_shells().size()) | stdr::to<std::vector>();
+       (atom_to_imp) ? *atom_to_imp : range(C_space.atomic_shells().size()) | tl::to<std::vector>();
 
     for (auto const &[atom, shell] : enumerate(C_space.atomic_shells())) {
       for (auto &&[idx, bl_size] : enumerate(block_decomposition(atom, 0))) {
@@ -69,7 +69,7 @@ namespace triqs::modest {
       if (not cls_to_imp.contains(sh.cls_idx)) cls_to_imp[sh.cls_idx] = imp_idx++;
     }
     auto atom_to_imp_idx = range(C_space.atomic_shells().size())
-       | stdv::transform([&](auto const &atom) { return cls_to_imp[atom_to_cls[atom]]; }) | stdr::to<std::vector>();
+       | stdv::transform([&](auto const &atom) { return cls_to_imp[atom_to_cls[atom]]; }) | tl::to<std::vector>();
 
     auto decomp = C_space.atoms_block_decomposition();
 
@@ -118,7 +118,7 @@ namespace triqs::modest {
     out2 << "Gf Block structures for solvers as names, [dim]:\n";
     for (auto &&[n, ish] : enumerate(impurities_shape_list)) {
       auto formatted_vec = ish | stdv::transform([](auto &&p) { return fmt::format("{} [{}]", p.first, p.second); })
-         | stdr::to<std::vector>();
+         | tl::to<std::vector>();
       out3 << fmt::format("[imp_idx = {}] {}\n", n, fmt::join(formatted_vec, ", "));
     }
 
@@ -126,10 +126,10 @@ namespace triqs::modest {
 
     //out2 << fmt::format("{}", E.psi);
     auto row_labels =
-       range(E.n_alpha()) | stdv::transform([](auto x) { return fmt::format("α = {}", x); }) | stdr::to<std::vector>();
+       range(E.n_alpha()) | stdv::transform([](auto x) { return fmt::format("α = {}", x); }) | tl::to<std::vector>();
     auto col_labels = range(E.n_sigma())
        | stdv::transform([&](auto i) { return fmt::format("σ = {} / {}", i, E.sigma_names()[i]); })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
     nda::format_as_table(out3, E.psi, row_labels, col_labels);
 
     return out;
@@ -154,7 +154,7 @@ namespace triqs::modest {
       }
       return res;
     };
-    return imp_decomps | stdv::transform(l) | stdr::to<std::vector>();
+    return imp_decomps | stdv::transform(l) | tl::to<std::vector>();
   }
 
   //-----------------------------------------------------------------
@@ -208,15 +208,15 @@ namespace triqs::modest {
     auto new_psi         = this->psi;
     auto new_imp_decomps = this->imp_decomps;
     auto const &igs      = new_imp_decomps[imp_idx];
-    auto indices         = nda::range(long(igs.size())) | stdr::to<std::vector>(); // {0,1,2, ... n_gamma}
+    auto indices         = nda::range(long(igs.size())) | tl::to<std::vector>(); // {0,1,2, ... n_gamma}
 
     // separate the block indices according to p. We put the indices in regard to the blocks and partition them
     auto mid = std::stable_partition(begin(indices), end(indices), p);
 
     // make 2 new gf_struct from the indices partition
     auto get_igs = [&](int i) { return igs[i]; };
-    auto stru1   = stdr::subrange{begin(indices), mid} | stdv::transform(get_igs) | stdr::to<std::vector>();
-    auto stru2   = stdr::subrange{mid, end(indices)} | stdv::transform(get_igs) | stdr::to<std::vector>();
+    auto stru1   = stdr::subrange{begin(indices), mid} | stdv::transform(get_igs) | tl::to<std::vector>();
+    auto stru2   = stdr::subrange{mid, end(indices)} | stdv::transform(get_igs) | tl::to<std::vector>();
     long L1      = long(stru1.size());
 
     // Store the new gf_struct in result at the position of the old impurity model
@@ -277,7 +277,7 @@ namespace triqs::modest {
       }
       return h_imp;
     };
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | stdr::to<std::vector>();
+    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }
 
 } // namespace triqs::modest

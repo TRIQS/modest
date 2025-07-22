@@ -39,7 +39,7 @@ namespace triqs::modest {
     auto n_w     = mesh.size();
     auto n_k     = obe_theta.H.n_k();
 
-    auto embedding_decomp = get_struct(Sigma_w).dims(r_all, 0) | stdr::to<std::vector>();
+    auto embedding_decomp = get_struct(Sigma_w).dims(r_all, 0) | tl::to<std::vector>();
 
     auto PSP = [&](auto &w, auto &k_idx, auto &sigma) {
       auto N_nu = obe_theta.H.N_nu(sigma, k_idx);
@@ -102,7 +102,7 @@ namespace triqs::modest {
 
     auto data = nda::array<double, 3>(n_sigma, n_k, n_w);
 
-    auto embedding_decomp = get_struct(Sigma_w).dims(r_all, 0) | stdr::to<std::vector>();
+    auto embedding_decomp = get_struct(Sigma_w).dims(r_all, 0) | tl::to<std::vector>();
 
     auto Glatt = lattice_gf(mesh, obe, obe.P, mu, embedding_decomp, Sigma_w, Sigma_DC, broadening);
 

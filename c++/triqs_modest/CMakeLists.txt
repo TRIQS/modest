@@ -26,6 +26,13 @@ target_compile_definitions(${PROJECT_NAME}_c PUBLIC
 install(TARGETS ${PROJECT_NAME}_c EXPORT ${PROJECT_NAME}-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
 
+# ========= Additional Dependencies ==========
+
+target_link_libraries(${PROJECT_NAME}_c PUBLIC ranges)
+install(TARGETS ranges EXPORT ${PROJECT_NAME}-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+target_link_libraries(${PROJECT_NAME}_c PUBLIC cppcoro)
+install(TARGETS cppcoro EXPORT ${PROJECT_NAME}-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # ========= Static Analyzer Checks ==========
 

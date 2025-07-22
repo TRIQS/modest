@@ -40,7 +40,7 @@ load_data_w_selfenergy(std::string filename) {
     return out;
   };
 
-  auto Sigma_embed = E.embed(Sigma_imp_dlr | stdv::transform(make_sigma_dlr_imfreq) | stdr::to<std::vector>());
+  auto Sigma_embed = E.embed(Sigma_imp_dlr | stdv::transform(make_sigma_dlr_imfreq) | tl::to<std::vector>());
 #else
   auto Sigma_imp_dlr =
      make_vec_block_gf(mesh::dlr_imfreq{40.0, triqs::mesh::statistic_enum::Fermion, w_max, eps}, E.imp_block_shape());
@@ -53,9 +53,9 @@ load_data_w_selfenergy(std::string filename) {
     }
   }
   auto Sigma_hartree = Sigma_imp_dlr | stdv::transform([](auto &x) { return std::get<0>(split_self_energy(x)); })
-     | stdr::to<std::vector>();
+     | tl::to<std::vector>();
   auto Sigma_dynamic = Sigma_imp_dlr | stdv::transform([](auto &x) { return std::get<1>(split_self_energy(x)); })
-     | stdr::to<std::vector>();
+     | tl::to<std::vector>();
   auto Sigma_embed   = E.embed(Sigma_dynamic);
   auto Sigma_H_embed = E.embed(Sigma_hartree);
 #endif

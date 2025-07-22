@@ -8,7 +8,7 @@ auto test_compute_hloc(std::string filename) {
   auto [_, obe]  = one_body_elements_from_dft_converter(filename);
   auto hloc_0    = obe.C_space.atomic_view(modest::impurity_levels(obe));
   auto hloc0_ref = sort_keys_as_int(h5::proxy{filename, 'r'}["ref_data"]["hloc0"])
-     | stdv::transform([](auto const &g) { return to_vector<cmat_t>(sort_keys_as_int(g)); }) | stdr::to<std::vector>();
+     | stdv::transform([](auto const &g) { return to_vector<cmat_t>(sort_keys_as_int(g)); }) | tl::to<std::vector>();
   auto U = obe.C_space.rotation_from_dft_to_local_basis();
   for (auto [a, s] : hloc_0.indices()) { EXPECT_ARRAY_NEAR(Udag_X_U(U(a, s), hloc_0(a, s)), hloc0_ref[a][s], 1.e-14); }
 };

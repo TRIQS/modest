@@ -11,7 +11,7 @@ namespace triqs::modest {
     struct union_find {
       std::vector<long> parent;
 
-      union_find(long n) { parent = range(n) | stdr::to<std::vector<long>>(); };
+      union_find(long n) { parent = range(n) | tl::to<std::vector<long>>(); };
 
       /// returns the representative of the set containing x
       long find(long x) {
@@ -59,7 +59,7 @@ namespace triqs::modest {
       // convert G to list of matrices at Mesh = 0
       auto midpt = static_cast<long>(G[0].mesh().size() / 2);
       auto mats  = G | stdv::transform([midpt](auto const &g) { return nda::matrix<dcomplex>{g(midpt)}; })
-         | stdr::to<std::vector>();
+         | tl::to<std::vector>();
 
       auto uf = detail::union_find(mats.size());
 
@@ -72,12 +72,12 @@ namespace triqs::modest {
       }
 
       return groups_map | stdv::values | stdv::filter([](auto const &g) { return g.size() > 1; })
-         | stdr::to<std::vector>();
+         | tl::to<std::vector>();
     };
     return find_degenerate(Gimp) | stdv::transform([](auto &x) {
-             return x | stdv::transform([](auto &x) { return x; }) | stdr::to<std::vector>();
+             return x | stdv::transform([](auto &x) { return x; }) | tl::to<std::vector>();
            })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
   }
 
   inline block_gf<imfreq, matrix_valued> symmetrize_gf(block_gf<imfreq, matrix_valued> const &Gin,

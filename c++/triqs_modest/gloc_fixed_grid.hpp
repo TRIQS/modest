@@ -34,11 +34,11 @@ namespace triqs::modest {
     auto n_kpts      = long(obe.H.n_k());
     auto const &mesh = Sigma_dynamic(0, 0).mesh();
     auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
-    auto omegas      = mesh | stdr::to<std::vector<dcomplex>>();
+    auto omegas      = mesh | tl::to<std::vector<dcomplex>>();
 
     // Embedding decomposition from structure of Sigma
     // FIXME : better way ?
-    auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | stdr::to<std::vector>();
+    auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
 
     auto timer = scoped_timer{};
     // ---------
@@ -134,7 +134,7 @@ namespace triqs::modest {
                                               block_gf<Mesh, matrix_valued> const &Gloc) {
     auto Sigma_hartree = get_struct(Gloc)
        | stdv::transform([](auto &x) { return nda::zeros<dcomplex>(x.second, x.second); })
-       | stdr::to<std::vector<nda::matrix<dcomplex>>>();
+       | tl::to<std::vector<nda::matrix<dcomplex>>>();
     auto Sigma_dynamic = block_gf{Gloc[0].mesh(), get_struct(Gloc)};
     return extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_hartree);
   }

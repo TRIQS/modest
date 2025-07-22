@@ -6,7 +6,7 @@ auto get_deg_blocks(std::string filename) {
   auto E        = make_embedding_with_equivalences(obe.C_space);
   auto mesh     = mesh::imfreq{40.0, triqs::mesh::Fermion, 1025};
   return E.extract(gloc(mesh, obe, 0.0)) | stdv::transform([](auto &G) { return analyze_degenerate_blocks(G); })
-     | stdr::to<std::vector>();
+     | tl::to<std::vector>();
 }
 
 TEST(deg_blocks, SrVO3) {
@@ -30,10 +30,10 @@ TEST(deg_blocks, SrVO3_symmetrize) {
   auto mesh     = mesh::imfreq{40.0, triqs::mesh::Fermion, 1025};
   auto Gimp     = E.extract(gloc(mesh, obe, 0.0));
   auto deg_blocks =
-     Gimp | stdv::transform([](auto &G) { return analyze_degenerate_blocks(G); }) | stdr::to<std::vector>();
+     Gimp | stdv::transform([](auto &G) { return analyze_degenerate_blocks(G); }) | tl::to<std::vector>();
   auto Gsymm = Gimp
      | stdv::transform([deg_blocks, idx = 0](auto const &Gin) mutable { return symmetrize_gf(Gin, deg_blocks[idx++]); })
-     | stdr::to<std::vector>();
+     | tl::to<std::vector>();
 }
 
 TEST(deg_blocks, LiV2O4_symmetrize) {
@@ -42,8 +42,8 @@ TEST(deg_blocks, LiV2O4_symmetrize) {
   auto mesh     = mesh::imfreq{40.0, triqs::mesh::Fermion, 1025};
   auto Gimp     = E.extract(gloc(mesh, obe, 0.0));
   auto deg_blocks =
-     Gimp | stdv::transform([](auto &G) { return analyze_degenerate_blocks(G); }) | stdr::to<std::vector>();
+     Gimp | stdv::transform([](auto &G) { return analyze_degenerate_blocks(G); }) | tl::to<std::vector>();
   auto Gsymm = Gimp
      | stdv::transform([deg_blocks, idx = 0](auto const &Gin) mutable { return symmetrize_gf(Gin, deg_blocks[idx++]); })
-     | stdr::to<std::vector>();
+     | tl::to<std::vector>();
 }

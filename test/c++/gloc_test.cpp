@@ -53,9 +53,9 @@ auto run_gloc_test_case(std::string filename, double const threshold, self_energ
     }
     //auto [Sigma_hartee, Sigma_dynamic] = split_self_energy(Sigma_imp_solver);
     auto Sigma_hartree = Sigma_imp_solver | stdv::transform([](auto &x) { return std::get<0>(split_self_energy(x)); })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
     auto Sigma_dynamic = Sigma_imp_solver | stdv::transform([](auto &x) { return std::get<1>(split_self_energy(x)); })
-       | stdr::to<std::vector>();
+       | tl::to<std::vector>();
     auto Sigma_embed   = E.embed(Sigma_dynamic);
     auto Sigma_H_embed = E.embed(Sigma_hartree);
     auto G = decomposition_view(gloc(obe, 0.0, Sigma_embed, Sigma_H_embed), obe.C_space.Gatom_block_shape());
@@ -73,9 +73,9 @@ auto gloc_two_ways(std::string filename) {
   auto mesh                  = mesh::imfreq{10.0, triqs::mesh::Fermion, 251};
   auto Sigma_imp_solver      = make_vec_block_gf(mesh, E.imp_block_shape());
   auto Sigma_hartree = Sigma_imp_solver | stdv::transform([](auto &x) { return std::get<0>(split_self_energy(x)); })
-     | stdr::to<std::vector>();
+     | tl::to<std::vector>();
   auto Sigma_dynamic = Sigma_imp_solver | stdv::transform([](auto &x) { return std::get<1>(split_self_energy(x)); })
-     | stdr::to<std::vector>();
+     | tl::to<std::vector>();
   auto Sigma_embed   = E.embed(Sigma_dynamic);
   auto Sigma_H_embed = E.embed(Sigma_hartree);
   auto Gloc1         = gloc(mesh, obe, 0.0);

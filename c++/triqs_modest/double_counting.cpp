@@ -118,7 +118,7 @@ namespace triqs::modest {
     auto [n_blocks, n_sigma] = density_matrix.shape();
 
     auto n_orb = stdr::fold_left(density_matrix(r_all, 0) | stdv::transform([](auto x) { return x.shape()[0]; })
-                                    | stdr::to<std::vector>(),
+                                    | tl::to<std::vector>(),
                                  0, std::plus<>());
     n_orb      = (n_sigma == 2) ? n_orb : static_cast<long>(n_orb / 2);
 
@@ -137,7 +137,7 @@ namespace triqs::modest {
 
     auto [n_blocks, n_sigma] = density_matrix.shape();
     auto n_orb = stdr::fold_left(density_matrix(r_all, 0) | stdv::transform([](auto x) { return x.shape()[0]; })
-                                    | stdr::to<std::vector>(),
+                                    | tl::to<std::vector>(),
                                  0, std::plus<>());
     n_orb      = (n_sigma == 2) ? n_orb : static_cast<long>(n_orb / 2);
 
