@@ -1,17 +1,22 @@
 #include <c2py/c2py.hpp>
 
-#include "triqs_modest/triqs_modest.hpp"
+#include "triqs_modest/downfolding.hpp"
+#include "triqs_modest/loaders.hpp"
+#include "triqs_modest/embedding.hpp"
+#include "triqs_modest/impurity_model.hpp"
+#include "triqs_modest/root_finder.hpp"
+#include "triqs_modest/double_counting.hpp"
+#include "triqs_modest/gloc_fixed_grid.hpp"
+#include "triqs_modest/density.hpp"
+#include "triqs_modest/postprocess.hpp"
+#include "triqs_modest/checkpoint.hpp"
+#include "triqs_modest/degenerate_blocks.hpp"
 
-using namespace std::string_literals;
-using triqs_modest::toto;
-template <> struct c2py::arithmetic<toto, c2py::OpName::Add> : std::tuple<triplet<toto, toto, toto>> {};
+template <> constexpr bool c2py::is_wrapped<triqs::mesh::imfreq>     = true;
+template <> constexpr bool c2py::is_wrapped<triqs::mesh::dlr_imfreq> = true;
 
 namespace c2py_module {
-
-  auto documentation = "Sample documentation for triqs_modest module";
-  auto match_names   = "triqs_modest::";
-  auto package_name  = "triqs_modest";
-
+  using DMFTCheckpoint = triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>;
 } // namespace c2py_module
 
 #include "module.wrap.cxx"

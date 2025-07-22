@@ -2,25 +2,23 @@
 package_name = "triqs_modest"
 
 # The documentation string of the module. 
-documentation = "TRIQS Modular electronic structure toolkit"
+documentation = "Python Module for TRIQS Modular Electronic Structure Toolkit"
 
-# List of namespaces as a space separated string e.g. "A A::B"
-# If non-empty, only the elements declared in EXACTLY these namespaces are wrapped.
-# NB e.g. in previous example A::detail will be ignored, whatever match_names.
-namespaces = "triqs_modest"
+# Namespace. 
+# Only the classes/functions/enums declared in this namespace will be wrapped
+namespaces = "triqs triqs::modest  triqs::modest::detail"
 
-# Match/reject elements according to a regex (LLVM regex)
-# If match_names/match_names are both set, the algorithm is 
-#  for X of fully qualified name qname
-#    if match_names and match_names does not match Qname : skip X
-#    if reject_names and reject_names matches Qname : skip X
+# Match/reject elements according to regex
+# If match_names/match_names are both set, filter for all elements 
+# Algorithm is (for an element X of fully qualified name Qname)
+#    if match_names and not match_names match Qname : skip X
+#    if reject_names and reject_names match Qname : skip X
 #    else keep X.
-#
-#match_names = ""
-#reject_names = ""
+
+match_names = "triqs::modest::|triqs::(root_finder|make_kanamori|make_slater|U_matrix_in_spherical_basis)"
+reject_names = "triqs::modest::(ibz_symmetry_ops|rotate_local_basis)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex
 
-# If true, transform methods with no arguments into a read only property
-#wrap_no_arg_methods_as_properties = false
+wrap_no_arg_methods_as_properties= true

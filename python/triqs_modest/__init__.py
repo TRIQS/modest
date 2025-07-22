@@ -25,6 +25,6 @@ r"""
 DOC
 
 """
-from .module import Toto, chain
+from .module import *
 
-__all__ = ['Toto', 'chain']
+__all__ = []
