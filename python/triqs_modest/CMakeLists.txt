@@ -28,7 +28,7 @@ foreach(module_src ${module_sources})
   Python_add_library(${module_name} MODULE ${module_src})
   set_target_properties(${module_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${module_dir})
   add_library(${PROJECT_NAME}::${module_name} ALIAS ${module_name})
-  target_link_libraries(${module_name} PRIVATE ${PROJECT_NAME}_c triqs_py c2py::c2py)
+  target_link_libraries(${module_name} PRIVATE ${PROJECT_NAME}_c triqs_py c2py::c2py ${PROJECT_NAME}_warnings)
   if(Update_Python_Bindings)
     string(REPLACE ".cpp" ".wrap.cxx" wrap_src ${CMAKE_CURRENT_SOURCE_DIR}/${module_src})
     add_custom_command(
