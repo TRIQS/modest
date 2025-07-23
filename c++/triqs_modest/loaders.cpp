@@ -137,8 +137,7 @@ namespace triqs::modest {
     auto P_k_tmp  = load_Pks(filename, mode);
     auto n_atoms  = P_k_tmp.extent(2);
     auto P_k_list = range(n_atoms)
-       | stdv::transform([&](auto atom) { return P_k_tmp(r_all, r_all, atom, r_all, r_all); })
-       | tl::to<std::vector>();
+       | stdv::transform([&](auto atom) { return P_k_tmp(r_all, r_all, atom, r_all, r_all); }) | tl::to<std::vector>();
 
     // Merge the rotation matrices R into the Ps: P <- dagger(R) * P
     auto [n_k, n_sigma, n_m, n_nu] = P_k_list[0].shape(); // NOLINT
@@ -240,8 +239,7 @@ namespace triqs::modest {
 
     // read the symmetrization matrices (Q) for each symmetry operation S in the space group G.
     auto symm_ops_mats = sort_keys_as_int(g_symm["mat"])
-       | stdv::transform([](auto const &g) { return to_vector<cmat_t>(sort_keys_as_int(g)); })
-       | tl::to<std::vector>();
+       | stdv::transform([](auto const &g) { return to_vector<cmat_t>(sort_keys_as_int(g)); }) | tl::to<std::vector>();
 
     // read the permutation table which contains: for each symmetry op S in space group G,
     // the permutations of all atoms in the crystal structure under S.

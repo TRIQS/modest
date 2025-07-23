@@ -20,8 +20,8 @@ namespace triqs::modest {
     auto n_k     = res.P_k.extent(0);
     auto n_sigma = res.P_k.extent(1);
     for (auto isig : range(n_sigma)) {
-      auto decomp = range(U.extent(0)) | stdv::transform([&](auto &&m) { return U(m, isig).extent(0); })
-         | tl::to<std::vector>();
+      auto decomp =
+         range(U.extent(0)) | stdv::transform([&](auto &&m) { return U(m, isig).extent(0); }) | tl::to<std::vector>();
       for (auto ik : range(n_k)) {
         for (auto const &[a, sli] : enumerated_sub_slices(decomp)) {
           // P <- dagger(U) * P

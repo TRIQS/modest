@@ -5,13 +5,13 @@
 #include "utils/gf_supp.hpp"
 
 namespace triqs::modest {
-  
+
 // omp reduction operation for block2_gf
-#pragma omp declare reduction(block2_gf_sum : block2_gf<imfreq, matrix_valued> : omp_out += omp_in)                             \
-  initializer(omp_priv = make_block2_gf(omp_orig(0,0).mesh(), get_struct(omp_orig)))
-#pragma omp declare reduction(block2_gf_sum : block2_gf<dlr_imfreq, matrix_valued> : omp_out += omp_in)                         \
-  initializer(omp_priv = make_block2_gf(omp_orig(0,0).mesh(), get_struct(omp_orig)))
-   
+#pragma omp declare reduction(block2_gf_sum : block2_gf<imfreq, matrix_valued> : omp_out += omp_in)                    \
+   initializer(omp_priv = make_block2_gf(omp_orig(0, 0).mesh(), get_struct(omp_orig)))
+#pragma omp declare reduction(block2_gf_sum : block2_gf<dlr_imfreq, matrix_valued> : omp_out += omp_in)                \
+   initializer(omp_priv = make_block2_gf(omp_orig(0, 0).mesh(), get_struct(omp_orig)))
+
   // ------------------------------------------------------------------
   /**
  * @brief compute G𝓒 local Green's function on Mesh(MxM) 
@@ -26,7 +26,7 @@ namespace triqs::modest {
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu,
                                       block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree) {
-                                        
+
     //std::optional<nda::array<nda::matrix<double>, 2>> const &Sigma_dc)
     // std::optional<block2_gf<Mesh, matrix_valued>> const &Sigma_dc
     auto n_sigma     = Sigma_dynamic.size2();
@@ -45,7 +45,7 @@ namespace triqs::modest {
     // NOTE: Is there any reason why sigma loop should be the external one?
     // Internal is favorable for maximum parallelization.
     mpi::communicator comm = {};
-#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                                                            \
+#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                              \
    shared(comm, r_all, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_hartree)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
       for (auto sigma : range(n_sigma)) {
@@ -98,9 +98,12 @@ namespace triqs::modest {
 
     auto gloc_result       = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
     mpi::communicator comm = {};
-#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none) shared(comm, r_all, gloc_k, n_kpts, n_sigma, obe)
+#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                              \
+   shared(comm, r_all, gloc_k, n_kpts, n_sigma, obe)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
-      for (auto sigma : range(n_sigma)) { gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data(); }
+      for (auto sigma : range(n_sigma)) {
+        gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data();
+      }
     }
     gloc_result = mpi::all_reduce(gloc_result);
 

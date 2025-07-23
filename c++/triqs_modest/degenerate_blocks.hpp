@@ -74,9 +74,8 @@ namespace triqs::modest {
       return groups_map | stdv::values | stdv::filter([](auto const &g) { return g.size() > 1; })
          | tl::to<std::vector>();
     };
-    return find_degenerate(Gimp) | stdv::transform([](auto &x) {
-             return x | stdv::transform([](auto &x) { return x; }) | tl::to<std::vector>();
-           })
+    return find_degenerate(Gimp)
+       | stdv::transform([](auto &x) { return x | stdv::transform([](auto &x) { return x; }) | tl::to<std::vector>(); })
        | tl::to<std::vector>();
   }
 
