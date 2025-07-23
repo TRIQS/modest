@@ -42,11 +42,12 @@ namespace triqs::modest {
 
     auto timer = scoped_timer{};
     // ---------
-    // NOTE: Is there any reason why sigma loop should be the external one? 
-    // Internal is favorable for maximum parallelization. 
-    mpi::communicator comm = {}; 
-    #pragma omp parallel for collapse(2) reduction(block2_gf_sum<Mesh, matrix_valued> : gloc_result) default(none) shared(comm, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_hartree) 
-    for (auto k_idx : mpi::chunk(range(n_kpts),comm)) {
+    // NOTE: Is there any reason why sigma loop should be the external one?
+    // Internal is favorable for maximum parallelization.
+    mpi::communicator comm = {};
+#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                                                            \
+   shared(comm, r_all, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_hartree)
+    for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
       for (auto sigma : range(n_sigma)) {
         auto Y = detail::G0_C_k_sigma(obe, mu, k_idx, sigma, omegas, false);
         for (auto &&[n, om] : itertools::enumerate(mesh)) {
@@ -95,13 +96,11 @@ namespace triqs::modest {
       return out;
     };
 
-    auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
-    mpi::communicator comm = {}; 
-    #pragma omp parallel for collapse(2) reduction(block2_gf_sum<Mesh, matrix_valued> : gloc_result) default(none) shared(comm, gloc_k, n_kpts, n_sigma, obe) 
-    for (auto k_idx : mpi::chunk(range(n_kpts),comm)) {
-      for (auto sigma : range(n_sigma)) {
-        gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data();
-      }
+    auto gloc_result       = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    mpi::communicator comm = {};
+#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none) shared(comm, r_all, gloc_k, n_kpts, n_sigma, obe)
+    for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
+      for (auto sigma : range(n_sigma)) { gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data(); }
     }
     gloc_result = mpi::all_reduce(gloc_result);
 
