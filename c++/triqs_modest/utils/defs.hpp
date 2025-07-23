@@ -6,7 +6,11 @@
 #include <triqs/gfs.hpp>
 #include "./range_supp.hpp"
 
+#ifdef __clang__
 #define C2PY_IGNORE __attribute__((annotate("c2py_ignore")))
+#else
+#define C2PY_IGNORE
+#endif
 //#include <c2py/user_api.hpp>
 
 namespace stdv = std::views;

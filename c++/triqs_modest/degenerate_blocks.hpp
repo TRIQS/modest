@@ -75,7 +75,7 @@ namespace triqs::modest {
          | tl::to<std::vector>();
     };
     return find_degenerate(Gimp)
-       | stdv::transform([](auto &x) { return x | stdv::transform([](auto &x) { return x; }) | tl::to<std::vector>(); })
+       | stdv::transform([](auto &x) { return x | stdv::transform([](auto &y) { return y; }) | tl::to<std::vector>(); })
        | tl::to<std::vector>();
   }
 
