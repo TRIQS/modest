@@ -25,19 +25,26 @@ file(GLOB_RECURSE module_sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 foreach(module_src ${module_sources})
   get_filename_component(module_name ${module_src} NAME_WE)
   get_filename_component(module_dir ${module_src} DIRECTORY)
+  
   Python_add_library(${module_name} MODULE ${module_src})
   set_target_properties(${module_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${module_dir})
   add_library(${PROJECT_NAME}::${module_name} ALIAS ${module_name})
   target_link_libraries(${module_name} PRIVATE ${PROJECT_NAME}_c triqs_py c2py::c2py ${PROJECT_NAME}_warnings)
+  
   if(Update_Python_Bindings)
-    string(REPLACE ".cpp" ".wrap.cxx" wrap_src ${CMAKE_CURRENT_SOURCE_DIR}/${module_src})
+    #string(REPLACE ".cpp" ".wrap.cxx" wrap_src ${CMAKE_CURRENT_SOURCE_DIR}/${module_src})
+    set(depfile "${CMAKE_CURRENT_BINARY_DIR}/${module_name}.cpp.d")
+    set(wrap_cxx "${CMAKE_CURRENT_SOURCE_DIR}/${module_name}.wrap.cxx")
+
     add_custom_command(
-      OUTPUT ${wrap_src}
-      COMMAND ${clair-c2py} -p ${PROJECT_BINARY_DIR} ${module_src}
-      DEPENDS ${module_src} ${clair-c2py} ${module_name}.toml
+      OUTPUT ${wrap_cxx}
+      COMMAND ${clair-c2py} -p ${PROJECT_BINARY_DIR} --generate-depfile ${depfile} ${module_src}
+      #DEPENDS ${module_src} ${module_name}.toml
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      DEPFILE ${depfile}
     )
-    add_custom_target(wrap_gen_${module_name} DEPENDS ${wrap_src})
+
+    add_custom_target(wrap_gen_${module_name} DEPENDS ${wrap_cxx})
     add_dependencies(${module_name} wrap_gen_${module_name})
   endif()
   install(TARGETS ${module_name} DESTINATION ${PYTHON_LIB_DEST}/${module_dir})
