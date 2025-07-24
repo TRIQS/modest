@@ -25,6 +25,15 @@ add_custom_target(doxygen ALL
   VERBATIM
 )
 
+# copy doxygen/html output folder to sphinx/html folder
+add_custom_command(TARGET doxygen POST_BUILD 
+  COMMAND "${CMAKE_COMMAND}" -E make_directory 
+         "${CMAKE_CURRENT_BINARY_DIR}/../sphinx/html/doxygen"
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory
+     "${CMAKE_CURRENT_BINARY_DIR}/html"
+     "${CMAKE_CURRENT_BINARY_DIR}/../sphinx/html/doxygen" 
+  COMMENT "Copying doxygen output to sphinx/html/doxygen directory")
+
 # ############
 # Install
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/ COMPONENT documentation DESTINATION share/doc/${PROJECT_NAME}
