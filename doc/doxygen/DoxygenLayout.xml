@@ -32,6 +32,7 @@
     </tab>
     <tab type="user" url="@ref changelog" title="Changelog"/>
     <tab type="user" url="@ref issues" title="Issues"/>
+    <tab type="user" url="../index.html" title="Main homepage"/>
   </navindex>
 
   <!-- Layout definition for a class page -->
