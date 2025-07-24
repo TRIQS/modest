@@ -1,7 +1,7 @@
 #include <c2py/c2py.hpp>
 
-#ifndef C2PY_HXX_DECLARATION_module_GUARDS
-#define C2PY_HXX_DECLARATION_module_GUARDS
+#ifndef C2PY_HXX_DECLARATION_triqs_modest_module_GUARDS
+#define C2PY_HXX_DECLARATION_triqs_modest_module_GUARDS
 template <> constexpr bool c2py::is_wrapped<triqs::modest::atomic_shell_t>                                                         = true;
 template <> constexpr bool c2py::is_wrapped<triqs::modest::local_space>                                                            = true;
 template <> constexpr bool c2py::is_wrapped<triqs::modest::band_dispersion>                                                        = true;

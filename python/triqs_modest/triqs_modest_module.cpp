@@ -19,4 +19,4 @@ namespace c2py_module {
   using DMFTCheckpoint = triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>;
 } // namespace c2py_module
 
-#include "module.wrap.cxx"
+#include "triqs_modest_module.wrap.cxx"

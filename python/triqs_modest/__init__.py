@@ -25,6 +25,6 @@ r"""
 DOC
 
 """
-from .module import *
+from .triqs_modest_module import *
 
 __all__ = []

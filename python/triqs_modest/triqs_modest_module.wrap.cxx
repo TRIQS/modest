@@ -46,7 +46,7 @@ std::map<triqs::modest::spin_kind_e, str_t> c2py::enum_to_string<triqs::modest::
 // ==================== module classes =====================
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::atomic_shell_t>   = "triqs::modest::atomic_shell_t";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::atomic_shell_t>       = "triqs_modest.module.AtomicShellT";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::atomic_shell_t>       = "triqs_modest.triqs_modest_module.AtomicShellT";
 template <> inline constexpr const char *c2py::tp_doc<triqs::modest::atomic_shell_t> = R"DOC(   Info on an atomic shell)DOC";
 
 static auto init_0 = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::atomic_shell_t>()};
@@ -76,7 +76,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::atomic_shell_t>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::local_space> = "triqs::modest::local_space";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::local_space>     = "triqs_modest.module.LocalSpace";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::local_space>     = "triqs_modest.triqs_modest_module.LocalSpace";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::local_space> =
    R"DOC(   It contains: * the spin kind (NonPolarized, Polarized, NonColinear) * the shell structure. * the decomposition of the 𝓒 space into atomic and irreps decomposition. * the transformation matrices to the DFT-basis and to the spherical basis. FIXME : Cf note : EXPLAIN)DOC";
@@ -165,7 +165,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::local_space>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::band_dispersion> = "triqs::modest::band_dispersion";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::band_dispersion>     = "triqs_modest.module.BandDispersion";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::band_dispersion>     = "triqs_modest.triqs_modest_module.BandDispersion";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::band_dispersion> = R"DOC(   * spin_kind: triqs::modest::spin_kind_e
       
@@ -247,7 +247,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::band_dispersion>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::downfolding_projector> = "triqs::modest::downfolding_projector";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::downfolding_projector>     = "triqs_modest.module.DownfoldingProjector";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::downfolding_projector>     = "triqs_modest.triqs_modest_module.DownfoldingProjector";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::downfolding_projector> = R"DOC(   * spin_kind: triqs::modest::spin_kind_e
       
@@ -322,7 +322,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::downfolding_projector>[] = 
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::one_body_elements_on_grid> = "triqs::modest::one_body_elements_on_grid";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements_on_grid>     = "triqs_modest.module.OneBodyElementsOnGrid";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements_on_grid> = "triqs_modest.triqs_modest_module.OneBodyElementsOnGrid";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::one_body_elements_on_grid> = R"DOC(   * H: triqs::modest::band_dispersion
       
@@ -386,7 +386,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements_on_grid>[
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::embedding>   = "triqs::modest::embedding";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::embedding>       = "triqs_modest.module.Embedding";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::embedding>       = "triqs_modest.triqs_modest_module.Embedding";
 template <> inline constexpr const char *c2py::tp_doc<triqs::modest::embedding> = R"DOC(   )DOC";
 
 static auto init_2                                                     = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::embedding>(),
@@ -640,7 +640,7 @@ static PyObject *getitem_0(PyObject *self, PyObject *key) {
 template <> PyMappingMethods c2py::tp_as_mapping<triqs::modest::embedding> = {nullptr, getitem_0, nullptr};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::embedding::imp_block_t>   = "triqs::modest::embedding::imp_block_t";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::embedding::imp_block_t>       = "triqs_modest.module.ImpBlockT";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::embedding::imp_block_t>       = "triqs_modest.triqs_modest_module.ImpBlockT";
 template <> inline constexpr const char *c2py::tp_doc<triqs::modest::embedding::imp_block_t> = R"DOC(   struct of tuples imp_idx, γ, τ)DOC";
 
 static auto init_3 = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::embedding::imp_block_t>(),
@@ -669,7 +669,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::embedding::imp_block_t>[] =
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::dc_solver>   = "triqs::modest::dc_solver";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::dc_solver>       = "triqs_modest.module.DcSolver";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::dc_solver>       = "triqs_modest.triqs_modest_module.DcSolver";
 template <> inline constexpr const char *c2py::tp_doc<triqs::modest::dc_solver> = R"DOC(   )DOC";
 
 static auto init_4 = c2py::dispatcher_c_kw_t{
@@ -714,7 +714,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::dc_solver>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::spectral_function_kw>   = "triqs::modest::spectral_function_kw";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::spectral_function_kw>       = "triqs_modest.module.SpectralFunctionKw";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::spectral_function_kw>       = "triqs_modest.triqs_modest_module.SpectralFunctionKw";
 template <> inline constexpr const char *c2py::tp_doc<triqs::modest::spectral_function_kw> = R"DOC(   * data: nda::array<double,3>)DOC";
 
 static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs) {
@@ -761,7 +761,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_kw>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::spectral_function_w> = "triqs::modest::spectral_function_w";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::spectral_function_w>     = "triqs_modest.module.SpectralFunctionW";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::spectral_function_w>     = "triqs_modest.triqs_modest_module.SpectralFunctionW";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::spectral_function_w> = R"DOC(   * total: nda::array<double,2>
       
@@ -816,7 +816,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_w>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::initial_data> = "triqs::modest::initial_data";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::initial_data>     = "triqs_modest.module.InitialData";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::initial_data>     = "triqs_modest.triqs_modest_module.InitialData";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::initial_data> = R"DOC(   * obe: triqs::modest::one_body_elements_on_grid
       One body elements
@@ -872,7 +872,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::initial_data>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::iteration_data> = "triqs::modest::iteration_data";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::iteration_data>     = "triqs_modest.module.IterationData";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::iteration_data>     = "triqs_modest.triqs_modest_module.IterationData";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::iteration_data> = R"DOC(   * mu: double
       Chemical potential
@@ -935,7 +935,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::iteration_data>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> inline const std::string c2py::cpp_name<triqs::modest::detail::union_find> = "triqs::modest::detail::union_find";
-template <> inline constexpr auto c2py::tp_name<triqs::modest::detail::union_find>     = "triqs_modest.module.UnionFind";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::detail::union_find>     = "triqs_modest.triqs_modest_module.UnionFind";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::detail::union_find> =
    R"DOC(   Union-Find: Data structure that efficiently tracks a collection of disjoint sets.)DOC";
@@ -975,7 +975,7 @@ inline const std::string c2py::cpp_name<triqs::modest::checkpoint<triqs::modest:
    "triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>";
 template <>
 inline constexpr auto c2py::tp_name<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>> =
-   "triqs_modest.module.DMFTCheckpoint";
+   "triqs_modest.triqs_modest_module.DMFTCheckpoint";
 template <>
 inline constexpr const char *c2py::tp_doc<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>> =
    R"DOC(   name = DMFTCheckpoint)DOC";
@@ -1622,7 +1622,7 @@ static PyMethodDef module_methods[] = {
 /// Or mandatory ?
 static struct PyModuleDef module_def = {
    PyModuleDef_HEAD_INIT,
-   "module",                                                                      /* name of module */
+   "triqs_modest_module",                                                         /* name of module */
    R"RAWDOC(Python Module for TRIQS Modular Electronic Structure Toolkit)RAWDOC", /* module documentation, may be NULL */
    -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
    module_methods,
@@ -1633,9 +1633,9 @@ static struct PyModuleDef module_def = {
 
 //--------------------- module init function -----------------------------
 
-extern "C" __attribute__((visibility("default"))) PyObject *PyInit_module() {
+extern "C" __attribute__((visibility("default"))) PyObject *PyInit_triqs_modest_module() {
 
-  if (not c2py::check_python_version("module")) return NULL;
+  if (not c2py::check_python_version("triqs_modest_module")) return NULL;
 
   // import numpy iff 'numpy/arrayobject.h' included
 #ifdef Py_ARRAYOBJECT_H
