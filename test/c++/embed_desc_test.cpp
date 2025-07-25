@@ -49,63 +49,63 @@ void test_embed_desc_rotate_hloc0(std::string filename, double threshold) {
 };
 
 TEST(embed_desc_tests, lunio3_vasp) { // NOLINT
-  auto filename = "dft_data/lunio3-vasp.ref.h5";
+  auto filename = "ref_data/lunio3-vasp.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-6);
   test_embed_desc_rotate_hloc0(filename, 1.e-6);
 }
 
 TEST(embed_desc_tests, nio_vasp) { // NOLINT
-  auto filename = "dft_data/nio.ref.h5";
+  auto filename = "ref_data/nio.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-5);
 }
 
 TEST(embed_desc_tests, lavo3_wien2k) { // NOLINT
-  auto filename = "dft_data/LaVO3-Pnma-t2g.ref.h5";
+  auto filename = "ref_data/LaVO3-Pnma-t2g.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-4);
   test_embed_desc_rotate_hloc0(filename, 1.e-4);
 }
 
 TEST(embed_desc_tests, svo_wien2k) { // NOLINT
-  auto filename = "dft_data/svo-wien2k.ref.h5";
+  auto filename = "ref_data/svo-wien2k.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-3);
   test_embed_desc_rotate_hloc0(filename, 1.e-3);
 }
 
 TEST(embed_desc_tests, sio_wien2k_soc) { // NOLINT
-  auto filename = "dft_data/sriro3-wien2k-soc.ref.h5";
+  auto filename = "ref_data_lfs/sriro3-wien2k-soc.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-6);
   test_embed_desc_rotate_hloc0(filename, 1.e-6);
 }
 
 TEST(embed_desc_tests,
      lvo_wien2k_diag_hloc) { // NOLINT
-  auto filename = "dft_data/liv2o4-r-3m-strained-wien2k.ref.h5";
+  auto filename = "ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-6);
   test_embed_desc_rotate_hloc0(filename, 1.e-6);
 }
 
 TEST(embed_desc_tests, la327_2222) { // NOLINT
-  auto filename = "dft_data/la327-2222-strain-w90-fixedgrid.ref.h5";
+  auto filename = "ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-5);
   test_embed_desc_rotate_hloc0(filename, 1.e-5);
 }
 
 TEST(embed_desc_tests, la327_1313) { // NOLINT
-  auto filename = "dft_data/la327-1313-p30-w90-fixedgrid.ref.h5";
+  auto filename = "ref_data_lfs/la327-1313-p30-w90-fixedgrid.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-5);
   test_embed_desc_rotate_hloc0(filename, 1.e-5);
 }
 
-TEST(embed_desc_tests, sriro3_soc) { test_embed_desc_from_dft("dft_data/sriro3-wien2k-soc.ref.h5", 1.e-6); }
+TEST(embed_desc_tests, sriro3_soc) { test_embed_desc_from_dft("ref_data_lfs/sriro3-wien2k-soc.ref.h5", 1.e-6); }
 
 TEST(embed_desc_tests, sriro3_soc_embed_sigma) {
-  test_embed_desc_embed<triqs::mesh::imfreq>("dft_data/sriro3-wien2k-soc.ref.h5", 1.e-6);
+  test_embed_desc_embed<triqs::mesh::imfreq>("ref_data_lfs/sriro3-wien2k-soc.ref.h5", 1.e-6);
 }
 
-TEST(embed_desc_tests, sr2mgoso6_soc) { test_embed_desc_from_dft("dft_data/sr2mgoso6-wien2k-soc.ref.h5", 1.e-6); }
+TEST(embed_desc_tests, sr2mgoso6_soc) { test_embed_desc_from_dft("ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5", 1.e-6); }
 
 TEST(embed_desc_tests, api) {
-  std::string filename = "dft_data/liv2o4-r-3m-strained-wien2k.ref.h5";
+  std::string filename = "ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5";
   std::cout << "filename= " << filename << std::endl;
   auto [_, obe] = one_body_elements_from_dft_converter(filename);
   auto E        = make_embedding_with_equivalences(obe.C_space);
@@ -123,7 +123,7 @@ TEST(embed_desc_tests, api) {
 }
 
 TEST(embed_desc_tests, extract_matrix) {
-  std::string filename = "dft_data/SrVO3-cubic-t2g.ref.h5";
+  std::string filename = "ref_data/SrVO3-cubic-t2g.ref.h5";
   auto [_, obe]        = one_body_elements_from_dft_converter(filename);
   auto E               = make_embedding_with_equivalences(obe.C_space);
   auto hloc_C          = impurity_levels(obe);
@@ -135,7 +135,7 @@ TEST(embed_desc_tests, extract_matrix) {
 // Embedding API tests: fails in Python
 //---------------------------------------------------------------
 TEST(embed_desc_tests, api2) {
-  std::string filename = "dft_data/liv2o4-r-3m-strained-wien2k.ref.h5";
+  std::string filename = "ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5";
   std::cout << "filename= " << filename << std::endl;
   auto [_, obe] = one_body_elements_from_dft_converter(filename);
   auto E        = make_embedding_with_equivalences(obe.C_space);
@@ -165,8 +165,8 @@ TEST(embed_desc_tests, api2) {
 // }
 
 // TEST(embed_desc_tests, cluster) {
-//   auto filename = "la327-2222-strain-w90-fixedgrid.ref.h5";
-//   std::cout << "Loading dft_data from data in HDF5 " << filename << std::endl;
+//   auto filename = "ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5";
+//   std::cout << "Loading ref_data from data in HDF5 " << filename << std::endl;
 //   auto [density, data] = load_one_body_elements_from_h5(filename);
 //   auto cluster_alphas  = std::vector<long>{0, 1};
 //   auto cluster_data    = clusterize_one_body_elements(data, cluster_alphas);
@@ -175,8 +175,8 @@ TEST(embed_desc_tests, api2) {
 // }
 
 // TEST(embed_desc_tests, dimer) {
-//   auto filename = "moocl2-dimer-w90-fix-grid.ref.h5";
-//   std::cout << "Loading dft_data from data in HDF5 " << filename << std::endl;
+//   auto filename = "ref_data_lfs/moocl2-dimer-w90-fix-grid.ref.h5";
+//   std::cout << "Loading ref_data from data in HDF5 " << filename << std::endl;
 //   auto [density, data] = load_one_body_elements_from_h5(filename);
 //   auto cluster_alphas  = std::vector<long>{0, 1};
 //   auto cluster_data    = clusterize_one_body_elements(data, cluster_alphas);
@@ -194,8 +194,8 @@ TEST(embed_desc_tests, api2) {
 // }
 
 // TEST(embed_desc_tests, dimer2) {
-//   auto filename = "la327-2222-strain-w90-fixedgrid.ref.h5";
-//   std::cout << "Loading dft_data from data in HDF5 " << filename << std::endl;
+//   auto filename = "ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5";
+//   std::cout << "Loading ref_data from data in HDF5 " << filename << std::endl;
 //   auto root            = h5::proxy{filename, 'r'};
 //   auto g_dft           = root["dft_input"];
 //   auto kpts            = as<nda::array<double, 2>>(g_dft["kpts"]);

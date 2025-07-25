@@ -28,13 +28,13 @@ auto run_dc_solver_test_case(std::string filename, double threshold, std::string
 // SrVO3 (Wien2k)
 //--------------------------------
 TEST(dc_solver_tests, dc_wien2k_svo_sFLL) { // NOLINT
-  run_dc_solver_test_case("dft_data/svo-wien2k.ref.h5", 1.e-6, "sFLL");
+  run_dc_solver_test_case("ref_data/svo-wien2k.ref.h5", 1.e-6, "sFLL");
 }
 TEST(dc_solver_tests, dc_wien2k_svo_sAMF) { // NOLINT
-  run_dc_solver_test_case("dft_data/svo-wien2k.ref.h5", 1.e-6, "sAMF");
+  run_dc_solver_test_case("ref_data/svo-wien2k.ref.h5", 1.e-6, "sAMF");
 }
 TEST(dc_solver_tests, dc_wien2k_svo_cHeld) { // NOLINT
-  run_dc_solver_test_case("dft_data/svo-wien2k.ref.h5", 1.e-6, "cHeld");
+  run_dc_solver_test_case("ref_data/svo-wien2k.ref.h5", 1.e-6, "cHeld");
 }
 //--------------------------------
 
@@ -42,26 +42,26 @@ TEST(dc_solver_tests, dc_wien2k_svo_cHeld) { // NOLINT
 // PrNiO3 (VASP)
 //--------------------------------
 TEST(dc_solver_tests, dc_vasp_prnio3_sFLL) { // NOLINT
-  run_dc_solver_test_case("dft_data/prnio3-vasp.ref.h5", 1.e-4, "sFLL");
+  run_dc_solver_test_case("ref_data/prnio3-vasp.ref.h5", 1.e-4, "sFLL");
 }
 TEST(dc_solver_tests, dc_vasp_prnio3_sAMF) { // NOLINT
-  run_dc_solver_test_case("dft_data/prnio3-vasp.ref.h5", 1.e-4, "sAMF");
+  run_dc_solver_test_case("ref_data/prnio3-vasp.ref.h5", 1.e-4, "sAMF");
 }
 TEST(dc_solver_tests, dc_vasp_prnio3_cHeld) { // NOLINT
-  run_dc_solver_test_case("dft_data/prnio3-vasp.ref.h5", 1.e-4, "cHeld");
+  run_dc_solver_test_case("ref_data/prnio3-vasp.ref.h5", 1.e-4, "cHeld");
 }
 
 //--------------------------------
 // LaVO3 (Wien2k)
 //--------------------------------
 TEST(dc_solver_tests, dc_vasp_lavo3_sFLL) { // NOLINT
-  run_dc_solver_test_case("dft_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, "sFLL");
+  run_dc_solver_test_case("ref_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, "sFLL");
 }
 TEST(dc_solver_tests, dc_vasp_lavo3_sAMF) { // NOLINT
-  run_dc_solver_test_case("dft_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, "sAMF");
+  run_dc_solver_test_case("ref_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, "sAMF");
 }
 TEST(dc_solver_tests, dc_vasp_lavo3_cHeld) { // NOLINT
-  run_dc_solver_test_case("dft_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, "cHeld");
+  run_dc_solver_test_case("ref_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, "cHeld");
 }
 //--------------------------------
 
@@ -83,13 +83,13 @@ TEST(dc_solver_tests, dc_vasp_lavo3_cHeld) { // NOLINT
 // LiV2O4 (Wien2k)
 //--------------------------------
 TEST(dc_solver_tests, dc_wien2k_liv2o4_sFLL) { // NOLINT
-  run_dc_solver_test_case("dft_data/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6, "sFLL");
+  run_dc_solver_test_case("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6, "sFLL");
 }
 TEST(dc_solver_tests, dc_wien2k_liv2o4_sAMF) { // NOLINT
-  run_dc_solver_test_case("dft_data/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6, "sAMF");
+  run_dc_solver_test_case("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6, "sAMF");
 }
 TEST(dc_solver_tests, dc_wien2k_liv2o4_cHeld) { // NOLINT
-  run_dc_solver_test_case("dft_data/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6, "cHeld");
+  run_dc_solver_test_case("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6, "cHeld");
 }
 //--------------------------------
 
@@ -97,12 +97,12 @@ TEST(dc_solver_tests, dc_wien2k_liv2o4_cHeld) { // NOLINT
 // La5Ni3O11 (Wien2k) (large nu)
 //--------------------------------
 TEST(dc_solver_tests, dc_wien2k_large_nu_sFLL) { //NOLINT
-  run_dc_solver_test_case("dft_data/la5ni3o11-wien2k.ref.h5", 0.00001, "sFLL");
+  run_dc_solver_test_case("ref_data/la5ni3o11-wien2k.ref.h5", 0.00001, "sFLL");
 }
 TEST(dc_solver_tests, dc_wien2k_large_nu_sAMF) { //NOLINT
-  run_dc_solver_test_case("dft_data/la5ni3o11-wien2k.ref.h5", 0.00001, "sAMF");
+  run_dc_solver_test_case("ref_data/la5ni3o11-wien2k.ref.h5", 0.00001, "sAMF");
 }
 TEST(dc_solver_tests, dc_wien2k_large_nu_cHeld) { //NOLINT
-  run_dc_solver_test_case("dft_data/la5ni3o11-wien2k.ref.h5", 0.00001, "cHeld");
+  run_dc_solver_test_case("ref_data/la5ni3o11-wien2k.ref.h5", 0.00001, "cHeld");
 }
 //--------------------------------

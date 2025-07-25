@@ -14,33 +14,33 @@ auto test_compute_hloc(std::string filename) {
 };
 
 TEST(hloc0_tests, liv2o4_r3m_strained_wien2k) { // NOLINT
-  test_compute_hloc("dft_data/liv2o4-r-3m-strained-wien2k.ref.h5");
+  test_compute_hloc("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5");
 }
 
 TEST(hloc0_tests, compute_hloc0_w90_fixed_grid) { // NOLINT
-  auto h5_files = {"dft_data/la327-1313-p30-w90-fixedgrid.ref.h5", "dft_data/la327-2222-strain-w90-fixedgrid.ref.h5"};
+  auto h5_files = {"ref_data_lfs/la327-1313-p30-w90-fixedgrid.ref.h5", "ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5"};
   for (auto &&file : h5_files) test_compute_hloc(file);
 }
 
 TEST(hloc0_tests, compute_hloc0_wien2k_fixed_grid) { // NOLINT
-  auto h5_files = {"dft_data/liv2o4-r-3m-strained-wien2k.ref.h5", "dft_data/svo-wien2k.ref.h5"};
+  auto h5_files = {"ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", "ref_data/svo-wien2k.ref.h5"};
   for (auto &&file : h5_files) test_compute_hloc(file);
 }
 
 TEST(hloc0_tests, compute_hloc0_vasp_fixed_grid) { // NOLINT
-  auto h5_files = {"dft_data/prnio3-vasp.ref.h5", "dft_data/lunio3-vasp.ref.h5"};
+  auto h5_files = {"ref_data/prnio3-vasp.ref.h5", "ref_data/lunio3-vasp.ref.h5"};
   for (auto &&file : h5_files) test_compute_hloc(file);
 }
 
 // // HL: need to check this test more carefully!
 // TEST(hloc0_tests, compute_hloc0_vasp_nio) { // NOLINT
-//   test_compute_hloc("dft_data/nio.ref.h5");
+//   test_compute_hloc("ref_data/nio.ref.h5");
 // }
 
 //------------------------------------------------
 // SOC test: fails because of merge of rotations
 //------------------------------------------------
 // TEST(hloc0_tests, compute_hloc0_wien2k_soc_fixed_grid) { // NOLINT
-//   auto h5_files = {"sriro3-wien2k-soc.ref.h5", "sr2mgoso6-wien2k-soc.ref.h5"};
+//   auto h5_files = {"ref_data_lfs/sriro3-wien2k-soc.ref.h5", "ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5"};
 //   for (auto &&file : h5_files) test_compute_hloc(file);
 // }

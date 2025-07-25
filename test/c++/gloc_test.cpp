@@ -88,65 +88,65 @@ auto gloc_two_ways(std::string filename) {
 //--------------------------------
 // PrNiO3 (VASP)
 //--------------------------------
-TEST(gloc_tests, gloc_2ways_prnio3) { gloc_two_ways("dft_data/prnio3-vasp.ref.h5"); }
+TEST(gloc_tests, gloc_2ways_prnio3) { gloc_two_ways("ref_data/prnio3-vasp.ref.h5"); }
 
 TEST(gloc_tests, gloc_vasp_zero_sigma_prnio3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/prnio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::ZeroSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/prnio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::ZeroSigma);
 }
 
 TEST(gloc_tests, gloc_vasp_const_sigma_prnio3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/prnio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::ConstSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/prnio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::ConstSigma);
 }
 TEST(gloc_tests, gloc_vasp_sigma_prnio3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/prnio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::Sigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/prnio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::Sigma);
 }
 //--------------------------------
 
 //--------------------------------
 // LuNiO3 (VASP)
 //--------------------------------
-TEST(gloc_tests, gloc_2ways_lunio3) { gloc_two_ways("dft_data/lunio3-vasp.ref.h5"); }
+TEST(gloc_tests, gloc_2ways_lunio3) { gloc_two_ways("ref_data/lunio3-vasp.ref.h5"); }
 TEST(gloc_tests, gloc_vasp_zero_sigma_lunio3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/lunio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::ZeroSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/lunio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::ZeroSigma);
 }
 
 TEST(gloc_tests, gloc_vasp_const_sigma_lunio3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/lunio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::ConstSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/lunio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::ConstSigma);
 }
 TEST(gloc_tests, gloc_vasp_sigma_lunio3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/lunio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::Sigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/lunio3-vasp.ref.h5", 1.e-6, self_energy_kind_e::Sigma);
 }
 //--------------------------------
 
 //--------------------------------
 // NiO (d-p) (VASP)
 //--------------------------------
-TEST(gloc_tests, gloc_2ways_nio) { gloc_two_ways("dft_data/nio.ref.h5"); }
+TEST(gloc_tests, gloc_2ways_nio) { gloc_two_ways("ref_data/nio.ref.h5"); }
 TEST(gloc_tests, gloc_vasp_zero_sigma_nio) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/nio.ref.h5", 1.e-5, self_energy_kind_e::ZeroSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/nio.ref.h5", 1.e-5, self_energy_kind_e::ZeroSigma);
 }
 TEST(gloc_tests, gloc_vasp_const_sigma_nio) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/nio.ref.h5", 1.e-5, self_energy_kind_e::ConstSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/nio.ref.h5", 1.e-5, self_energy_kind_e::ConstSigma);
 }
 TEST(gloc_tests, gloc_vasp_sigma_nio) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/nio.ref.h5", 1.e-5, self_energy_kind_e::Sigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/nio.ref.h5", 1.e-5, self_energy_kind_e::Sigma);
 }
 //--------------------------------
 
 //--------------------------------
 // LiV2O4 (Wien2k)
 //--------------------------------
-TEST(gloc_tests, gloc_2ways_liv2o4) { gloc_two_ways("dft_data/liv2o4-r-3m-strained-wien2k.ref.h5"); }
+TEST(gloc_tests, gloc_2ways_liv2o4) { gloc_two_ways("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5"); }
 TEST(gloc_tests, gloc_wien2k_zero_sigma_liv2o4) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6,
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6,
                                           self_energy_kind_e::ZeroSigma);
 }
 TEST(gloc_tests, gloc_wien2k_const_sigma_liv2o4) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6,
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6,
                                           self_energy_kind_e::ConstSigma);
 }
 TEST(gloc_tests, gloc_wien2k_sigma_liv2o4) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6,
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", 1.e-6,
                                           self_energy_kind_e::Sigma);
 }
 //--------------------------------
@@ -154,45 +154,45 @@ TEST(gloc_tests, gloc_wien2k_sigma_liv2o4) { // NOLINT
 //--------------------------------
 // SrVO3 (Wien2k)
 //--------------------------------
-TEST(gloc_tests, gloc_2ways_svo3) { gloc_two_ways("dft_data/svo-wien2k.ref.h5"); }
+TEST(gloc_tests, gloc_2ways_svo3) { gloc_two_ways("ref_data/svo-wien2k.ref.h5"); }
 TEST(gloc_tests, gloc_wien2k_zero_sigma_svo3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/svo-wien2k.ref.h5", 1.e-6, self_energy_kind_e::ZeroSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/svo-wien2k.ref.h5", 1.e-6, self_energy_kind_e::ZeroSigma);
 }
 TEST(gloc_tests, gloc_wien2k_const_sigma_svo3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/svo-wien2k.ref.h5", 1.e-6, self_energy_kind_e::ConstSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/svo-wien2k.ref.h5", 1.e-6, self_energy_kind_e::ConstSigma);
 }
 TEST(gloc_tests, gloc_wien2k_sigma_svo3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/svo-wien2k.ref.h5", 1.e-6, self_energy_kind_e::Sigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/svo-wien2k.ref.h5", 1.e-6, self_energy_kind_e::Sigma);
 }
 //--------------------------------
 
 //--------------------------------
 // LaVO3 (Wien2k)
 //--------------------------------
-TEST(gloc_tests, gloc_2ways_lvo3) { gloc_two_ways("dft_data/LaVO3-Pnma-t2g.ref.h5"); }
+TEST(gloc_tests, gloc_2ways_lvo3) { gloc_two_ways("ref_data/LaVO3-Pnma-t2g.ref.h5"); }
 TEST(gloc_tests, gloc_wien2k_zero_sigma_lvo3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, self_energy_kind_e::ZeroSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, self_energy_kind_e::ZeroSigma);
 }
 TEST(gloc_tests, gloc_wien2k_const_sigma_lvo3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, self_energy_kind_e::ConstSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, self_energy_kind_e::ConstSigma);
 }
 TEST(gloc_tests, gloc_wien2k_sigma_lvo3) { // NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, self_energy_kind_e::Sigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/LaVO3-Pnma-t2g.ref.h5", 1.e-4, self_energy_kind_e::Sigma);
 }
 //--------------------------------
 
 //--------------------------------
 // La5Ni3O11 (Wien2k) (large nu)
 //--------------------------------
-TEST(gloc_tests, gloc_2ways_la5ni3o11) { gloc_two_ways("dft_data/la5ni3o11-wien2k.ref.h5"); }
+TEST(gloc_tests, gloc_2ways_la5ni3o11) { gloc_two_ways("ref_data/la5ni3o11-wien2k.ref.h5"); }
 TEST(gloc_tests, gloc_wien2k_zero_sigma_large_nu) { //NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/la5ni3o11-wien2k.ref.h5", 0.00001, self_energy_kind_e::ZeroSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/la5ni3o11-wien2k.ref.h5", 0.00001, self_energy_kind_e::ZeroSigma);
 }
 TEST(gloc_tests, gloc_wien2k_const_sigma_large_nu) { //NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/la5ni3o11-wien2k.ref.h5", 0.00001, self_energy_kind_e::ConstSigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/la5ni3o11-wien2k.ref.h5", 0.00001, self_energy_kind_e::ConstSigma);
 }
 TEST(gloc_tests, gloc_wien2k_sigma_large_nu) { //NOLINT
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/la5ni3o11-wien2k.ref.h5", 0.00001, self_energy_kind_e::Sigma);
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/la5ni3o11-wien2k.ref.h5", 0.00001, self_energy_kind_e::Sigma);
 }
 //--------------------------------
 
@@ -200,7 +200,7 @@ TEST(gloc_tests, gloc_wien2k_sigma_large_nu) { //NOLINT
 // La5Ni3O11 (Wien2k) (dense freq mesh)
 //--------------------------------
 TEST(gloc_tests, gloc_wien2k_sigma_large_nu_large_mesh) { // I am a test that is long. Comment me out for speed up!
-  run_gloc_test_case<triqs::mesh::imfreq>("dft_data/la5ni3o11-wien2k-large-mesh.ref.h5", 0.00001,
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/la5ni3o11-wien2k-large-mesh.ref.h5", 0.00001,
                                           self_energy_kind_e::Sigma);
 }
 //--------------------------------
@@ -209,41 +209,41 @@ TEST(gloc_tests, gloc_wien2k_sigma_large_nu_large_mesh) { // I am a test that is
 // SOC Tests NB: failing because of merged rotations
 //------------------------------------------------------------
 // TEST(gloc_tests, gloc_wien2k_zero_sigma_sriro3_soc) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("sriro3-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::ZeroSigma);
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/sriro3-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::ZeroSigma);
 // }
 
 // TEST(gloc_tests, gloc_wien2k_const_sigma_sriro3_soc) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("sriro3-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::ConstSigma);
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/sriro3-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::ConstSigma);
 // }
 
 // TEST(gloc_tests, gloc_wien2k_sigma_sriro3_soc) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("sriro3-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::Sigma);
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/sriro3-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::Sigma);
 // }
 
 // TEST(gloc_tests, gloc_wien2k_zero_sigma_sr2mgoso6_soc) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("sr2mgoso6-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::ZeroSigma);
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::ZeroSigma);
 // }
 
 // TEST(gloc_tests, gloc_wien2k_const_sigma_sr2mgoso6_soc) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("sr2mgoso6-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::ConstSigma);
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::ConstSigma);
 // }
 
 // TEST(gloc_tests, gloc_wien2k_sigma_sr2mgoso6_soc) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("sr2mgoso6-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::Sigma);
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5", 0.00001, self_energy_kind_e::Sigma);
 // }
 //------------------------------------------------------------
 // W90 Tests NB: failing because of Woodbury Formula
 //------------------------------------------------------------
 // TEST(gloc_tests, gloc_w90_fixed_grid_zero_sigma_la327_2222) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("la327-2222-strain-w90-fixedgrid.ref.h5", 1.e-6,
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5", 1.e-6,
 //                                           self_energy_kind_e::ZeroSigma);
 // }
 // TEST(gloc_tests, gloc_w90_fixed_grid_const_sigma_la327_2222) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("la327-2222-strain-w90-fixedgrid.ref.h5", 1.e-6,
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5", 1.e-6,
 //                                           self_energy_kind_e::ConstSigma);
 // }
 // TEST(gloc_tests, gloc_w90_fixed_grid_sigma_la327_2222) { // NOLINT
-//   run_gloc_test_case<triqs::mesh::imfreq>("la327-2222-strain-w90-fixedgrid.ref.h5", 1.e-6, self_energy_kind_e::Sigma);
+//   run_gloc_test_case<triqs::mesh::imfreq>("ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5", 1.e-6, self_energy_kind_e::Sigma);
 // }
 
 MPI_TEST_MAIN

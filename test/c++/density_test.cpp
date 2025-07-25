@@ -121,25 +121,25 @@ auto root_finder_test_case(std::string filename) {
 };
 
 TEST(density_tests, density_prnio3_vasp) { // NOLINT
-  calc_density_test_case("dft_data/prnio3-vasp.ref.h5");
+  calc_density_test_case("ref_data/prnio3-vasp.ref.h5");
 }
 
 TEST(density_tests, lunio3_vasp) { // NOLINT
-  calc_density_test_case("dft_data/lunio3-vasp.ref.h5");
+  calc_density_test_case("ref_data/lunio3-vasp.ref.h5");
 }
 
 TEST(density_tests, nio_wien2k) { // NOLINT
-  calc_density_test_case("dft_data/nio.ref.h5");
+  calc_density_test_case("ref_data/nio.ref.h5");
 }
 
 TEST(density_tests, root_prnio3_vasp) { // NOLINT
-  root_finder_test_case("dft_data/prnio3-vasp.ref.h5");
+  root_finder_test_case("ref_data/prnio3-vasp.ref.h5");
 }
 
 // TEST(density_tests, lavo3_wien2k) { // NOLINT
-//   calc_density_test_case("dft_data/LaVO3-Pnma-t2g.ref.h5");
+//   calc_density_test_case("ref_data/LaVO3-Pnma-t2g.ref.h5");
 // }
 
 // TEST(density_tests, la5ni3o11_wien2k) { // NOLINT
-//   calc_density_test_case("dft_data/la5ni3o11-wien2k.ref.h5");
+//   calc_density_test_case("ref_data/la5ni3o11-wien2k.ref.h5");
 // }
