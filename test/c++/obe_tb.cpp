@@ -16,5 +16,5 @@ TEST(obe_tb, simple_construct) { // NOLINT
   long atom = 0;
   atomic_shells.emplace_back(dim, l, type, atom);
 
-  one_body_elements_tb obe_tb = one_body_elements_from_wannier90("./dft_data/svo", spin_kind_e::NonPolarized, atomic_shells);
+  one_body_elements_tb obe_tb = one_body_elements_from_wannier90("./ref_data/svo", spin_kind_e::NonPolarized, atomic_shells);
 }
