@@ -48,4 +48,21 @@ namespace triqs::modest {
  * @return One-body elements along high-symmetry k-path.
  */
   one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe);
+
+  /** 
+  * @brief Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure. 
+  * 
+  * @details Disovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
+  * Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
+  * 
+  * @param Hloc0 the R = 0 part of the Hamiltonian as a vector of [nspin, nshells]
+  * @param atomic_shells the list of atomic shells used to index Hloc 
+  * @param block_threshold the threshold of accuracy at which a symmetry is considered found
+  * @param diagonalize_hloc whether or not to diagonalize hloc
+  * @return decomposition, U_rotation describing the block structure of GF based on Hloc
+  */
+  std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<dcomplex>, 2>>
+  discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0, std::vector<atomic_shell_t> const &atomic_shells, double block_threshold,
+                      bool diagonalize_hloc);
+
 } // namespace triqs::modest

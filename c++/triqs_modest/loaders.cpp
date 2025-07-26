@@ -56,7 +56,11 @@ namespace triqs::modest {
     for (auto const &[atom, shell] : enumerate(atomic_shells)) {
       for (auto sigma : nda::range(n_sigma)) {
         auto D                     = find_blocks(nda::matrix<double>{abs(Hloc0(atom, sigma))}, block_threshold);
+<<<<<<< HEAD
         U_rotation(atom, sigma)    = nda::make_matrix_from_permutation<dcomplex>(nda::flatten(D));
+=======
+        U_rotation(atom, sigma)    = nda::make_matrix_from_permutation<dcomplex>(flatten(D));
+>>>>>>> a75cb51 (put discover_sym function in the header of loaders.hpp and add a docstring)
         decomposition(atom, sigma) = D | stdv::transform([](auto &x) { return long(x.size()); }) | tl::to<std::vector>();
 
         // diagonalize the hloc0 to find a new basis of orbitals
