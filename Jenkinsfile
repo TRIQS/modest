@@ -32,6 +32,8 @@ for (int i = 0; i < dockerPlatforms.size(); i++) {
   platforms[platform] = { -> node('linux && docker && triqs') {
     stage(platform) { timeout(time: 1, unit: 'HOURS') { ansiColor('xterm') {
       checkout scm
+      sh "git lfs install --local"
+      sh "git lfs pull"
       /* construct a Dockerfile for this base */
       sh """
       ( echo "FROM flatironinstitute/triqs:${triqsBranch}-${env.STAGE_NAME}" ; sed '0,/^FROM /d' Dockerfile ) > Dockerfile.jenkins
@@ -80,6 +82,8 @@ for (int i = 0; i < osxPlatforms.size(); i++) {
       }
 
       checkout scm
+      sh "git lfs install --local"
+      sh "git lfs pull"
 
       def hdf5 = "${env.BREW}/opt/hdf5"
       dir(buildDir) { withEnv(platformEnv[1].collect { it.replace('\$BREW', env.BREW) } + [
