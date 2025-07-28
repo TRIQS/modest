@@ -71,6 +71,16 @@ TEST(embed_desc_tests, svo_wien2k) { // NOLINT
   test_embed_desc_rotate_hloc0(filename, 1.e-3);
 }
 
+TEST(embed_desc_tests, extract_matrix) {
+  std::string filename = "ref_data/SrVO3-cubic-t2g.ref.h5";
+  auto [_, obe]        = one_body_elements_from_dft_converter(filename);
+  auto E               = make_embedding_with_equivalences(obe.C_space);
+  auto hloc_C          = impurity_levels(obe);
+  auto h_imp           = E.extract(hloc_C)[0];
+  for (auto h : h_imp) { std::cout << fmt::format("{}\n", h); }
+}
+
+#if LFS
 TEST(embed_desc_tests, sio_wien2k_soc) { // NOLINT
   auto filename = "ref_data_lfs/sriro3-wien2k-soc.ref.h5";
   test_embed_desc_from_dft(filename, 1.e-6);
@@ -98,9 +108,7 @@ TEST(embed_desc_tests, la327_1313) { // NOLINT
 
 TEST(embed_desc_tests, sriro3_soc) { test_embed_desc_from_dft("ref_data_lfs/sriro3-wien2k-soc.ref.h5", 1.e-6); }
 
-TEST(embed_desc_tests, sriro3_soc_embed_sigma) {
-  test_embed_desc_embed<triqs::mesh::imfreq>("ref_data_lfs/sriro3-wien2k-soc.ref.h5", 1.e-6);
-}
+TEST(embed_desc_tests, sriro3_soc_embed_sigma) { test_embed_desc_embed<triqs::mesh::imfreq>("ref_data_lfs/sriro3-wien2k-soc.ref.h5", 1.e-6); }
 
 TEST(embed_desc_tests, sr2mgoso6_soc) { test_embed_desc_from_dft("ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5", 1.e-6); }
 
@@ -118,17 +126,7 @@ TEST(embed_desc_tests, api) {
   auto E3 = E2.flip_spin(0);
   std::cout << "==============\n flip_sigma 0" << E2 << E3 << std::endl;
   auto E4 = E.split(0, {2}).split(1, {1});
-  std::cout << "==============\n multiple split : E.split(0, { up_2 , down_2 }).split(1, { up_1 ,  down_1}) \n"
-            << E << E4 << std::endl;
-}
-
-TEST(embed_desc_tests, extract_matrix) {
-  std::string filename = "ref_data/SrVO3-cubic-t2g.ref.h5";
-  auto [_, obe]        = one_body_elements_from_dft_converter(filename);
-  auto E               = make_embedding_with_equivalences(obe.C_space);
-  auto hloc_C          = impurity_levels(obe);
-  auto h_imp           = E.extract(hloc_C)[0];
-  for (auto h : h_imp) { std::cout << fmt::format("{}\n", h); }
+  std::cout << "==============\n multiple split : E.split(0, { up_2 , down_2 }).split(1, { up_1 ,  down_1}) \n" << E << E4 << std::endl;
 }
 
 //---------------------------------------------------------------
@@ -213,3 +211,4 @@ TEST(embed_desc_tests, api2) {
 //   embedding_desc E = make_embed_from_dft(cluster_data, Hloc, 1.e-3, true);
 //   std::cout << E << std::endl;
 // }
+#endif

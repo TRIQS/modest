@@ -13,24 +13,31 @@ auto test_compute_hloc(std::string filename) {
   for (auto [a, s] : hloc_0.indices()) { EXPECT_ARRAY_NEAR(Udag_X_U(U(a, s), hloc_0(a, s)), hloc0_ref[a][s], 1.e-14); }
 };
 
+TEST(hloc0_tests, prnio3_vasp) { // NOLINT
+  test_compute_hloc("ref_data/prnio3-vasp.ref.h5");
+}
+
+TEST(hloc0_tests, lunio3_vasp) { // NOLINT
+  test_compute_hloc("ref_data/lunio3-vasp.ref.h5");
+}
+
+TEST(hloc0_tests, svo_wien2k) { // NOLINT
+  test_compute_hloc("ref_data/svo-wien2k.ref.h5");
+}
+
+#if LFS
 TEST(hloc0_tests, liv2o4_r3m_strained_wien2k) { // NOLINT
   test_compute_hloc("ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5");
 }
 
-TEST(hloc0_tests, compute_hloc0_w90_fixed_grid) { // NOLINT
-  auto h5_files = {"ref_data_lfs/la327-1313-p30-w90-fixedgrid.ref.h5", "ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5"};
-  for (auto &&file : h5_files) test_compute_hloc(file);
+TEST(hloc0_tests, compute_hloc0_w90_fixed_grid1) { // NOLINT
+  test_compute_hloc("ref_data_lfs/la327-1313-p30-w90-fixedgrid.ref.h5");
 }
 
-TEST(hloc0_tests, compute_hloc0_wien2k_fixed_grid) { // NOLINT
-  auto h5_files = {"ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", "ref_data/svo-wien2k.ref.h5"};
-  for (auto &&file : h5_files) test_compute_hloc(file);
+TEST(hloc0_tests, compute_hloc0_w90_fixed_grid2) { // NOLINT
+  test_compute_hloc("ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5");
 }
-
-TEST(hloc0_tests, compute_hloc0_vasp_fixed_grid) { // NOLINT
-  auto h5_files = {"ref_data/prnio3-vasp.ref.h5", "ref_data/lunio3-vasp.ref.h5"};
-  for (auto &&file : h5_files) test_compute_hloc(file);
-}
+#endif
 
 // // HL: need to check this test more carefully!
 // TEST(hloc0_tests, compute_hloc0_vasp_nio) { // NOLINT

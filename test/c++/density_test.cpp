@@ -16,8 +16,7 @@ double random_constant() {
 }
 
 // FIXME
-std::tuple<double, one_body_elements_on_grid, block2_gf<dlr_imfreq, matrix_valued>,
-           nda::array<nda::matrix<dcomplex>, 2>>
+std::tuple<double, one_body_elements_on_grid, block2_gf<dlr_imfreq, matrix_valued>, nda::array<nda::matrix<dcomplex>, 2>>
 load_data_w_selfenergy(std::string filename) {
   auto root                  = h5::proxy{filename, 'r'};
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
@@ -42,9 +41,8 @@ load_data_w_selfenergy(std::string filename) {
 
   auto Sigma_embed = E.embed(Sigma_imp_dlr | stdv::transform(make_sigma_dlr_imfreq) | tl::to<std::vector>());
 #else
-  auto Sigma_imp_dlr =
-     make_vec_block_gf(mesh::dlr_imfreq{40.0, triqs::mesh::statistic_enum::Fermion, w_max, eps}, E.imp_block_shape());
-  auto const &mesh = Sigma_imp_dlr[0][0].mesh();
+  auto Sigma_imp_dlr = make_vec_block_gf(mesh::dlr_imfreq{40.0, triqs::mesh::statistic_enum::Fermion, w_max, eps}, E.imp_block_shape());
+  auto const &mesh   = Sigma_imp_dlr[0][0].mesh();
   for (auto &bg : Sigma_imp_dlr) {
     for (auto &g : bg) {
       auto A = 0.0 * random_constant();
@@ -52,18 +50,15 @@ load_data_w_selfenergy(std::string filename) {
       for (auto &&[n, iw] : enumerate(mesh)) { g.data()(n, r_all, r_all) = A + B / iw; }
     }
   }
-  auto Sigma_hartree = Sigma_imp_dlr | stdv::transform([](auto &x) { return std::get<0>(split_self_energy(x)); })
-     | tl::to<std::vector>();
-  auto Sigma_dynamic = Sigma_imp_dlr | stdv::transform([](auto &x) { return std::get<1>(split_self_energy(x)); })
-     | tl::to<std::vector>();
+  auto Sigma_hartree = Sigma_imp_dlr | stdv::transform([](auto &x) { return std::get<0>(split_self_energy(x)); }) | tl::to<std::vector>();
+  auto Sigma_dynamic = Sigma_imp_dlr | stdv::transform([](auto &x) { return std::get<1>(split_self_energy(x)); }) | tl::to<std::vector>();
   auto Sigma_embed   = E.embed(Sigma_dynamic);
   auto Sigma_H_embed = E.embed(Sigma_hartree);
 #endif
   return {target_density, obe, Sigma_embed, Sigma_H_embed};
 }
 
-std::tuple<double, one_body_elements_on_grid, block2_gf<dlr_imfreq, matrix_valued>, double>
-load_data(std::string filename) {
+std::tuple<double, one_body_elements_on_grid, block2_gf<dlr_imfreq, matrix_valued>, double> load_data(std::string filename) {
   auto root                     = h5::proxy{filename, 'r'};
   auto n_ref                    = as<double>(root["ref_data"]["total_density_zero_mu"]);
   auto load                     = one_body_elements_from_dft_converter(filename);
@@ -75,8 +70,7 @@ load_data(std::string filename) {
   auto eps   = 1.e-12;
   auto mesh  = mesh::dlr_imfreq{40.0, triqs::mesh::statistic_enum::Fermion, w_max, eps};
   // zero self-energy
-  std::cout << fmt::format("Sigma created with random DLR coefficents: w_max= {:.2f} eps= {} n_dlr= {}\n", w_max, eps,
-                           mesh.size());
+  std::cout << fmt::format("Sigma created with random DLR coefficents: w_max= {:.2f} eps= {} n_dlr= {}\n", w_max, eps, mesh.size());
   auto Sigma_embed = make_block2_gf(mesh, E.sigma_embed_block_shape());
   return {target_density, obe, Sigma_embed, n_ref};
 }
@@ -114,10 +108,9 @@ auto root_finder_test_case(std::string filename) {
 
   auto f = [obe, Sigma_embed, Sigma_H_embed](auto x) { return density_slow(obe, x, Sigma_embed, Sigma_H_embed); };
 
-  PRINT(
-     root_finder("dichotomy", f, 0.0, target_density, 1.e-4, 0.5, 1000, "Chemical Potential", "Total Density", true));
-  PRINT(
-     root_finder("bisection", f, 0.0, target_density, 1.e-4, 0.5, 1000, "Chemical Potential", "Total Density", false));
+  auto [mu1, d1] = root_finder("dichotomy", f, 0.0, target_density, 1.e-4, 0.5, 1000, "Chemical Potential", "Total Density", false);
+  auto [mu2, d2] = root_finder("bisection", f, 0.0, target_density, 1.e-4, 0.5, 1000, "Chemical Potential", "Total Density", false);
+  EXPECT_NEAR(mu1, mu2, 1.e-3);
 };
 
 TEST(density_tests, density_prnio3_vasp) { // NOLINT
@@ -134,6 +127,19 @@ TEST(density_tests, nio_wien2k) { // NOLINT
 
 TEST(density_tests, root_prnio3_vasp) { // NOLINT
   root_finder_test_case("ref_data/prnio3-vasp.ref.h5");
+}
+
+TEST(density_tests, root_lunio3_vasp) { // NOLINT
+  root_finder_test_case("ref_data/lunio3-vasp.ref.h5");
+}
+
+TEST(density_tests, root_svo_vasp) { // NOLINT
+  //root_finder_test_case("ref_data/SrVO3-cubic-t2g.ref.h5");
+  auto [target_density, obe_dft] = one_body_elements_from_dft_converter("ref_data/SrVO3-cubic-t2g.ref.h5");
+  auto mu                        = find_chemical_potential(target_density, obe_dft, 10.0);
+  std::cout << mu << std::endl;
+  auto mu2 = find_chemical_potential(target_density + 0.1, obe_dft, 10.0);
+  std::cout << mu2 << std::endl;
 }
 
 // TEST(density_tests, lavo3_wien2k) { // NOLINT

@@ -23,41 +23,43 @@ auto test_load_data_with_symm_ops(std::string filename) {
   }
 }
 
-TEST(ref_data_tests, load_dft_from_h5_wien2k_fixed_grid) { // NOLINT
-  auto h5_files = {"ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", "ref_data/svo-wien2k.ref.h5"};
-  for (auto &&file : h5_files) test_load(file);
+TEST(load_data_tests, load_dft_from_h5_wien2k_fixed_grid) { // NOLINT
+  test_load("ref_data/svo-wien2k.ref.h5");
 }
 
-TEST(ref_data_tests, load_dft_from_h5_vasp_fixed_grid) { // NOLINT
+TEST(load_data_tests, load_dft_from_h5_vasp_fixed_grid) { // NOLINT
   auto h5_files = {"ref_data/prnio3-vasp.ref.h5", "ref_data/lunio3-vasp.ref.h5", "ref_data/nio.ref.h5"};
   for (auto &&file : h5_files) test_load(file);
 }
-TEST(ref_data_tests, load_dft_from_h5_wien2k_soc_fixed_grid) { // NOLINT
-  auto h5_files = {"ref_data_lfs/sriro3-wien2k-soc.ref.h5", "ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5"};
-  for (auto &&file : h5_files) test_load(file);
-}
 
-TEST(ref_data_tests, load_ref_data_with_symm_ops) {
-  auto h5_files = {"ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", "ref_data_lfs/sriro3-wien2k-soc.ref.h5",
-                   "ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5"};
-  for (auto &&file : h5_files) test_load_data_with_symm_ops(file);
-}
-
-TEST(ref_data_tests, obe_high_symm_path) {
+TEST(load_data_tests, obe_high_symm_path) {
   auto [_, obe] = one_body_elements_from_dft_converter("ref_data/SrVO3-cubic-t2g.ref.h5");
   std::cout << obe << std::endl;
   auto obe_bands = one_body_elements_on_high_symmetry_path("ref_data/SrVO3-cubic-t2g.ref.h5", obe);
   std::cout << obe_bands << std::endl;
 }
 
-TEST(ref_data_tests, obe_parproj) {
+TEST(load_data_tests, obe_parproj) {
   auto [_, obe] = one_body_elements_from_dft_converter("ref_data/SrVO3-cubic-t2g.ref.h5");
   std::cout << obe << std::endl;
   auto obe_dos = one_body_elements_with_theta_projectors("ref_data/SrVO3-cubic-t2g.ref.h5", obe);
   std::cout << obe_dos << std::endl;
 }
 
-// TEST(ref_data_tests, load_dft_from_h5_w90_fixed_grid) { // NOLINT
-//   auto h5_files = {"ref_data_lfs/la327-1313-p30-w90-fixedgrid.ref.h5", "ref_data_lfs/la327-2222-strain-w90-fixedgrid.ref.h5"};
+#if LFS
+TEST(load_data_tests, load_dft_from_h5_wien2k_soc_fixed_grid) { // NOLINT
+  auto h5_files = {"ref_data_lfs/sriro3-wien2k-soc.ref.h5", "ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5"};
+  for (auto &&file : h5_files) test_load(file);
+}
+
+TEST(load_data_tests, load_dft_data_with_symm_ops) {
+  auto h5_files = {"ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5", "ref_data_lfs/sriro3-wien2k-soc.ref.h5",
+                   "ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5"};
+  for (auto &&file : h5_files) test_load_data_with_symm_ops(file);
+}
+#endif
+
+// TEST(load_data_tests, load_dft_from_h5_w90_fixed_grid) { // NOLINT
+//   auto h5_files = {"dft_data/la327-1313-p30-w90-fixedgrid.ref.h5", "dft_data/la327-2222-strain-w90-fixedgrid.ref.h5"};
 //   for (auto &&file : h5_files) test_load(file);
 // }

@@ -7,13 +7,26 @@ endforeach()
 # List of all tests
 file(GLOB_RECURSE all_tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
+# Some tests can optionally be run with large file storage (LFS) input files.
+option(Enable_LFS_Tests "Enable Large File Storage Tests" OFF)
+
 foreach(test ${all_tests})
+
   get_filename_component(test_name ${test} NAME_WE)
   get_filename_component(test_dir ${test} DIRECTORY)
   add_executable(${test_name} ${test})
   target_link_libraries(${test_name} ${PROJECT_NAME}::${PROJECT_NAME}_c ${PROJECT_NAME}_warnings gtest_main)
   set_property(TARGET ${test_name} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${test_dir})
   add_test(NAME ${test_name} COMMAND ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${test_dir})
+
+  if (Enable_LFS_Tests AND NOT ${test} MATCHES "impurity_model_test|density_test|utility")
+    add_executable(${test_name}_lfs ${test})
+    target_compile_definitions(${test_name}_lfs PRIVATE LFS)
+    target_link_libraries(${test_name}_lfs ${PROJECT_NAME}::${PROJECT_NAME}_c ${PROJECT_NAME}_warnings gtest_main)
+    set_property(TARGET ${test_name}_lfs PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${test_dir})
+    add_test(NAME ${test_name}_lfs COMMAND ${test_name}_lfs WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${test_dir})
+  endif()
+
   # Run clang-tidy if found
   if(CLANG_TIDY_EXECUTABLE)
     set_target_properties(${test_name} PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXECUTABLE}")
