@@ -3,7 +3,6 @@
 #include <triqs/utility/exceptions.hpp>
 #include <type_traits>
 #include "./local_space.hpp"
-#include <triqs/lattice/tb_hamiltonian.hpp>
 #include <triqs/lattice/wannier_loader.hpp>
 #include "downfolding.hpp"
 #include <stdexcept>
@@ -33,10 +32,9 @@ namespace triqs::modest {
     }
     // call the wannier90 loader and set up tb_hamiltonian
     auto [R, HR, _] = read_wannier90_tb_data(wannier_file_path);
-    //std::cout << HR[0] << std::endl;
     std::vector<tb_hamiltonian> tb_H;
     tb_H.emplace_back(R, HR);
-    return make_obe_from_tb(tb_H, spin_kind, atomic_shells);
+    return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   };
 
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
@@ -44,17 +42,18 @@ namespace triqs::modest {
     if (spin_kind != spin_kind_e::Polarized) {
       TRIQS_RUNTIME_ERROR << "For a non-spin polarized calculation, you should specify only one Wannier Hamiltonian.\n";
     }
+    
     // call the wannier90 loader and set up tb_hamiltonian list
     std::vector<tb_hamiltonian> tb_H;
     for (auto file : {wannier_file_path_up, wannier_file_path_dn}) {
       auto [R, HR, _] = read_wannier90_tb_data(file);
       tb_H.emplace_back(R, HR);
     }
-    return make_obe_from_tb(tb_H, spin_kind, atomic_shells);
+    return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   }
 
-  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> const &H_sigma, spin_kind_e const &spin_kind,
-                                        std::vector<atomic_shell_t> const &atomic_shells) {
+  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> const H_sigma, spin_kind_e const &spin_kind,
+                                        std::vector<atomic_shell_t> const atomic_shells) {
 
     nda::array<nda::matrix<dcomplex>, 2> Hloc(atomic_shells.size(), 1);
 
@@ -100,6 +99,7 @@ namespace triqs::modest {
     auto LS = local_space(spin_kind, atomic_shells, decomposition, U, {});
 
     // construct and return obe_tb
-    return one_body_elements_tb{.H = H_sigma, .C_space = LS};
+    return one_body_elements_tb{.H = std::move(H_sigma), .C_space = std::move(LS)};
   }
+
 } // namespace triqs::modest
