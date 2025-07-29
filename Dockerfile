@@ -3,7 +3,7 @@ FROM flatironinstitute/triqs:unstable-ubuntu-clang
 ARG APPNAME=triqs_modest
 
 # Install here missing dependencies, e.g.
-RUN apt-get update && apt-get install -y libzstd-dev
+RUN apt-get update && apt-get install -y libzstd-dev doxygen
 
 COPY --chown=build . $SRC/$APPNAME
 RUN mkdir $BUILD/$APPNAME && chown build $BUILD/$APPNAME
