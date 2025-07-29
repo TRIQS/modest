@@ -8,9 +8,9 @@
 
 namespace triqs::modest {
 
-  struct one_body_elements_tb {
-    std::vector<tb_hamiltonian> H; // positibility to have two spin channels for spin pol
+  struct one_body_elements {
     local_space C_space;
+    std::vector<tb_hamiltonian> H; // positibility to have two spin channels for spin pol
     //downfolding_projector P;
     //C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
   };
@@ -20,14 +20,14 @@ namespace triqs::modest {
    * @param spin_kind enum telling us the spintype 
    * @param shells list of atomic shells input by the user 
    */
-  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e const &spin_kind,
-                                                        std::vector<atomic_shell_t> const &atomic_shells);
+  one_body_elements one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e const &spin_kind,
+                                                     std::vector<atomic_shell_t> atomic_shells);
 
-  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
-                                                        spin_kind_e const &spin_kind, std::vector<atomic_shell_t> const &atomic_shells);
+  one_body_elements one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
+                                                     spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells);
 
-  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e const &spin_kind,
-                                        std::vector<atomic_shell_t> const atomic_shells);
+  one_body_elements make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e const &spin_kind,
+                                     std::vector<atomic_shell_t> atomic_shells);
 
   /** @brief Compute local Green's function from a one_body_elements_tb object.
     *    
@@ -40,22 +40,32 @@ namespace triqs::modest {
     * @return gloc[alpha][sigma] = gf on the mesh, as a vector of length alpha, storing block gfs dim sigma 
     */
   template <typename Mesh>
-  block2_gf<Mesh, matrix_valued> gloc(one_body_elements_tb const &obe_tb, double mu, block2_gf<Mesh, matrix_valued> const &Sigma,
+  block2_gf<Mesh, matrix_valued> gloc(one_body_elements const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                       triqs::bz_int::bz_int_options const &opt) {
 
-    block2_gf<Mesh, matrix_valued> result = triqs::gfs::make_block2_gf(Sigma(0, 0).mesh(), triqs::gfs::get_struct(Sigma));
-    auto n_alpha                          = result.size1();
-    auto n_sigma                          = result.size2();
+    // Need a sigma Hartree
+    auto &mesh = Sigma_dynamic(0, 0).mesh();
 
-    if(n_sigma != obe_tb.H.size()) {
-      throw std::runtime_error("Mismatch between the spin channels in Sigma and spin channels in Hamiltonian.");
-    }
+    // CHECK Does this account for the possiblity of different norbitals in up and down?
+    auto n_sigma     = Sigma_dynamic.size2();
+    auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
 
-    for (auto alpha : range(n_alpha)) {   // block index
-      for (auto sigma : range(n_sigma)) { // spin index
-        result(alpha, sigma) = gloc(obe_tb.H[sigma], mu, Sigma(alpha, sigma), opt);
+    if (n_sigma != obe.H.size()) { throw std::runtime_error("Mismatch between the spin channels in Sigma and spin channels in Hamiltonian."); }
+
+    // Embedding decomposition from structure of Sigma -- provides a list of block names
+    auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
+
+    // REFACTOR norbtials in tb_obe
+    auto Sigma_big_space = gfs::gf(mesh, {obe.H[0].n_orbitals(), obe.H[0].n_orbitals()}); //
+    for (auto sigma : range(n_sigma)) {                                                   // spin index
+
+      for (auto &&[iblock, R] : enumerated_sub_slices(embedding_decomp)) {
+        Sigma_big_space.data()(r_all, R, R) = Sigma_dynamic(iblock, sigma).data();
       }
+
+      // Call the TRIQS version of this function
+      gloc_result(0, sigma) = gloc(obe.H[sigma], mu, Sigma_big_space, opt);
     }
-    return result;
+    return gloc_result;
   }
 } // namespace triqs::modest
