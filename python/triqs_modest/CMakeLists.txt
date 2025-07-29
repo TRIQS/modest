@@ -27,7 +27,11 @@ foreach(module_src ${module_sources})
   get_filename_component(module_dir ${module_src} DIRECTORY)
 
   Python_add_library(${module_name} MODULE ${module_src})
-  set_target_properties(${module_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${module_dir})
+  set_target_properties(${module_name} PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${module_dir}
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+  )
   add_library(${PROJECT_NAME}::${module_name} ALIAS ${module_name})
   target_link_libraries(${module_name} PRIVATE ${PROJECT_NAME}_c ${PROJECT_NAME}_warnings triqs_py c2py::c2py)
   install(TARGETS ${module_name} DESTINATION ${PYTHON_LIB_DEST}/${module_dir})
