@@ -130,8 +130,8 @@ namespace triqs::modest {
       return out;
     };
 
-    for (auto sigma : nda::range(obe.C_space.n_sigma())) {
-      for (auto k_idx : nda::range(obe.H.n_k())) { result.data() += obe.H.k_weights(k_idx) * Glatt(k_idx, sigma).data(); }
+    for (auto k_idx : range(obe.H.n_k())) {
+      for (auto sigma : range(obe.C_space.n_sigma())) { result.data() += obe.H.k_weights(k_idx) * Glatt(k_idx, sigma).data(); }
     }
 
     return density_nk(obe, mu, beta) + real(density(result));
@@ -144,18 +144,16 @@ namespace triqs::modest {
  * @param obe The one-body elements.
  * @param beta The inverse temperature (units 1/eV).
  * @param method The root finding method to use (default = dichotomy).
- * @param x_init The initial guess (default = 0.0).
  * @param precision The precision to end search (default = 1e-5).
- * @param delta_x The increment to guess when finding upper and lower bounds (default = 0.5).
- * @param max_loops The maximum number of iterations (default = 1000).
- * @param x_name default = Chemical Potential
- * @param y_name default = Total Density
  * @param verbosity Printing of the root finder's progress (default = true).
  * @return double 
  */
-  double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe, double beta, std::string method = "dichotomy",
-                                 double x_init = 0.0, double precision = 1.e-5, double delta_x = 0.5, long max_loops = 1000,
-                                 std::string x_name = "Chemical Potential", std::string y_name = "Total Density", bool verbosity = true);
+  inline double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe, double beta,
+                                        std::string method = "dichotomy", double precision = 1.e-5, bool verbosity = true) {
+    std::function<double(double)> f = [&obe, beta](double x) { return density_nk(obe, x, beta); };
+    return std::get<0>(triqs::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+  }
+
   /**
  * @ingroup mu
  * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
@@ -165,20 +163,19 @@ namespace triqs::modest {
  * @param Sigma_dynamic The dynamic part of the embedded self-energy.
  * @param Sigma_static The static part of the embedded self-energy.
  * @param method The root finding method to use (default = dichotomy).
- * @param x_init The initial guess (default = 0.0).
  * @param precision The precision to end search (default = 1e-5).
- * @param delta_x The increment to guess when finding upper and lower bounds (default = 0.5).
- * @param max_loops The maximum number of iterations (default = 1000).
- * @param x_name default = Chemical Potential
- * @param y_name default = Total Density
  * @param verbosity Printing of the root finder's progress (default = true).
  * @return double 
  */
-  double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
-                                 block2_gf<imfreq, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static,
-                                 std::string method = "dichotomy", double x_init = 0.0, double precision = 1.e-5, double delta_x = 0.5,
-                                 long max_loops = 1000, std::string x_name = "Chemical Potential", std::string y_name = "Total Density",
-                                 bool verbosity = true);
+  inline double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
+                                        block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
+                                        nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, std::string method = "dichotomy",
+                                        double precision = 1.e-5, bool verbosity = true) {
+
+    std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static](double x) { return density_slow(obe, x, Sigma_dynamic, Sigma_static); };
+    return std::get<0>(triqs::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+  }
+
   /**
  * @ingroup mu
  * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
@@ -188,20 +185,17 @@ namespace triqs::modest {
  * @param Sigma_dynamic The dynamic part of the embedded self-energy.
  * @param Sigma_static The static part of the embedded self-energy.
  * @param method The root finding method to use (default = dichotomy).
- * @param x_init The initial guess (default = 0.0).
  * @param precision The precision to end search (default = 1e-5).
- * @param delta_x The increment to guess when finding upper and lower bounds (default = 0.5).
- * @param max_loops The maximum number of iterations (default = 1000).
- * @param x_name default = Chemical Potential
- * @param y_name default = Total Density
  * @param verbosity Printing of the root finder's progress (default = true).
  * @return double 
  */
-  double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
-                                 block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static,
-                                 std::string method = "dichotomy", double x_init = 0.0, double precision = 1.e-5, double delta_x = 0.5,
-                                 long max_loops = 1000, std::string x_name = "Chemical Potential", std::string y_name = "Total Density",
-                                 bool verbosity = true);
+  inline double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
+                                        block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
+                                        nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, std::string method = "dichotomy",
+                                        double precision = 1.e-5, bool verbosity = true) {
+    std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static](double x) { return density(obe, x, Sigma_dynamic, Sigma_static); };
+    return std::get<0>(triqs::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+  }
 
   /** @cond DOXYGEN_SKIP_THIS */
   template double density_slow(one_body_elements_on_grid const &obe, double mu, block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,

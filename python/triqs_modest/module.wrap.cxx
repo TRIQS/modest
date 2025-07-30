@@ -1137,36 +1137,24 @@ static auto const fun_27 =
                               "epsilon_levels", "Gloc")};
 
 // find_chemical_potential
-static auto const fun_28 =
-   c2py::dispatcher_f_kw_t{
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements_on_grid &obe, double beta, std::string method, double x_init,
-            double precision, double delta_x, long max_loops, std::string x_name, std::string y_name, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, beta, method, x_init, precision, delta_x, max_loops, x_name, y_name,
-                                                         verbosity);
-         },
-         "target_density", "obe", "beta", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5, "delta_x"_a = 0.5, "max_loops"_a = 1000,
-         "x_name"_a = "Chemical Potential", "y_name"_a = "Total Density", "verbosity"_a = true),
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
-            const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double x_init, double precision, double delta_x,
-            long max_loops, std::string x_name, std::string y_name, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, x_init, precision, delta_x,
-                                                         max_loops, x_name, y_name, verbosity);
-         },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
-         "delta_x"_a = 0.5, "max_loops"_a = 1000, "x_name"_a = "Chemical Potential", "y_name"_a = "Total Density", "verbosity"_a = true),
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
-            const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double x_init, double precision, double delta_x,
-            long max_loops, std::string x_name, std::string y_name, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, x_init, precision, delta_x,
-                                                         max_loops, x_name, y_name, verbosity);
-         },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
-         "delta_x"_a = 0.5, "max_loops"_a = 1000, "x_name"_a = "Chemical Potential", "y_name"_a = "Total Density", "verbosity"_a = true)};
+static auto const fun_28 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](double target_density, const triqs::modest::one_body_elements_on_grid &obe, double beta, std::string method, double precision,
+                 bool verbosity) { return triqs::modest::find_chemical_potential(target_density, obe, beta, method, precision, verbosity); },
+              "target_density", "obe", "beta", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
+         const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, precision, verbosity);
+      },
+      "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
+         const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, precision, verbosity);
+      },
+      "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true)};
 
 // gloc
 static auto const fun_29 = c2py::dispatcher_f_kw_t{
@@ -1465,18 +1453,8 @@ static constexpr auto doc_f_28_0 = R"DOC(   Parameters
       The inverse temperature (units 1/eV).
    method:
       The root finding method to use (default = dichotomy).
-   x_init:
-      The initial guess (default = 0.0).
    precision:
       The precision to end search (default = 1e-5).
-   delta_x:
-      The increment to guess when finding upper and lower bounds (default = 0.5).
-   max_loops:
-      The maximum number of iterations (default = 1000).
-   x_name:
-      default = Chemical Potential
-   y_name:
-      default = Total Density
    verbosity:
       Printing of the root finder's progress (default = true).
    
@@ -1497,18 +1475,8 @@ static constexpr auto doc_f_28_1 = R"DOC(   Parameters
       The static part of the embedded self-energy.
    method:
       The root finding method to use (default = dichotomy).
-   x_init:
-      The initial guess (default = 0.0).
    precision:
       The precision to end search (default = 1e-5).
-   delta_x:
-      The increment to guess when finding upper and lower bounds (default = 0.5).
-   max_loops:
-      The maximum number of iterations (default = 1000).
-   x_name:
-      default = Chemical Potential
-   y_name:
-      default = Total Density
    verbosity:
       Printing of the root finder's progress (default = true).
    
@@ -1529,18 +1497,8 @@ static constexpr auto doc_f_28_2 = R"DOC(   Parameters
       The static part of the embedded self-energy.
    method:
       The root finding method to use (default = dichotomy).
-   x_init:
-      The initial guess (default = 0.0).
    precision:
       The precision to end search (default = 1e-5).
-   delta_x:
-      The increment to guess when finding upper and lower bounds (default = 0.5).
-   max_loops:
-      The maximum number of iterations (default = 1000).
-   x_name:
-      default = Chemical Potential
-   y_name:
-      default = Total Density
    verbosity:
       Printing of the root finder's progress (default = true).
    

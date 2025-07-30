@@ -21,8 +21,7 @@ namespace triqs::modest {
 
   double density(one_body_elements_on_grid const &obe, double mu,
                  // add magnetic field,
-                 block2_gf<mesh::dlr_imfreq, matrix_valued> const &Sigma_dynamic,
-                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree) {
+                 block2_gf<mesh::dlr_imfreq, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree) {
 
     auto n_sigma     = Sigma_dynamic.size2();
     auto const &mesh = Sigma_dynamic(0, 0).mesh();
@@ -56,35 +55,4 @@ namespace triqs::modest {
     return KS_term + real(density(corr));
   }
 
-  double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe, double beta,
-                                 std::string method, double x_init, double precision, double delta_x, long max_loops,
-                                 std::string x_name, std::string y_name, bool verbosity) {
-    return std::get<0>(triqs::root_finder(
-       method, [&obe, beta](double x) { return density_nk(obe, x, beta); }, x_init, target_density, precision, delta_x,
-       max_loops, x_name, y_name, verbosity));
-  }
-
-  double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
-                                 block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
-                                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, std::string method,
-                                 double x_init, double precision, double delta_x, long max_loops, std::string x_name,
-                                 std::string y_name, bool verbosity) {
-    std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_hartree](double x) {
-      return density_slow(obe, x, Sigma_dynamic, Sigma_hartree);
-    };
-    return std::get<0>(
-       triqs::root_finder(method, f, x_init, target_density, precision, delta_x, max_loops, x_name, y_name, verbosity));
-  }
-
-  double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
-                                 block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
-                                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, std::string method,
-                                 double x_init, double precision, double delta_x, long max_loops, std::string x_name,
-                                 std::string y_name, bool verbosity) {
-    std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_hartree](double x) {
-      return density(obe, x, Sigma_dynamic, Sigma_hartree);
-    };
-    return std::get<0>(
-       triqs::root_finder(method, f, x_init, target_density, precision, delta_x, max_loops, x_name, y_name, verbosity));
-  }
 } // namespace triqs::modest
