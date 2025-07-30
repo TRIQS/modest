@@ -236,13 +236,13 @@ namespace triqs::modest {
     return split(imp_idx, [&](long idx) { return stdr::find(block_list, idx) != block_list.end(); });
   }
 
-  nda::array<nda::matrix<dcomplex>, 2> embedding::embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_hartree_vec) const {
-    auto Sigma_hartree_embed = nda::array<nda::matrix<dcomplex>, 2>(n_alpha(), n_sigma());
-    for (auto &&[S, m] : zip(Sigma_hartree_embed, psi)) {
+  nda::array<nda::matrix<dcomplex>, 2> embedding::embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_static_vec) const {
+    auto Sigma_static_embed = nda::array<nda::matrix<dcomplex>, 2>(n_alpha(), n_sigma());
+    for (auto &&[S, m] : zip(Sigma_static_embed, psi)) {
       if (m.imp_idx == -1) continue;
-      S = Sigma_imp_hartree_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
+      S = Sigma_imp_static_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
     }
-    return Sigma_hartree_embed;
+    return Sigma_static_embed;
   }
 
   std::vector<std::vector<nda::matrix<dcomplex>>> embedding::extract(nda::array<nda::matrix<dcomplex>, 2> const &matrix_C) const {

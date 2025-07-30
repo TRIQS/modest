@@ -200,7 +200,7 @@ namespace triqs::modest {
     template <typename Mesh> block2_gf<Mesh, tensor_valued<4>> embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const;
 
     /// embed block matrices
-    nda::array<nda::matrix<dcomplex>, 2> embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_hartree_vec) const;
+    nda::array<nda::matrix<dcomplex>, 2> embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_static_vec) const;
 
     /// embed tensors
     // nda::array<dcomplex, 4> embed(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const;

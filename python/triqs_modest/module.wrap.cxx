@@ -418,11 +418,9 @@ static auto const fun_7 = c2py::dispatcher_f_kw_t{
         return self.embed(Sigma_imp_vec);
       },
       "self", "Sigma_imp_vec"),
-   c2py::cmethod(
-      [](triqs::modest::embedding const &self, const std::vector<std::vector<nda::matrix<triqs::dcomplex>>> &Sigma_imp_hartree_vec) {
-        return self.embed(Sigma_imp_hartree_vec);
-      },
-      "self", "Sigma_imp_hartree_vec")};
+   c2py::cmethod([](triqs::modest::embedding const &self,
+                    const std::vector<std::vector<nda::matrix<triqs::dcomplex>>> &Sigma_imp_static_vec) { return self.embed(Sigma_imp_static_vec); },
+                 "self", "Sigma_imp_static_vec")};
 
 // extract
 static auto const fun_8 = c2py::dispatcher_f_kw_t{
@@ -1086,8 +1084,8 @@ static auto const fun_22 =
 static auto const fun_23 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
       const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-      const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_hartree); },
-   "obe", "mu", "Sigma_dynamic", "Sigma_hartree")};
+      const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_static); },
+   "obe", "mu", "Sigma_dynamic", "Sigma_static")};
 
 // density_nk
 static auto const fun_24 = c2py::dispatcher_f_kw_t{
@@ -1098,10 +1096,8 @@ static auto const fun_24 = c2py::dispatcher_f_kw_t{
 static auto const fun_25 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
       const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-      const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree) {
-     return triqs::modest::density_slow(obe, mu, Sigma_dynamic, Sigma_hartree);
-   },
-   "obe", "mu", "Sigma_dynamic", "Sigma_hartree")};
+      const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::density_slow(obe, mu, Sigma_dynamic, Sigma_static); },
+   "obe", "mu", "Sigma_dynamic", "Sigma_static")};
 
 // double_counting
 static auto const fun_26 =
@@ -1115,18 +1111,18 @@ static auto const fun_27 =
                               [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
                                  const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc,
                                  const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                                 const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_hartree) {
-                                return triqs::modest::extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_hartree);
+                                 const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_static) {
+                                return triqs::modest::extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
                               },
-                              "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_hartree"),
+                              "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
                            c2py::cfun(
                               [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
                                  const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc,
                                  const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                                 const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_hartree) {
-                                return triqs::modest::extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_hartree);
+                                 const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_static) {
+                                return triqs::modest::extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
                               },
-                              "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_hartree"),
+                              "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
                            c2py::cfun(
                               [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
                                  const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc) {
@@ -1154,22 +1150,22 @@ static auto const fun_28 =
       c2py::cfun(
          [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
             const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree, std::string method, double x_init, double precision, double delta_x,
+            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double x_init, double precision, double delta_x,
             long max_loops, std::string x_name, std::string y_name, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_hartree, method, x_init, precision, delta_x,
+           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, x_init, precision, delta_x,
                                                          max_loops, x_name, y_name, verbosity);
          },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_hartree", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
+         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
          "delta_x"_a = 0.5, "max_loops"_a = 1000, "x_name"_a = "Chemical Potential", "y_name"_a = "Total Density", "verbosity"_a = true),
       c2py::cfun(
          [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
             const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree, std::string method, double x_init, double precision, double delta_x,
+            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double x_init, double precision, double delta_x,
             long max_loops, std::string x_name, std::string y_name, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_hartree, method, x_init, precision, delta_x,
+           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, x_init, precision, delta_x,
                                                          max_loops, x_name, y_name, verbosity);
          },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_hartree", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
+         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
          "delta_x"_a = 0.5, "max_loops"_a = 1000, "x_name"_a = "Chemical Potential", "y_name"_a = "Total Density", "verbosity"_a = true)};
 
 // gloc
@@ -1177,13 +1173,13 @@ static auto const fun_29 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
          const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree) { return triqs::modest::gloc(obe, mu, Sigma_dynamic, Sigma_hartree); },
-      "obe", "mu", "Sigma_dynamic", "Sigma_hartree"),
+         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::gloc(obe, mu, Sigma_dynamic, Sigma_static); },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static"),
    c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
          const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree) { return triqs::modest::gloc(obe, mu, Sigma_dynamic, Sigma_hartree); },
-      "obe", "mu", "Sigma_dynamic", "Sigma_hartree"),
+         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::gloc(obe, mu, Sigma_dynamic, Sigma_static); },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static"),
    c2py::cfun([](const triqs::mesh::imfreq &mesh, const triqs::modest::one_body_elements_on_grid &obe,
                  double mu) { return triqs::modest::gloc(mesh, obe, mu); },
               "mesh", "obe", "mu"),
@@ -1361,7 +1357,7 @@ static const auto doc_d_23       = fun_23.doc({R"DOC(   Parameters
       The chemical potential.
    Sigma_dynamic:
       The dynamic part of the embedded self-energy.
-   Sigma_hartree:
+   Sigma_static:
       The static part of the embedded self-energy.
    
    Returns
@@ -1378,7 +1374,7 @@ static const auto doc_d_25       = fun_25.doc({R"DOC(   Parameters
       The chemical potential.
    Sigma_dynamic:
       The dynamic part of the embedded self-energy.
-   Sigma_hartree:
+   Sigma_static:
       The static part of the embedded self-energy.
    
    Returns
@@ -1410,8 +1406,8 @@ static constexpr auto doc_f_27_0 = R"DOC(   Parameters
       The local Green's function of the impurity.
    Sigma_dynamic:
       The frequency dependent part of the impurity self-energy.
-   Sigma_hartree:
-      The Hartree term of the impurity self-energy.
+   Sigma_static:
+      The static term of the impurity self-energy.
    
    Returns
    -------
@@ -1426,8 +1422,8 @@ static constexpr auto doc_f_27_1 = R"DOC(   Parameters
       The local Green's function of the impurity.
    Sigma_dynamic:
       The frequency dependent part of the impurity self-energy.
-   Sigma_hartree:
-      The Hartree term of the impurity self-energy.
+   Sigma_static:
+      The static term of the impurity self-energy.
    
    Returns
    -------
@@ -1497,7 +1493,7 @@ static constexpr auto doc_f_28_1 = R"DOC(   Parameters
       The one-body elements.
    Sigma_dynamic:
       The dynamic part of the embedded self-energy.
-   Sigma_hartree:
+   Sigma_static:
       The static part of the embedded self-energy.
    method:
       The root finding method to use (default = dichotomy).
@@ -1529,7 +1525,7 @@ static constexpr auto doc_f_28_2 = R"DOC(   Parameters
       The one-body elements.
    Sigma_dynamic:
       The dynamic part of the embedded self-energy.
-   Sigma_hartree:
+   Sigma_static:
       The static part of the embedded self-energy.
    method:
       The root finding method to use (default = dichotomy).
@@ -1562,7 +1558,7 @@ static constexpr auto doc_f_29_0 = R"DOC(   Parameters
       chemical potential
    Sigma_dynamic:
       The dynamic part of the embedded self-energy in the embedded view.
-   Sigma_hartree:
+   Sigma_static:
       The static part of the embedded self-energy in the embedded view.
    
    Returns
@@ -1578,7 +1574,7 @@ static constexpr auto doc_f_29_1 = R"DOC(   Parameters
       chemical potential
    Sigma_dynamic:
       The dynamic part of the embedded self-energy in the embedded view.
-   Sigma_hartree:
+   Sigma_static:
       The static part of the embedded self-energy in the embedded view.
    
    Returns

@@ -21,12 +21,12 @@ namespace triqs::modest {
  * @param obe one_body_elements_on_grid
  * @param mu chemical potential
  * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view.
- * @param Sigma_hartree The static part of the embedded self-energy in the embedded view.
+ * @param Sigma_static The static part of the embedded self-energy in the embedded view.
  * @return block2_gf<Mesh, matrix_valued> 
  */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                                      nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree) {
+                                      nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
 
     //std::optional<nda::array<nda::matrix<double>, 2>> const &Sigma_dc)
     // std::optional<block2_gf<Mesh, matrix_valued>> const &Sigma_dc
@@ -47,13 +47,13 @@ namespace triqs::modest {
     // Internal is favorable for maximum parallelization.
     mpi::communicator comm = {};
 #pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                                                            \
-   shared(comm, r_all, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_hartree)
+   shared(comm, r_all, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_static)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
       for (auto sigma : range(n_sigma)) {
         auto Y = detail::G0_C_k_sigma(obe, mu, k_idx, sigma, omegas, false);
         for (auto &&[n, om] : itertools::enumerate(mesh)) {
           auto Y1 = Y(n, r_all, r_all);
-          auto B  = detail::calc_inv_G_G0(M, embedding_decomp, Sigma_dynamic, Sigma_hartree, om, sigma, Y1, Y1);
+          auto B  = detail::calc_inv_G_G0(M, embedding_decomp, Sigma_dynamic, Sigma_static, om, sigma, Y1, Y1);
           gloc_result(0, sigma).data()(n, r_all, r_all) += obe.H.k_weights(k_idx) * B;
         }
       }
@@ -115,13 +115,13 @@ namespace triqs::modest {
    * @param epsilon_levels The effective impurity levels.
    * @param Gloc The local Green's function of the impurity.
    * @param Sigma_dynamic The frequency dependent part of the impurity self-energy.
-   * @param Sigma_hartree The Hartree term of the impurity self-energy.
+   * @param Sigma_static The static term of the impurity self-energy.
    * @return block_gf<Mesh, matrix_valued> 
    */
   template <typename Mesh>
   block_gf<Mesh, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc,
                                               block_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                                              std::vector<nda::matrix<dcomplex>> const &Sigma_hartree) {
+                                              std::vector<nda::matrix<dcomplex>> const &Sigma_static) {
     auto gf_struct = get_struct(Gloc);
     auto mesh      = Gloc[0].mesh();
     auto Delta     = block_gf{mesh, gf_struct};
@@ -129,7 +129,7 @@ namespace triqs::modest {
     for (auto bl : range(n_blocks)) {
       for (auto &&[n, w] : enumerate(mesh))
         Delta[bl].data()(n, r_all, r_all) =
-           (w - epsilon_levels[bl] - inverse(Gloc[bl]).data()(n, r_all, r_all) - (Sigma_dynamic[bl].data()(n, r_all, r_all) + Sigma_hartree[bl]));
+           (w - epsilon_levels[bl] - inverse(Gloc[bl]).data()(n, r_all, r_all) - (Sigma_dynamic[bl].data()(n, r_all, r_all) + Sigma_static[bl]));
     }
     return Delta;
   }
@@ -145,10 +145,10 @@ namespace triqs::modest {
    */
   template <typename Mesh>
   block_gf<Mesh, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc) {
-    auto Sigma_hartree = get_struct(Gloc) | stdv::transform([](auto &x) { return nda::zeros<dcomplex>(x.second, x.second); })
+    auto Sigma_static = get_struct(Gloc) | stdv::transform([](auto &x) { return nda::zeros<dcomplex>(x.second, x.second); })
        | tl::to<std::vector<nda::matrix<dcomplex>>>();
     auto Sigma_dynamic = block_gf{Gloc[0].mesh(), get_struct(Gloc)};
-    return extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_hartree);
+    return extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
   }
 
   // ------------------------------------------------------
@@ -158,24 +158,24 @@ namespace triqs::modest {
   // Mesh = imfreq
   template block2_gf<imfreq, matrix_valued> gloc(one_body_elements_on_grid const &one_body, double mu,
                                                  block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
-                                                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree);
+                                                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
   template block2_gf<imfreq, matrix_valued> gloc(imfreq const &mesh, one_body_elements_on_grid const &obe, double mu);
   template block2_gf<dlr_imfreq, matrix_valued> gloc(one_body_elements_on_grid const &one_body, double mu,
                                                      block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
-                                                     nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree);
+                                                     nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
   template block2_gf<dlr_imfreq, matrix_valued> gloc(dlr_imfreq const &mesh, one_body_elements_on_grid const &obe, double mu);
   template block_gf<imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                          block_gf<imfreq, matrix_valued> const &Gloc);
   template block_gf<imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                          block_gf<imfreq, matrix_valued> const &Gloc,
                                                          block_gf<imfreq, matrix_valued> const &Sigma_dynamic,
-                                                         std::vector<nda::matrix<dcomplex>> const &Sigma_hartree);
+                                                         std::vector<nda::matrix<dcomplex>> const &Sigma_static);
   template block_gf<dlr_imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                              block_gf<dlr_imfreq, matrix_valued> const &Gloc);
   template block_gf<dlr_imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                              block_gf<dlr_imfreq, matrix_valued> const &Gloc,
                                                              block_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
-                                                             std::vector<nda::matrix<dcomplex>> const &Sigma_hartree);
+                                                             std::vector<nda::matrix<dcomplex>> const &Sigma_static);
   /** @endcond */
 
 } // namespace triqs::modest
