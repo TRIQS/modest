@@ -12,16 +12,16 @@ namespace triqs::modest {
   enum class spin_kind_e {
     Polarized,    // σ = 0,1, the object can have different value for different σ
     NonPolarized, // σ = 0,1, but the object is the same for both σ. Can store only one copy e.g.
-    NonColinear // σ = 0. There is no index, the spin index is grouped with other non-diagonal indices. e.g. Nambu, spin-orbit
+    NonColinear   // σ = 0. There is no index, the spin index is grouped with other non-diagonal indices. e.g. Nambu, spin-orbit
   };
 
   // --------------------------------------------------------------------
   /// Info on an atomic shell
   struct atomic_shell_t {
-    long dim;     // dimension of orbital space
-    long l;       // angular quantum number
-    long cls_idx; // Equivalent atoms will have the same sort index (sort)
-    long dft_idx; // idx of the atom in the dft code if any, or -1
+    long dim     = 0; // dimension of orbital space
+    long l       = 0; // angular quantum number
+    long cls_idx = 0; // Equivalent atoms will have the same sort index (sort)
+    long dft_idx = 0; // idx of the atom in the dft code if any, or -1
     // int n_irrep;     // are the orbitals reducible into irreps (irep) ( seach "irep" in TRIQS/dft_tools; never used in DMFT routines
   };
 

@@ -11,6 +11,7 @@
 #include "triqs_modest/postprocess.hpp"
 #include "triqs_modest/checkpoint.hpp"
 #include "triqs_modest/degenerate_blocks.hpp"
+#include "triqs/lattice/tb_hamiltonian.hpp"
 
 template <> constexpr bool c2py::is_wrapped<triqs::mesh::imfreq>     = true;
 template <> constexpr bool c2py::is_wrapped<triqs::mesh::dlr_imfreq> = true;

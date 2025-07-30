@@ -15,10 +15,12 @@ namespaces = "triqs triqs::modest  triqs::modest::detail"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::|triqs::(root_finder|make_kanamori|make_slater|U_matrix_in_spherical_basis)"
+match_names = "triqs::modest::|triqs::(root_finder|make_kanamori|make_slater|U_matrix_in_spherical_basis|tb_hamiltonian)"
 reject_names = "triqs::modest::(ibz_symmetry_ops|rotate_local_basis)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex
 
 wrap_no_arg_methods_as_properties= true
+exclude_system_headers = false
+
