@@ -2,11 +2,14 @@
 #include <triqs/lattice/tb_hamiltonian.hpp>
 #include <stdexcept>
 #include "loaders.hpp"
-#include "triqs/utility/integration/bz_integrators.hpp"
+#include "triqs/lattice/bz_integrators.hpp"
 #include "triqs/lattice/gloc.hpp"
+#include "triqs/lattice/superlattice.hpp"
 #include "triqs_modest/utils/gf_supp.hpp"
 
 namespace triqs::modest {
+
+  using triqs::lattice::superlattice;
 
   struct one_body_elements {
     local_space C_space;
@@ -29,6 +32,9 @@ namespace triqs::modest {
   one_body_elements make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e const &spin_kind,
                                      std::vector<atomic_shell_t> atomic_shells);
 
+  /// Folding with superlattice
+  one_body_elements fold(superlattice const &sl, one_body_elements const &obe);
+
   /** @brief Compute local Green's function from a one_body_elements_tb object.
     *    
     * @param one_body_elements_tb A one_body_elements object containing the tb_hamiltonian
@@ -41,7 +47,7 @@ namespace triqs::modest {
     */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                                      triqs::bz_int::bz_int_options const &opt) {
+                                      triqs::lattice::bz_int_options const &opt) {
 
     // Need a sigma Hartree
     auto &mesh = Sigma_dynamic(0, 0).mesh();

@@ -91,4 +91,23 @@ namespace triqs::modest {
     // construct and return obe_tb
     return one_body_elements{.C_space = std::move(LS), .H = std::move(H_sigma)};
   }
+
+  // -----------------------------------------------------------------------
+
+  one_body_elements fold(lattice::superlattice const &sl, one_body_elements const &obe) {
+
+    auto new_H = obe.H | stdv::transform([&](auto x) { return fold(sl, x); }) | tl::to<std::vector>();
+
+    auto sh = obe.C_space.atomic_shells();
+    decltype(sh) new_atomic_shells;
+    auto const &dec = obe.C_space.atoms_block_decomposition();
+    nda::array<std::vector<long>, 2> new_dec(dec.extent(0) * sl.n_cluster_sites(), dec.extent(1));
+
+    for (auto i : nda::range(sl.n_cluster_sites())) {
+      for (auto const &shell : sh) { new_atomic_shells.emplace_back(shell); }
+      new_dec(i, r_all) = dec(i, r_all);
+    }
+
+    return {.C_space = local_space{obe.C_space.spin_kind(), std::move(new_atomic_shells), new_dec, {}, {}}, .H = std::move(new_H)};
+  }
 } // namespace triqs::modest
