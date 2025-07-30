@@ -1,6 +1,7 @@
 #pragma once
 #include "./downfolding.hpp"
 #include <triqs/utility/streams.hpp>
+#include "utils/nda_supp.hpp"
 
 namespace triqs::modest {
 
@@ -18,8 +19,7 @@ namespace triqs::modest {
    * @param verbosity Log steps of creating the one-body elements.
    * @return The total electron density and a one-body elements.
    */
-  std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename,
-                                                                                    double threshold      = 1.e-5,
+  std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold = 1.e-5,
                                                                                     bool diagonalize_hloc = false);
   // bool verbosity        = true);
   /**
@@ -34,8 +34,7 @@ namespace triqs::modest {
  * @param obe One-body elements that was used in the DMFT calculation.
  * @return One-body elements using the Θ projectors.
  */
-  one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename,
-                                                                    one_body_elements_on_grid const &obe);
+  one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe);
   /**
  * @ingroup obe_factories
  * @brief Create a one-body elements object along specific k-grid. 
@@ -48,6 +47,5 @@ namespace triqs::modest {
  * @param obe One-body elements that was ued in the DMFT calculation.
  * @return One-body elements along high-symmetry k-path.
  */
-  one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename,
-                                                                    one_body_elements_on_grid const &obe);
+  one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe);
 } // namespace triqs::modest

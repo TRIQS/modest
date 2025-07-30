@@ -20,14 +20,12 @@ namespace triqs::modest {
     auto n_k     = res.P_k.extent(0);
     auto n_sigma = res.P_k.extent(1);
     for (auto isig : range(n_sigma)) {
-      auto decomp =
-         range(U.extent(0)) | stdv::transform([&](auto &&m) { return U(m, isig).extent(0); }) | tl::to<std::vector>();
+      auto decomp = range(U.extent(0)) | stdv::transform([&](auto &&m) { return U(m, isig).extent(0); }) | tl::to<std::vector>();
       for (auto ik : range(n_k)) {
         for (auto const &[a, sli] : enumerated_sub_slices(decomp)) {
           // P <- dagger(U) * P
-          res.P_k(ik, isig, sli, r_all) =
-             dagger(U(a, isig)) * matrix_const_view<dcomplex>{this->P_k(ik, isig, sli, r_all)};
-          // I can not use x.P(isig,k)(sli, r_all) because of the slice on the n_bands_per_k in this P
+          res.P_k(ik, isig, sli, r_all) = dagger(U(a, isig)) * matrix_const_view<dcomplex>{this->P_k(ik, isig, sli, r_all)};
+          // I can not use x.P(isig,k)(sli, r_all) because of the slice on the n_bands_per_k in this P }
         }
       }
     }
@@ -36,13 +34,74 @@ namespace triqs::modest {
 
   // -------------------------------------------------------------------------------------------
 
-  one_body_elements_on_grid rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U,
-                                               one_body_elements_on_grid const &x) {
+  one_body_elements_on_grid rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U, one_body_elements_on_grid const &x) {
     auto res = x;
     res.P    = x.P.rotate_local_basis(U);
     if (res.ibz_symm_ops) res.ibz_symm_ops = rotate_local_basis(U, x.ibz_symm_ops.value());
     return res;
   }
+  // -------------------------------------------------------------------------------------------
+
+  one_body_elements_on_grid permute_local_space(std::vector<std::vector<long>> const &atom_partition, one_body_elements_on_grid const &obe) {
+    auto atom_indices = nda::flatten(atom_partition);
+
+    auto spin_kind     = obe.C_space.spin_kind();
+    auto atomic_shells = atom_indices | stdv::transform([&](auto i) { return obe.C_space.atomic_shells()[i]; }) | tl::to<std::vector>();
+
+    auto rot_from_dft_to_local_basis = obe.C_space.rotation_from_dft_to_local_basis();
+    auto rot_from_sph_to_dft_basis   = obe.C_space.rotation_from_spherical_to_dft_basis();
+    for (auto &&[iatom, atom] : enumerate(atom_indices)) {
+      rot_from_dft_to_local_basis(iatom, r_all) = obe.C_space.rotation_from_dft_to_local_basis()(atom, r_all);
+      rot_from_sph_to_dft_basis(iatom)          = obe.C_space.rotation_from_spherical_to_dft_basis()(atom);
+    }
+
+    auto n_atoms = atom_partition.size();
+    auto n_sigma = obe.C_space.n_sigma();
+
+    auto irreps_per_atom = nda::array<std::vector<long>, 2>(n_atoms, n_sigma);
+    for (auto &&[ipart, partition] : enumerate(atom_partition)) {
+      if (partition.size() == 1) {
+        irreps_per_atom(ipart, r_all) = obe.C_space.atoms_block_decomposition()(partition[0], r_all);
+      } else {
+        irreps_per_atom(ipart, r_all) = std::vector{
+           stdr::fold_left(partition | stdv::transform([&](auto idx) { return obe.C_space.atomic_shells()[idx].dim; }), 0, std::plus<>())};
+      }
+    }
+
+    auto new_C_space = local_space{spin_kind, atomic_shells, irreps_per_atom, rot_from_dft_to_local_basis, rot_from_sph_to_dft_basis};
+
+    auto atom_decomp = obe.C_space.atomic_decomposition() | tl::to<std::vector>();
+
+    auto [n_k, n_sig, n_M, n_nu] = obe.P.P_k.shape();
+
+    auto P_k_list = atom_decomp | stdv::transform([&](auto dim) { return nda::zeros<dcomplex>(n_k, n_sig, dim, n_nu); }) | tl::to<std::vector>();
+    for (auto &&[atom, sli] : enumerated_sub_slices(atom_decomp)) {
+      P_k_list[atom](r_all, r_all, r_all, r_all) = obe.P.P_k(r_all, r_all, sli, r_all);
+    }
+
+    auto new_P_k_list = atom_indices | stdv::transform([&](auto i) { return P_k_list[i]; }) | tl::to<std::vector>();
+
+    auto new_atom_decomp = new_C_space.atomic_decomposition() | tl::to<std::vector>();
+
+    auto P_k = nda::zeros<dcomplex>(n_k, n_sig, n_M, n_nu);
+    for (auto const &[atom, sli] : enumerated_sub_slices(new_atom_decomp)) {
+      P_k(r_all, r_all, sli, r_all) = new_P_k_list[atom](r_all, r_all, nda::range(0, new_atom_decomp[atom]), r_all);
+    }
+
+    auto n_bands_per_k = obe.P.n_bands_per_k;
+    downfolding_projector new_P{.spin_kind = spin_kind, .P_k = P_k, .n_bands_per_k = n_bands_per_k};
+
+    if (!obe.ibz_symm_ops) return {.H = obe.H, .C_space = new_C_space, .P = new_P, .ibz_symm_ops = {}};
+
+    auto ibz_symm_ops     = obe.ibz_symm_ops.value();
+    auto new_ibz_symm_ops = ibz_symm_ops;
+    for (auto &&[isym, sym_op] : enumerate(new_ibz_symm_ops.ops)) {
+      sym_op.mats        = atom_indices | stdv::transform([&](auto i) { return ibz_symm_ops.ops[isym].mats[i]; }) | tl::to<std::vector>();
+      sym_op.permutation = atom_indices | stdv::transform([&](auto i) { return ibz_symm_ops.ops[isym].permutation[i]; }) | tl::to<std::vector>();
+    }
+    return {.H = obe.H, .C_space = new_C_space, .P = new_P, .ibz_symm_ops = new_ibz_symm_ops};
+  }
+
   // -------------------------------------------------------------------------------------------
 
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_on_grid const &obe) {

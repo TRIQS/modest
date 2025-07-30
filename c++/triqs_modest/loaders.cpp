@@ -7,11 +7,6 @@
 
 namespace triqs::modest {
   /// utility to flatten a nested vector (move to utils/ ?)
-  template <typename T> std::vector<T> flatten(const std::vector<std::vector<T>> &nested) {
-    std::vector<T> flat;
-    for (const auto &sub : nested) { flat.insert(flat.end(), sub.begin(), sub.end()); }
-    return flat;
-  }
 
   /// free function for svd (FIXME: nda::linalg::svd) (see TRIQS/nda PR#103)
   nda::matrix<dcomplex> svd(const nda::matrix<dcomplex> &A) {
@@ -26,8 +21,7 @@ namespace triqs::modest {
 
   namespace detail {
     /// inject an object T from the C space to W space (used in the context of post-processing).
-    nda::array<std::vector<long>, 2> inject_to_new_space(nda::array<std::vector<long>, 2> const &T,
-                                                         std::vector<atomic_shell_t> const &old_space,
+    nda::array<std::vector<long>, 2> inject_to_new_space(nda::array<std::vector<long>, 2> const &T, std::vector<atomic_shell_t> const &old_space,
                                                          std::vector<atomic_shell_t> const &new_space) {
       auto n_atoms = new_space.size();
       auto n_sigma = T.extent(1);
@@ -52,8 +46,8 @@ namespace triqs::modest {
   /// Disovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
   /// Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
   std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<dcomplex>, 2>>
-  discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0,
-                      std::vector<atomic_shell_t> const &atomic_shells, double block_threshold, bool diagonalize_hloc) {
+  discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0, std::vector<atomic_shell_t> const &atomic_shells, double block_threshold,
+                      bool diagonalize_hloc) {
 
     auto [n_atoms, n_sigma] = Hloc0.shape();
     auto decomposition      = nda::array<std::vector<long>, 2>(n_atoms, n_sigma);
@@ -61,10 +55,9 @@ namespace triqs::modest {
 
     for (auto const &[atom, shell] : enumerate(atomic_shells)) {
       for (auto sigma : nda::range(n_sigma)) {
-        auto D                  = find_blocks(nda::matrix<double>{abs(Hloc0(atom, sigma))}, block_threshold);
-        U_rotation(atom, sigma) = nda::make_matrix_from_permutation<dcomplex>(flatten(D));
-        decomposition(atom, sigma) =
-           D | stdv::transform([](auto &x) { return long(x.size()); }) | tl::to<std::vector>();
+        auto D                     = find_blocks(nda::matrix<double>{abs(Hloc0(atom, sigma))}, block_threshold);
+        U_rotation(atom, sigma)    = nda::make_matrix_from_permutation<dcomplex>(nda::flatten(D));
+        decomposition(atom, sigma) = D | stdv::transform([](auto &x) { return long(x.size()); }) | tl::to<std::vector>();
 
         // diagonalize the hloc0 to find a new basis of orbitals
         if (diagonalize_hloc) {
@@ -98,27 +91,22 @@ namespace triqs::modest {
     auto read_mats = [SO](auto group, auto name1, auto name2) {
       auto mats             = to_vector<cmat_t>(sort_keys_as_int(group[name1]));
       auto mats_tinv        = to_vector<long>(sort_keys_as_int(group[name2]));
-      auto mats_tinv_and_SO = mats_tinv | stdv::transform([SO](long const &x) { return (x == 1 && SO == 1) ? 1 : 0; })
-         | tl::to<std::vector<long>>();
+      auto mats_tinv_and_SO = mats_tinv | stdv::transform([SO](long const &x) { return (x == 1 && SO == 1) ? 1 : 0; }) | tl::to<std::vector<long>>();
 
       // NB: mat = D(R_{\alpaha})
       // if mat has time inversion symmetry (T), then T*D(R_{\alpha}) = -D(R_{\alpha})
-      return mats | stdv::transform([mats_tinv_and_SO, i = 0](cmat_t const &x) mutable {
-               return (mats_tinv_and_SO[i++] == 1) ? -conj(svd(x)) : svd(x);
-             })
+      return mats
+         | stdv::transform([mats_tinv_and_SO, i = 0](cmat_t const &x) mutable { return (mats_tinv_and_SO[i++] == 1) ? -conj(svd(x)) : svd(x); })
          | tl::to<std::vector<cmat_t>>();
     };
-    return (mode == ReadMode::Correlated) ?
-       read_mats(root["dft_input"], "rot_mat", "rot_mat_time_inv") :
-       (mode == ReadMode::ThetaProjectors) ?
-       read_mats(root["dft_parproj_input"], "rot_mat_all", "rot_mat_all_time_inv") :
-       throw std::runtime_error("This should not happen!");
+    return (mode == ReadMode::Correlated)  ? read_mats(root["dft_input"], "rot_mat", "rot_mat_time_inv") :
+       (mode == ReadMode::ThetaProjectors) ? read_mats(root["dft_parproj_input"], "rot_mat_all", "rot_mat_all_time_inv") :
+                                             throw std::runtime_error("This should not happen!");
   }
 
   //-------------------------------------------------------
   /// Read projectors using ReadMode, rotate to local frame, and embed them in the M space. (internal)
-  nda::array<dcomplex, 4> load_rotate_and_format_projectors(std::string const &filename, ReadMode mode,
-                                                            std::vector<cmat_t> const &rot_mats,
+  nda::array<dcomplex, 4> load_rotate_and_format_projectors(std::string const &filename, ReadMode mode, std::vector<cmat_t> const &rot_mats,
                                                             std::vector<long> const &atom_decomp) {
     auto load_Pks = [](auto filename, auto mode) {
       auto root = h5::proxy{filename, 'r'};
@@ -136,16 +124,14 @@ namespace triqs::modest {
 
     auto P_k_tmp  = load_Pks(filename, mode);
     auto n_atoms  = P_k_tmp.extent(2);
-    auto P_k_list = range(n_atoms)
-       | stdv::transform([&](auto atom) { return P_k_tmp(r_all, r_all, atom, r_all, r_all); }) | tl::to<std::vector>();
+    auto P_k_list = range(n_atoms) | stdv::transform([&](auto atom) { return P_k_tmp(r_all, r_all, atom, r_all, r_all); }) | tl::to<std::vector>();
 
     // Merge the rotation matrices R into the Ps: P <- dagger(R) * P
     auto [n_k, n_sigma, n_m, n_nu] = P_k_list[0].shape(); // NOLINT
     for (auto isig : range(n_sigma)) {
       for (auto ik : range(n_k)) {
         for (auto const &[R, P] : zip(rot_mats, P_k_list)) {
-          P(ik, isig, nda::range(0, R.extent(0)), r_all) =
-             dagger(R) * nda::matrix<dcomplex>{P(ik, isig, nda::range(0, R.extent(0)), r_all)};
+          P(ik, isig, nda::range(0, R.extent(0)), r_all) = dagger(R) * nda::matrix<dcomplex>{P(ik, isig, nda::range(0, R.extent(0)), r_all)};
         }
       }
     }
@@ -161,8 +147,7 @@ namespace triqs::modest {
 
   //-------------------------------------------------------
   /// Read band dispersion and k-weights according to ReadMode. (internal)
-  std::tuple<nda::array<dcomplex, 4>, nda::matrix<long>, nda::array<double, 1>>
-  read_bands_and_weights(std::string filename, ReadMode mode) {
+  std::tuple<nda::array<dcomplex, 4>, nda::matrix<long>, nda::array<double, 1>> read_bands_and_weights(std::string filename, ReadMode mode) {
     auto root = h5::proxy{filename, 'r'};
     if (mode == ReadMode::Correlated || mode == ReadMode::ThetaProjectors) {
       auto g_dft = root["dft_input"];
@@ -181,8 +166,7 @@ namespace triqs::modest {
   spin_kind_e read_spin_kind(auto const &filename) {
     // set up spin_type
     auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
-    return (long(g_dft["SO"]) == 1) ? spin_kind_e::NonColinear :
-                                      ((long(g_dft["SP"]) == 1) ? spin_kind_e::Polarized : spin_kind_e::NonPolarized);
+    return (long(g_dft["SO"]) == 1) ? spin_kind_e::NonColinear : ((long(g_dft["SP"]) == 1) ? spin_kind_e::Polarized : spin_kind_e::NonPolarized);
   }
 
   //-------------------------------------------------------
@@ -199,8 +183,7 @@ namespace triqs::modest {
 
   //-------------------------------------------------------
   /// Prepare the spherical Ylm to DFT orbital basis rotations. (internal)
-  nda::array<nda::matrix<dcomplex>, 1> read_spherical_to_dft_basis(std::string dft_code,
-                                                                   std::vector<atomic_shell_t> const &atomic_shells) {
+  nda::array<nda::matrix<dcomplex>, 1> read_spherical_to_dft_basis(std::string dft_code, std::vector<atomic_shell_t> const &atomic_shells) {
     //TODO: finish this!
     auto string_to_enum = [](auto dft_code) {
       if (dft_code == "wien2k") {
@@ -238,14 +221,14 @@ namespace triqs::modest {
     auto symm_ops = ibz_symmetry_ops{};
 
     // read the symmetrization matrices (Q) for each symmetry operation S in the space group G.
-    auto symm_ops_mats = sort_keys_as_int(g_symm["mat"])
-       | stdv::transform([](auto const &g) { return to_vector<cmat_t>(sort_keys_as_int(g)); }) | tl::to<std::vector>();
+    auto symm_ops_mats = sort_keys_as_int(g_symm["mat"]) | stdv::transform([](auto const &g) { return to_vector<cmat_t>(sort_keys_as_int(g)); })
+       | tl::to<std::vector>();
 
     // read the permutation table which contains: for each symmetry op S in space group G,
     // the permutations of all atoms in the crystal structure under S.
     // dim(perm_table_all) = [number of sym ops][number of atoms in crystal]
-    auto perm_table_all = sort_keys_as_int(g_symm["perm"])
-       | stdv::transform([](auto const &g) { return to_vector<long>(sort_keys_as_int(g)); }) | tl::to<std::vector>();
+    auto perm_table_all =
+       sort_keys_as_int(g_symm["perm"]) | stdv::transform([](auto const &g) { return to_vector<long>(sort_keys_as_int(g)); }) | tl::to<std::vector>();
 
     // The permutation table is written for all atoms in the crystal. We must filter to obtain only the correlated atoms.
     auto corr_atom_to_alpha = std::unordered_map<long, long>{};
@@ -254,26 +237,22 @@ namespace triqs::modest {
     // The filtered permutation table (perm_table_corr): for each sym S, filter only the correlated atoms
     // and map their indices from dft_idx correlated idx.
     // dim(perm_table_correlated) = [number of sym ops][number of correlated atoms in crystal]
-    auto perm_table_correlated =
-       perm_table_all | stdv::transform([&](auto const &sym) {
-         return atomic_shells
-            | stdv::transform([&](auto corr_atom) { return corr_atom_to_alpha[sym[corr_atom.dft_idx - 1]]; })
-            | tl::to<std::vector>();
-       })
+    auto perm_table_correlated = perm_table_all | stdv::transform([&](auto const &sym) {
+                                   return atomic_shells
+                                      | stdv::transform([&](auto corr_atom) { return corr_atom_to_alpha[sym[corr_atom.dft_idx - 1]]; })
+                                      | tl::to<std::vector>();
+                                 })
        | tl::to<std::vector>();
 
     // Merge the rotation matrices R into the symmetrization matrices (Qs).
     for (auto const &[iq, perm] : enumerate(perm_table_correlated)) {
-      for (auto const &[a, b] : enumerate(perm)) {
-        symm_ops_mats[iq][a] = dagger(rot_mats[b]) * symm_ops_mats[iq][a] * rot_mats[a];
-      }
+      for (auto const &[a, b] : enumerate(perm)) { symm_ops_mats[iq][a] = dagger(rot_mats[b]) * symm_ops_mats[iq][a] * rot_mats[a]; }
     }
 
     // Does this op have time inversion symmetry
     auto time_inv_op = to_vector<long>(sort_keys_as_int(g_symm["time_inv"]));
     // save the symmetry ops in to the ibz_symmetrizer
-    symm_ops.ops = range(perm_table_correlated.size())
-       | stdv::transform([symm_ops_mats, perm_table_correlated, time_inv_op](auto const &isym) {
+    symm_ops.ops = range(perm_table_correlated.size()) | stdv::transform([symm_ops_mats, perm_table_correlated, time_inv_op](auto const &isym) {
                      return ibz_symmetry_ops::op{symm_ops_mats[isym], perm_table_correlated[isym], time_inv_op[isym]};
                    })
        | tl::to<std::vector>();
@@ -283,8 +262,8 @@ namespace triqs::modest {
 
   //-------------------------------------------------------
   /// Prepare one-body elements for a DMFT calculation.
-  std::pair<double, one_body_elements_on_grid>
-  one_body_elements_from_dft_converter(std::string const &filename, double threshold, bool diagonalize_hloc) {
+  std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold,
+                                                                                    bool diagonalize_hloc) {
     //TODO: add verbosity, currently not used.
     auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
 
@@ -314,17 +293,15 @@ namespace triqs::modest {
 
     /// read symmetry ops
     //FIXME: auto symm_ops = (long(g_dft["symm_op"]) == 0) ? ibz_symmetry_ops{} : read_ibz(root, atomic_shells, Rmats);
-    auto symm_ops = (long(g_dft["symm_op"]) == 0) ?
-       std::optional<ibz_symmetry_ops>{} :
-       std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::Correlated));
+    auto symm_ops = (long(g_dft["symm_op"]) == 0) ? std::optional<ibz_symmetry_ops>{} :
+                                                    std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::Correlated));
 
-    auto eps_k = band_dispersion{spin_kind, std::move(H_k), n_bands_per_k, k_weights};
-    auto proj  = downfolding_projector{spin_kind, std::move(P_k), n_bands_per_k};
+    auto eps_k = band_dispersion{.spin_kind = spin_kind, .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = k_weights};
+    auto proj  = downfolding_projector{.spin_kind = spin_kind, .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
 
     /// build a first version without symmetries
     auto C_space_no_symm = local_space{spin_kind, atomic_shells, {}, {}, {}};
-    auto obe             = one_body_elements_on_grid{
-                   .H = eps_k, .C_space = C_space_no_symm, .P = proj, .ibz_symm_ops = std::move(symm_ops)};
+    auto obe             = one_body_elements_on_grid{.H = eps_k, .C_space = C_space_no_symm, .P = proj, .ibz_symm_ops = std::move(symm_ops)};
 
     // TODO: verbosity should report the symmetries found (or at least the result of the symmetries found).
     // auto out = ostream_with_verbosity(std::cout, verbosity);
@@ -359,8 +336,7 @@ namespace triqs::modest {
 
   //-------------------------------------------------------
   /// Prepare one-body elements with the Θ projectors.
-  one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename,
-                                                                    one_body_elements_on_grid const &obe) {
+  one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe) {
     //check for group and throw error
     auto root = h5::proxy{filename, 'r'};
     if (!root.has_group("dft_parproj_input")) {
@@ -371,8 +347,7 @@ namespace triqs::modest {
     auto atomic_shells = read_atomic_shells(filename, ReadMode::ThetaProjectors);
 
     /// The decomposition and rotations must be embedded from the C spcae to the W space
-    auto new_block_decomposition =
-       detail::inject_to_new_space(obe.C_space.atoms_block_decomposition(), obe.C_space.atomic_shells(), atomic_shells);
+    auto new_block_decomposition = detail::inject_to_new_space(obe.C_space.atoms_block_decomposition(), obe.C_space.atomic_shells(), atomic_shells);
 
     /// The local space expanded from C to W
     auto W_space = local_space{obe.C_space.spin_kind(), atomic_shells, new_block_decomposition, {}, {}};
@@ -386,17 +361,15 @@ namespace triqs::modest {
     auto theta_proj  = downfolding_projector{obe.C_space.spin_kind(), std::move(P_k), obe.H.n_bands_per_k};
 
     /// create a new IBZ symmetrizer that spans all atoms instead of just the correlated atoms
-    auto symm_ops = (obe.ibz_symm_ops) ?
-       std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::ThetaProjectors)) :
-       std::optional<ibz_symmetry_ops>{};
+    auto symm_ops = (obe.ibz_symm_ops) ? std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::ThetaProjectors)) :
+                                         std::optional<ibz_symmetry_ops>{};
 
     return one_body_elements_on_grid{.H = obe.H, .C_space = W_space, .P = theta_proj, .ibz_symm_ops = symm_ops};
   }
 
   //-------------------------------------------------------
   /// Prepare one-body elements along high-symmetry k-path.
-  one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename,
-                                                                    one_body_elements_on_grid const &obe) {
+  one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe) {
     /// check for group and throw error
     auto root = h5::proxy{filename, 'r'};
     if (!root.has_group("dft_bands_input")) {

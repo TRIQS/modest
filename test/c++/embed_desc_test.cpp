@@ -72,12 +72,25 @@ TEST(embed_desc_tests, svo_wien2k) { // NOLINT
 }
 
 TEST(embed_desc_tests, extract_matrix) {
-  std::string filename = "ref_data/SrVO3-cubic-t2g.ref.h5";
-  auto [_, obe]        = one_body_elements_from_dft_converter(filename);
-  auto E               = make_embedding_with_equivalences(obe.C_space);
-  auto hloc_C          = impurity_levels(obe);
-  auto h_imp           = E.extract(hloc_C)[0];
-  for (auto h : h_imp) { std::cout << fmt::format("{}\n", h); }
+  std::string filename       = "ref_data/SrVO3-cubic-t2g.ref.h5";
+  auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
+  auto E                     = make_embedding_with_no_equivalences(obe.C_space);
+  auto hloc_C                = impurity_levels(obe);
+  auto h_imp                 = E.extract(hloc_C);
+  auto n_orb                 = obe.C_space.dim();
+  auto n_sigma               = obe.C_space.n_sigma();
+  for (auto a : range(obe.C_space.n_atoms()))
+    for (auto o : range(n_orb))
+      for (auto s : range(n_sigma)) EXPECT_COMPLEX_NEAR(hloc_C(a, s)(o, o), h_imp[a][o + s * o](0, 0));
+}
+
+TEST(embed_desc_tests, cluster) { // NOLINT
+  auto [target_density, obe] = one_body_elements_from_dft_converter("ref_data/nio.ref.h5");
+
+  auto partition        = std::vector<std::vector<long>>{{0, 1}};
+  auto [obe_cluster, E] = make_embedding_with_clusters(obe, partition);
+  std::cout << obe_cluster << std::endl;
+  std::cout << E << std::endl;
 }
 
 #if LFS

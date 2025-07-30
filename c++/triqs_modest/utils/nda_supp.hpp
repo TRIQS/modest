@@ -19,4 +19,10 @@ namespace nda {
     for (int j = 0; j < N; ++j) res(p[j], j) = 1;
     return res;
   }
+
+  template <typename T> std::vector<T> flatten(const std::vector<std::vector<T>> &nested) {
+    std::vector<T> flat;
+    for (const auto &sub : nested) { flat.insert(flat.end(), sub.begin(), sub.end()); }
+    return flat;
+  }
 } // namespace nda

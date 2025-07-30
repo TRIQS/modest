@@ -1,9 +1,10 @@
 #pragma once
-#include "./local_space.hpp"
+#include "./downfolding.hpp"
 #include "utils/defs.hpp"
 #include "utils/gf_supp.hpp"
 #include "utils/range_supp.hpp"
 #include <fmt/ranges.h>
+
 namespace triqs::modest {
 
   /**
@@ -392,6 +393,14 @@ namespace triqs::modest {
       return pi_imp;
     };
     return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
+  }
+
+  // -----------------------------------------------------------------------
+  inline std::pair<one_body_elements_on_grid, embedding> make_embedding_with_clusters(one_body_elements_on_grid obe,
+                                                                                      std::vector<std::vector<long>> const &atom_partition) {
+    auto new_obe = permute_local_space(atom_partition, obe);
+    auto E       = make_embedding_with_no_equivalences(new_obe.C_space);
+    return {new_obe, E};
   }
 
 // ------------------------------------------------------------------------------

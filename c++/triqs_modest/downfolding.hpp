@@ -3,15 +3,14 @@
 #include <type_traits>
 #include "./local_space.hpp"
 #include "./ibz_symmetry_ops.hpp"
+#include "utils/nda_supp.hpp"
 
 namespace triqs::modest {
 
   // In NonPolarized case, σ logically has 2 values, but
   // the data are the same, so we store only on.
   // this method maps σ to its index for the data arrays
-  [[nodiscard]] inline long sigma_to_data_idx(spin_kind_e spin_kind, long sigma) {
-    return (spin_kind == spin_kind_e::Polarized) ? sigma : 0;
-  };
+  [[nodiscard]] inline long sigma_to_data_idx(spin_kind_e spin_kind, long sigma) { return (spin_kind == spin_kind_e::Polarized) ? sigma : 0; };
 
   /**
  * @ingroup band_dispersion
@@ -21,12 +20,10 @@ namespace triqs::modest {
  * 
  */
   struct band_dispersion {
-    spin_kind_e
-       spin_kind; // FIXME : TO DO : change to diagonal ? Or make variant on this point for a general basis ? premature ?
+    spin_kind_e spin_kind;             // FIXME : TO DO : change to diagonal ? Or make variant on this point for a general basis ? premature ?
     nda::array<dcomplex, 4> H_k;       //< H_k [k_idx, σ', nu, nu']
     nda::array<long, 2> n_bands_per_k; //< n_bands_per_k [k_idx, σ'] = # of nu
-    nda::array<double, 1>
-       k_weights; //< k_weights[k_idx] //FIXME : Do we want to make a mini- k grid object with the weights ??
+    nda::array<double, 1> k_weights;   //< k_weights[k_idx] //FIXME : Do we want to make a mini- k grid object with the weights ??
 
     // public:
     // /// Constructor
@@ -47,9 +44,7 @@ namespace triqs::modest {
     }
 
     /// Number of bands #ν
-    [[nodiscard]] long N_nu(long sigma, long k_idx) const {
-      return n_bands_per_k(k_idx, sigma_to_data_idx(spin_kind, sigma));
-    }
+    [[nodiscard]] long N_nu(long sigma, long k_idx) const { return n_bands_per_k(k_idx, sigma_to_data_idx(spin_kind, sigma)); }
 
     /// Number of k points in the grid
     [[nodiscard]] long n_k() const { return H_k.extent(0); }
@@ -109,10 +104,12 @@ namespace triqs::modest {
   void h5_read(h5::group g, std::string const &name, one_body_elements_on_grid &x);
   void h5_write(h5::group g, std::string const &name, one_body_elements_on_grid const &x);
 
+  //-------------------------------------------------------------
+  one_body_elements_on_grid permute_local_space(std::vector<std::vector<long>> const &atom_partition, one_body_elements_on_grid const &x);
+
   // -------------------------------------------------------------
   /// Rotates the local basis of the downfolding projector
-  one_body_elements_on_grid rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U,
-                                               one_body_elements_on_grid const &x);
+  one_body_elements_on_grid rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U, one_body_elements_on_grid const &x);
   // -------------------------------------------------------------
   /// Compute the local impurity levels from the single-particle dispersion.
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_on_grid const &obe);
@@ -121,8 +118,8 @@ namespace triqs::modest {
   // These functions are not part of the public API: not documented, not wrapped.
   namespace detail {
     /// The projected bare function on the C space, cf notes.
-    nda::array<dcomplex, 3> G0_C_k_sigma(one_body_elements_on_grid const &obe, double mu, long k_idx, long sigma,
-                                         std::vector<dcomplex> const &omegas, bool mu_derivative = false);
+    nda::array<dcomplex, 3> G0_C_k_sigma(one_body_elements_on_grid const &obe, double mu, long k_idx, long sigma, std::vector<dcomplex> const &omegas,
+                                         bool mu_derivative = false);
   } // namespace detail
 
 } // namespace triqs::modest

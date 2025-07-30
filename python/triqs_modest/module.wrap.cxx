@@ -1220,22 +1220,28 @@ static auto const fun_33 = c2py::dispatcher_f_kw_t{c2py::cfun(
       const std::optional<std::vector<long>> &atom_to_imp) { return triqs::modest::make_embedding(C_space, block_decomposition, atom_to_imp); },
    "C_space", "block_decomposition", "atom_to_imp"_a = std::nullopt)};
 
-// make_embedding_with_equivalences
+// make_embedding_with_clusters
 static auto const fun_34 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](triqs::modest::one_body_elements_on_grid obe,
+                 const std::vector<std::vector<long>> &atom_partition) { return triqs::modest::make_embedding_with_clusters(obe, atom_partition); },
+              "obe", "atom_partition")};
+
+// make_embedding_with_equivalences
+static auto const fun_35 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::local_space &C_space) { return triqs::modest::make_embedding_with_equivalences(C_space); }, "C_space")};
 
 // make_embedding_with_no_equivalences
-static auto const fun_35 = c2py::dispatcher_f_kw_t{
+static auto const fun_36 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::local_space &C_space) { return triqs::modest::make_embedding_with_no_equivalences(C_space); }, "C_space")};
 
 // make_kanamori
-static auto const fun_36 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_37 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double U_prime, double J_hund, bool spin_flip,
       bool pair_hopping) { return triqs::make_kanamori(tau_names, dim_gamma, U_int, U_prime, J_hund, spin_flip, pair_hopping); },
    "tau_names", "dim_gamma", "U_int", "U_prime", "J_hund", "spin_flip"_a = true, "pair_hopping"_a = true)};
 
 // make_slater
-static auto const fun_37 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_38 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double J_hund,
       const nda::matrix<triqs::dcomplex> &spherical_to_dft, const std::optional<nda::matrix<triqs::dcomplex>> &dft_to_local) {
      return triqs::make_slater(tau_names, dim_gamma, U_int, J_hund, spherical_to_dft, dft_to_local);
@@ -1243,52 +1249,58 @@ static auto const fun_37 = c2py::dispatcher_f_kw_t{c2py::cfun(
    "tau_names", "dim_gamma", "U_int", "J_hund", "spherical_to_dft", "dft_to_local")};
 
 // one_body_elements_from_dft_converter
-static auto const fun_38 = c2py::dispatcher_f_kw_t{
+static auto const fun_39 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::string &filename, double threshold,
                  bool diagonalize_hloc) { return triqs::modest::one_body_elements_from_dft_converter(filename, threshold, diagonalize_hloc); },
               "filename", "threshold"_a = 1.e-5, "diagonalize_hloc"_a = false)};
 
 // one_body_elements_on_high_symmetry_path
-static auto const fun_39 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_40 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::string &filename, const triqs::modest::one_body_elements_on_grid &obe) {
      return triqs::modest::one_body_elements_on_high_symmetry_path(filename, obe);
    },
    "filename", "obe")};
 
 // one_body_elements_with_theta_projectors
-static auto const fun_40 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_41 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::string &filename, const triqs::modest::one_body_elements_on_grid &obe) {
      return triqs::modest::one_body_elements_with_theta_projectors(filename, obe);
    },
    "filename", "obe")};
 
+// permute_local_space
+static auto const fun_42 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const std::vector<std::vector<long>> &atom_partition,
+                 const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::permute_local_space(atom_partition, x); },
+              "atom_partition", "x")};
+
 // projected_spectral_function
-static auto const fun_41 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_43 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const triqs::modest::one_body_elements_on_grid &obe_theta, const triqs::modest::downfolding_projector &Proj, double mu,
       const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma_w, const nda::array<nda::matrix<double>, 2> &Sigma_DC,
       double broadening) { return triqs::modest::projected_spectral_function(obe_theta, Proj, mu, Sigma_w, Sigma_DC, broadening); },
    "obe_theta", "Proj", "mu", "Sigma_w", "Sigma_DC", "broadening"_a = 0.01)};
 
 // root_finder
-static auto const fun_42 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_44 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](std::string method, std::function<double(double)> f, double x_init, double y_value, double precision, double delta_x, long max_loops,
       std::string x_name, std::string y_name,
       bool verbosity) { return triqs::root_finder(method, f, x_init, y_value, precision, delta_x, max_loops, x_name, y_name, verbosity); },
    "method", "f", "x_init", "y_value", "precision", "delta_x", "max_loops"_a = 1000, "x_name"_a = "", "y_name"_a = "", "verbosity"_a = true)};
 
 // sigma_to_data_idx
-static auto const fun_43 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_45 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](triqs::modest::spin_kind_e spin_kind, long sigma) { return triqs::modest::sigma_to_data_idx(spin_kind, sigma); }, "spin_kind", "sigma")};
 
 // spectral_function_on_high_symmetry_path
-static auto const fun_44 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_46 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
       const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma_w, const nda::array<nda::matrix<double>, 2> &Sigma_DC,
       double broadening) { return triqs::modest::spectral_function_on_high_symmetry_path(obe, mu, Sigma_w, Sigma_DC, broadening); },
    "obe", "mu", "Sigma_w", "Sigma_DC", "broadening"_a = 0.01)};
 
 // symmetrize_gf
-static auto const fun_45 = c2py::dispatcher_f_kw_t{
+static auto const fun_47 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gin,
                  std::vector<std::vector<long>> degenerate_blocks) { return triqs::modest::symmetrize_gf(Gin, degenerate_blocks); },
               "Gin", "degenerate_blocks")};
@@ -1625,7 +1637,8 @@ static const auto doc_d_33       = fun_33.doc({R"DOC(   Parameters
    -------
    
       embedding)DOC"});
-static const auto doc_d_34       = fun_34.doc({R"DOC(   Parameters
+static const auto doc_d_34       = fun_34.doc({R"DOC(   )DOC"});
+static const auto doc_d_35       = fun_35.doc({R"DOC(   Parameters
    ----------
    
    C_space:
@@ -1635,7 +1648,7 @@ static const auto doc_d_34       = fun_34.doc({R"DOC(   Parameters
    -------
    
       embedding)DOC"});
-static const auto doc_d_35       = fun_35.doc({R"DOC(   Parameters
+static const auto doc_d_36       = fun_36.doc({R"DOC(   Parameters
    ----------
    
    C_space:
@@ -1645,7 +1658,7 @@ static const auto doc_d_35       = fun_35.doc({R"DOC(   Parameters
    -------
    
       embedding)DOC"});
-static const auto doc_d_36       = fun_36.doc({R"DOC(   Parameters
+static const auto doc_d_37       = fun_37.doc({R"DOC(   Parameters
    ----------
    
    tau_names:
@@ -1662,7 +1675,7 @@ static const auto doc_d_36       = fun_36.doc({R"DOC(   Parameters
       spin flip term
    pair_hopping:
       pair hopping term)DOC"});
-static const auto doc_d_37       = fun_37.doc({R"DOC(   Parameters
+static const auto doc_d_38       = fun_38.doc({R"DOC(   Parameters
    ----------
    
    tau_names:
@@ -1676,7 +1689,7 @@ static const auto doc_d_37       = fun_37.doc({R"DOC(   Parameters
    spherical_to_dft:
       
    dft_to_local:)DOC"});
-static const auto doc_d_38       = fun_38.doc({R"DOC(   Parameters
+static const auto doc_d_39       = fun_39.doc({R"DOC(   Parameters
    ----------
    
    filename:
@@ -1692,7 +1705,7 @@ static const auto doc_d_38       = fun_38.doc({R"DOC(   Parameters
    -------
    
       The total electron density and a one-body elements.)DOC"});
-static const auto doc_d_39       = fun_39.doc({R"DOC(   Parameters
+static const auto doc_d_40       = fun_40.doc({R"DOC(   Parameters
    ----------
    
    filename:
@@ -1704,7 +1717,7 @@ static const auto doc_d_39       = fun_39.doc({R"DOC(   Parameters
    -------
    
       One-body elements along high-symmetry k-path.)DOC"});
-static const auto doc_d_40       = fun_40.doc({R"DOC(   Parameters
+static const auto doc_d_41       = fun_41.doc({R"DOC(   Parameters
    ----------
    
    filename:
@@ -1716,7 +1729,8 @@ static const auto doc_d_40       = fun_40.doc({R"DOC(   Parameters
    -------
    
       One-body elements using the Θ projectors.)DOC"});
-static const auto doc_d_41       = fun_41.doc({R"DOC(   Parameters
+static const auto doc_d_42       = fun_42.doc({R"DOC(   )DOC"});
+static const auto doc_d_43       = fun_43.doc({R"DOC(   Parameters
    ----------
    
    obe_theta:
@@ -1736,7 +1750,7 @@ static const auto doc_d_41       = fun_41.doc({R"DOC(   Parameters
    -------
    
       spectral_function_w)DOC"});
-static const auto doc_d_42       = fun_42.doc({R"DOC(   Parameters
+static const auto doc_d_44       = fun_44.doc({R"DOC(   Parameters
    ----------
    
    method:
@@ -1764,8 +1778,8 @@ static const auto doc_d_42       = fun_42.doc({R"DOC(   Parameters
    -------
    
       x, f(x) std::pair<double, double>)DOC"});
-static const auto doc_d_43       = fun_43.doc({R"DOC(   )DOC"});
-static const auto doc_d_44       = fun_44.doc({R"DOC(   Parameters
+static const auto doc_d_45       = fun_45.doc({R"DOC(   )DOC"});
+static const auto doc_d_46       = fun_46.doc({R"DOC(   Parameters
    ----------
    
    obe:
@@ -1783,7 +1797,7 @@ static const auto doc_d_44       = fun_44.doc({R"DOC(   Parameters
    -------
    
       spectral_function_kw)DOC"});
-static const auto doc_d_45       = fun_45.doc({R"DOC(   Parameters
+static const auto doc_d_47       = fun_47.doc({R"DOC(   Parameters
    ----------
    
    Gin:
@@ -1813,18 +1827,20 @@ static PyMethodDef module_methods[] = {
    {"h5_write", (PyCFunction)c2py::pyfkw<fun_31>, METH_VARARGS | METH_KEYWORDS, doc_d_31.c_str()},
    {"impurity_levels", (PyCFunction)c2py::pyfkw<fun_32>, METH_VARARGS | METH_KEYWORDS, doc_d_32.c_str()},
    {"make_embedding", (PyCFunction)c2py::pyfkw<fun_33>, METH_VARARGS | METH_KEYWORDS, doc_d_33.c_str()},
-   {"make_embedding_with_equivalences", (PyCFunction)c2py::pyfkw<fun_34>, METH_VARARGS | METH_KEYWORDS, doc_d_34.c_str()},
-   {"make_embedding_with_no_equivalences", (PyCFunction)c2py::pyfkw<fun_35>, METH_VARARGS | METH_KEYWORDS, doc_d_35.c_str()},
-   {"make_kanamori", (PyCFunction)c2py::pyfkw<fun_36>, METH_VARARGS | METH_KEYWORDS, doc_d_36.c_str()},
-   {"make_slater", (PyCFunction)c2py::pyfkw<fun_37>, METH_VARARGS | METH_KEYWORDS, doc_d_37.c_str()},
-   {"one_body_elements_from_dft_converter", (PyCFunction)c2py::pyfkw<fun_38>, METH_VARARGS | METH_KEYWORDS, doc_d_38.c_str()},
-   {"one_body_elements_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<fun_39>, METH_VARARGS | METH_KEYWORDS, doc_d_39.c_str()},
-   {"one_body_elements_with_theta_projectors", (PyCFunction)c2py::pyfkw<fun_40>, METH_VARARGS | METH_KEYWORDS, doc_d_40.c_str()},
-   {"projected_spectral_function", (PyCFunction)c2py::pyfkw<fun_41>, METH_VARARGS | METH_KEYWORDS, doc_d_41.c_str()},
-   {"root_finder", (PyCFunction)c2py::pyfkw<fun_42>, METH_VARARGS | METH_KEYWORDS, doc_d_42.c_str()},
-   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_43>, METH_VARARGS | METH_KEYWORDS, doc_d_43.c_str()},
-   {"spectral_function_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<fun_44>, METH_VARARGS | METH_KEYWORDS, doc_d_44.c_str()},
-   {"symmetrize_gf", (PyCFunction)c2py::pyfkw<fun_45>, METH_VARARGS | METH_KEYWORDS, doc_d_45.c_str()},
+   {"make_embedding_with_clusters", (PyCFunction)c2py::pyfkw<fun_34>, METH_VARARGS | METH_KEYWORDS, doc_d_34.c_str()},
+   {"make_embedding_with_equivalences", (PyCFunction)c2py::pyfkw<fun_35>, METH_VARARGS | METH_KEYWORDS, doc_d_35.c_str()},
+   {"make_embedding_with_no_equivalences", (PyCFunction)c2py::pyfkw<fun_36>, METH_VARARGS | METH_KEYWORDS, doc_d_36.c_str()},
+   {"make_kanamori", (PyCFunction)c2py::pyfkw<fun_37>, METH_VARARGS | METH_KEYWORDS, doc_d_37.c_str()},
+   {"make_slater", (PyCFunction)c2py::pyfkw<fun_38>, METH_VARARGS | METH_KEYWORDS, doc_d_38.c_str()},
+   {"one_body_elements_from_dft_converter", (PyCFunction)c2py::pyfkw<fun_39>, METH_VARARGS | METH_KEYWORDS, doc_d_39.c_str()},
+   {"one_body_elements_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<fun_40>, METH_VARARGS | METH_KEYWORDS, doc_d_40.c_str()},
+   {"one_body_elements_with_theta_projectors", (PyCFunction)c2py::pyfkw<fun_41>, METH_VARARGS | METH_KEYWORDS, doc_d_41.c_str()},
+   {"permute_local_space", (PyCFunction)c2py::pyfkw<fun_42>, METH_VARARGS | METH_KEYWORDS, doc_d_42.c_str()},
+   {"projected_spectral_function", (PyCFunction)c2py::pyfkw<fun_43>, METH_VARARGS | METH_KEYWORDS, doc_d_43.c_str()},
+   {"root_finder", (PyCFunction)c2py::pyfkw<fun_44>, METH_VARARGS | METH_KEYWORDS, doc_d_44.c_str()},
+   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_45>, METH_VARARGS | METH_KEYWORDS, doc_d_45.c_str()},
+   {"spectral_function_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<fun_46>, METH_VARARGS | METH_KEYWORDS, doc_d_46.c_str()},
+   {"symmetrize_gf", (PyCFunction)c2py::pyfkw<fun_47>, METH_VARARGS | METH_KEYWORDS, doc_d_47.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
