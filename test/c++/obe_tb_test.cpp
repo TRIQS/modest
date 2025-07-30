@@ -33,7 +33,7 @@ TEST(obe_tb, svo_wannier90) { // NOLINT
   //auto iw_mesh = gloc_ref[0].mesh();
 
   // full kgrid info is not written to reference files, it appears this one was ~12x12x12?
-  triqs::bz_int::bz_int_options opt = {.k_grid_dims = {24, 24, 24}};
+  triqs::lattice::bz_int_options opt = {.k_grid_dims = {24, 24, 24}};
 
   // make a zero self energy
   auto Sigma = gfs::gf<mesh::imfreq>{iw_mesh, {dim, dim}};
