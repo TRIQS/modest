@@ -13,9 +13,3 @@ CPMAddPackage(
   URI "gh:TartanLlama/ranges#main"
   OPTIONS "RANGES_BUILD_TESTS OFF"
 )
-
-# -- cppcoro --
-CPMAddPackage(
-  URI "gh:andreasbuhr/cppcoro#main"
-  OPTIONS "BUILD_TESTING OFF"
-)

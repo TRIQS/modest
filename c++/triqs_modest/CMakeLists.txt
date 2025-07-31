@@ -31,9 +31,6 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include FILES_MATCHING
 target_link_libraries(${PROJECT_NAME}_c PUBLIC ranges)
 install(TARGETS ranges EXPORT ${PROJECT_NAME}-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-target_link_libraries(${PROJECT_NAME}_c PUBLIC cppcoro)
-install(TARGETS cppcoro EXPORT ${PROJECT_NAME}-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
 # ========= Static Analyzer Checks ==========
 
 option(ANALYZE_SOURCES OFF "Run static analyzer checks if found (clang-tidy, cppcheck)")
