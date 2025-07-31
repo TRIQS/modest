@@ -15,7 +15,7 @@ namespaces = "triqs triqs::modest  triqs::lattice"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::|triqs::(root_finder|make_kanamori|make_slater|U_matrix_in_spherical_basis|tb_hamiltonian)|triqs::lattice::(superlattice)"
+match_names = "triqs::modest::|triqs::(fold|root_finder|make_kanamori|make_slater|U_matrix_in_spherical_basis|tb_hamiltonian)|triqs::lattice::(superlattice)"
 reject_names = "triqs::modest::(ibz_symmetry_ops|rotate_local_basis)"
 
 # Only keep elements declared in files matching the pattern

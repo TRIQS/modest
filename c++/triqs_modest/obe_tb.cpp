@@ -74,7 +74,7 @@ namespace triqs::modest {
         auto Hloc0_ab = nda::zeros<dcomplex>(shell.dim, shell.dim);
         // need to create a matrix of dim x dim for each
         for (auto iorb : nda::range(shell.dim)) {
-          for (auto jorb : nda::range(shell.dim)) { Hloc0_ab(iorb, jorb) = H.get_hoppings()[iR0](start_orb + iorb, start_orb + jorb); }
+          for (auto jorb : nda::range(shell.dim)) { Hloc0_ab(iorb, jorb) = H.hoppings()[iR0](start_orb + iorb, start_orb + jorb); }
           start_orb += shell.dim;
         }
         Hloc(ishell, isigma) = Hloc0_ab;
