@@ -17,7 +17,7 @@ namespace triqs::modest {
 
   struct one_body_elements {
     local_space C_space;
-    C2PY_IGNORE std::vector<tb_hamiltonian> H; // positibility to have two spin channels for spin pol
+    std::vector<tb_hamiltonian> H; // positibility to have two spin channels for spin pol
     //downfolding_projector P;
     //C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
   };
