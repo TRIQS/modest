@@ -9,12 +9,11 @@
 #include <nda/nda.hpp>
 #include <triqs/gfs/functions/density.hpp>
 #include "./root_finder.hpp"
-
-namespace nda::temp {
-  CLEF_MAKE_FNT_LAZY(trace);
-}
+#include "triqs/lattice/superlattice.hpp"
 
 namespace triqs::modest {
+
+  using triqs::lattice::superlattice;
 
   struct one_body_elements {
     local_space C_space;
@@ -34,20 +33,25 @@ namespace triqs::modest {
   one_body_elements one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
                                                      spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells);
 
-  // TODO docstring
+  C2PY_IGNORE one_body_elements make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e const &spin_kind,
+                                                 std::vector<atomic_shell_t> atomic_shells);
+
+  // FIXME docstring
   nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells);
   nda::array<nda::matrix<dcomplex>, 2> Hloc(one_body_elements const &obe);
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements const &obe);
 
-  C2PY_IGNORE one_body_elements make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e const &spin_kind,
-                                                 std::vector<atomic_shell_t> atomic_shells);
+  /// Folding with superlattice
+  one_body_elements fold(superlattice const &sl, one_body_elements const &obe);
 
+  //  -----------------------------------------------------------------------
+  // FIXME docstring
   /** @brief Compute local Green's function from a one_body_elements_tb object.
     *    
     * @param one_body_elements_tb A one_body_elements object containing the tb_hamiltonian
     * @param mu Chemical potential 
     * @param Sigma_embed Self energy in the embedded basis? TODO I don't think this was relevant 
-    * @param Sigma_DC ? TODO JC would like this to be optional 
+    * @param Sigma_Hartree
     * @param bz_int_options Option of the BZ integration
     * @param d_H ? for magnetic fields etc? 
     * @return gloc[alpha][sigma] = gf on the mesh, as a vector of length alpha, storing block gfs dim sigma 
@@ -71,11 +75,6 @@ namespace triqs::modest {
 
       // spin index
       auto Sigma_full_space = gfs::gf(mesh, {obe.H[sigma].n_orbitals(), obe.H[sigma].n_orbitals()}); //
-      //for (auto &&[alpha, R] : enumerated_sub_slices(embedding_decomp)) {
-      //  auto Sigma = nda::matrix<dcomplex>{Sigma_dynamic(alpha, sigma)[om] + Sigma_hartree(alpha, sigma)};
-      //std::cout << Sigma_dynamic(0, sigma).data()(r_all).shape() << std::endl;
-      //std::cout << "Sigma_hartree " << Sigma_hartree(0, sigma) << std::endl;
-      // FIXME how else can I add these two things ?
       for (auto &&[block, R] : enumerated_sub_slices(embedding_decomp)) {
         for (auto [n, w] : enumerate(mesh)) {
           Sigma_full_space.data()(n, R, R) = Sigma_dynamic(block, sigma).data()(n, r_all, r_all) + Sigma_hartree(block, sigma);
@@ -87,6 +86,7 @@ namespace triqs::modest {
     return gloc_result;
   }
 
+  //  -----------------------------------------------------------------------
   // FIXME docstring
   template <typename Mesh>
   double density(one_body_elements const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
@@ -140,12 +140,19 @@ namespace triqs::modest {
   // --------  instantiations --------------
 
   /** @cond DOXYGEN_SKIP_THIS */
-  block2_gf<mesh::imfreq, matrix_valued> gloc(one_body_elements const &obe, double mu, block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
-                                              nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, double tolerance,
-                                              triqs::lattice::bz_int_options const &opt);
+  template block2_gf<mesh::imfreq, matrix_valued> gloc(one_body_elements const &obe, double mu,
+                                                       block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
+                                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree,
+                                                       triqs::lattice::bz_int_options const &opt);
 
-  //double density(one_body_elements const &obe, double mu, block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
-  //               nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree,  triqs::lattice::bz_int_options const &opt);
+  template double density(one_body_elements const &obe, double mu, block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
+                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, triqs::lattice::bz_int_options const &opt);
+
+  template double find_chemical_potential(double const target_density, one_body_elements const &obe,
+                                          block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
+                                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, triqs::lattice::bz_int_options const &opt,
+                                          std::string method, double x_init, double precision, double delta_x, long max_loops, std::string x_name,
+                                          std::string y_name, bool verbosity);
 
   /** @endcond */
 
