@@ -107,7 +107,7 @@ jobs:
       env:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
-        TRIQS_BRANCH: ${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
+        TRIQS_BRANCH: modest_updates #${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
       run: |
         git clone https://github.com/TRIQS/triqs --branch $TRIQS_BRANCH
         mkdir triqs/build && cd triqs/build
