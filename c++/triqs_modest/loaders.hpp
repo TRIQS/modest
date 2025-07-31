@@ -52,10 +52,10 @@ namespace triqs::modest {
   /** 
   * @brief Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure. 
   * 
-  * @details Disovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
+  * @details Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
   * Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
   * 
-  * @param Hloc0 the R = 0 part of the Hamiltonian as a vector of [nspin, nshells]
+  * @param Hloc0 the R = 0 part of the Hamiltonian as a vector of [n_atoms, n_sigma] 
   * @param atomic_shells the list of atomic shells used to index Hloc 
   * @param block_threshold the threshold of accuracy at which a symmetry is considered found
   * @param diagonalize_hloc whether or not to diagonalize hloc
