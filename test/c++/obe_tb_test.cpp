@@ -4,6 +4,7 @@
 #include <nda/matrix_functions.hpp>
 #include <triqs/arrays.hpp>
 #include <triqs/mesh/imfreq.hpp>
+#include "triqs_modest/density.hpp"
 #include "triqs_modest/gloc_fixed_grid.hpp"
 #include "triqs_modest/obe_tb.hpp"
 #include "triqs_modest/utils/h5_proxy.hpp"
@@ -29,24 +30,35 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
   auto iw_mesh             = mesh::imfreq{beta, triqs::mesh::Fermion, 51};
 
   // make a zero self energy
+  long n_sigma      = 2;
   auto Sigma        = gfs::gf<mesh::imfreq>{iw_mesh, {dim, dim}};
-  auto Sigma_block2 = make_block2_gf(1, 1, Sigma); // block, nsigma, fill with empty sigma
-  nda::array<nda::matrix<dcomplex>, 2> Sigma_hartree(1, 1);
-  Sigma_hartree(0,0) = nda::matrix<dcomplex>::zeros(1,1); // 1 orbital 
+  auto Sigma_block2 = make_block2_gf(1, n_sigma, Sigma); // block, nsigma, fill with empty sigma
+  nda::array<nda::matrix<dcomplex>, 2> Sigma_hartree(1, n_sigma);
+  // spin up and down both zero for now
+  Sigma_hartree(0, 0) = nda::matrix<dcomplex>::zeros(1, 1); // 1 orbital
+  Sigma_hartree(0, 1) = nda::matrix<dcomplex>::zeros(1, 1); // 1 orbital
 
   // read in some reference data
   auto [dft_density, obe_dft] = one_body_elements_from_dft_converter("./ref_data/lco_wannier.ref.h5");
-  double mu                   = find_chemical_potential(dft_density, obe_dft, beta);
-  auto gloc_dft               = gloc(iw_mesh, obe_dft, mu);
+  double mu_dft               = find_chemical_potential(dft_density, obe_dft, beta);
+  auto gloc_dft               = gloc(iw_mesh, obe_dft, mu_dft);
 
   // run gloc, forcing gloc to use PTR on the same grid as the DFT calculation was done
   triqs::lattice::bz_int_options opt = {.k_grid_dims = {7, 7, 7}, .n_k_max = 8, .run_adaptive = false};
-  auto gloc_tb                      = gloc(obe_tb, mu, Sigma_block2, Sigma_hartree, opt);
+  auto gloc_tb                       = gloc(obe_tb, mu_dft, Sigma_block2, Sigma_hartree, opt);
 
   // Check equivalence
   for (auto iw : iw_mesh) { EXPECT_COMPLEX_NEAR(gloc_tb(0, 0)[iw](0, 0), gloc_dft(0, 0)[iw](0, 0), 1e-5); }
 
-  // density calculation
-  //std::cout << density_obe(obe_tb, mu, Sigma_block2, Sigma_hartree) << std::endl;
-  //std::cout << density(gloc_tb(0, 0)) << std::endl;
+  // density calculation for one spin channel
+  double n = density(obe_tb, mu_dft, Sigma_block2, Sigma_hartree, opt);
+  EXPECT_NEAR(n, 1.0, 1e-4);
+
+  // check mu finding
+  double mu_calc = find_chemical_potential(n, obe_tb, Sigma_block2, Sigma_hartree, opt);
+  EXPECT_NEAR(mu_calc, mu_dft, 1e-4);
+
+  // check spin up and down channels -- FIXME change to loop
+  EXPECT_ARRAY_NEAR(impurity_levels(obe_tb)(0, 0), impurity_levels(obe_tb)(0, 0), 1e-8);
+  EXPECT_ARRAY_NEAR(impurity_levels(obe_tb)(0, 1), impurity_levels(obe_tb)(0, 1), 1e-8);
 }

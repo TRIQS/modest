@@ -33,6 +33,9 @@ namespace triqs::modest {
     auto [R, HR, _] = read_wannier90_tb_data(wannier_file_path);
     std::vector<tb_hamiltonian> tb_H;
     tb_H.emplace_back(R, HR);
+    // put the same H a second time for two spin channels
+    if (spin_kind == spin_kind_e::NonPolarized) { tb_H.emplace_back(R, HR); }
+
     return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   };
 
@@ -72,12 +75,12 @@ namespace triqs::modest {
       long n_orb = 0;
       for (auto shell : atomic_shells) { n_orb += shell.dim; }
       if (H.n_orbitals() != n_orb) {
-        throw std::runtime_error("Wannier Hamiltonian does not have the same number of orbitals as the provided atomic shells: HR " + std::to_string(H.n_orbitals()) + 
-                            " , atomic_shells total " + std::to_string(n_orb));
+        throw std::runtime_error("Wannier Hamiltonian does not have the same number of orbitals as the provided atomic shells: HR "
+                                 + std::to_string(H.n_orbitals()) + " , atomic_shells total " + std::to_string(n_orb));
       }
 
       // find the home cell of the TB file to get H0
-      auto iR0 = H.get_R_idx({0, 0, 0});
+      auto iR0 = H.get_R_idx(std::array<long, 3>{0, 0, 0});
 
       // Hloc needs to have dimensions [nshells, nspin].
       // REFACTOR -- need opposite of enumerate_sub_slice --
@@ -101,7 +104,6 @@ namespace triqs::modest {
    */
   nda::array<nda::matrix<dcomplex>, 2> Hloc(one_body_elements const &obe) {
 
-    // TODO is this working as we think it will... FIXME need num atoms here
     auto n_atoms = obe.C_space.n_atoms();
     auto n_sigma = obe.C_space.n_sigma();
     nda::array<nda::matrix<dcomplex>, 2> Hloc_result(n_atoms, n_sigma);
