@@ -5,6 +5,16 @@ namespace triqs::modest {
   enum class DFTCode { Wien2k, QuantumEspresso, VASP, Elk, W90, Hk };
 
   namespace dft_code {
+
+    inline DFTCode dft_code_to_enum(std::string const &code) {
+      if (code == "wien2k") return DFTCode::Wien2k;
+      if (code == "vasp") return DFTCode::VASP;
+      if (code == "w90") return DFTCode::W90;
+      if (code == "elk") return DFTCode::Elk;
+      if (code == "hk") return DFTCode::Hk;
+      throw std::runtime_error{"Not a valid dft_code!"};
+    }
+
     // Various functions implemented in C++ files
     nda::matrix<dcomplex> get_spherical_to_dft_rotation_Wien2k(long l);
     nda::matrix<dcomplex> get_spherical_to_dft_rotation_VASP(long l);
@@ -25,6 +35,7 @@ namespace triqs::modest {
         default: throw std::invalid_argument("Unknown DFTCode");
       }
     }
+
   } // namespace dft_code
 
 } // namespace triqs::modest

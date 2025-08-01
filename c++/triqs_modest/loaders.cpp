@@ -13,9 +13,9 @@ namespace triqs::modest {
     auto Acopy = nda::matrix<dcomplex, nda::F_layout>{transpose(A)};
     long m     = Acopy.extent(0);
     // auto S     = nda::vector<double>(m);
-    auto U  = nda::matrix<dcomplex, nda::F_layout>(m, m);
-    auto VT = nda::matrix<dcomplex, nda::F_layout>(m, m);
-    auto _  = nda::lapack::gesvd(Acopy, nda::vector<double>(m), U, VT);
+    auto U                       = nda::matrix<dcomplex, nda::F_layout>(m, m);
+    auto VT                      = nda::matrix<dcomplex, nda::F_layout>(m, m);
+    [[maybe_unused]] auto status = nda::lapack::gesvd(Acopy, nda::vector<double>(m), U, VT);
     return nda::matrix<dcomplex>{transpose(U * VT)};
   }
 
@@ -108,12 +108,12 @@ namespace triqs::modest {
   /// Read projectors using ReadMode, rotate to local frame, and embed them in the M space. (internal)
   nda::array<dcomplex, 4> load_rotate_and_format_projectors(std::string const &filename, ReadMode mode, std::vector<cmat_t> const &rot_mats,
                                                             std::vector<long> const &atom_decomp) {
-    auto load_Pks = [](auto filename, auto mode) {
-      auto root = h5::proxy{filename, 'r'};
-      if (mode == ReadMode::Correlated || mode == ReadMode::Bands) {
-        return (mode == ReadMode::Correlated) ? as<nda::array<dcomplex, 5>>(root["dft_input"]["proj_mat"]) :
-                                                as<nda::array<dcomplex, 5>>(root["dft_bands_input"]["proj_mat"]);
-      } else if (mode == ReadMode::ThetaProjectors) {
+    auto load_Pks = [](auto f, auto m) {
+      auto root = h5::proxy{f, 'r'};
+      if (m == ReadMode::Correlated || m == ReadMode::Bands) {
+        return (m == ReadMode::Correlated) ? as<nda::array<dcomplex, 5>>(root["dft_input"]["proj_mat"]) :
+                                             as<nda::array<dcomplex, 5>>(root["dft_bands_input"]["proj_mat"]);
+      } else if (m == ReadMode::ThetaProjectors) {
         auto tmp = as<nda::array<dcomplex, 6>>(root["dft_parproj_input"]["proj_mat_all"]);
         // FIXME: The θ projectors have an extra dimesion called ir. Not sure why it is there...
         return nda::array<dcomplex, 5>{tmp(r_all, r_all, r_all, 0, r_all, r_all)};
@@ -183,28 +183,11 @@ namespace triqs::modest {
 
   //-------------------------------------------------------
   /// Prepare the spherical Ylm to DFT orbital basis rotations. (internal)
-  nda::array<nda::matrix<dcomplex>, 1> read_spherical_to_dft_basis(std::string dft_code, std::vector<atomic_shell_t> const &atomic_shells) {
+  nda::array<nda::matrix<dcomplex>, 1> read_spherical_to_dft_basis(std::string dft, std::vector<atomic_shell_t> const &atomic_shells) {
     //TODO: finish this!
-    auto string_to_enum = [](auto dft_code) {
-      if (dft_code == "wien2k") {
-        return DFTCode::Wien2k;
-      } else if (dft_code == "vasp") {
-        return DFTCode::VASP;
-      } else if (dft_code == "qe") {
-        return DFTCode::QuantumEspresso;
-      } else if (dft_code == "w90") {
-        return DFTCode::W90;
-      } else if (dft_code == "elk") {
-        return DFTCode::Elk;
-      } else if (dft_code == "hk") {
-        return DFTCode::Hk;
-      } else
-        throw std::runtime_error{"Not a valid dft_code!"};
-    };
+    auto code = dft_code::dft_code_to_enum(dft);
     auto Ylms = nda::array<nda::matrix<dcomplex>, 1>(atomic_shells.size());
-    for (auto const &[iatom, atom] : enumerate(atomic_shells)) {
-      Ylms(iatom) = dft_code::get_spherical_to_dft_rotation(string_to_enum(dft_code), atom.l);
-    }
+    for (auto const &[iatom, atom] : enumerate(atomic_shells)) { Ylms(iatom) = dft_code::get_spherical_to_dft_rotation(code, atom.l); }
     return Ylms;
   }
 
