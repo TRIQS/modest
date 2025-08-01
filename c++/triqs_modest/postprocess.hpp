@@ -46,9 +46,7 @@ namespace triqs::modest {
  * @return spectral_function_kw 
  */
   spectral_function_kw spectral_function_on_high_symmetry_path(one_body_elements_on_grid const &obe, double mu,
-                                                               block2_gf<mesh::refreq, matrix_valued> const &Sigma_w,
-                                                               nda::array<nda::matrix<double>, 2> const &Sigma_DC,
-                                                               double broadening = 0.01);
+                                                               block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
   struct spectral_function_w {
     nda::array<double, 2> total;     // A[σ](w)
     nda::array<double, 4> per_theta; // A[a,σ](m,m',w)
@@ -66,11 +64,8 @@ namespace triqs::modest {
  * @param broadening spectral broadening
  * @return spectral_function_w 
  */
-  spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe_theta,
-                                                  downfolding_projector const &Proj, double mu,
-                                                  block2_gf<mesh::refreq, matrix_valued> const &Sigma_w,
-                                                  nda::array<nda::matrix<double>, 2> const &Sigma_DC,
-                                                  double broadening = 0.01);
+  spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe_theta, downfolding_projector const &Proj, double mu,
+                                                  block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
 
 } // namespace triqs::modest
 
