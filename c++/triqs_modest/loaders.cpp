@@ -250,12 +250,12 @@ namespace triqs::modest {
     //TODO: add verbosity, currently not used.
     auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
 
+    auto total_density = as<double>(g_dft["density_required"]);
+
     //TODO: FIXME! hdf5 read to strict on long
-    auto total_density  = as<double>(g_dft["density_required"]);
-    double charge_below = 10000;
-    try {
-      charge_below = as<double>(g_dft["charge_below"]);
-    } catch (std::exception const &e) { charge_below = as<long>(g_dft["charge_below"]); }
+    auto charge_below = (as<std::string>(g_dft["dft_code"]) != "w90" && as<std::string>(g_dft["dft_code"]) != "hk") ?
+       as<double>(g_dft["charge_below"]) :
+       as<long>(g_dft["charge_below"]);
     total_density -= charge_below;
 
     /// set up spin_type
