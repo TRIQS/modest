@@ -221,7 +221,10 @@ inline constexpr const char *c2py::tp_doc<triqs::modest::band_dispersion> = R"DO
    * n_bands_per_k: nda::array<long,2>
       
    
-   * k_weights: nda::array<double,1>)DOC";
+   * k_weights: nda::array<double,1>
+      
+   
+   * matrix_valued: bool)DOC";
 
 static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs) {
   if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
@@ -241,6 +244,7 @@ static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs)
   de("H_k", self_c.H_k, false);
   de("n_bands_per_k", self_c.n_bands_per_k, false);
   de("k_weights", self_c.k_weights, false);
+  de("matrix_valued", self_c.matrix_valued, false);
   return de.check();
 }
 
@@ -284,6 +288,7 @@ constexpr auto doc_member_4 = R"DOC()DOC";
 constexpr auto doc_member_5 = R"DOC()DOC";
 constexpr auto doc_member_6 = R"DOC()DOC";
 constexpr auto doc_member_7 = R"DOC()DOC";
+constexpr auto doc_member_8 = R"DOC()DOC";
 static PyObject *prop_get_dict_1(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::band_dispersion> *)self)->_c);
   c2py::pydict dic;
@@ -291,6 +296,7 @@ static PyObject *prop_get_dict_1(PyObject *self, void *) {
   dic["H_k"]           = self_c.H_k;
   dic["n_bands_per_k"] = self_c.n_bands_per_k;
   dic["k_weights"]     = self_c.k_weights;
+  dic["matrix_valued"] = self_c.matrix_valued;
   return dic.new_ref();
 }
 static constexpr auto prop_doc_11 = R"DOC(/// Number of k points in the grid)DOC";
@@ -303,6 +309,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::band_dispersion>[] = {
    c2py::getsetdef_from_member<&triqs::modest::band_dispersion::H_k, triqs::modest::band_dispersion>("H_k", doc_member_5),
    c2py::getsetdef_from_member<&triqs::modest::band_dispersion::n_bands_per_k, triqs::modest::band_dispersion>("n_bands_per_k", doc_member_6),
    c2py::getsetdef_from_member<&triqs::modest::band_dispersion::k_weights, triqs::modest::band_dispersion>("k_weights", doc_member_7),
+   c2py::getsetdef_from_member<&triqs::modest::band_dispersion::matrix_valued, triqs::modest::band_dispersion>("matrix_valued", doc_member_8),
    {"n_k", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::band_dispersion::n_k)>, nullptr, prop_doc_11, nullptr},
    {"__dict__", (getter)prop_get_dict_1, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
@@ -374,9 +381,9 @@ PyMethodDef c2py::tp_methods<triqs::modest::downfolding_projector>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_8  = R"DOC()DOC";
 constexpr auto doc_member_9  = R"DOC()DOC";
 constexpr auto doc_member_10 = R"DOC()DOC";
+constexpr auto doc_member_11 = R"DOC()DOC";
 static PyObject *prop_get_dict_2(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::downfolding_projector> *)self)->_c);
   c2py::pydict dic;
@@ -390,10 +397,10 @@ static PyObject *prop_get_dict_2(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::downfolding_projector>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::downfolding_projector::spin_kind, triqs::modest::downfolding_projector>("spin_kind", doc_member_8),
-   c2py::getsetdef_from_member<&triqs::modest::downfolding_projector::P_k, triqs::modest::downfolding_projector>("P_k", doc_member_9),
+   c2py::getsetdef_from_member<&triqs::modest::downfolding_projector::spin_kind, triqs::modest::downfolding_projector>("spin_kind", doc_member_9),
+   c2py::getsetdef_from_member<&triqs::modest::downfolding_projector::P_k, triqs::modest::downfolding_projector>("P_k", doc_member_10),
    c2py::getsetdef_from_member<&triqs::modest::downfolding_projector::n_bands_per_k, triqs::modest::downfolding_projector>("n_bands_per_k",
-                                                                                                                           doc_member_10),
+                                                                                                                           doc_member_11),
    {"__dict__", (getter)prop_get_dict_2, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -437,9 +444,9 @@ PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements_on_grid>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_11 = R"DOC()DOC";
 constexpr auto doc_member_12 = R"DOC()DOC";
 constexpr auto doc_member_13 = R"DOC()DOC";
+constexpr auto doc_member_14 = R"DOC()DOC";
 static PyObject *prop_get_dict_3(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements_on_grid> *)self)->_c);
   c2py::pydict dic;
@@ -453,10 +460,10 @@ static PyObject *prop_get_dict_3(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements_on_grid>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::H, triqs::modest::one_body_elements_on_grid>("H", doc_member_11),
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::H, triqs::modest::one_body_elements_on_grid>("H", doc_member_12),
    c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::C_space, triqs::modest::one_body_elements_on_grid>("C_space",
-                                                                                                                             doc_member_12),
-   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::P, triqs::modest::one_body_elements_on_grid>("P", doc_member_13),
+                                                                                                                             doc_member_13),
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::P, triqs::modest::one_body_elements_on_grid>("P", doc_member_14),
    {"__dict__", (getter)prop_get_dict_3, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -711,17 +718,17 @@ PyMethodDef c2py::tp_methods<triqs::modest::embedding::imp_block_t>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_14 = R"DOC()DOC";
 constexpr auto doc_member_15 = R"DOC()DOC";
 constexpr auto doc_member_16 = R"DOC()DOC";
+constexpr auto doc_member_17 = R"DOC()DOC";
 
 // ----- Method table ----
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::embedding::imp_block_t>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::embedding::imp_block_t::imp_idx, triqs::modest::embedding::imp_block_t>("imp_idx", doc_member_14),
-   c2py::getsetdef_from_member<&triqs::modest::embedding::imp_block_t::gamma, triqs::modest::embedding::imp_block_t>("gamma", doc_member_15),
-   c2py::getsetdef_from_member<&triqs::modest::embedding::imp_block_t::tau, triqs::modest::embedding::imp_block_t>("tau", doc_member_16),
+   c2py::getsetdef_from_member<&triqs::modest::embedding::imp_block_t::imp_idx, triqs::modest::embedding::imp_block_t>("imp_idx", doc_member_15),
+   c2py::getsetdef_from_member<&triqs::modest::embedding::imp_block_t::gamma, triqs::modest::embedding::imp_block_t>("gamma", doc_member_16),
+   c2py::getsetdef_from_member<&triqs::modest::embedding::imp_block_t::tau, triqs::modest::embedding::imp_block_t>("tau", doc_member_17),
 
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -812,7 +819,7 @@ PyMethodDef c2py::tp_methods<triqs::modest::spectral_function_kw>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_17 = R"DOC()DOC";
+constexpr auto doc_member_18 = R"DOC()DOC";
 static PyObject *prop_get_dict_4(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_kw> *)self)->_c);
   c2py::pydict dic;
@@ -824,7 +831,7 @@ static PyObject *prop_get_dict_4(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_kw>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::spectral_function_kw::data, triqs::modest::spectral_function_kw>("data", doc_member_17),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_kw::data, triqs::modest::spectral_function_kw>("data", doc_member_18),
    {"__dict__", (getter)prop_get_dict_4, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -863,8 +870,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::spectral_function_w>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_18 = R"DOC()DOC";
 constexpr auto doc_member_19 = R"DOC()DOC";
+constexpr auto doc_member_20 = R"DOC()DOC";
 static PyObject *prop_get_dict_5(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_w> *)self)->_c);
   c2py::pydict dic;
@@ -877,8 +884,8 @@ static PyObject *prop_get_dict_5(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_w>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::total, triqs::modest::spectral_function_w>("total", doc_member_18),
-   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::per_theta, triqs::modest::spectral_function_w>("per_theta", doc_member_19),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::total, triqs::modest::spectral_function_w>("total", doc_member_19),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::per_theta, triqs::modest::spectral_function_w>("per_theta", doc_member_20),
    {"__dict__", (getter)prop_get_dict_5, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -918,8 +925,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::initial_data>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_20 = R"DOC(/// One body elements)DOC";
-constexpr auto doc_member_21 = R"DOC(/// Embedding)DOC";
+constexpr auto doc_member_21 = R"DOC(/// One body elements)DOC";
+constexpr auto doc_member_22 = R"DOC(/// Embedding)DOC";
 static PyObject *prop_get_dict_6(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::initial_data> *)self)->_c);
   c2py::pydict dic;
@@ -932,8 +939,8 @@ static PyObject *prop_get_dict_6(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::initial_data>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::initial_data::obe, triqs::modest::initial_data>("obe", doc_member_20),
-   c2py::getsetdef_from_member<&triqs::modest::initial_data::embed, triqs::modest::initial_data>("embed", doc_member_21),
+   c2py::getsetdef_from_member<&triqs::modest::initial_data::obe, triqs::modest::initial_data>("obe", doc_member_21),
+   c2py::getsetdef_from_member<&triqs::modest::initial_data::embed, triqs::modest::initial_data>("embed", doc_member_22),
    {"__dict__", (getter)prop_get_dict_6, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -989,12 +996,12 @@ PyMethodDef c2py::tp_methods<triqs::modest::iteration_data>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_22 = R"DOC(/// Chemical potential)DOC";
-constexpr auto doc_member_23 = R"DOC(/// Impurities self-energies)DOC";
-constexpr auto doc_member_24 = R"DOC(/// Sigma Hartree)DOC";
-constexpr auto doc_member_25 = R"DOC(/// Impurities Green's functions)DOC";
+constexpr auto doc_member_23 = R"DOC(/// Chemical potential)DOC";
+constexpr auto doc_member_24 = R"DOC(/// Impurities self-energies)DOC";
+constexpr auto doc_member_25 = R"DOC(/// Sigma Hartree)DOC";
 constexpr auto doc_member_26 = R"DOC(/// Impurities Green's functions)DOC";
-constexpr auto doc_member_27 = R"DOC(/// Impurities self-energies)DOC";
+constexpr auto doc_member_27 = R"DOC(/// Impurities Green's functions)DOC";
+constexpr auto doc_member_28 = R"DOC(/// Impurities self-energies)DOC";
 static PyObject *prop_get_dict_7(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::iteration_data> *)self)->_c);
   c2py::pydict dic;
@@ -1011,13 +1018,13 @@ static PyObject *prop_get_dict_7(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::iteration_data>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::iteration_data::mu, triqs::modest::iteration_data>("mu", doc_member_22),
-   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_imp_list, triqs::modest::iteration_data>("Sigma_imp_list", doc_member_23),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::mu, triqs::modest::iteration_data>("mu", doc_member_23),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_imp_list, triqs::modest::iteration_data>("Sigma_imp_list", doc_member_24),
    c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_hartree_list, triqs::modest::iteration_data>("Sigma_hartree_list",
-                                                                                                                  doc_member_24),
-   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Gimp_freq_list, triqs::modest::iteration_data>("Gimp_freq_list", doc_member_25),
-   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Gimp_time_list, triqs::modest::iteration_data>("Gimp_time_list", doc_member_26),
-   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_dc_list, triqs::modest::iteration_data>("Sigma_dc_list", doc_member_27),
+                                                                                                                  doc_member_25),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Gimp_freq_list, triqs::modest::iteration_data>("Gimp_freq_list", doc_member_26),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Gimp_time_list, triqs::modest::iteration_data>("Gimp_time_list", doc_member_27),
+   c2py::getsetdef_from_member<&triqs::modest::iteration_data::Sigma_dc_list, triqs::modest::iteration_data>("Sigma_dc_list", doc_member_28),
    {"__dict__", (getter)prop_get_dict_7, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -1168,11 +1175,11 @@ PyMethodDef c2py::tp_methods<triqs::lattice::bz_int_options>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_28 = R"DOC()DOC";
 constexpr auto doc_member_29 = R"DOC()DOC";
 constexpr auto doc_member_30 = R"DOC()DOC";
 constexpr auto doc_member_31 = R"DOC()DOC";
 constexpr auto doc_member_32 = R"DOC()DOC";
+constexpr auto doc_member_33 = R"DOC()DOC";
 static PyObject *prop_get_dict_8(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::lattice::bz_int_options> *)self)->_c);
   c2py::pydict dic;
@@ -1188,17 +1195,21 @@ static PyObject *prop_get_dict_8(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::lattice::bz_int_options>[] = {
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::tolerance, triqs::lattice::bz_int_options>("tolerance", doc_member_28),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::k_grid_dims, triqs::lattice::bz_int_options>("k_grid_dims", doc_member_29),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::tolerance, triqs::lattice::bz_int_options>("tolerance", doc_member_29),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::k_grid_dims, triqs::lattice::bz_int_options>("k_grid_dims", doc_member_30),
    c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::delta_k_grid_dims, triqs::lattice::bz_int_options>("delta_k_grid_dims",
-                                                                                                                   doc_member_30),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::n_k_max, triqs::lattice::bz_int_options>("n_k_max", doc_member_31),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::run_adaptive, triqs::lattice::bz_int_options>("run_adaptive", doc_member_32),
+                                                                                                                   doc_member_31),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::n_k_max, triqs::lattice::bz_int_options>("n_k_max", doc_member_32),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::run_adaptive, triqs::lattice::bz_int_options>("run_adaptive", doc_member_33),
    {"__dict__", (getter)prop_get_dict_8, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements>       = "triqs_modest.module.OneBodyElements";
-template <> inline constexpr const char *c2py::tp_doc<triqs::modest::one_body_elements> = R"DOC(   * C_space: triqs::modest::local_space)DOC";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements> = "triqs_modest.module.OneBodyElements";
+template <>
+inline constexpr const char *c2py::tp_doc<triqs::modest::one_body_elements> = R"DOC(   * C_space: triqs::modest::local_space
+      
+   
+   * H: std::vector<triqs::tb_hamiltonian>)DOC";
 
 static int synth_constructor_9(PyObject *self, PyObject *args, PyObject *kwargs) {
   if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
@@ -1215,6 +1226,7 @@ static int synth_constructor_9(PyObject *self, PyObject *args, PyObject *kwargs)
   }
   auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements> *)self)->_c);
   de("C_space", self_c.C_space, false);
+  de("H", self_c.H, false);
   return de.check();
 }
 
@@ -1227,11 +1239,13 @@ PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_33 = R"DOC()DOC";
+constexpr auto doc_member_34 = R"DOC()DOC";
+constexpr auto doc_member_35 = R"DOC()DOC";
 static PyObject *prop_get_dict_9(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements> *)self)->_c);
   c2py::pydict dic;
   dic["C_space"] = self_c.C_space;
+  dic["H"]       = self_c.H;
   return dic.new_ref();
 }
 
@@ -1239,7 +1253,8 @@ static PyObject *prop_get_dict_9(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::one_body_elements::C_space, triqs::modest::one_body_elements>("C_space", doc_member_33),
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements::C_space, triqs::modest::one_body_elements>("C_space", doc_member_34),
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements::H, triqs::modest::one_body_elements>("H", doc_member_35),
    {"__dict__", (getter)prop_get_dict_9, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -1334,7 +1349,7 @@ static auto const fun_23 =
 static auto const fun_24 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
-         const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+         const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
          const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_static); },
       "obe", "mu", "Sigma_dynamic", "Sigma_static"),
    c2py::cfun([](const triqs::modest::one_body_elements &obe, double mu,
@@ -1348,28 +1363,21 @@ static auto const fun_25 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, double mu, double beta) { return triqs::modest::density_nk(obe, mu, beta); },
               "obe", "mu", "beta")};
 
-// density_slow
-static auto const fun_26 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
-      const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-      const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::density_slow(obe, mu, Sigma_dynamic, Sigma_static); },
-   "obe", "mu", "Sigma_dynamic", "Sigma_static")};
-
 // discover_symmetries
-static auto const fun_27 = c2py::dispatcher_f_kw_t{
+static auto const fun_26 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const nda::array<nda::matrix<triqs::dcomplex>, 2> &Hloc0, const std::vector<triqs::modest::atomic_shell_t> &atomic_shells,
                  double block_threshold,
                  bool diagonalize_hloc) { return triqs::modest::discover_symmetries(Hloc0, atomic_shells, block_threshold, diagonalize_hloc); },
               "Hloc0", "atomic_shells", "block_threshold", "diagonalize_hloc")};
 
 // double_counting
-static auto const fun_28 =
+static auto const fun_27 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const nda::array<nda::matrix<triqs::dcomplex>, 2> &density_matrix, double U_int, double J_hund,
                                          const std::string method) { return triqs::modest::double_counting(density_matrix, U_int, J_hund, method); },
                                       "density_matrix", "U_int", "J_hund", "method")};
 
 // extract_delta
-static auto const fun_29 =
+static auto const fun_28 =
    c2py::dispatcher_f_kw_t{c2py::cfun(
                               [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
                                  const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc,
@@ -1400,42 +1408,36 @@ static auto const fun_29 =
                               "epsilon_levels", "Gloc")};
 
 // find_chemical_potential
-static auto const fun_30 =
-   c2py::dispatcher_f_kw_t{
-      c2py::cfun([](double target_density, const triqs::modest::one_body_elements_on_grid &obe, double beta, std::string method, double precision,
-                    bool verbosity) { return triqs::modest::find_chemical_potential(target_density, obe, beta, method, precision, verbosity); },
-                 "target_density", "obe", "beta", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
-            const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double precision, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, precision, verbosity);
-         },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
-            const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double precision, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, precision, verbosity);
-         },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements &obe,
-            const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree, const triqs::lattice::bz_int_options &opt, std::string method,
-            double x_init, double precision, double delta_x, long max_loops, std::string x_name, std::string y_name, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_hartree, opt, method, x_init, precision, delta_x,
-                                                         max_loops, x_name, y_name, verbosity);
-         },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_hartree", "opt", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
-         "delta_x"_a = 0.5, "max_loops"_a = 1000, "x_name"_a = "Chemical Potential", "y_name"_a = "Total Density", "verbosity"_a = true)};
+static auto const fun_29 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](double target_density, const triqs::modest::one_body_elements_on_grid &obe, double beta, std::string method, double precision,
+                 bool verbosity) { return triqs::modest::find_chemical_potential(target_density, obe, beta, method, precision, verbosity); },
+              "target_density", "obe", "beta", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
+         const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, precision, verbosity);
+      },
+      "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](double target_density, const triqs::modest::one_body_elements &obe,
+         const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree, const triqs::lattice::bz_int_options &opt, std::string method,
+         double x_init, double precision, double delta_x, long max_loops, std::string x_name, std::string y_name, bool verbosity) {
+        return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_hartree, opt, method, x_init, precision, delta_x,
+                                                      max_loops, x_name, y_name, verbosity);
+      },
+      "target_density", "obe", "Sigma_dynamic", "Sigma_hartree", "opt", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
+      "delta_x"_a = 0.5, "max_loops"_a = 1000, "x_name"_a = "Chemical Potential", "y_name"_a = "Total Density", "verbosity"_a = true)};
 
 // fold
-static auto const fun_31 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](const triqs::lattice::superlattice &sl, const triqs::modest::one_body_elements &obe) { return triqs::modest::fold(sl, obe); }, "sl", "obe")};
+static auto const fun_30 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const triqs::lattice::superlattice &sl, const triqs::tb_hamiltonian &tb) { return triqs::fold(sl, tb); }, "sl", "tb"),
+   c2py::cfun([](const triqs::lattice::superlattice &sl, const triqs::modest::one_body_elements &obe) { return triqs::modest::fold(sl, obe); }, "sl",
+              "obe")};
 
 // gloc
-static auto const fun_32 = c2py::dispatcher_f_kw_t{
+static auto const fun_31 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
          const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
@@ -1459,7 +1461,7 @@ static auto const fun_32 = c2py::dispatcher_f_kw_t{
               "obe", "mu", "Sigma_dynamic", "Sigma_hartree", "opt")};
 
 // h5_read
-static auto const fun_33 = c2py::dispatcher_f_kw_t{
+static auto const fun_32 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](h5::group g, const std::string &name, triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::h5_read(g, name, x); },
               "g", "name", "x"),
    c2py::cfun([](h5::group g, const std::string &name, triqs::modest::initial_data &data) { return triqs::modest::h5_read(g, name, data); }, "g",
@@ -1468,7 +1470,7 @@ static auto const fun_33 = c2py::dispatcher_f_kw_t{
               "name", "data")};
 
 // h5_write
-static auto const fun_34 = c2py::dispatcher_f_kw_t{
+static auto const fun_33 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](h5::group g, const std::string &name, const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::h5_write(g, name, x); },
       "g", "name", "x"),
@@ -1478,38 +1480,38 @@ static auto const fun_34 = c2py::dispatcher_f_kw_t{
               "g", "name", "data")};
 
 // impurity_levels
-static auto const fun_35 =
+static auto const fun_34 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::impurity_levels(obe); }, "obe"),
                            c2py::cfun([](const triqs::modest::one_body_elements &obe) { return triqs::modest::impurity_levels(obe); }, "obe")};
 
 // make_embedding
-static auto const fun_36 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_35 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const triqs::modest::local_space &C_space, const nda::array<std::vector<long>, 2> &block_decomposition,
       const std::optional<std::vector<long>> &atom_to_imp) { return triqs::modest::make_embedding(C_space, block_decomposition, atom_to_imp); },
    "C_space", "block_decomposition", "atom_to_imp"_a = std::nullopt)};
 
 // make_embedding_with_clusters
-static auto const fun_37 = c2py::dispatcher_f_kw_t{
+static auto const fun_36 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](triqs::modest::one_body_elements_on_grid obe,
                  const std::vector<std::vector<long>> &atom_partition) { return triqs::modest::make_embedding_with_clusters(obe, atom_partition); },
               "obe", "atom_partition")};
 
 // make_embedding_with_equivalences
-static auto const fun_38 = c2py::dispatcher_f_kw_t{
+static auto const fun_37 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::local_space &C_space) { return triqs::modest::make_embedding_with_equivalences(C_space); }, "C_space")};
 
 // make_embedding_with_no_equivalences
-static auto const fun_39 = c2py::dispatcher_f_kw_t{
+static auto const fun_38 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::local_space &C_space) { return triqs::modest::make_embedding_with_no_equivalences(C_space); }, "C_space")};
 
 // make_kanamori
-static auto const fun_40 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_39 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double U_prime, double J_hund, bool spin_flip,
       bool pair_hopping) { return triqs::make_kanamori(tau_names, dim_gamma, U_int, U_prime, J_hund, spin_flip, pair_hopping); },
    "tau_names", "dim_gamma", "U_int", "U_prime", "J_hund", "spin_flip"_a = true, "pair_hopping"_a = true)};
 
 // make_slater
-static auto const fun_41 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_40 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double J_hund,
       const nda::matrix<triqs::dcomplex> &spherical_to_dft, const std::optional<nda::matrix<triqs::dcomplex>> &dft_to_local) {
      return triqs::make_slater(tau_names, dim_gamma, U_int, J_hund, spherical_to_dft, dft_to_local);
@@ -1517,13 +1519,13 @@ static auto const fun_41 = c2py::dispatcher_f_kw_t{c2py::cfun(
    "tau_names", "dim_gamma", "U_int", "J_hund", "spherical_to_dft", "dft_to_local")};
 
 // one_body_elements_from_dft_converter
-static auto const fun_42 = c2py::dispatcher_f_kw_t{
+static auto const fun_41 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::string &filename, double threshold,
                  bool diagonalize_hloc) { return triqs::modest::one_body_elements_from_dft_converter(filename, threshold, diagonalize_hloc); },
               "filename", "threshold"_a = 1.e-5, "diagonalize_hloc"_a = false)};
 
 // one_body_elements_from_wannier90
-static auto const fun_43 = c2py::dispatcher_f_kw_t{
+static auto const fun_42 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](const std::string &wannier_file_path, const triqs::modest::spin_kind_e &spin_kind,
          std::vector<triqs::modest::atomic_shell_t> atomic_shells) {
@@ -1538,52 +1540,52 @@ static auto const fun_43 = c2py::dispatcher_f_kw_t{
       "wannier_file_path_up", "wannier_file_path_dn", "spin_kind", "atomic_shells")};
 
 // one_body_elements_on_high_symmetry_path
-static auto const fun_44 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_43 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::string &filename, const triqs::modest::one_body_elements_on_grid &obe) {
      return triqs::modest::one_body_elements_on_high_symmetry_path(filename, obe);
    },
    "filename", "obe")};
 
 // one_body_elements_with_theta_projectors
-static auto const fun_45 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_44 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::string &filename, const triqs::modest::one_body_elements_on_grid &obe) {
      return triqs::modest::one_body_elements_with_theta_projectors(filename, obe);
    },
    "filename", "obe")};
 
 // permute_local_space
-static auto const fun_46 = c2py::dispatcher_f_kw_t{
+static auto const fun_45 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::vector<std::vector<long>> &atom_partition,
                  const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::permute_local_space(atom_partition, x); },
               "atom_partition", "x")};
 
 // projected_spectral_function
-static auto const fun_47 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](const triqs::modest::one_body_elements_on_grid &obe_theta, const triqs::modest::downfolding_projector &Proj, double mu,
-      const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma_w, const nda::array<nda::matrix<double>, 2> &Sigma_DC,
-      double broadening) { return triqs::modest::projected_spectral_function(obe_theta, Proj, mu, Sigma_w, Sigma_DC, broadening); },
-   "obe_theta", "Proj", "mu", "Sigma_w", "Sigma_DC", "broadening"_a = 0.01)};
+static auto const fun_46 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe_theta, const triqs::modest::downfolding_projector &Proj, double mu,
+                 const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma_w,
+                 double broadening) { return triqs::modest::projected_spectral_function(obe_theta, Proj, mu, Sigma_w, broadening); },
+              "obe_theta", "Proj", "mu", "Sigma_w", "broadening"_a = 0.01)};
 
 // root_finder
-static auto const fun_48 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_47 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](std::string method, std::function<double(double)> f, double x_init, double y_value, double precision, double delta_x, long max_loops,
       std::string x_name, std::string y_name,
       bool verbosity) { return triqs::root_finder(method, f, x_init, y_value, precision, delta_x, max_loops, x_name, y_name, verbosity); },
    "method", "f", "x_init", "y_value", "precision", "delta_x", "max_loops"_a = 1000, "x_name"_a = "", "y_name"_a = "", "verbosity"_a = true)};
 
 // sigma_to_data_idx
-static auto const fun_49 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_48 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](triqs::modest::spin_kind_e spin_kind, long sigma) { return triqs::modest::sigma_to_data_idx(spin_kind, sigma); }, "spin_kind", "sigma")};
 
 // spectral_function_on_high_symmetry_path
-static auto const fun_50 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
-      const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma_w, const nda::array<nda::matrix<double>, 2> &Sigma_DC,
-      double broadening) { return triqs::modest::spectral_function_on_high_symmetry_path(obe, mu, Sigma_w, Sigma_DC, broadening); },
-   "obe", "mu", "Sigma_w", "Sigma_DC", "broadening"_a = 0.01)};
+static auto const fun_49 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, double mu,
+                 const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma_w,
+                 double broadening) { return triqs::modest::spectral_function_on_high_symmetry_path(obe, mu, Sigma_w, broadening); },
+              "obe", "mu", "Sigma_w", "broadening"_a = 0.01)};
 
 // symmetrize_gf
-static auto const fun_51 = c2py::dispatcher_f_kw_t{
+static auto const fun_50 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gin,
                  std::vector<std::vector<long>> degenerate_blocks) { return triqs::modest::symmetrize_gf(Gin, degenerate_blocks); },
               "Gin", "degenerate_blocks")};
@@ -1679,25 +1681,7 @@ static const auto doc_d_25 = fun_25.doc(R"DOC(   [0]Compute number of particles 
    -------
 
 )DOC");
-static const auto doc_d_26 = fun_26.doc(R"DOC(   [0]Compute the density of the lattice Green's function with a self-energy.
-   Parameters
-   ----------
-
-      obe:
-         The one-body elements.
-      mu:
-         The chemical potential.
-      Sigma_dynamic:
-         The dynamic part of the embedded self-energy.
-      Sigma_static:
-         The static part of the embedded self-energy.
-
-   Returns
-   -------
-
-      [0]double
-)DOC");
-static const auto doc_d_27 = fun_27.doc(R"DOC(   [0]Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure.
+static const auto doc_d_26 = fun_26.doc(R"DOC(   [0]Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure.
    Parameters
    ----------
 
@@ -1715,8 +1699,8 @@ static const auto doc_d_27 = fun_27.doc(R"DOC(   [0]Find symmetries of the R = 0
 
       [0]decomposition, U_rotation describing the block structure of GF based on Hloc
 )DOC");
-static const auto doc_d_28 =
-   fun_28.doc(R"DOC(   [0]compute double counting correction (H_DC) for a dc_type (method) from the G𝓒 and interaction parameters.
+static const auto doc_d_27 =
+   fun_27.doc(R"DOC(   [0]compute double counting correction (H_DC) for a dc_type (method) from the G𝓒 and interaction parameters.
    Parameters
    ----------
 
@@ -1734,7 +1718,7 @@ static const auto doc_d_28 =
 
       [0]H_DC nda::array<dc_t, 2>
 )DOC");
-static const auto doc_d_29 = fun_29.doc(
+static const auto doc_d_28 = fun_28.doc(
    R"DOC(   [0]Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
    [1]Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
    [2]Compute the hybridization function from the effective impurity levels and the local Green's function.
@@ -1759,10 +1743,9 @@ static const auto doc_d_29 = fun_29.doc(
       [2]block_gf<Mesh, matrix_valued>
       [3]block_gf<Mesh, matrix_valued>
 )DOC");
-static const auto doc_d_30 = fun_30.doc(R"DOC(   [0]Find the chemical potenital from the local Green's function given a target density.
+static const auto doc_d_29 = fun_29.doc(R"DOC(   [0]Find the chemical potenital from the local Green's function given a target density.
    [1]Find the chemical potenital from the local Green's function and self-energy given a target density.
    [2]Find the chemical potenital from the local Green's function and self-energy given a target density.
-   [3]Find the chemical potenital from the local Green's function and self-energy given a target density.
    Parameters
    ----------
 
@@ -1801,9 +1784,9 @@ static const auto doc_d_30 = fun_30.doc(R"DOC(   [0]Find the chemical potenital 
       [0]double
       [1]double
       [2]double
-      [3]double
 )DOC");
-static const auto doc_d_31 = fun_31.doc(R"DOC(   [0]Folding with superlattice
+static const auto doc_d_30 = fun_30.doc(R"DOC(   [0]
+   [1]Folding with superlattice
    Parameters
    ----------
 
@@ -1812,7 +1795,7 @@ static const auto doc_d_31 = fun_31.doc(R"DOC(   [0]Folding with superlattice
    -------
 
 )DOC");
-static const auto doc_d_32 = fun_32.doc(R"DOC(   [0]compute G𝓒 local Green's function on Mesh(MxM)
+static const auto doc_d_31 = fun_31.doc(R"DOC(   [0]compute G𝓒 local Green's function on Mesh(MxM)
    [1]compute G𝓒 local Green's function on Mesh(MxM)
    [2]Compute G𝓒 on with a Mesh with no self-energy.
    [3]Compute G𝓒 on with a Mesh with no self-energy.
@@ -1850,6 +1833,17 @@ static const auto doc_d_32 = fun_32.doc(R"DOC(   [0]compute G𝓒 local Green's 
       [3]block2_gf<Mesh, matrix_valued>
       [4]gloc[alpha][sigma] = gf on the mesh, as a vector of length alpha, storing block gfs dim sigma
 )DOC");
+static const auto doc_d_32 = fun_32.doc(R"DOC(   [0]
+   [1]
+   [2]
+   Parameters
+   ----------
+
+
+   Returns
+   -------
+
+)DOC");
 static const auto doc_d_33 = fun_33.doc(R"DOC(   [0]
    [1]
    [2]
@@ -1861,18 +1855,7 @@ static const auto doc_d_33 = fun_33.doc(R"DOC(   [0]
    -------
 
 )DOC");
-static const auto doc_d_34 = fun_34.doc(R"DOC(   [0]
-   [1]
-   [2]
-   Parameters
-   ----------
-
-
-   Returns
-   -------
-
-)DOC");
-static const auto doc_d_35 = fun_35.doc(R"DOC(   [0]Compute the local impurity levels from the single-particle dispersion.
+static const auto doc_d_34 = fun_34.doc(R"DOC(   [0]Compute the local impurity levels from the single-particle dispersion.
    [1]
    Parameters
    ----------
@@ -1882,7 +1865,7 @@ static const auto doc_d_35 = fun_35.doc(R"DOC(   [0]Compute the local impurity l
    -------
 
 )DOC");
-static const auto doc_d_36 = fun_36.doc(
+static const auto doc_d_35 = fun_35.doc(
    R"DOC(   [0]Construct the embedding class from the local space, a description of the block decomposition, and an equivalence         mapping between atom sites.
    Parameters
    ----------
@@ -1899,7 +1882,7 @@ static const auto doc_d_36 = fun_36.doc(
 
       [0]embedding
 )DOC");
-static const auto doc_d_37 = fun_37.doc(R"DOC(   [0]
+static const auto doc_d_36 = fun_36.doc(R"DOC(   [0]
    Parameters
    ----------
 
@@ -1908,7 +1891,7 @@ static const auto doc_d_37 = fun_37.doc(R"DOC(   [0]
    -------
 
 )DOC");
-static const auto doc_d_38 = fun_38.doc(R"DOC(   [0]Construct the embedding class from the local space using equivalences between atoms.
+static const auto doc_d_37 = fun_37.doc(R"DOC(   [0]Construct the embedding class from the local space using equivalences between atoms.
    Parameters
    ----------
 
@@ -1920,7 +1903,7 @@ static const auto doc_d_38 = fun_38.doc(R"DOC(   [0]Construct the embedding clas
 
       [0]embedding
 )DOC");
-static const auto doc_d_39 = fun_39.doc(R"DOC(   [0]Construct the embedding class from the local space without using equivalences between atoms.
+static const auto doc_d_38 = fun_38.doc(R"DOC(   [0]Construct the embedding class from the local space without using equivalences between atoms.
    Parameters
    ----------
 
@@ -1932,7 +1915,7 @@ static const auto doc_d_39 = fun_39.doc(R"DOC(   [0]Construct the embedding clas
 
       [0]embedding
 )DOC");
-static const auto doc_d_40 = fun_40.doc(R"DOC(   [0]Construct a Hubbard-Kanamori Hamiltonian
+static const auto doc_d_39 = fun_39.doc(R"DOC(   [0]Construct a Hubbard-Kanamori Hamiltonian
    Parameters
    ----------
 
@@ -1955,7 +1938,7 @@ static const auto doc_d_40 = fun_40.doc(R"DOC(   [0]Construct a Hubbard-Kanamori
    -------
 
 )DOC");
-static const auto doc_d_41 = fun_41.doc(R"DOC(   [0]Construct a new operators::many body operator make slater object
+static const auto doc_d_40 = fun_40.doc(R"DOC(   [0]Construct a new operators::many body operator make slater object
    Parameters
    ----------
 
@@ -1976,7 +1959,7 @@ static const auto doc_d_41 = fun_41.doc(R"DOC(   [0]Construct a new operators::m
    -------
 
 )DOC");
-static const auto doc_d_42 = fun_42.doc(R"DOC(   [0]Create a one-body elements object with orthonormalized projectors.
+static const auto doc_d_41 = fun_41.doc(R"DOC(   [0]Create a one-body elements object with orthonormalized projectors.
    Parameters
    ----------
 
@@ -1994,7 +1977,7 @@ static const auto doc_d_42 = fun_42.doc(R"DOC(   [0]Create a one-body elements o
 
       [0]The total electron density and a one-body elements.
 )DOC");
-static const auto doc_d_43 = fun_43.doc(R"DOC(   [0]Construct a obe_tb from Wannier90 in the case of a single spin index
+static const auto doc_d_42 = fun_42.doc(R"DOC(   [0]Construct a obe_tb from Wannier90 in the case of a single spin index
    [1]
    Parameters
    ----------
@@ -2010,7 +1993,7 @@ static const auto doc_d_43 = fun_43.doc(R"DOC(   [0]Construct a obe_tb from Wann
    -------
 
 )DOC");
-static const auto doc_d_44 = fun_44.doc(R"DOC(   [0]Create a one-body elements object along specific k-grid.
+static const auto doc_d_43 = fun_43.doc(R"DOC(   [0]Create a one-body elements object along specific k-grid.
    Parameters
    ----------
 
@@ -2024,7 +2007,7 @@ static const auto doc_d_44 = fun_44.doc(R"DOC(   [0]Create a one-body elements o
 
       [0]One-body elements along high-symmetry k-path.
 )DOC");
-static const auto doc_d_45 = fun_45.doc(R"DOC(   [0]Create a one-body elements object with the Θ projectors.
+static const auto doc_d_44 = fun_44.doc(R"DOC(   [0]Create a one-body elements object with the Θ projectors.
    Parameters
    ----------
 
@@ -2038,7 +2021,7 @@ static const auto doc_d_45 = fun_45.doc(R"DOC(   [0]Create a one-body elements o
 
       [0]One-body elements using the Θ projectors.
 )DOC");
-static const auto doc_d_46 = fun_46.doc(R"DOC(   [0]
+static const auto doc_d_45 = fun_45.doc(R"DOC(   [0]
    Parameters
    ----------
 
@@ -2047,7 +2030,7 @@ static const auto doc_d_46 = fun_46.doc(R"DOC(   [0]
    -------
 
 )DOC");
-static const auto doc_d_47 = fun_47.doc(R"DOC(   [0]Compute the atom- and orbital-resolved spectral function (interacting density of states).
+static const auto doc_d_46 = fun_46.doc(R"DOC(   [0]Compute the atom- and orbital-resolved spectral function (interacting density of states).
    Parameters
    ----------
 
@@ -2069,7 +2052,7 @@ static const auto doc_d_47 = fun_47.doc(R"DOC(   [0]Compute the atom- and orbita
 
       [0]spectral_function_w
 )DOC");
-static const auto doc_d_48 = fun_48.doc(R"DOC(   [0]Root finder f(x) = 0.
+static const auto doc_d_47 = fun_47.doc(R"DOC(   [0]Root finder f(x) = 0.
    Parameters
    ----------
 
@@ -2099,7 +2082,7 @@ static const auto doc_d_48 = fun_48.doc(R"DOC(   [0]Root finder f(x) = 0.
 
       [0]x, f(x) std::pair<double, double>
 )DOC");
-static const auto doc_d_49 = fun_49.doc(R"DOC(   [0]
+static const auto doc_d_48 = fun_48.doc(R"DOC(   [0]
    Parameters
    ----------
 
@@ -2108,7 +2091,7 @@ static const auto doc_d_49 = fun_49.doc(R"DOC(   [0]
    -------
 
 )DOC");
-static const auto doc_d_50 = fun_50.doc(R"DOC(   [0]Compute momentum-resolved spectral function A(k, ω) along high-symmetry path.
+static const auto doc_d_49 = fun_49.doc(R"DOC(   [0]Compute momentum-resolved spectral function A(k, ω) along high-symmetry path.
    Parameters
    ----------
 
@@ -2128,7 +2111,7 @@ static const auto doc_d_50 = fun_50.doc(R"DOC(   [0]Compute momentum-resolved sp
 
       [0]spectral_function_kw
 )DOC");
-static const auto doc_d_51 = fun_51.doc(R"DOC(   [0]Symmetrize the blocks of a Green's function given a list of it's degenerate blocks.
+static const auto doc_d_50 = fun_50.doc(R"DOC(   [0]Symmetrize the blocks of a Green's function given a list of it's degenerate blocks.
    Parameters
    ----------
 
@@ -2151,32 +2134,31 @@ static PyMethodDef module_methods[] = {
    {"dc_formulas", (PyCFunction)c2py::pyfkw<fun_23>, METH_VARARGS | METH_KEYWORDS, doc_d_23.c_str()},
    {"density", (PyCFunction)c2py::pyfkw<fun_24>, METH_VARARGS | METH_KEYWORDS, doc_d_24.c_str()},
    {"density_nk", (PyCFunction)c2py::pyfkw<fun_25>, METH_VARARGS | METH_KEYWORDS, doc_d_25.c_str()},
-   {"density_slow", (PyCFunction)c2py::pyfkw<fun_26>, METH_VARARGS | METH_KEYWORDS, doc_d_26.c_str()},
-   {"discover_symmetries", (PyCFunction)c2py::pyfkw<fun_27>, METH_VARARGS | METH_KEYWORDS, doc_d_27.c_str()},
-   {"double_counting", (PyCFunction)c2py::pyfkw<fun_28>, METH_VARARGS | METH_KEYWORDS, doc_d_28.c_str()},
-   {"extract_delta", (PyCFunction)c2py::pyfkw<fun_29>, METH_VARARGS | METH_KEYWORDS, doc_d_29.c_str()},
-   {"find_chemical_potential", (PyCFunction)c2py::pyfkw<fun_30>, METH_VARARGS | METH_KEYWORDS, doc_d_30.c_str()},
-   {"fold", (PyCFunction)c2py::pyfkw<fun_31>, METH_VARARGS | METH_KEYWORDS, doc_d_31.c_str()},
-   {"gloc", (PyCFunction)c2py::pyfkw<fun_32>, METH_VARARGS | METH_KEYWORDS, doc_d_32.c_str()},
-   {"h5_read", (PyCFunction)c2py::pyfkw<fun_33>, METH_VARARGS | METH_KEYWORDS, doc_d_33.c_str()},
-   {"h5_write", (PyCFunction)c2py::pyfkw<fun_34>, METH_VARARGS | METH_KEYWORDS, doc_d_34.c_str()},
-   {"impurity_levels", (PyCFunction)c2py::pyfkw<fun_35>, METH_VARARGS | METH_KEYWORDS, doc_d_35.c_str()},
-   {"make_embedding", (PyCFunction)c2py::pyfkw<fun_36>, METH_VARARGS | METH_KEYWORDS, doc_d_36.c_str()},
-   {"make_embedding_with_clusters", (PyCFunction)c2py::pyfkw<fun_37>, METH_VARARGS | METH_KEYWORDS, doc_d_37.c_str()},
-   {"make_embedding_with_equivalences", (PyCFunction)c2py::pyfkw<fun_38>, METH_VARARGS | METH_KEYWORDS, doc_d_38.c_str()},
-   {"make_embedding_with_no_equivalences", (PyCFunction)c2py::pyfkw<fun_39>, METH_VARARGS | METH_KEYWORDS, doc_d_39.c_str()},
-   {"make_kanamori", (PyCFunction)c2py::pyfkw<fun_40>, METH_VARARGS | METH_KEYWORDS, doc_d_40.c_str()},
-   {"make_slater", (PyCFunction)c2py::pyfkw<fun_41>, METH_VARARGS | METH_KEYWORDS, doc_d_41.c_str()},
-   {"one_body_elements_from_dft_converter", (PyCFunction)c2py::pyfkw<fun_42>, METH_VARARGS | METH_KEYWORDS, doc_d_42.c_str()},
-   {"one_body_elements_from_wannier90", (PyCFunction)c2py::pyfkw<fun_43>, METH_VARARGS | METH_KEYWORDS, doc_d_43.c_str()},
-   {"one_body_elements_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<fun_44>, METH_VARARGS | METH_KEYWORDS, doc_d_44.c_str()},
-   {"one_body_elements_with_theta_projectors", (PyCFunction)c2py::pyfkw<fun_45>, METH_VARARGS | METH_KEYWORDS, doc_d_45.c_str()},
-   {"permute_local_space", (PyCFunction)c2py::pyfkw<fun_46>, METH_VARARGS | METH_KEYWORDS, doc_d_46.c_str()},
-   {"projected_spectral_function", (PyCFunction)c2py::pyfkw<fun_47>, METH_VARARGS | METH_KEYWORDS, doc_d_47.c_str()},
-   {"root_finder", (PyCFunction)c2py::pyfkw<fun_48>, METH_VARARGS | METH_KEYWORDS, doc_d_48.c_str()},
-   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_49>, METH_VARARGS | METH_KEYWORDS, doc_d_49.c_str()},
-   {"spectral_function_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<fun_50>, METH_VARARGS | METH_KEYWORDS, doc_d_50.c_str()},
-   {"symmetrize_gf", (PyCFunction)c2py::pyfkw<fun_51>, METH_VARARGS | METH_KEYWORDS, doc_d_51.c_str()},
+   {"discover_symmetries", (PyCFunction)c2py::pyfkw<fun_26>, METH_VARARGS | METH_KEYWORDS, doc_d_26.c_str()},
+   {"double_counting", (PyCFunction)c2py::pyfkw<fun_27>, METH_VARARGS | METH_KEYWORDS, doc_d_27.c_str()},
+   {"extract_delta", (PyCFunction)c2py::pyfkw<fun_28>, METH_VARARGS | METH_KEYWORDS, doc_d_28.c_str()},
+   {"find_chemical_potential", (PyCFunction)c2py::pyfkw<fun_29>, METH_VARARGS | METH_KEYWORDS, doc_d_29.c_str()},
+   {"fold", (PyCFunction)c2py::pyfkw<fun_30>, METH_VARARGS | METH_KEYWORDS, doc_d_30.c_str()},
+   {"gloc", (PyCFunction)c2py::pyfkw<fun_31>, METH_VARARGS | METH_KEYWORDS, doc_d_31.c_str()},
+   {"h5_read", (PyCFunction)c2py::pyfkw<fun_32>, METH_VARARGS | METH_KEYWORDS, doc_d_32.c_str()},
+   {"h5_write", (PyCFunction)c2py::pyfkw<fun_33>, METH_VARARGS | METH_KEYWORDS, doc_d_33.c_str()},
+   {"impurity_levels", (PyCFunction)c2py::pyfkw<fun_34>, METH_VARARGS | METH_KEYWORDS, doc_d_34.c_str()},
+   {"make_embedding", (PyCFunction)c2py::pyfkw<fun_35>, METH_VARARGS | METH_KEYWORDS, doc_d_35.c_str()},
+   {"make_embedding_with_clusters", (PyCFunction)c2py::pyfkw<fun_36>, METH_VARARGS | METH_KEYWORDS, doc_d_36.c_str()},
+   {"make_embedding_with_equivalences", (PyCFunction)c2py::pyfkw<fun_37>, METH_VARARGS | METH_KEYWORDS, doc_d_37.c_str()},
+   {"make_embedding_with_no_equivalences", (PyCFunction)c2py::pyfkw<fun_38>, METH_VARARGS | METH_KEYWORDS, doc_d_38.c_str()},
+   {"make_kanamori", (PyCFunction)c2py::pyfkw<fun_39>, METH_VARARGS | METH_KEYWORDS, doc_d_39.c_str()},
+   {"make_slater", (PyCFunction)c2py::pyfkw<fun_40>, METH_VARARGS | METH_KEYWORDS, doc_d_40.c_str()},
+   {"one_body_elements_from_dft_converter", (PyCFunction)c2py::pyfkw<fun_41>, METH_VARARGS | METH_KEYWORDS, doc_d_41.c_str()},
+   {"one_body_elements_from_wannier90", (PyCFunction)c2py::pyfkw<fun_42>, METH_VARARGS | METH_KEYWORDS, doc_d_42.c_str()},
+   {"one_body_elements_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<fun_43>, METH_VARARGS | METH_KEYWORDS, doc_d_43.c_str()},
+   {"one_body_elements_with_theta_projectors", (PyCFunction)c2py::pyfkw<fun_44>, METH_VARARGS | METH_KEYWORDS, doc_d_44.c_str()},
+   {"permute_local_space", (PyCFunction)c2py::pyfkw<fun_45>, METH_VARARGS | METH_KEYWORDS, doc_d_45.c_str()},
+   {"projected_spectral_function", (PyCFunction)c2py::pyfkw<fun_46>, METH_VARARGS | METH_KEYWORDS, doc_d_46.c_str()},
+   {"root_finder", (PyCFunction)c2py::pyfkw<fun_47>, METH_VARARGS | METH_KEYWORDS, doc_d_47.c_str()},
+   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_48>, METH_VARARGS | METH_KEYWORDS, doc_d_48.c_str()},
+   {"spectral_function_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<fun_49>, METH_VARARGS | METH_KEYWORDS, doc_d_49.c_str()},
+   {"symmetrize_gf", (PyCFunction)c2py::pyfkw<fun_50>, METH_VARARGS | METH_KEYWORDS, doc_d_50.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
