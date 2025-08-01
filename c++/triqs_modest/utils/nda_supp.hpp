@@ -25,4 +25,12 @@ namespace nda {
     for (const auto &sub : nested) { flat.insert(flat.end(), sub.begin(), sub.end()); }
     return flat;
   }
+
+  template <typename T> bool is_diagonal(nda::matrix<T> const &M) {
+    auto dim = M.shape()[0];
+    for (size_t i = 0; i < dim; i++)
+      for (size_t j = i + 1; j < dim; j++)
+        if (abs(M(i, j)) > 1.e-14) return false;
+    return true;
+  }
 } // namespace nda

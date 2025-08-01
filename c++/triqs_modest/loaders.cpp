@@ -276,11 +276,12 @@ namespace triqs::modest {
 
     /// read symmetry ops
     //FIXME: auto symm_ops = (long(g_dft["symm_op"]) == 0) ? ibz_symmetry_ops{} : read_ibz(root, atomic_shells, Rmats);
-    auto symm_ops = (long(g_dft["symm_op"]) == 0) ? std::optional<ibz_symmetry_ops>{} :
-                                                    std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::Correlated));
-
-    auto eps_k = band_dispersion{.spin_kind = spin_kind, .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = k_weights};
-    auto proj  = downfolding_projector{.spin_kind = spin_kind, .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
+    auto symm_ops        = (long(g_dft["symm_op"]) == 0) ? std::optional<ibz_symmetry_ops>{} :
+                                                           std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::Correlated));
+    auto H_k_is_diagonal = nda::is_diagonal(nda::matrix<dcomplex>{H_k(1, 0, r_all, r_all)});
+    auto eps_k           = band_dispersion{
+                 .spin_kind = spin_kind, .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = k_weights, .matrix_valued = !H_k_is_diagonal};
+    auto proj = downfolding_projector{.spin_kind = spin_kind, .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
 
     /// build a first version without symmetries
     auto C_space_no_symm = local_space{spin_kind, atomic_shells, {}, {}, {}};
@@ -341,7 +342,7 @@ namespace triqs::modest {
     /// read and rotate projectors
     auto atom_decomp = W_space.atomic_decomposition() | tl::to<std::vector<long>>();
     auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::ThetaProjectors, rot_mats, atom_decomp);
-    auto theta_proj  = downfolding_projector{obe.C_space.spin_kind(), std::move(P_k), obe.H.n_bands_per_k};
+    auto theta_proj  = downfolding_projector{.spin_kind = obe.C_space.spin_kind(), .P_k = std::move(P_k), .n_bands_per_k = obe.H.n_bands_per_k};
 
     /// create a new IBZ symmetrizer that spans all atoms instead of just the correlated atoms
     auto symm_ops = (obe.ibz_symm_ops) ? std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::ThetaProjectors)) :
@@ -370,9 +371,10 @@ namespace triqs::modest {
     auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::Bands, rot_mats, atom_decomp);
 
     /// construct one-body elements (ibz_symm_ops are needed so we drop)
-    auto eps_k = band_dispersion{obe.C_space.spin_kind(), std::move(H_k), n_bands_per_k, {}};
-    auto proj  = downfolding_projector{obe.C_space.spin_kind(), std::move(P_k), n_bands_per_k};
-    auto obe1  = one_body_elements_on_grid{.H = eps_k, .C_space = obe.C_space, .P = proj, .ibz_symm_ops = {}};
+    auto eps_k = band_dispersion{
+       .spin_kind = obe.C_space.spin_kind(), .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = {}, .matrix_valued = false};
+    auto proj = downfolding_projector{.spin_kind = obe.C_space.spin_kind(), .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
+    auto obe1 = one_body_elements_on_grid{.H = eps_k, .C_space = obe.C_space, .P = proj, .ibz_symm_ops = {}};
 
     /// rotate to the local basis that the self-energies will be defined in.
     return rotate_local_basis(obe.C_space.rotation_from_dft_to_local_basis(), std::move(obe1));

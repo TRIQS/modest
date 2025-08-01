@@ -167,6 +167,21 @@ TEST(gloc_tests, gloc_wien2k_sigma_large_nu) { //NOLINT
 }
 //--------------------------------
 
+//--------------------------------
+// La2CuO4 (Fixed grid W90)
+//--------------------------------
+TEST(gloc_tests, gloc_2ways_lco) { gloc_two_ways("ref_data/lco_qe_dp_w90_grid.ref.h5"); }
+TEST(gloc_tests, gloc_lco_zero_sigma) { //NOLINT
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/lco_qe_dp_w90_grid.ref.h5", 0.00001, self_energy_kind_e::ZeroSigma);
+}
+TEST(gloc_tests, gloc_lco_const_sigma) { //NOLINT
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/lco_qe_dp_w90_grid.ref.h5", 0.00001, self_energy_kind_e::ConstSigma);
+}
+TEST(gloc_tests, gloc_lco_sigma) { //NOLINT
+  run_gloc_test_case<triqs::mesh::imfreq>("ref_data/lco_qe_dp_w90_grid.ref.h5", 0.00001, self_energy_kind_e::Sigma);
+}
+//--------------------------------
+
 #if LFS
 //--------------------------------
 // La5Ni3O11 (Wien2k) (dense freq mesh)

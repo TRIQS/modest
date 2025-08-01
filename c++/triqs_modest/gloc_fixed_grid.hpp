@@ -12,6 +12,62 @@ namespace triqs::modest {
 #pragma omp declare reduction(block2_gf_sum : block2_gf<dlr_imfreq, matrix_valued> : omp_out += omp_in)                                              \
    initializer(omp_priv = make_block2_gf(omp_orig(0, 0).mesh(), get_struct(omp_orig)))
 
+  /** @cond DOXYGEN_SKIP_THIS */
+  /**
+  * @brief [INTERNAL] compute G𝓒 local Green's function on Mesh(MxM) for cases where H(k) is not diagonal.
+  * 
+  * @tparam Mesh triqs::mesh::{dlr_imfreq,imfreq}
+  * @param obe one_body_elements_on_grid
+  * @param mu chemical potential
+  * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view.
+  * @param Sigma_static The static part of the embedded self-energy in the embedded view.
+  * @return block2_gf<Mesh, matrix_valued> 
+   */
+  template <typename Mesh>
+  block2_gf<Mesh, matrix_valued> gloc_for_matrix_valued_dispersion_impl(one_body_elements_on_grid const &obe, double mu,
+                                                                        block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
+                                                                        nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
+
+    auto n_sigma     = obe.C_space.n_sigma();
+    auto n_M         = obe.C_space.dim();
+    auto n_kpts      = long(obe.H.n_k());
+    auto const &mesh = Sigma_dynamic(0, 0).mesh();
+
+    auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
+
+    auto PSP = [&](auto &w, auto &k_idx, auto &sigma) {
+      auto N_nu = obe.H.N_nu(sigma, k_idx);
+      auto out  = nda::zeros<dcomplex>(N_nu, N_nu);
+      for (auto &&[alpha, R] : enumerated_sub_slices(embedding_decomp)) {
+        auto P = obe.P.P(sigma, k_idx)(R, r_all);
+        out(r_all, r_all) += dagger(P) * nda::matrix<dcomplex>{Sigma_dynamic(alpha, sigma).data()(w, r_all, r_all) + Sigma_static(alpha, sigma)} * P;
+      }
+      return out;
+    };
+
+    auto gloc_k = [&](auto &k_idx, auto &sigma) {
+      auto out = gf{mesh, {n_M, n_M}};
+      auto P   = obe.P.P(sigma, k_idx);
+      for (auto &&[n, w] : enumerate(mesh)) {
+        out.data()(n, r_all, r_all) = P * inverse(w + mu - obe.H.H(sigma, k_idx) - PSP(n, k_idx, sigma)) * dagger(P);
+      }
+      return out;
+    };
+
+    auto gloc_result       = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    mpi::communicator comm = {};
+#pragma omp parallel for collapse(2) reduction(block2_gf_sum<Mesh, matrix_valued> : gloc_result) default(none)                                       \
+   shared(comm, gloc_k, n_kpts, n_sigma, obe)
+    for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
+      for (auto sigma : range(n_sigma)) { gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data(); }
+    }
+    gloc_result = mpi::all_reduce(gloc_result);
+
+    if (auto const &S = obe.ibz_symm_ops; S) { gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition()); }
+    return gloc_result;
+  }
+  /** @endcond */
+
   // ------------------------------------------------------------------
   /**
  * @ingroup gloc_fixed
@@ -28,8 +84,9 @@ namespace triqs::modest {
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
 
-    //std::optional<nda::array<nda::matrix<double>, 2>> const &Sigma_dc)
-    // std::optional<block2_gf<Mesh, matrix_valued>> const &Sigma_dc
+    // intercept if the dispersion in obe is matrix valued. The Woodbury offers no performance gain for this case.
+    if (obe.H.matrix_valued) return gloc_for_matrix_valued_dispersion_impl(obe, mu, Sigma_dynamic, Sigma_static);
+
     auto n_sigma     = Sigma_dynamic.size2();
     auto M           = obe.C_space.dim();
     auto n_kpts      = long(obe.H.n_k());
@@ -38,7 +95,6 @@ namespace triqs::modest {
     auto omegas      = mesh | tl::to<std::vector<dcomplex>>();
 
     // Embedding decomposition from structure of Sigma
-    // FIXME : better way ?
     auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
 
     auto timer = scoped_timer{};
@@ -64,11 +120,9 @@ namespace triqs::modest {
     // FIXME :: the IBZ should work on a proper gf_view with atomic decomposition
     // CHANGE IBZ accordingly ...
     if (auto const &S = obe.ibz_symm_ops; S) gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition());
-
     return gloc_result;
   }
 
-  //TODO: Port to Woodbury? Wrap one gloc function?
   /**
    * @ingroup gloc_fixed
    * @brief  Compute G𝓒 on with a Mesh with no self-energy.
@@ -82,29 +136,10 @@ namespace triqs::modest {
    * @return block2_gf<Mesh, matrix_valued> 
    */
   template <typename Mesh> block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements_on_grid const &obe, double mu) {
-
-    auto n_sigma = obe.C_space.n_sigma();
-    auto n_M     = obe.C_space.dim();
-    auto n_kpts  = long(obe.H.n_k());
-
-    auto gloc_k = [&](auto &k_idx, auto &sigma) {
-      auto out = gf{mesh, {n_M, n_M}};
-      auto P   = obe.P.P(sigma, k_idx);
-      for (auto &&[n, w] : enumerate(mesh)) { out.data()(n, r_all, r_all) = P * inverse(w + mu - obe.H.H(sigma, k_idx)) * dagger(P); }
-      return out;
-    };
-
-    auto gloc_result       = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
-    mpi::communicator comm = {};
-#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none) shared(comm, r_all, gloc_k, n_kpts, n_sigma, obe)
-    for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
-      for (auto sigma : range(n_sigma)) { gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data(); }
-    }
-    gloc_result = mpi::all_reduce(gloc_result);
-
-    if (auto const &S = obe.ibz_symm_ops; S) { gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition()); }
-
-    return gloc_result;
+    auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    auto Sigma_static  = nda::array<nda::matrix<dcomplex>, 2>(1, obe.C_space.n_sigma());
+    for (auto [i, j] : Sigma_static.indices()) { Sigma_static(i, j) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim()); }
+    return gloc(obe, mu, Sigma_dynamic, Sigma_static);
   }
 
   /**

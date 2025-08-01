@@ -32,6 +32,12 @@ TEST(load_data_tests, load_dft_from_h5_vasp_fixed_grid) { // NOLINT
   for (auto &&file : h5_files) test_load(file);
 }
 
+TEST(load_data_tests, load_dft_from_w90_qe_fixed_grid) { // NOLINT
+  auto [target_density, obe] = one_body_elements_from_dft_converter("ref_data/lco_qe_dp_w90_grid.ref.h5");
+  std::cout << obe << std::endl;
+  ASSERT_TRUE(obe.H.matrix_valued);
+}
+
 TEST(load_data_tests, obe_high_symm_path) {
   auto [_, obe] = one_body_elements_from_dft_converter("ref_data/SrVO3-cubic-t2g.ref.h5");
   std::cout << obe << std::endl;

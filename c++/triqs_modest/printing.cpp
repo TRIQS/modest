@@ -12,6 +12,7 @@ namespace triqs::modest {
     out1 << fmt::format("Number of bands (max): {}\n", x.H_k.extent(3));
     out1 << fmt::format("Represented on a fixed grid of {} points.\n", x.n_k());
     out1 << fmt::format("Shape of H[k_idx, σ, ν, ν'] = {}\n", x.H_k.shape());
+    out1 << fmt::format("ε^σ(k) is matrix valued? = {}\n", x.matrix_valued);
     return out;
   }
 
@@ -67,8 +68,7 @@ namespace triqs::modest {
   std::ostream &operator<<(std::ostream &out, one_body_elements_on_grid const &obe) {
     auto out1 = indented_ostream(out, 2); // same stream, but shifted by 2 spaces
     auto out2 = indented_ostream(out, 4);
-    out
-       << "One body elements representing a downfolding from (restricted) Bloch 𝓑 to Correlated space 𝓒 from DFT code [one_body_elements_on_grid]\n";
+    out << "One body elements representing a downfolding from (restricted) Bloch 𝓑 to Correlated space 𝓒 from DFT code [one_body_elements_on_grid]\n";
     out1 << "H:\n";
     out2 << obe.H;
     out1 << "C_space:\n";

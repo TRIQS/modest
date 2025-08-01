@@ -24,6 +24,7 @@ namespace triqs::modest {
     nda::array<dcomplex, 4> H_k;       //< H_k [k_idx, σ', nu, nu']
     nda::array<long, 2> n_bands_per_k; //< n_bands_per_k [k_idx, σ'] = # of nu
     nda::array<double, 1> k_weights;   //< k_weights[k_idx] //FIXME : Do we want to make a mini- k grid object with the weights ??
+    bool matrix_valued;
 
     // public:
     // /// Constructor

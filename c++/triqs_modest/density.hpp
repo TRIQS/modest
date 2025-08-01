@@ -9,6 +9,9 @@
 
 namespace triqs::modest {
 
+  // #pragma omp declare reduction(gf_sum : gf<imfreq, scalar_valued> : omp_out += omp_in) initializer(omp_priv = gf{omp_orig.mesh()})
+  // #pragma omp declare reduction(gf_sum : gf<dlr_imfreq, scalar_valued> : omp_out += omp_in) initializer(omp_priv = gf{omp_orig.mesh()})
+
   // ============================================
   namespace detail {
     // impl detail : compute (1- Y1 Sigma)^{-1} Y2 in M x M space, with Sigma by block
@@ -17,10 +20,7 @@ namespace triqs::modest {
       // Y Sigma. NB Sigma is by blocks.
       // NB: F_layout because of getrs in Ainv_B below
       auto YS = nda::matrix<dcomplex, nda::F_layout>::zeros(M, M);
-      // auto Sigma_m_Sigma_DC = [&](auto alpha, auto sigma) {
-      //   if (dH_C) return nda::matrix<dcomplex>{Sigma(alpha, sigma)[om] - dH_C.value()(alpha, sigma)};
-      //   return nda::matrix<dcomplex>{Sigma(alpha, sigma)[om]};
-      // };
+
       for (auto &&[alpha, R] : enumerated_sub_slices(embedding_decomp)) {
         auto Sigma = nda::matrix<dcomplex>{Sigma_dynamic(alpha, sigma)[om] + Sigma_static(alpha, sigma)};
         nda::blas::gemm(-1, Y1(r_all, R), Sigma, 0, YS(r_all, R));
@@ -82,9 +82,43 @@ namespace triqs::modest {
    * @param Sigma_static The static part of the embedded self-energy.
    * @return double 
    */
+  template <typename Mesh>
   double density(one_body_elements_on_grid const &obe, double mu,
                  // add magnetic field,
-                 block2_gf<mesh::dlr_imfreq, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
+                 block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
+
+    if (obe.H.matrix_valued) return density_for_matrix_valued_impl(obe, mu, Sigma_dynamic, Sigma_static);
+
+    auto n_sigma     = Sigma_dynamic.size2();
+    auto n_k         = obe.H.n_k();
+    auto const &mesh = Sigma_dynamic(0, 0).mesh();
+    double beta      = mesh.beta();
+    auto corr        = gf{mesh}; // Compute the correction term on all dlr mesh points
+    double KS_term   = 0;        // The first Kohn Sham term, cf Notes
+
+    // OP : we don't have a Fermi function in TRIQS ??
+    auto Fermi                = [](double x) { return (x > 0 ? exp(-x) / (1 + exp(-x)) : 1 / (1 + exp(x))); };
+    auto calc_correction_term = detail::trace_G_B_m_G_KS(obe, mu, Sigma_dynamic, Sigma_static);
+
+    // ---------
+    // TODO: OpenMP
+    for (auto k_idx : range(n_k)) {
+      for (auto sigma : range(n_sigma)) {
+
+        // 1- KS term
+        double KS_term_acc = 0;
+        auto eps           = obe.H.H(sigma, k_idx);
+        for (auto nu : range(obe.H.N_nu(sigma, k_idx)))        // we must cut at N_nu, do not add nu with eps =0
+          KS_term_acc += Fermi(beta * real(eps(nu, nu) - mu)); // FIXME : H SHOULD BE REAL in OBE !!
+        KS_term += obe.H.k_weights(k_idx) * KS_term_acc;
+
+        //  2- Correction term
+        corr.data() += calc_correction_term(sigma, k_idx);
+      }
+    }
+    // OP, JC : Fix the mpi. NB :  KS_term : REDUCE TOO
+    return KS_term + real(density(corr));
+  }
 
   // ------------------------------------------------------------------------------------
   ///Compute number of particles n = ∑f(β(e(k)-μ))
@@ -103,8 +137,8 @@ namespace triqs::modest {
    * @return double 
    */
   template <typename Mesh>
-  double density_slow(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                      nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
+  double density_for_matrix_valued_impl(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
+                                        nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
     // nda::array<nda::matrix<double>, 2> const &Sigma_DC) {
     auto const &mesh = Sigma_dynamic(0, 0).mesh();
     auto beta        = mesh.beta();
@@ -130,12 +164,14 @@ namespace triqs::modest {
       return out;
     };
 
+    //TODO: OpenMP
     for (auto k_idx : range(obe.H.n_k())) {
       for (auto sigma : range(obe.C_space.n_sigma())) { result.data() += obe.H.k_weights(k_idx) * Glatt(k_idx, sigma).data(); }
     }
 
     return density_nk(obe, mu, beta) + real(density(result));
   }
+
   /**
  * @ingroup mu
  * @brief Find the chemical potenital from the local Green's function given a target density.
@@ -167,41 +203,21 @@ namespace triqs::modest {
  * @param verbosity Printing of the root finder's progress (default = true).
  * @return double 
  */
-  inline double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
-                                        block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
-                                        nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, std::string method = "dichotomy",
-                                        double precision = 1.e-5, bool verbosity = true) {
-
-    std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static](double x) { return density_slow(obe, x, Sigma_dynamic, Sigma_static); };
-    return std::get<0>(triqs::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
-  }
-
-  /**
- * @ingroup mu
- * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
- * 
- * @param target_density The total electron density.
- * @param obe The one-body elements.
- * @param Sigma_dynamic The dynamic part of the embedded self-energy.
- * @param Sigma_static The static part of the embedded self-energy.
- * @param method The root finding method to use (default = dichotomy).
- * @param precision The precision to end search (default = 1e-5).
- * @param verbosity Printing of the root finder's progress (default = true).
- * @return double 
- */
-  inline double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
-                                        block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
-                                        nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, std::string method = "dichotomy",
-                                        double precision = 1.e-5, bool verbosity = true) {
+  template <typename Mesh>
+  double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
+                                 block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static,
+                                 std::string method = "dichotomy", double precision = 1.e-5, bool verbosity = true) {
     std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static](double x) { return density(obe, x, Sigma_dynamic, Sigma_static); };
     return std::get<0>(triqs::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
   }
 
   /** @cond DOXYGEN_SKIP_THIS */
-  template double density_slow(one_body_elements_on_grid const &obe, double mu, block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
-                               nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
-  //  nda::array<nda::matrix<double>, 2> const &Sigma_DC);
-
+  template double density(one_body_elements_on_grid const &obe, double mu, block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
+                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
+  template double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
+                                          block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
+                                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, std::string method = "dichotomy",
+                                          double precision = 1.e-5, bool verbosity = true);
   /** @endcond */
 
 } // namespace triqs::modest
