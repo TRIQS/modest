@@ -14,9 +14,6 @@
 #include "triqs_modest/obe_tb.hpp"
 #include "triqs/lattice/superlattice.hpp"
 
-template <> constexpr bool c2py::is_wrapped<triqs::mesh::imfreq>     = true;
-template <> constexpr bool c2py::is_wrapped<triqs::mesh::dlr_imfreq> = true;
-
 namespace c2py_module {
   using DMFTCheckpoint = triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>;
 } // namespace c2py_module
