@@ -30,9 +30,8 @@ template <typename U> struct fmt::formatter<nda::matrix<U>> {
 
   //
   auto format(auto const &mat, format_context &ctx) const {
-    auto out = ctx.out();
-    int max_width =
-       std::ranges::max(mat | std::views::transform([](auto &&x) { return fmt::format("{}", x).length(); }));
+    auto out      = ctx.out();
+    int max_width = std::ranges::max(mat | std::views::transform([](auto &&x) { return fmt::format("{}", x).length(); }));
     for (long i = 0; i < mat.extent(0); ++i) {
       if (i == 0)
         fmt::format_to(out, "\n[[");
@@ -73,11 +72,9 @@ template <typename T> struct fmt::formatter<nda::matrix<std::complex<T>>> : fmt:
   template <typename FormatContext> auto format(const nda::matrix<std::complex<T>> &mat, FormatContext &ctx) const {
     auto out = ctx.out();
 
-    int max_width_r = std::ranges::max(
-       mat | std::views::transform([&](auto &&x) { return fmt::format("{:.{}f}", x.real(), precision).length(); }));
-    int max_width_i = std::ranges::max(
-       mat | std::views::transform([&](auto &&x) { return fmt::format("{:.{}f}", x.imag(), precision).length(); }));
-    int max_width = std::max(max_width_r, max_width_i);
+    int max_width_r = std::ranges::max(mat | std::views::transform([&](auto &&x) { return fmt::format("{:.{}f}", x.real(), precision).length(); }));
+    int max_width_i = std::ranges::max(mat | std::views::transform([&](auto &&x) { return fmt::format("{:.{}f}", x.imag(), precision).length(); }));
+    int max_width   = std::max(max_width_r, max_width_i);
 
     for (size_t i = 0; i < mat.extent(0); ++i) {
       if (i == 0)
@@ -119,9 +116,8 @@ namespace nda {
     // Widths of each column: max(label, all formatted elements)
     std::vector<long> col_widths(cols, 0);
     for (long j : range(cols)) {
-      auto formatted_column =
-         stdv::iota(0L, rows) | stdv::transform([&](long i) { return long(fmt::format("{}", mat(i, j)).size()); });
-      col_widths[j] = std::max(long(col_labels[j].size()), stdr::max(formatted_column));
+      auto formatted_column = stdv::iota(0L, rows) | stdv::transform([&](long i) { return long(fmt::format("{}", mat(i, j)).size()); });
+      col_widths[j]         = std::max(long(col_labels[j].size()), stdr::max(formatted_column));
     }
 
     // Header row (centered labels)

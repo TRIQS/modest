@@ -18,9 +18,8 @@ namespace triqs {
  * @param verbosity 
  * @return std::pair<double, double> 
  */
-  inline std::pair<double, double> find_bounds(std::function<double(double)> f, double x_init, double y_value,
-                                               double delta_x, double precision, long max_loops = 1000,
-                                               bool verbosity = true) {
+  inline std::pair<double, double> find_bounds(std::function<double(double)> f, double x_init, double y_value, double delta_x, double precision,
+                                               long max_loops = 1000, bool verbosity = true) {
 
     auto out = ostream_with_verbosity(std::cout, verbosity);
     double x = x_init;
@@ -63,9 +62,8 @@ namespace triqs {
  * @param verbosity 
  * @return std::pair<double, double> 
  */
-  inline std::pair<double, double> dichotomy(std::function<double(double)> f, double x_low, double x_high,
-                                             double y_target, double precision, long max_loops, std::string x_name,
-                                             std::string y_name, bool verbosity) {
+  inline std::pair<double, double> dichotomy(std::function<double(double)> f, double x_low, double x_high, double y_target, double precision,
+                                             long max_loops, std::string x_name, std::string y_name, bool verbosity) {
     auto out = ostream_with_verbosity(std::cout, verbosity);
 
     auto x1 = x_low;
@@ -101,8 +99,7 @@ namespace triqs {
       return {x, yfound};
     } else {
       out << fmt::format("FAILURE to adjust {} to the value {} after {} iterations.\n", x_name, y_target, nbre_loop);
-      throw std::runtime_error{
-         fmt::format("Dichotomy adjustment for {} failed after {} iterations", x_name, nbre_loop)};
+      throw std::runtime_error{fmt::format("Dichotomy adjustment for {} failed after {} iterations", x_name, nbre_loop)};
     }
   }
   //------------------------------------------------------
@@ -122,9 +119,8 @@ namespace triqs {
  * @param verbosity 
  * @return std::pair<double, double> 
  */
-  inline std::pair<double, double> bisection(std::function<double(double)> f, double x_low, double x_high,
-                                             double y_target, double precision, long max_loops, std::string x_name,
-                                             std::string y_name, bool verbosity) {
+  inline std::pair<double, double> bisection(std::function<double(double)> f, double x_low, double x_high, double y_target, double precision,
+                                             long max_loops, std::string x_name, std::string y_name, bool verbosity) {
 
     auto out = ostream_with_verbosity(std::cout, verbosity);
 
@@ -172,9 +168,8 @@ namespace triqs {
   * @param verbosity logging of root finder
   * @return x, f(x) std::pair<double, double> 
   */
-  inline std::pair<double, double> root_finder(std::string method, std::function<double(double)> f, double x_init,
-                                               double y_value, double precision, double delta_x, long max_loops = 1000,
-                                               std::string x_name = "", std::string y_name = "",
+  inline std::pair<double, double> root_finder(std::string method, std::function<double(double)> f, double x_init, double y_value, double precision,
+                                               double delta_x, long max_loops = 1000, std::string x_name = "", std::string y_name = "",
                                                bool verbosity = true) {
 
     auto out = ostream_with_verbosity(std::cout, verbosity);

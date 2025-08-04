@@ -16,9 +16,8 @@ namespace triqs {
  * @param U_prime U' (typically U' = U - 2J)
  * @param J_hund Kanamori J
  */
-  operators::many_body_operator make_density_density(std::vector<std::string> const &tau_names,
-                                                     std::vector<long> const &dim_gamma, double U_int, double U_prime,
-                                                     double J_hund);
+  operators::many_body_operator make_density_density(std::vector<std::string> const &tau_names, std::vector<long> const &dim_gamma, double U_int,
+                                                     double U_prime, double J_hund);
 
   /**
  * @ingroup hubb_kan
@@ -32,9 +31,8 @@ namespace triqs {
  * @param spin_flip  spin flip term
  * @param pair_hopping pair hopping term
  */
-  operators::many_body_operator make_kanamori(std::vector<std::string> const &tau_names,
-                                              std::vector<long> const &dim_gamma, double U_int, double U_prime,
-                                              double J_hund, bool spin_flip = true, bool pair_hopping = true);
+  operators::many_body_operator make_kanamori(std::vector<std::string> const &tau_names, std::vector<long> const &dim_gamma, double U_int,
+                                              double U_prime, double J_hund, bool spin_flip = true, bool pair_hopping = true);
   /**
  * @ingroup slater
   * @brief Construct a new operators::many body operator make slater object
@@ -46,9 +44,8 @@ namespace triqs {
   * @param spherical_to_dft 
   * @param dft_to_local 
   */
-  operators::many_body_operator make_slater(std::vector<std::string> const &tau_names,
-                                            std::vector<long> const &dim_gamma, double U_int, double J_hund,
-                                            nda::matrix<dcomplex> const &spherical_to_dft,
+  operators::many_body_operator make_slater(std::vector<std::string> const &tau_names, std::vector<long> const &dim_gamma, double U_int,
+                                            double J_hund, nda::matrix<dcomplex> const &spherical_to_dft,
                                             std::optional<nda::matrix<dcomplex>> const &dft_to_local);
   /**
  * @ingroup Utensor

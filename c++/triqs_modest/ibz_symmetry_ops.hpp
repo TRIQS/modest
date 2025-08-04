@@ -40,8 +40,7 @@ namespace triqs::modest {
       for (auto const &sym_op : this->ops) {
         for (auto &&[ialpha, jalpha, mat] : zip(range(n_alpha), sym_op.permutation, sym_op.mats)) {
           for (auto sigma : range(n_sigma)) {
-            result(jalpha, sigma) +=
-               mat * (sym_op.time_inv ? transpose(X(ialpha, sigma)) : X(ialpha, sigma)) * dagger(mat) / n_symm;
+            result(jalpha, sigma) += mat * (sym_op.time_inv ? transpose(X(ialpha, sigma)) : X(ialpha, sigma)) * dagger(mat) / n_symm;
           } // end loop on sigma
         } // end loop on alpha
       } // end loop on ops
@@ -54,16 +53,15 @@ namespace triqs::modest {
     // as a block2_gf_view ??
     // Or array<gf_view, 2> ??
     template <typename Mesh>
-    block2_gf<Mesh, matrix_valued> symmetrize(block2_gf<Mesh, matrix_valued> const &Gin,
-                                              auto const &atomic_decomposition) const {
+    block2_gf<Mesh, matrix_valued> symmetrize(block2_gf<Mesh, matrix_valued> const &Gin, auto const &atomic_decomposition) const {
       // FIXME : copy it , take atom_ivew of it, operate and return it.
       // FIXME : are we sure all Gin have the same mesh ? We use this internally and we have a check at E.embed that the meshes are the same. We could add this here.
       auto Gout    = make_block2_gf(Gin(0, 0).mesh(), get_struct(Gin));
       auto n_sigma = Gout.size2();
       auto n_symm  = double(this->ops.size());
 
-      auto range_list = enumerated_sub_slices(atomic_decomposition)
-         | stdv::transform([](auto &&x) { return std::get<1>(x); }) | tl::to<std::vector>();
+      auto range_list =
+         enumerated_sub_slices(atomic_decomposition) | stdv::transform([](auto &&x) { return std::get<1>(x); }) | tl::to<std::vector>();
 
       for (auto [alpha, R_alpha] : enumerated_sub_slices(atomic_decomposition)) { // loop on alpha
         for (auto sigma : range(n_sigma)) {                                       // loop on sigma
@@ -91,8 +89,7 @@ namespace triqs::modest {
   inline ibz_symmetry_ops rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U, ibz_symmetry_ops const &x) {
     auto result = x;
     for (auto &sym_op : result.ops)
-      for (auto &&[a, b] : zip(range(U.extent(0)), sym_op.permutation))
-        sym_op.mats[a] = dagger(U(b, 0)) * sym_op.mats[a] * U(a, 0);
+      for (auto &&[a, b] : zip(range(U.extent(0)), sym_op.permutation)) sym_op.mats[a] = dagger(U(b, 0)) * sym_op.mats[a] * U(a, 0);
     return result;
   }
 

@@ -19,8 +19,8 @@ namespace triqs::modest {
  * @param J the Hund's coupling J
  * @return std::pair<double, double> 
  */
-  std::pair<double, double> dc_formulas(std::string const method, double const N_tot, double const N_sigma,
-                                        long const n_orb, double const U, double const J);
+  std::pair<double, double> dc_formulas(std::string const method, double const N_tot, double const N_sigma, long const n_orb, double const U,
+                                        double const J);
   /**
  * @brief compute double counting correction (H_DC) for a dc_type (method) from the G𝓒 and interaction parameters.
  * 
@@ -30,9 +30,8 @@ namespace triqs::modest {
  * @param method dc_formula (sFLL, cFLL, sAMF, cAMF, cHeld)
  * @return H_DC nda::array<dc_t, 2> 
  */
-  std::pair<nda::array<nda::matrix<double>, 2>, nda::array<double, 2>>
-  double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund,
-                  std::string const method);
+  std::pair<nda::array<nda::matrix<double>, 2>, nda::array<double, 2>> double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix,
+                                                                                       double U_int, double J_hund, std::string const method);
 
   /**
  * @ingroup double_counting

@@ -26,8 +26,7 @@
 using namespace triqs::modest;
 
 template <typename Mesh>
-std::pair<std::vector<nda::matrix<dcomplex>>, block_gf<Mesh, matrix_valued>>
-split_self_energy(block_gf<Mesh, matrix_valued> &Sigma) {
+std::pair<std::vector<nda::matrix<dcomplex>>, block_gf<Mesh, matrix_valued>> split_self_energy(block_gf<Mesh, matrix_valued> &Sigma) {
   auto Sigma_hartree = std::vector<nda::matrix<dcomplex>>{};
   auto Sigma_dynamic = Sigma;
   auto const &mesh   = Sigma_dynamic[0].mesh();
@@ -40,9 +39,7 @@ split_self_energy(block_gf<Mesh, matrix_valued> &Sigma) {
 }
 
 namespace triqs {
-  template <typename Mesh>
-  std::vector<block_gf<Mesh, matrix_valued>> make_vec_block_gf(Mesh const &mesh,
-                                                               std::vector<gf_struct_t> const &s_vec) {
+  template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> make_vec_block_gf(Mesh const &mesh, std::vector<gf_struct_t> const &s_vec) {
     auto r = std::vector<block_gf<Mesh, matrix_valued>>{};
     for (auto const &estruct : s_vec) r.emplace_back(block_gf<Mesh, matrix_valued>{mesh, estruct});
     return r;

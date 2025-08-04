@@ -26,13 +26,11 @@ namespace h5 {
     std::string g_path; // for error messages
     char mode;          // same as h5::file
 
-    proxy(group g, std::string const &key, std::string const &g_path, char mode)
-       : g{std::move(g)}, _key{key}, g_path{g_path}, mode{mode} {}
+    proxy(group g, std::string const &key, std::string const &g_path, char mode) : g{std::move(g)}, _key{key}, g_path{g_path}, mode{mode} {}
 
     public:
     friend std::ostream &operator<<(std::ostream &out, proxy const &p) {
-      return out << fmt::format("h5 proxy {} : path = {}, key ={}.   ", (p.is_group() ? "[Group]" : "Dataset"),
-                                p.g_path, p._key);
+      return out << fmt::format("h5 proxy {} : path = {}, key ={}.   ", (p.is_group() ? "[Group]" : "Dataset"), p.g_path, p._key);
     }
 
     // I would prefer to construct from file, but I can not access mode from file.

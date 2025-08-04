@@ -74,8 +74,7 @@ namespace triqs::modest {
      * @param rotation_from_dft_to_local_basis  rotation_to_dft_basis[a, σ]: unitary matrix of the rotation to the DFT code basis. FIXME : CHECK 
      * @param rotation_from_spherical_to_dft_basis  rotation_to_dft_basis[a, σ]: unitary matrix of the rotation to the DFT code basis. FIXME : CHECK 
      */
-    local_space(spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells,
-                nda::array<std::vector<long>, 2> irreps_decomp_per_atom,
+    local_space(spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells, nda::array<std::vector<long>, 2> irreps_decomp_per_atom,
                 nda::array<nda::matrix<dcomplex>, 2> rotation_from_dft_to_local_basis,
                 nda::array<nda::matrix<dcomplex>, 1> rotation_from_spherical_to_dft_basis);
 
@@ -108,14 +107,10 @@ namespace triqs::modest {
 
     /// List of all blocks spanning 𝓒 space -> atoms_block_decomposition
     // OP : explain the 2 indices : spin ?? [ a, σ] ?
-    [[nodiscard]] nda::array<std::vector<long>, 2> const &atoms_block_decomposition() const {
-      return _irreps_decomp_per_atom;
-    }
+    [[nodiscard]] nda::array<std::vector<long>, 2> const &atoms_block_decomposition() const { return _irreps_decomp_per_atom; }
 
     /// List of all (a, sigma) local rotation matices that rotate the data
-    [[nodiscard]] nda::array<nda::matrix<dcomplex>, 2> const &rotation_from_dft_to_local_basis() const {
-      return _rotation_from_dft_to_local_basis;
-    }
+    [[nodiscard]] nda::array<nda::matrix<dcomplex>, 2> const &rotation_from_dft_to_local_basis() const { return _rotation_from_dft_to_local_basis; }
 
     /// List of rotation matrices from spherical harmonics to dft specific orbital basis
     [[nodiscard]] nda::array<nda::matrix<dcomplex>, 1> const &rotation_from_spherical_to_dft_basis() const {

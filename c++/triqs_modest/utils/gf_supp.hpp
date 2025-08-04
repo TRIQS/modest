@@ -77,8 +77,7 @@ namespace triqs::gfs {
     return Gout;
   }
 
-  inline block2_gf<mesh::dlr_imfreq, matrix_valued> make_block2_dlr_gf(block2_gf<mesh::imfreq, matrix_valued> const &g,
-                                                                       double w_max, double eps) {
+  inline block2_gf<mesh::dlr_imfreq, matrix_valued> make_block2_dlr_gf(block2_gf<mesh::imfreq, matrix_valued> const &g, double w_max, double eps) {
     auto &in_mesh = g(0, 0).mesh();
     auto beta     = in_mesh.beta();
     auto dlr_mesh = mesh::dlr_imfreq(beta, mesh::statistic_enum::Fermion, w_max, eps);
@@ -90,8 +89,7 @@ namespace triqs::gfs {
         for (auto [iw, wdlr] : enumerate(dlr_mesh)) {
           if (wdlr.n > g(0, 0).mesh().last_index())
             throw std::runtime_error{
-               fmt::format("make_block2_dlr_gf: the imfreq mesh \n{}\n is too short to extract the dlr_mesh \n{}\n",
-                           in_mesh, dlr_mesh)};
+               fmt::format("make_block2_dlr_gf: the imfreq mesh \n{}\n is too short to extract the dlr_mesh \n{}\n", in_mesh, dlr_mesh)};
           // FIXME : fmt
           gdlr(a, s).data()(iw, r_all, r_all) = g(a, s)(wdlr);
         }

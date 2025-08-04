@@ -8,13 +8,12 @@ namespace triqs::modest {
 
   //------------------------------------------------------------------------------------
   /// double counting formulas parameterized by density, U, and J
-  std::pair<double, double> dc_formulas(std::string const method, double const N_tot, double const N_sigma,
-                                        long const n_orb, double const U, double const J) {
+  std::pair<double, double> dc_formulas(std::string const method, double const N_tot, double const N_sigma, long const n_orb, double const U,
+                                        double const J) {
     double Mag     = N_sigma - (N_tot - N_sigma);
     double L_orbit = 0.5 * (double(n_orb) - 1.0);
     if (method == "cFLL") {
-      return {(U * (N_tot - 0.5) - 0.5 * J * (N_tot - 1.0)),
-              0.5 * U * N_tot * (N_tot - 1.0) - 0.5 * J * N_tot * (0.5 * N_tot - 1.0)};
+      return {(U * (N_tot - 0.5) - 0.5 * J * (N_tot - 1.0)), 0.5 * U * N_tot * (N_tot - 1.0) - 0.5 * J * N_tot * (0.5 * N_tot - 1.0)};
     } else if (method == "sFLL") {
       return {(U * (N_tot - 0.5) - J * (N_sigma - 0.5)),
               0.5 * U * N_tot * (N_tot - 1.0) - 0.5 * J * N_tot * (N_tot * 0.5 - 1.0) - 0.25 * J * Mag * Mag};
@@ -25,9 +24,8 @@ namespace triqs::modest {
          (0.5 * U - 0.25 * C) * N_tot * N_tot //Energy
       };
     } else if (method == "sAMF") {
-      return {(U * N_tot - ((U + 2.0 * L_orbit * J) / (2.0 * L_orbit + 1.0)) * N_sigma), // DC
-              0.5 * U * N_tot * N_tot
-                 - 0.25 * ((U + 2.0 * L_orbit * J) / (2.0 * L_orbit + 1.0)) * N_tot * N_tot // Energy
+      return {(U * N_tot - ((U + 2.0 * L_orbit * J) / (2.0 * L_orbit + 1.0)) * N_sigma),                         // DC
+              0.5 * U * N_tot * N_tot - 0.25 * ((U + 2.0 * L_orbit * J) / (2.0 * L_orbit + 1.0)) * N_tot * N_tot // Energy
                  - 0.25 * ((U + 2.0 * L_orbit * J) / (2.0 * L_orbit + 1.0)) * Mag * Mag};
     } else if (method == "cHeld") {
       // double C     = double(n_orb) - 1.0;
@@ -53,8 +51,7 @@ namespace triqs::modest {
  */
   std::pair<nda::array<nda::matrix<double>, 2>, nda::array<double, 2>>
   //double_counting_from_gf(block2_gf<imfreq, matrix_valued> const &GC, double U_int, double J_hund,
-  double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund,
-                  std::string const method) {
+  double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund, std::string const method) {
 
     auto [n_atoms, n_sigma] = density_matrix.shape();
     auto Sigma_DC           = nda::array<nda::matrix<double>, 2>(n_atoms, n_sigma);
@@ -109,18 +106,16 @@ namespace triqs::modest {
     return {N_total, N_per_sigma};
   }
 
-  nda::array<nda::matrix<double>, 2>
-  double_counting_sigma_dc(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund,
-                           std::string const method) {
+  nda::array<nda::matrix<double>, 2> double_counting_sigma_dc(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund,
+                                                              std::string const method) {
 
     auto [N_total, N_per_sigma] = get_total_density(density_matrix);
 
     auto [n_blocks, n_sigma] = density_matrix.shape();
 
-    auto n_orb = stdr::fold_left(density_matrix(r_all, 0) | stdv::transform([](auto x) { return x.shape()[0]; })
-                                    | tl::to<std::vector>(),
-                                 0, std::plus<>());
-    n_orb      = (n_sigma == 2) ? n_orb : static_cast<long>(n_orb / 2);
+    auto n_orb =
+       stdr::fold_left(density_matrix(r_all, 0) | stdv::transform([](auto x) { return x.shape()[0]; }) | tl::to<std::vector>(), 0, std::plus<>());
+    n_orb = (n_sigma == 2) ? n_orb : static_cast<long>(n_orb / 2);
 
     auto Sigma_DC = nda::array<nda::matrix<double>, 2>(n_blocks, n_sigma);
     for (auto bl : range(n_blocks))
@@ -130,21 +125,19 @@ namespace triqs::modest {
     return Sigma_DC;
   }
 
-  nda::matrix<double> double_counting_energy_dc(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix,
-                                                double U_int, double J_hund, std::string const method) {
+  nda::matrix<double> double_counting_energy_dc(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund,
+                                                std::string const method) {
 
     auto [N_total, N_per_sigma] = get_total_density(density_matrix);
 
     auto [n_blocks, n_sigma] = density_matrix.shape();
-    auto n_orb = stdr::fold_left(density_matrix(r_all, 0) | stdv::transform([](auto x) { return x.shape()[0]; })
-                                    | tl::to<std::vector>(),
-                                 0, std::plus<>());
-    n_orb      = (n_sigma == 2) ? n_orb : static_cast<long>(n_orb / 2);
+    auto n_orb =
+       stdr::fold_left(density_matrix(r_all, 0) | stdv::transform([](auto x) { return x.shape()[0]; }) | tl::to<std::vector>(), 0, std::plus<>());
+    n_orb = (n_sigma == 2) ? n_orb : static_cast<long>(n_orb / 2);
 
     auto E_DC = nda::matrix<double>(n_blocks, n_sigma);
     for (auto bl : range(n_blocks))
-      for (auto sigma : range(n_sigma))
-        E_DC(bl, sigma) = std::get<1>(dc_formulas(method, N_total, N_per_sigma(sigma), n_orb, U_int, J_hund));
+      for (auto sigma : range(n_sigma)) E_DC(bl, sigma) = std::get<1>(dc_formulas(method, N_total, N_per_sigma(sigma), n_orb, U_int, J_hund));
     return E_DC;
   }
 
@@ -152,8 +145,7 @@ namespace triqs::modest {
   dc_solver::dc_solver(std::vector<std::string> spin_names, std::string method, double U_int, double J_hund)
      : spin_names{std::move(spin_names)}, method{std::move(method)}, U_int{U_int}, J_hund{J_hund} {};
 
-  nda::array<nda::matrix<double>, 2>
-  dc_solver::get_density_matrix_from_gf(block_gf<imfreq, matrix_valued> const &gimp) {
+  nda::array<nda::matrix<double>, 2> dc_solver::get_density_matrix_from_gf(block_gf<imfreq, matrix_valued> const &gimp) {
     auto n_sigma        = spin_names.size();
     auto n_blocks       = gimp.size() / n_sigma;
     auto density_matrix = nda::array<nda::matrix<double>, 2>(n_blocks, n_sigma);

@@ -32,8 +32,7 @@ namespace triqs {
     //-----------------------------------------
 
     /// construct the Kanamori two-index interaction matrix for parallel and anti-parallel spins.
-    std::pair<nda::matrix<double>, nda::matrix<double>> kanamori_umatrices(long n_orb, double U_int, double U_prime,
-                                                                           double J_hund) {
+    std::pair<nda::matrix<double>, nda::matrix<double>> kanamori_umatrices(long n_orb, double U_int, double U_prime, double J_hund) {
       auto Umat  = nda::zeros<double>(n_orb, n_orb);
       auto Upmat = nda::zeros<double>(n_orb, n_orb);
       for (auto &&[m, mp] : product(range(n_orb), range(n_orb))) {
@@ -50,22 +49,20 @@ namespace triqs {
     double three_j_symbol(std::tuple<long, long, long, long, long, long> jms) {
       auto [j1, m1, j2, m2, j3, m3] = jms;
       auto fact                     = [](auto x) { return std::tgamma(x + 1); };
-      if ((m1 + m2 + m3 != 0) || (m1 < -j1) || (m1 > j1) || (m2 < -j2) || (m2 > j2) || (m3 < -j3) || (m3 > j3)
-          || (j3 > j1 + j2) || j3 < std::abs(j1 - j2)) {
+      if ((m1 + m2 + m3 != 0) || (m1 < -j1) || (m1 > j1) || (m2 < -j2) || (m2 > j2) || (m3 < -j3) || (m3 > j3) || (j3 > j1 + j2)
+          || j3 < std::abs(j1 - j2)) {
         return 0.0;
       }
       auto three_j_sym = ((j1 - j2 - m3) % 2) ? -1.0 : 1.0;
       three_j_sym *= sqrt((fact(j1 + j2 - j3) * fact(j1 - j2 + j3) * fact(-j1 + j2 + j3)) / fact(j1 + j2 + j3 + 1));
-      three_j_sym *=
-         sqrt(fact(j1 - m1) * fact(j1 + m1) * fact(j2 - m2) * fact(j2 + m2) * fact(j3 - m3) * fact(j3 + m3));
+      three_j_sym *= sqrt(fact(j1 - m1) * fact(j1 + m1) * fact(j2 - m2) * fact(j2 + m2) * fact(j3 - m3) * fact(j3 + m3));
 
       auto t_min = std::max({j2 - j3 - m1, j1 - j3 + m2, static_cast<long>(0)});
       auto t_max = std::min({j1 - m1, j2 + m2, j1 + j2 - j3});
       auto t_sum = 0.0;
       for (auto t : range(t_min, t_max + 1)) {
         t_sum += ((t % 2) ? -1.0 : 1.0)
-           / (fact(t) * fact(j3 - j2 + m1 + t) * fact(j3 - j1 - m2 + t) * fact(j1 + j2 - j3 - t) * fact(j1 - m1 - t)
-              * fact(j2 + m2 - t));
+           / (fact(t) * fact(j3 - j2 + m1 + t) * fact(j3 - j1 - m2 + t) * fact(j1 + j2 - j3 - t) * fact(j1 - m1 - t) * fact(j2 + m2 - t));
       }
       three_j_sym *= t_sum;
       return three_j_sym;
@@ -77,8 +74,7 @@ namespace triqs {
 
       auto ang_mat_ele = 0.0;
       for (auto q : range(-k, k + 1)) {
-        ang_mat_ele += three_j_symbol({l, -m1, k, q, l, m3}) * three_j_symbol({l, -m2, k, -q, l, m4})
-           * (((m1 + q + m2) % 2) ? -1.0 : 1.0);
+        ang_mat_ele += three_j_symbol({l, -m1, k, q, l, m3}) * three_j_symbol({l, -m2, k, -q, l, m4}) * (((m1 + q + m2) % 2) ? -1.0 : 1.0);
       }
       ang_mat_ele *= squared(2.0 * static_cast<double>(l) + 1) * squared(three_j_symbol({l, 0, k, 0, l, 0}));
       return ang_mat_ele;
@@ -103,16 +99,14 @@ namespace triqs {
     }
   } // namespace detail
 
-  operators::many_body_operator make_density_density(const std::vector<std::string> &tau_names,
-                                                     const std::vector<long> &dim_gamma, double U_int, double U_prime,
-                                                     double J_hund) {
+  operators::many_body_operator make_density_density(const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int,
+                                                     double U_prime, double J_hund) {
     return make_kanamori(tau_names, dim_gamma, U_int, U_prime, J_hund, false, false);
   }
 
   // ----------------------------------------------------
-  operators::many_body_operator make_kanamori(std::vector<std::string> const &tau_names,
-                                              std::vector<long> const &dim_gamma, double U_int, double U_prime,
-                                              double J_hund, bool spin_flip, bool pair_hopping) {
+  operators::many_body_operator make_kanamori(std::vector<std::string> const &tau_names, std::vector<long> const &dim_gamma, double U_int,
+                                              double U_prime, double J_hund, bool spin_flip, bool pair_hopping) {
     auto n_sigma = long(tau_names.size());
     auto n_orb   = stdr::fold_left(dim_gamma, 0, std::plus<>());
 
@@ -126,8 +120,7 @@ namespace triqs {
     // density-density terms
     for (auto &&[s1, s2] : product(range(n_sigma), range(n_sigma))) {
       for (auto &&[a1, a2] : product(range(n_orb), range(n_orb))) {
-        h_int += 0.5 * ((s1 == s2) ? Umat(a1, a2) : Upmat(a1, a2)) * detail::n(op_names(a1, s1))
-           * detail::n(op_names(a2, s2));
+        h_int += 0.5 * ((s1 == s2) ? Umat(a1, a2) : Upmat(a1, a2)) * detail::n(op_names(a1, s1)) * detail::n(op_names(a2, s2));
       }
     }
 
@@ -137,8 +130,8 @@ namespace triqs {
         if (s1 == s2) continue;
         for (auto &&[a1, a2] : product(range(n_orb), range(n_orb))) {
           if (a1 == a2) continue;
-          h_int += -0.5 * J_hund * detail::c_dag(op_names(a1, s1)) * detail::c(op_names(a1, s2))
-             * detail::c_dag(op_names(a2, s2)) * detail::c(op_names(a2, s1));
+          h_int += -0.5 * J_hund * detail::c_dag(op_names(a1, s1)) * detail::c(op_names(a1, s2)) * detail::c_dag(op_names(a2, s2))
+             * detail::c(op_names(a2, s1));
         }
       }
     }
@@ -149,8 +142,8 @@ namespace triqs {
         if (s1 == s2) continue;
         for (auto &&[a1, a2] : product(range(n_orb), range(n_orb))) {
           if (a1 == a2) continue;
-          h_int += 0.5 * J_hund * detail::c_dag(op_names(a1, s1)) * detail::c_dag(op_names(a1, s2))
-             * detail::c(op_names(a2, s2)) * detail::c(op_names(a2, s1));
+          h_int += 0.5 * J_hund * detail::c_dag(op_names(a1, s1)) * detail::c_dag(op_names(a1, s2)) * detail::c(op_names(a2, s2))
+             * detail::c(op_names(a2, s1));
         }
       }
     }
@@ -193,9 +186,8 @@ namespace triqs {
     return U_local;
   }
 
-  operators::many_body_operator make_slater(std::vector<std::string> const &tau_names,
-                                            std::vector<long> const &dim_gamma, double U_int, double J_hund,
-                                            nda::matrix<dcomplex> const &spherical_to_dft,
+  operators::many_body_operator make_slater(std::vector<std::string> const &tau_names, std::vector<long> const &dim_gamma, double U_int,
+                                            double J_hund, nda::matrix<dcomplex> const &spherical_to_dft,
                                             std::optional<nda::matrix<dcomplex>> const &dft_to_local) {
     auto n_sigma = long(tau_names.size());
     auto n_orb   = stdr::fold_left(dim_gamma, 0, std::plus<>());
@@ -211,8 +203,8 @@ namespace triqs {
     auto h_int = operators::many_body_operator();
     for (auto [s1, s2] : product(range(n_sigma), range(n_sigma))) {
       for (auto [m1, m2, m3, m4] : product(range(n_orb), range(n_orb), range(n_orb), range(n_orb))) {
-        h_int += 0.5 * real(U_matrix(m1, m2, m3, m4)) * detail::c_dag(op_names(m1, s1))
-           * detail::c_dag(op_names(m2, s2)) * detail::c(op_names(m4, s2)) * detail::c(op_names(m3, s1));
+        h_int += 0.5 * real(U_matrix(m1, m2, m3, m4)) * detail::c_dag(op_names(m1, s1)) * detail::c_dag(op_names(m2, s2))
+           * detail::c(op_names(m4, s2)) * detail::c(op_names(m3, s1));
       }
     }
     return h_int;

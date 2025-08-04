@@ -31,9 +31,7 @@ namespace triqs::modest {
 
     void write(h5path p, auto const &x) const { h5::write(h5::file(p.file, 'a'), p.group_name, x); }
 
-    template <typename T> [[nodiscard]] T read(h5path p) const {
-      return h5::read<T>(h5::file(p.file, 'r'), p.group_name);
-    }
+    template <typename T> [[nodiscard]] T read(h5path p) const { return h5::read<T>(h5::file(p.file, 'r'), p.group_name); }
 
     public:
     /**
@@ -41,10 +39,8 @@ namespace triqs::modest {
      * @param dirname Name of the directory containing the checkpoint files.
      */
     checkpoint(std::string dirname) : _dirname{dirname} {
-      if (!fs::exists(dirname))
-        throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' does not exist", dirname)};
-      if (!fs::is_directory(dirname))
-        throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' exists but is not a directory", dirname)};
+      if (!fs::exists(dirname)) throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' does not exist", dirname)};
+      if (!fs::is_directory(dirname)) throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' exists but is not a directory", dirname)};
 
       // Read n_iter from file : length of the iteration data in the h5 file
       auto file = h5::file(iteration_file_path, 'r');
@@ -57,8 +53,7 @@ namespace triqs::modest {
      * @param initial_data Initial data to store in the checkpoint.
      */
     checkpoint(std::string dirname, InitialData const &initial_data) : _dirname{dirname} {
-      if (fs::exists(dirname))
-        throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' already exists", dirname)};
+      if (fs::exists(dirname)) throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' already exists", dirname)};
       fs::create_directory(dirname);
       auto f    = h5::file(path_initial_data.file, 'w');
       auto root = h5::group{f};
@@ -79,8 +74,7 @@ namespace triqs::modest {
 
     [[nodiscard]] IterationData operator[](long i) const {
       if (i < 0) i += size();
-      if (i < 0 || i >= size())
-        throw std::out_of_range{fmt::format("Checkpoint: index {} out of range [0, {}]", i, size())};
+      if (i < 0 || i >= size()) throw std::out_of_range{fmt::format("Checkpoint: index {} out of range [0, {}]", i, size())};
       return read<IterationData>(path_iteration(i));
     }
 
