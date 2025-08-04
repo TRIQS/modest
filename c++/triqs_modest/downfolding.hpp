@@ -18,7 +18,7 @@ namespace triqs::modest {
   [[nodiscard]] inline long sigma_to_data_idx(spin_kind_e spin_kind, long sigma) { return (spin_kind == spin_kind_e::Polarized) ? sigma : 0; };
 
   /**
- * @ingroup band_dispersion
+ * @ingroup one_body_elements
  * @brief The one-body dispersion as a function of momentum.
  *
  * @details A band dispersion containing the DFT band structure ε(ν,k,σ), weights in the Brillouin zone, and the spin kind used in the DFT calculation.
@@ -63,7 +63,7 @@ namespace triqs::modest {
   };
 
   /**
- * @ingroup downfolding_projector
+ * @ingroup one_body_elements
  * @brief The projector that downfolds the one-body dispersion (ν) onto local orbitals (m).
  * 
  * @details A downfoldin projector contains the projector, the kind of spin used in the projection, and the number of bands per k-point for cases
@@ -97,7 +97,6 @@ namespace triqs::modest {
   /**
  * @ingroup one_body_elements
  * @brief A one-body elements struct where all of the underlying data exists on a fixed momentum grid.
- * 
  */
   struct one_body_elements_on_grid {
     band_dispersion H;
@@ -117,7 +116,16 @@ namespace triqs::modest {
   /// Rotates the local basis of the downfolding projector
   one_body_elements_on_grid rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U, one_body_elements_on_grid const &x);
   // -------------------------------------------------------------
+
   /// Compute the local impurity levels from the single-particle dispersion.
+
+  /**
+   * @ingroup hybridization
+   * @brief Comput the atomic (impurity) levels from an obe.
+   * 
+   * @param obe One-body elements
+   * @return nda::array<nda::matrix<dcomplex>, 2> 
+   */
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_on_grid const &obe);
   // -------------------------------------------------------------
 

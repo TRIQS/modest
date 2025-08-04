@@ -10,11 +10,14 @@
 
 namespace triqs::modest {
 
+  /** @name OBE factories using a fixed grid
+ *  Factory functions to create one_body_elements_on_grid
+ *  @{
+ */
+
   /**
-   * @ingroup obe_factories
-   * @brief Create a one-body elements object with orthonormalized projectors.
-   *
-   * @details Using the data from the "dft_input" group, the band_dispersion, local_space, 
+   * @ingroup one_body_elements
+   * @brief Create a one-body elements object with orthonormalized projectors. Using the data from the "dft_input" group, the band_dispersion, local_space, 
    * downfolding_projector, and optional ibz_symmetry_ops are prepared to create a one-body 
    * elements object. This object is intended to be used in DMFT calculations.
    * 
@@ -28,7 +31,7 @@ namespace triqs::modest {
                                                                                     bool diagonalize_hloc = false);
   // bool verbosity        = true);
   /**
- * @ingroup obe_factories
+ * @ingroup one_body_elements
  * @brief Create a one-body elements object with the Θ projectors.
  * 
  * @details Using the data from the "dft_parproj_input" group, the local_space, downfolding_projectors, 
@@ -41,7 +44,7 @@ namespace triqs::modest {
  */
   one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe);
   /**
- * @ingroup obe_factories
+ * @ingroup one_body_elements
  * @brief Create a one-body elements object along specific k-grid. 
  *
  * @details Using the data from the "dft_bands_input" group, the band_disperion and downfolding_projector
@@ -53,6 +56,8 @@ namespace triqs::modest {
  * @return One-body elements along high-symmetry k-path.
  */
   one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe);
+
+  /** @} */ // Fixed grid factories
 
   /** 
   * @brief Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure. 

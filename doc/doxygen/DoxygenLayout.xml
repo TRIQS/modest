@@ -11,35 +11,16 @@
       <tab type="user" url="@ref ex1" title="Example 1: Test example"/>
     </tab>
     <tab type="usergroup" url="@ref documentation" title="API Documentation">
-      <tab type="usergroup" url="@ref one_body_elements" title="One-body elements">
-        <tab type="usergroup" url="@ref obe_components" title="Components">
-          <tab type="user" url="@ref local_space" title="Local space"/>
-          <tab type="user" url="@ref band_dispersion" title="Band dispersion"/>
-          <tab type="user" url="@ref downfolding_projector" title="Downfolding projector"/>
-          <tab type="user" url="@ref ibz_symmetry_ops" title="IBZ symmetry operations"/>
-        </tab>
-        <tab type="user" url="@ref obe_factories" title="Factories"/>
-      </tab>
-      <tab type="usergroup" url="@ref embedding" title="Embedding">
-          <tab type="user" url="@ref embedding_factories" title="Factories"/>
-          <tab type="user" url="@ref embedding_ops" title="Operations"/>
-          <tab type="user" url="@ref embedding_methods" title="Methods"/>
-      </tab>
-      <tab type="usergroup" url="@ref gloc" title="Local Green's function">
-          <tab type="user" url="@ref gloc_fixed" title="Fixed grid"/>
-      </tab>
-      <tab type="user" url="@ref hybridization" title="Hybridization function"></tab>
+      <tab type="user" url="@ref one_body_elements" title="One-body elements"/>
+      <tab type="user" url="@ref embedding" title="Embedding"/>
+      <tab type="user" url="@ref gloc" title="Local Green's function"/>
+      <tab type="user" url="@ref hybridization" title="Atomic levels and Hybridization"></tab>
       <tab type="user" url="@ref mu" title="Densities and Chemical Potentials"></tab>
-      <tab type="usergroup" url="@ref hamiltonian" title="Interaction Hamiltonians">
-          <tab type="user" url="@ref den_den" title="Density-density"/>
-          <tab type="user" url="@ref hubb_kan" title="Hubbard-Kanamori"/>
-          <tab type="user" url="@ref slater" title="Slater"/>
-          <tab type="user" url="@ref Utensor" title="Coulomb tensors"/>
-      </tab>
-      <tab type="user" url="@ref double_counting" title="Double counting"></tab>
+      <tab type="user" url="@ref hamiltonian" title="Interaction Hamiltonians"/>
       <tab type="user" url="@ref post" title="Post-processing"></tab>
-      <tab type="user" url="@ref checkpoint" title="File I/O"></tab>
       <tab type="usergroup" url="@ref utils" title="Utilities">
+          <tab type="user" url="@ref double_counting" title="Double counting"/>
+          <tab type="user" url="@ref checkpoint" title="File I/O"/>
           <tab type="user" url="@ref root" title="Root finders"/>
           <tab type="user" url="@ref deg" title="Green's function analysis"/>
       </tab>

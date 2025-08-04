@@ -74,8 +74,6 @@ To describe local interactions, ModEST provides tools to construct standard inte
 
 All built using TRIQS many-body operators.
 
-## Double Counting
-DFT+DMFT requires subtracting a "double counting" term \f$\Sigma_{\mathrm{DC}}\f$ to avoid counting static correlations twice. ModEST abstracts this into a dedicated solver that computes \f$\Sigma_{\mathrm{DC}}\f$ based on dirrect formulas.
 
 This design makes it easier to swap and test different double counting schemes.
 
@@ -86,12 +84,21 @@ Compute spectral functions and related quantities:
 
 Plot-ready output to help you analyze and publish results.
 
-## File I/O
-No more boilerplated HDF5 code.
+## Utilities
+Extra tools that make life easier:
+
+### File I/O
+No more boilerplated HDF5 code. 
 
 The checkpoint object saved DMFT calculation data (Green's functions, self-energies, etc.) in a clean, standardized HDF5 layout -- automatically organized by iteration.
 
-## Utilities
-Extra tools that make life easier:
-* @ref root -- generic root finders
-* @ref deg -- analyze and symmetrize degenerate Green's function blocks.
+### Root finders
+@ref root
+
+### Green's function symmetries
+@ref deg
+analyze and symmetrize degenerate Green's function blocks.
+
+### Double counting
+@ref double_counting
+DFT+DMFT requires subtracting a "double counting" term \f$\Sigma_{\mathrm{DC}}\f$ to avoid counting static correlations twice. ModEST abstracts this into a dedicated solver that computes \f$\Sigma_{\mathrm{DC}}\f$ based on dirrect formulas.

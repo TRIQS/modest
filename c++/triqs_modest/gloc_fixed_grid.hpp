@@ -74,8 +74,12 @@ namespace triqs::modest {
   /** @endcond */
 
   // ------------------------------------------------------------------
+
+  /** @name Local Green's function using a fixed k-grid
+  */
+  ///@{
   /**
- * @ingroup gloc_fixed
+ * @ingroup gloc
  * @brief compute G𝓒 local Green's function on Mesh(MxM) 
  * 
  * @tparam Mesh triqs::mesh::{dlr_imfreq,imfreq}
@@ -83,7 +87,7 @@ namespace triqs::modest {
  * @param mu chemical potential
  * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view.
  * @param Sigma_static The static part of the embedded self-energy in the embedded view.
- * @return block2_gf<Mesh, matrix_valued> 
+ * @return The local Green's function.
  */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
@@ -129,16 +133,16 @@ namespace triqs::modest {
   }
 
   /**
-   * @ingroup gloc_fixed
-   * @brief  Compute G𝓒 on with a Mesh with no self-energy.
-   *
-   * @details This implementation does not use the Woodbury formula.
+   * @ingroup gloc
+   * @brief  Compute the local Green's function without a self-energy.
+   * 
+   * @details See gloc for more details.
    * 
    * @tparam Mesh 
    * @param mesh mesh triqs::meshes::{imfreq, dlr_imfreq}
    * @param obe one-body elements
    * @param mu chemical potential
-   * @return block2_gf<Mesh, matrix_valued> 
+   * @return The local Green's function.
    */
   template <typename Mesh> block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements_on_grid const &obe, double mu) {
     auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
@@ -146,6 +150,7 @@ namespace triqs::modest {
     for (auto [i, j] : Sigma_static.indices()) { Sigma_static(i, j) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim()); }
     return gloc(obe, mu, Sigma_dynamic, Sigma_static);
   }
+  ///@}
 
   /**
    * @ingroup hybridization
@@ -159,7 +164,7 @@ namespace triqs::modest {
    * @return block_gf<Mesh, matrix_valued> 
    */
   template <typename Mesh>
-  block_gf<Mesh, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc,
+  block_gf<Mesh, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc,
                                               block_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                               std::vector<nda::matrix<dcomplex>> const &Sigma_static) {
     auto gf_struct = get_struct(Gloc);
@@ -184,11 +189,11 @@ namespace triqs::modest {
    * @return block_gf<Mesh, matrix_valued> 
    */
   template <typename Mesh>
-  block_gf<Mesh, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc) {
+  block_gf<Mesh, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc) {
     auto Sigma_static = get_struct(Gloc) | stdv::transform([](auto &x) { return nda::zeros<dcomplex>(x.second, x.second); })
        | tl::to<std::vector<nda::matrix<dcomplex>>>();
     auto Sigma_dynamic = block_gf{Gloc[0].mesh(), get_struct(Gloc)};
-    return extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
+    return hybridization(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
   }
 
   // ------------------------------------------------------
@@ -204,15 +209,15 @@ namespace triqs::modest {
                                                      block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
                                                      nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
   template block2_gf<dlr_imfreq, matrix_valued> gloc(dlr_imfreq const &mesh, one_body_elements_on_grid const &obe, double mu);
-  template block_gf<imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
+  template block_gf<imfreq, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                          block_gf<imfreq, matrix_valued> const &Gloc);
-  template block_gf<imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
+  template block_gf<imfreq, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                          block_gf<imfreq, matrix_valued> const &Gloc,
                                                          block_gf<imfreq, matrix_valued> const &Sigma_dynamic,
                                                          std::vector<nda::matrix<dcomplex>> const &Sigma_static);
-  template block_gf<dlr_imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
+  template block_gf<dlr_imfreq, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                              block_gf<dlr_imfreq, matrix_valued> const &Gloc);
-  template block_gf<dlr_imfreq, matrix_valued> extract_delta(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
+  template block_gf<dlr_imfreq, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels,
                                                              block_gf<dlr_imfreq, matrix_valued> const &Gloc,
                                                              block_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
                                                              std::vector<nda::matrix<dcomplex>> const &Sigma_static);

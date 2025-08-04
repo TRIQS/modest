@@ -43,6 +43,7 @@ namespace triqs::modest {
     friend void h5_read(h5::group g, std::string const &name, embedding &x);
 
     public:
+    /** @cond DOXYGEN_SKIP_THIS */
     /// struct of tuples imp_idx, γ, τ
     struct imp_block_t {
 
@@ -59,6 +60,7 @@ namespace triqs::modest {
         return out << fmt::format("(imp_idx = {}, γ = {}, τ = {})", x.imp_idx, x.gamma, x.tau);
       }
     };
+    /** @endcond */
 
     private:
     // For each imp, for all (γ, τ), a list of all (α, σ) such that ψ[α, σ] ==(n_imp, γ, τ)
@@ -68,6 +70,26 @@ namespace triqs::modest {
     std::vector<nda::array<std::vector<std::array<long, 2>>, 2>> reverse_psi;
 
     public:
+    /// Default constructor
+    /**
+     * @brief Constructor 
+     * 
+     * @param sigma_embed_decomposition  Decomposition (list of block sizes) for Σ_embed: [α] = block size
+     * @note The decompositions are given for α, γ index, and are independent of σ
+     * @param imp_decompositions         List of decomposition of solvers: [n_imp][γ] = block size
+     * @param psi                        The mapping ψ[α,σ] -> n_imp, γ, τ
+     * @param sigma_names                Names for the values of the σ index (e.g., "up", "down")
+     */
+    embedding(std::vector<long> sigma_embed_decomposition, std::vector<std::vector<long>> imp_decompositions, nda::array<imp_block_t, 2> psi,
+              std::vector<std::string> sigma_names);
+
+    /** @cond DOXYGEN_SKIP_THIS */
+    embedding() = default; // for h5_read
+    /** @endcond */
+
+    /** @name Accessors */
+    ///@{
+
     /// bracket accessor: [α, σ] -> the corresponding impurity block (n_imp, γ, τ)
     imp_block_t operator[](long alpha, long sigma) const { return psi(alpha, sigma); }
 
@@ -93,40 +115,26 @@ namespace triqs::modest {
     /// The impurity decomposition
     [[nodiscard]] std::vector<long> imp_decomposition(long imp_idx) const { return imp_decomps[imp_idx]; };
 
-    // --------------------------------------------------------
-
-    /// Default constructor
-    embedding() = default; // for h5_read
-
-    /**
-     * @ingroup embedding_factories 
-     * @brief Constructor 
-     * 
-     * @param sigma_embed_decomposition  Decomposition (list of block sizes) for Σ_embed: [α] = block size
-     * @note The decompositions are given for α, γ index, and are independent of σ
-     * @param imp_decompositions         List of decomposition of solvers: [n_imp][γ] = block size
-     * @param psi                        The mapping ψ[α,σ] -> n_imp, γ, τ
-     * @param sigma_names                Names for the values of the σ index (e.g., "up", "down")
-     */
-    embedding(std::vector<long> sigma_embed_decomposition, std::vector<std::vector<long>> imp_decompositions, nda::array<imp_block_t, 2> psi,
-              std::vector<std::string> sigma_names);
-
-    public:
-    // --------------------------------------------------------
-    bool operator==(embedding const &other) const = default;
-
-    // --------------------------------------------------------
-
     /// Gf block structure for Σ_embed
     C2PY_IGNORE gf_struct2_t sigma_embed_block_shape() const;
 
     /// Gf block structure for the impurity solvers
     std::vector<gf_struct_t> imp_block_shape() const;
 
+    ///@}
+
     // ****************** Operation methods to change the embedding **********************
 
+    /** @name Unary Ops
+    * Embedding methods which operate on itself and return a new Embedding object.
+    */
+    ///@{
+
+    // --------------------------------------------------------
+    bool operator==(embedding const &other) const = default;
+    // --------------------------------------------------------
+
     /**
-    * @ingroup embedding_ops
     * @brief Remove an impurity from the embedding table ψ
     *
     * @details Remove the impurity imp_idx, maps the corresponding α blocks to -1 (i.e. no longer connected to an impurity)
@@ -138,7 +146,6 @@ namespace triqs::modest {
     embedding drop(long imp_idx) const;
 
     /**
-    * @ingroup embedding_ops
     * @brief Replaces one impurity in the embedding table ψ.
     *
     * @details Replaces the impurity solver corresponding to imp_idx_to with the impurity solver at imp_idx_from 
@@ -151,7 +158,6 @@ namespace triqs::modest {
     embedding replace(long imp_idx_to_remove, long imp_idx_to_replace_with) const;
 
     /**
-    * @ingroup embedding_ops
     * @brief Flip the spins (σ) for block α.  
     *
     * @details For block α transforms (σ,σ') -> (τ, τ') to (σ, σ') -> (τ', τ).
@@ -162,7 +168,6 @@ namespace triqs::modest {
     embedding flip_spin(long alpha) const;
 
     /**
-    * @ingroup embedding_ops
     * @brief Flip the spins (σ) for all [α].
     *
     * @details For block α transforms (σ,σ') -> (τ, τ') to (σ, σ') -> (τ', τ).
@@ -176,7 +181,6 @@ namespace triqs::modest {
     embedding split(long imp_idx, std::function<bool(long)> p) const;
 
     /**
-    * @ingroup embedding_ops
     * @brief Split impurity imp_idx based on block_list
     *
     * @details For impurity imp_idx, split part of its blocks into a new impurity.
@@ -189,6 +193,7 @@ namespace triqs::modest {
     embedding split(long imp_idx, std::vector<long> const &block_list) const;
 
     embedding split(long imp_idx, std::initializer_list<const char *> x) = delete;
+    ///@}
 
     //------------------------------------------------------------------------------------
 
@@ -197,12 +202,17 @@ namespace triqs::modest {
     // ****************************************************
 
     //--------------------- Embed -----------------------------------------
-
+    /** @name Complex Ops
+    * Embedding methods which operate on a given object X where X ∈ (block2gf, block_gf, block_matrix, etc.)
+    */
+    ///@{
     /// embed single-particle quantities
     template <typename Mesh> block2_gf<Mesh, matrix_valued> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const;
 
     /// embed two-particle quantities
-    template <typename Mesh> block2_gf<Mesh, tensor_valued<4>> embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const;
+    // template <typename Mesh> block2_gf<Mesh, tensor_valued<4>> embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const;
+    //[n_w, n_spin, n_m, n_m]
+    nda::array<dcomplex, 5> embed(std::vector<nda::array<dcomplex, 5>> const &Pi_imp_vec) const;
 
     /// embed block matrices
     nda::array<nda::matrix<dcomplex>, 2> embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_static_vec) const;
@@ -226,12 +236,19 @@ namespace triqs::modest {
 
     /// embed tensors
     // std::vector<nda::array<dcomplex, 4>> extract(nda::array<dcomplex, 4> const &U_tensor) const;
+    ///@}
   };
 
   // ***************************** Free functions/factories *******************************************
 
+  /** @name Embedding factories functions
+  * Factory functions to create the embedding class for different embedding scenarios. Typically, one will create the embedding
+  * from the local space.
+ *  @{
+ */
+
   /**
- * @ingroup embedding_factories 
+ * @ingroup embedding
  * @brief Construct the embedding class from the local space, a description of the block decomposition, and an equivalence 
  *        mapping between atom sites.
  * 
@@ -244,7 +261,7 @@ namespace triqs::modest {
                            std::optional<std::vector<long>> const &atom_to_imp = std::nullopt);
 
   /**
- * @ingroup embedding_factories 
+ * @ingroup embedding
  * @brief Construct the embedding class from the local space using equivalences between atoms.
  * 
  * @param C_space the local space from one_body_elements
@@ -253,7 +270,7 @@ namespace triqs::modest {
   embedding make_embedding_with_equivalences(local_space const &C_space);
 
   /**
- * @ingroup embedding_factories 
+ * @ingroup embedding
  * @brief Construct the embedding class from the local space without using equivalences between atoms.
  * 
  * @param C_space the local space from one_body_elements.
@@ -261,10 +278,11 @@ namespace triqs::modest {
  */
   embedding make_embedding_with_no_equivalences(local_space const &C_space);
 
+  /** @} Embedding factories functions */
+
   // *****************************  Method implementation ***************************************
 
   /**
-    * @ingroup embedding_methods
     * @brief Embed impurity solver self-energies into an embedded self-energy. 
     *
     *    \Sigma_{embed}^{ασ} = \Sigma_{imp}^{ψ(α,σ)} 
@@ -288,35 +306,9 @@ namespace triqs::modest {
     return Sigma_embed;
   }
 
-  /**
-    * @ingroup embedding_methods
-    * @brief Embed impurity solver self-energies into an embedded self-energy. 
-    *
-    *    \Pi_{embed}^{ασ} = \Pi_{imp}^{ψ(α,σ)} 
-    *     ψ(α,σ) -> (n_imp, γ, τ) 
-    * @param Pi_imp_vec 
-    * @return Π_embed in C space
-    */
-  template <typename Mesh> block2_gf<Mesh, tensor_valued<4>> embedding::embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const {
-    // Check that all meshes are the same for Sigma_imp_vec
-    if (not all_equal(Pi_imp_vec | stdv::transform([](auto &&x) -> decltype(auto) { return x[0].mesh(); })))
-      throw std::runtime_error{"[embedding_desc::embed]: meshes of solvers are not all equal"};
-
-    auto const &mesh = Pi_imp_vec[0][0].mesh();
-    // build the result
-    auto Pi_embed = make_block2_gf(mesh, this->sigma_embed_block_shape());
-
-    for (auto &&[Pi, m] : zip(Pi_embed, psi)) {
-      if (m.imp_idx == -1) continue;
-      Pi() = Pi_imp_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
-    }
-    return Pi_embed;
-  }
-
   // ---------------------------------------------------------------
 
   /**
- * @ingroup embedding_methods
  * @brief  Extract the impurity Green's function
  * 
  * @tparam Mesh  triqs::mesh::{dlr_imfreq, imfreq}
@@ -340,62 +332,6 @@ namespace triqs::modest {
         gimp[gamma + n_gamma(n_imp) * tau].data() = g(alpha, sigma).data();
       }
       return gimp;
-    };
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-
-  /**
- * @ingroup embedding_methods
- * @brief  Extract the impurity Green's function
- * 
- * @tparam Mesh  triqs::mesh::{dlr_imfreq, imfreq}
- * @param g_loc  BlockGf of gloc in MxM space
- * @return local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>> 
- */
-  template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block_gf<Mesh, matrix_valued> const &g) const {
-
-    if (auto decomp = get_struct(g) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
-      if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
-      return extract(decomposition_view(g, this->sigma_embed_block_shape()));
-    }
-    // FIXME : check all meshes are the same
-    auto imp_gf_stru_list = imp_block_shape();
-    auto extract_one_imp  = [&](long n_imp) {
-      auto gimp        = block_gf{g(0, 0).mesh(), imp_gf_stru_list[n_imp]};
-      auto const &rpsi = reverse_psi[n_imp];
-      for (auto [gamma, tau] : rpsi.indices()) {
-        auto [alpha, sigma]                       = rpsi(gamma, tau)[0];
-        gimp[gamma + n_gamma(n_imp) * tau].data() = g(alpha, sigma).data();
-      }
-      return gimp;
-    };
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-
-  /**
- * @ingroup embedding_methods
- * @brief  Extract the impurity Green's function
- * 
- * @tparam Mesh  triqs::mesh::{dlr_imfreq, imfreq}
- * @param g_loc  BlockGf of gloc in MxM space
- * @return local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>> 
- */
-  template <typename Mesh> std::vector<block_gf<Mesh, tensor_valued<4>>> embedding::extract(block_gf<Mesh, tensor_valued<4>> const &pi_loc) const {
-
-    if (auto decomp = get_struct(pi_loc) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
-      if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
-      return extract(decomposition_view(pi_loc, this->sigma_embed_block_shape()));
-    }
-    // FIXME : check all meshes are the same
-    auto imp_gf_stru_list = imp_block_shape();
-    auto extract_one_imp  = [&](long n_imp) {
-      auto pi_imp      = block_gf{pi_loc(0, 0).mesh(), imp_gf_stru_list[n_imp]};
-      auto const &rpsi = reverse_psi[n_imp];
-      for (auto [gamma, tau] : rpsi.indices()) {
-        auto [alpha, sigma]                         = rpsi(gamma, tau)[0];
-        pi_imp[gamma + n_gamma(n_imp) * tau].data() = pi_loc(alpha, sigma).data();
-      }
-      return pi_imp;
     };
     return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }

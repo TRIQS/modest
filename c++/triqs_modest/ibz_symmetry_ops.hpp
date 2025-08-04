@@ -19,18 +19,20 @@ namespace triqs::modest {
   // FIXME OP : rename into ibz_symmetrizer
   // FIMXE HL : can we generalize to work on any type T that supports matrix multiplication?
   /**
- * @ingroup ibz_symmetry_ops
+ * @ingroup one_body_elements
  * @brief ibz symmetry operations
  * 
  */
   struct ibz_symmetry_ops {
 
     //-----------------------------------------------------------------------------------
+    /** @cond DOXYGEN_SKIP_THIS */
     struct op {
       std::vector<nda::matrix<dcomplex>> mats; // mats[i_alpha]
       std::vector<long> permutation;           // permutation [i_alpha]
       long time_inv;                           // FIXME : we should supress/comment this ?
     };
+    /** @endcond */
     std::vector<op> ops; // ops[i_sym]
 
     // printing

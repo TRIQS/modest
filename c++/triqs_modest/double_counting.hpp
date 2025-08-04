@@ -13,7 +13,7 @@ using namespace triqs::gfs;
 namespace triqs::modest {
 
   /**
- * @ingroup dc_formula
+ * @ingroup double_counting
  * @brief Double counting formulas.
  * 
  * @param method the double counting formula to use.
@@ -46,23 +46,27 @@ namespace triqs::modest {
  *
  */
   class dc_solver {
+
     private:
+    /// FIXME: should update to n_sigma
     std::vector<std::string> spin_names;
+    /// double counting method to use
     std::string method;
+    /// U term used in the double counting formulas
     double U_int;
+    /// J term used in the double counting formulas
     double J_hund;
 
     /**
     * @brief Get the density matrix from gf object
     * 
     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
-    * @return nda::array<nda::matrix<double>, 2> 
+    * @return Density matrix of Green's function in block_matrix format.
     */
     nda::array<nda::matrix<double>, 2> get_density_matrix_from_gf(block_gf<imfreq, matrix_valued> const &gimp);
 
     public:
     /**
-     * @ingroup double_counting
      * @brief Construct a double counting "solver".
      * 
      * @param spin_names The names of the spin indices 
@@ -73,19 +77,18 @@ namespace triqs::modest {
     dc_solver(std::vector<std::string> spin_names, std::string method, double U_int, double J_hund);
 
     /**
-    * @ingroup double_counting
     * @brief Compute the double-counting self-energy
     * 
     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
-    * @return block_gf<imfreq, matrix_valued> 
+    * @return Double counting self-energy
     */
     block_gf<imfreq, matrix_valued> dc_self_energy(block_gf<imfreq, matrix_valued> const &gimp);
+
     /**
-    * @ingroup double_counting
      * @brief Compute the double counting correction to the energy.
      * 
      * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
-     * @return nda::array<double, 2> 
+     * @return Double counting energy term
      */
     nda::array<double, 2> dc_energy(block_gf<imfreq, matrix_valued> const &gimp);
   };

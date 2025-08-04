@@ -32,14 +32,8 @@ namespace triqs::modest {
 
   // ==========================================================
   /**
-    * @ingroup local_space
-    * @brief Describe the set of local orbitals of a downfolded 𝓒 space.
-    *
-    * It contains: 
-    *   * the spin kind (NonPolarized, Polarized, NonColinear)
-    *   * the shell structure.
-    *   * the decomposition of the 𝓒 space into atomic and irreps decomposition.
-    *   * the transformation matrices to the DFT-basis and to the spherical basis. FIXME : Cf note : EXPLAIN  
+    * @ingroup one_body_elements
+    * @brief Describe the atomic orbitals within downfolded \f$\mathcal{C}\f$ space.
     * 
     */
   class local_space {
@@ -70,24 +64,18 @@ namespace triqs::modest {
     friend void h5_write(h5::group g, std::string const &name, local_space const &ls);
 
     public:
-    /**
-     * @brief Constructs an orbital_set object with the specified parameters.
-     *
-     * @param spin_kind The spin kind 
-     * @param atomic_shells The atomic shells.
-     * @param irreps_decomp_per_atom  irreps_decomp_per_atom[a, σ] = a list of dimension of the irreps decomposition the atom a
-     * @param rotation_from_dft_to_local_basis  rotation_to_dft_basis[a, σ]: unitary matrix of the rotation to the DFT code basis. FIXME : CHECK 
-     * @param rotation_from_spherical_to_dft_basis  rotation_to_dft_basis[a, σ]: unitary matrix of the rotation to the DFT code basis. FIXME : CHECK 
-     */
     local_space(spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells, nda::array<std::vector<long>, 2> irreps_decomp_per_atom,
                 nda::array<nda::matrix<dcomplex>, 2> rotation_from_dft_to_local_basis,
                 nda::array<nda::matrix<dcomplex>, 1> rotation_from_spherical_to_dft_basis);
 
+    /** @cond DOXYGEN_SKIP_THIS */
     /// default constructor for h5
     local_space() = default;
+    /** @endcond */
 
     // ---------------- sigma indices and co. ----------------
-
+    /** @name Accessors */
+    ///@{
     /// Accessor for the spin kind
     [[nodiscard]] spin_kind_e spin_kind() const { return _spin_kind; };
 
@@ -100,7 +88,6 @@ namespace triqs::modest {
     }
 
     // --------  Atomic shells and related functions -----------
-
     /// Dimension of the correlated space
     [[nodiscard]] long dim() const { return _dim_C; }
 
@@ -132,9 +119,12 @@ namespace triqs::modest {
     [[nodiscard]] auto atomic_decomposition() const {
       return atomic_shells() | stdv::transform([](auto const &s) { return s.dim; });
     }
+    ///@}
 
     // --------  Atomic "view" methods for Green functions and matrices -----------
 
+    /** @name Views and shapes */
+    ///@{
     /**
      * @brief Creates an atomic view of a block2_gf object by extracting specific slices
      *        based on the atomic decomposition of the current object.
@@ -179,6 +169,7 @@ namespace triqs::modest {
       for (auto const &[alpha, shell] : enumerate(_atomic_shells)) res(alpha, r_all) = shell.dim;
       return {.names = {atom_names(), sigma_names()}, .dims = std::move(res)};
     }
+    ///@}
   };
 
   // --------  stream -----------

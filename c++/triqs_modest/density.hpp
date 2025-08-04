@@ -130,8 +130,8 @@ namespace triqs::modest {
   double density_nk(one_body_elements_on_grid const &obe, double mu, double beta);
 
   // ------------------------------------------------------------------------------------
+  /** @cond DOXYGEN_SKIP_THIS */
   /**
-   * @ingroup mu
    * @brief  Compute the density of the lattice Green's function with a self-energy.
    * 
    * @tparam Mesh 
@@ -176,6 +176,7 @@ namespace triqs::modest {
 
     return density_nk(obe, mu, beta) + real(density(result));
   }
+  /** @endcond */
 
   /**
  * @ingroup mu

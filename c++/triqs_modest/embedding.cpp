@@ -137,7 +137,7 @@ namespace triqs::modest {
   gf_struct2_t embedding::sigma_embed_block_shape() const {
     auto res = nda::zeros<long>(n_alpha(), n_sigma());
     for (long alpha : range(n_alpha())) res(alpha, r_all) = sigma_embed_decomp[alpha];
-    return {{alpha_names, _sigma_names}, std::move(res)};
+    return {.names = {alpha_names, _sigma_names}, .dims = std::move(res)};
   }
 
   //-----------------------------------------------------------------
@@ -237,9 +237,10 @@ namespace triqs::modest {
     if (not stdr::all_of(block_list, [&](auto i) { return (i >= 0) and (i < n_gamma(imp_idx)); }))
       throw std::runtime_error(fmt::format("[embedding::split] The list of block indices {} is incorrect. Indices i should all be 0<= i < N_γ = {}",
                                            block_list, n_gamma(imp_idx)));
-    //embedding_desc split(long imp_idx, std::vector<std::string> const &bl_names) const {
     return split(imp_idx, [&](long idx) { return stdr::find(block_list, idx) != block_list.end(); });
   }
+
+  // ----------------------------------------------------------------------
 
   nda::array<nda::matrix<dcomplex>, 2> embedding::embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_static_vec) const {
     auto Sigma_static_embed = nda::array<nda::matrix<dcomplex>, 2>(n_alpha(), n_sigma());
@@ -249,6 +250,8 @@ namespace triqs::modest {
     }
     return Sigma_static_embed;
   }
+
+  // ----------------------------------------------------------------------
 
   std::vector<std::vector<nda::matrix<dcomplex>>> embedding::extract(nda::array<nda::matrix<dcomplex>, 2> const &matrix_C) const {
     auto imp_gf_stru_list = imp_block_shape();
