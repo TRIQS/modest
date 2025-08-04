@@ -91,6 +91,14 @@ namespace triqs::modest {
     return gloc_result;
   }
 
+  template <typename Mesh>
+  block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements const &obe, double mu, triqs::lattice::bz_int_options const &opt) {
+    auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    auto Sigma_static  = nda::array<nda::matrix<dcomplex>, 2>(1, obe.C_space.n_sigma());
+    for (auto [i, j] : Sigma_static.indices()) { Sigma_static(i, j) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim()); }
+    return gloc(obe, mu, Sigma_dynamic, Sigma_static, opt);
+  }
+
   //  -----------------------------------------------------------------------
   // FIXME docstring
   template <typename Mesh>
@@ -118,28 +126,30 @@ namespace triqs::modest {
  * @param target_density The total electron density.
  * @param obe The one-body elements
  * @param Sigma_dynamic The dynamic part of the embedded self-energy.
- * @param Sigma_hartree The static part of the embedded self-energy.
+ * @param Sigma_static The static part of the embedded self-energy.
  * @param method The root finding method to use (default = dichotomy).
- * @param x_init The initial guess (default = 0.0).
  * @param precision The precision to end search (default = 1e-5).
- * @param delta_x The increment to guess when finding upper and lower bounds (default = 0.5).
- * @param max_loops The maximum number of iterations (default = 1000).
- * @param x_name default = Chemical Potential
- * @param y_name default = Total Density
  * @param verbosity Printing of the root finder's progress (default = true).
  * @return double 
  */
   template <typename Mesh>
   double find_chemical_potential(double const target_density, one_body_elements const &obe, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, triqs::lattice::bz_int_options const &opt,
-                                 std::string method = "dichotomy", double x_init = 0.0, double precision = 1.e-5, double delta_x = 0.5,
-                                 long max_loops = 1000, std::string x_name = "Chemical Potential", std::string y_name = "Total Density",
-                                 bool verbosity = true) {
-
-    std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_hartree, &opt](double x) {
-      return density(obe, x, Sigma_dynamic, Sigma_hartree, opt);
+                                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt,
+                                 std::string method = "dichotomy", double precision = 1.e-5, bool verbosity = true) {
+    std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static, &opt](double x) {
+      return density(obe, x, Sigma_dynamic, Sigma_static, opt);
     };
-    return std::get<0>(triqs::root_finder(method, f, x_init, target_density, precision, delta_x, max_loops, x_name, y_name, verbosity));
+    return std::get<0>(triqs::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+  }
+
+  template <typename Mesh>
+  double find_chemical_potential(double const target_density, one_body_elements const &obe, Mesh const &mesh,
+                                 triqs::lattice::bz_int_options const &opt, std::string method = "dichotomy", double precision = 1.e-5,
+                                 bool verbosity = true) {
+    auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    auto Sigma_static  = nda::array<nda::matrix<dcomplex>, 2>(1, obe.C_space.n_sigma());
+    for (auto [i, j] : Sigma_static.indices()) { Sigma_static(i, j) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim()); }
+    return find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, opt, method, precision, verbosity);
   }
 
   // --------  instantiations --------------
@@ -150,14 +160,19 @@ namespace triqs::modest {
                                                        nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree,
                                                        triqs::lattice::bz_int_options const &opt);
 
+  template block2_gf<mesh::imfreq, matrix_valued> gloc(mesh::imfreq const &mesh, one_body_elements const &obe, double mu,
+                                                       triqs::lattice::bz_int_options const &opt);
+
   template double density(one_body_elements const &obe, double mu, block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
                           nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, triqs::lattice::bz_int_options const &opt);
 
   template double find_chemical_potential(double const target_density, one_body_elements const &obe,
                                           block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
-                                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, triqs::lattice::bz_int_options const &opt,
-                                          std::string method, double x_init, double precision, double delta_x, long max_loops, std::string x_name,
-                                          std::string y_name, bool verbosity);
+                                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt,
+                                          std::string method, double precision, bool verbosity);
+
+  template double find_chemical_potential(double const target_density, one_body_elements const &obe, mesh::imfreq const &mesh,
+                                          triqs::lattice::bz_int_options const &opt, std::string method, double precision, bool verbosity);
 
   /** @endcond */
 
