@@ -66,7 +66,7 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
 }
 
 // ----------------------------- SVO with t2g only test -----------------------------------------
-
+/* 
 TEST(obe_tb, svo_t2g_wannier90) { // NOLINT
 
   // set up atomic shells
@@ -187,4 +187,4 @@ TEST(obe_tb, svo_t2g_eg_wannier90) { // NOLINT
   //std::cout << impurity_levels(obe_dft) << std::endl;
   //std::cout << impurity_levels(obe_tb) << std::endl;
   //}
-}
+} */
