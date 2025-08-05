@@ -71,11 +71,16 @@ namespace triqs::modest {
    */
   nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells) {
 
-    // return Hloc with shape [atomic_shells, nsigma]
+    // group the shells into atom indices
+    // makes a vector containing the dim of each atomic shell...
+    //auto shell_decomposition = atomic_shells | stdv::transform([](auto const &s) { return s.dim; });
+
+    // return Hloc with shape [n_atoms, nsigma]
     nda::array<nda::matrix<dcomplex>, 2> Hloc_result(atomic_shells.size(), H_sigma.size());
 
     for (auto [isigma, H] : enumerate(H_sigma)) {
 
+      // FIXME : REFACTOR decomposition from atomic shells
       // check that HR and atomic shells list have the same total size
       long n_orb = 0;
       for (auto shell : atomic_shells) { n_orb += shell.dim; }
@@ -87,8 +92,7 @@ namespace triqs::modest {
       // find the home cell of the TB file to get H0
       auto iR0 = H.get_R_idx(std::array<long, 3>{0, 0, 0});
 
-      // Hloc needs to have dimensions [nshells, nspin].
-      // REFACTOR -- need opposite of enumerate_sub_slice --
+      // Hloc needs to have dimensions [n_atomic_shells, nspin].
       // NOTE: we cannot use enumerated_subslice here because we do not have a C_space!
       // this function computes Hloc so we can determine the C_space in the first place.
       long start_orb = 0;
@@ -105,13 +109,14 @@ namespace triqs::modest {
     return Hloc_result;
   }
 
-  /** Creates an Hloc function from an OBE based on a tight binding Hamiltonian 
-   */
-  nda::array<nda::matrix<dcomplex>, 2> Hloc(one_body_elements const &obe) {
+  /** Compute the local impurity levels from the single-particle dispersion. 
+  * This simply computes Hloc and returns it, but exists to match the syntax used in the fixed_grid case. 
+  */
+  nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements const &obe) {
 
-    auto n_atoms = obe.C_space.n_atoms();
-    auto n_sigma = obe.C_space.n_sigma();
-    nda::array<nda::matrix<dcomplex>, 2> Hloc_result(n_atoms, n_sigma);
+    auto n_shells = obe.C_space.n_atoms();
+    auto n_sigma  = obe.C_space.n_sigma();
+    nda::array<nda::matrix<dcomplex>, 2> Hloc_result(n_shells, n_sigma);
 
     for (auto sigma : range(n_sigma)) {
 
@@ -158,10 +163,5 @@ namespace triqs::modest {
     }
     return {.C_space = local_space{obe.C_space.spin_kind(), std::move(new_atomic_shells), new_dec, {}, {}}, .H = std::move(new_H)};
   }
-
-  /** Compute the local impurity levels from the single-particle dispersion. 
-  * This simply computes Hloc and returns it, but exists to match the syntax used in the fixed_grid case. 
-  */
-  nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements const &obe) { return Hloc(obe); }
 
 } // namespace triqs::modest
