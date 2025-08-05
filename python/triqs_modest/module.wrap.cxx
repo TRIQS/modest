@@ -35,7 +35,7 @@ template <> constexpr bool c2py::is_wrapped<triqs::modest::iteration_data>      
 template <> constexpr bool c2py::is_wrapped<triqs::lattice::superlattice>                                                          = true;
 template <> constexpr bool c2py::is_wrapped<triqs::tb_hamiltonian>                                                                 = true;
 template <> constexpr bool c2py::is_wrapped<triqs::lattice::bz_int_options>                                                        = true;
-template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements>                                                      = true;
+template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements_tb>                                                   = true;
 template <> constexpr bool c2py::is_wrapped<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>> = true;
 
 // ==================== enums =====================
@@ -118,10 +118,8 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::atomic_shell_t>[] = {
    {"__dict__", (getter)prop_get_dict_0, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> inline constexpr auto c2py::tp_name<triqs::modest::local_space> = "triqs_modest.module.LocalSpace";
-template <>
-inline constexpr const char *c2py::tp_doc<triqs::modest::local_space> =
-   R"DOC(   It contains: * the spin kind (NonPolarized, Polarized, NonColinear) * the shell structure. * the decomposition of the 𝓒 space into atomic and irreps decomposition. * the transformation matrices to the DFT-basis and to the spherical basis. FIXME : Cf note : EXPLAIN)DOC";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::local_space>       = "triqs_modest.module.LocalSpace";
+template <> inline constexpr const char *c2py::tp_doc<triqs::modest::local_space> = R"DOC(   space.)DOC";
 
 static auto init_0 = c2py::dispatcher_c_kw_t{
    c2py::c_constructor<triqs::modest::local_space, triqs::modest::spin_kind_e, std::vector<triqs::modest::atomic_shell_t>,
@@ -140,32 +138,47 @@ static auto const fun_0 = c2py::dispatcher_f_kw_t{
 // first_shell_of_its_equiv_cls
 static auto const fun_1 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::local_space const &self, long idx) { return self.first_shell_of_its_equiv_cls(idx); }, "self", "idx")};
-static const auto doc_d_0 = fun_0.doc(
-   R"DOC(   [0]Creates an atomic view of a block2_gf object by extracting specific slices        based on the atomic decomposition of the current object.
-   [1]Creates an atomic view of block matrices  by extracting specific slices        based on the atomic decomposition of the current object.
-   Parameters
-   ----------
+static const auto doc_d_0 = fun_0.doc(R"DOC(
+[0] Creates an atomic view of a block2_gf object by extracting specific slices        based on the atomic decomposition of the current object.
 
-      G_C:
-         The input block2_gf object from which the atomic view is created.
-      matrix_C:
-         The input block matrices object from which the atomic view is created.
+@
+{
 
-   Returns
-   -------
+.. raw:: html
 
-      [0]A new block2_gf object representing the atomic view.
-      [1]new block matrices in the atomic view.
+   <hr>
+
+[1] Creates an atomic view of block matrices  by extracting specific slices        based on the atomic decomposition of the current object.
+
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :G_C:
+      The input block2_gf object from which the atomic view is created.
+   :matrix_C:
+      The input block matrices object from which the atomic view is created.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   [0] A new block2_gf object representing the atomic view.
+
+   [1] new block matrices in the atomic view.
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_1 =
-   fun_1.doc(R"DOC(   [0]Given the index idx of an atomic shell, return the index of the first atomic shell of its equivalence class
-   Parameters
-   ----------
+static const auto doc_d_1 = fun_1.doc(R"DOC(
+Given the index idx of an atomic shell, return the index of the first atomic shell of its equivalence class
 
+.. raw:: html
 
-   Returns
-   -------
-
+   <hr>
 )DOC");
 
 // ----- Method table ----
@@ -186,7 +199,9 @@ static constexpr auto prop_doc_6  = R"DOC(/// Dimension of the σ index)DOC";
 static constexpr auto prop_doc_7  = R"DOC(/// List of all (a, sigma) local rotation matices that rotate the data)DOC";
 static constexpr auto prop_doc_8  = R"DOC(/// List of rotation matrices from spherical harmonics to dft specific orbital basis)DOC";
 static constexpr auto prop_doc_9  = R"DOC(/// names of spin indices for naming blocks in block_gf)DOC";
-static constexpr auto prop_doc_10 = R"DOC(/// Accessor for the spin kind)DOC";
+static constexpr auto prop_doc_10 = R"DOC(/** @name Accessors */
+    ///@{
+    /// Accessor for the spin kind)DOC";
 
 // ----- Method table ----
 
@@ -257,23 +272,19 @@ static auto const fun_2 = c2py::dispatcher_f_kw_t{
 // N_nu
 static auto const fun_3   = c2py::dispatcher_f_kw_t{c2py::cmethod(
    [](triqs::modest::band_dispersion const &self, long sigma, long k_idx) { return self.N_nu(sigma, k_idx); }, "self", "sigma", "k_idx")};
-static const auto doc_d_2 = fun_2.doc(R"DOC(   [0]H^σ(k)_ν, returned as a MATRIX in (ν, ν)
-   Parameters
-   ----------
+static const auto doc_d_2 = fun_2.doc(R"DOC(
+H^σ(k)_ν, returned as a MATRIX in (ν, ν)
 
+.. raw:: html
 
-   Returns
-   -------
-
+   <hr>
 )DOC");
-static const auto doc_d_3 = fun_3.doc(R"DOC(   [0]Number of bands #ν
-   Parameters
-   ----------
+static const auto doc_d_3 = fun_3.doc(R"DOC(
+Number of bands #ν
 
+.. raw:: html
 
-   Returns
-   -------
-
+   <hr>
 )DOC");
 
 // ----- Method table ----
@@ -354,23 +365,19 @@ static auto const fun_4 = c2py::dispatcher_f_kw_t{c2py::cmethod(
 static auto const fun_5   = c2py::dispatcher_f_kw_t{c2py::cmethod(
    [](triqs::modest::downfolding_projector const &self, const nda::array<nda::matrix<triqs::dcomplex>, 2> &U) { return self.rotate_local_basis(U); },
    "self", "U")};
-static const auto doc_d_4 = fun_4.doc(R"DOC(   [0]P^σ(k)_mν, returned as a matrix in (m ν)
-   Parameters
-   ----------
+static const auto doc_d_4 = fun_4.doc(R"DOC(
+P^σ(k)_mν, returned as a matrix in (m ν)
 
+.. raw:: html
 
-   Returns
-   -------
-
+   <hr>
 )DOC");
-static const auto doc_d_5 = fun_5.doc(R"DOC(   [0]Rotates the local basis of the downfolding projector
-   Parameters
-   ----------
+static const auto doc_d_5 = fun_5.doc(R"DOC(
+Rotates the local basis of the downfolding projector
 
+.. raw:: html
 
-   Returns
-   -------
-
+   <hr>
 )DOC");
 
 // ----- Method table ----
@@ -470,10 +477,10 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements_on_grid>[
 template <> inline constexpr auto c2py::tp_name<triqs::modest::embedding>       = "triqs_modest.module.Embedding";
 template <> inline constexpr const char *c2py::tp_doc<triqs::modest::embedding> = R"DOC(   )DOC";
 
-static auto init_1                                                     = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::embedding>(),
-                                             c2py::c_constructor<triqs::modest::embedding, std::vector<long>, std::vector<std::vector<long>>,
-                                                                                                                     nda::array<triqs::modest::embedding::imp_block_t, 2>, std::vector<std::string>>(
-                                                "sigma_embed_decomposition", "imp_decompositions", "psi", "sigma_names")};
+static auto init_1 = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::embedding, std::vector<long>, std::vector<std::vector<long>>,
+                                                                 nda::array<triqs::modest::embedding::imp_block_t, 2>, std::vector<std::string>>(
+                                                "sigma_embed_decomposition", "imp_decompositions", "psi", "sigma_names"),
+                                             c2py::c_constructor<triqs::modest::embedding>()};
 template <> constexpr initproc c2py::tp_init<triqs::modest::embedding> = c2py::pyfkw_constructor<init_1>;
 // drop
 static auto const fun_6 =
@@ -499,6 +506,9 @@ static auto const fun_7 = c2py::dispatcher_f_kw_t{
         return self.embed(Sigma_imp_vec);
       },
       "self", "Sigma_imp_vec"),
+   c2py::cmethod(
+      [](triqs::modest::embedding const &self, const std::vector<nda::array<triqs::dcomplex, 5>> &Pi_imp_vec) { return self.embed(Pi_imp_vec); },
+      "self", "Pi_imp_vec"),
    c2py::cmethod([](triqs::modest::embedding const &self,
                     const std::vector<std::vector<nda::matrix<triqs::dcomplex>>> &Sigma_imp_static_vec) { return self.embed(Sigma_imp_static_vec); },
                  "self", "Sigma_imp_static_vec")};
@@ -544,123 +554,196 @@ static auto const fun_13 = c2py::dispatcher_f_kw_t{
    c2py::cmethod(
       [](triqs::modest::embedding const &self, long imp_idx, const std::vector<long> &block_list) { return self.split(imp_idx, block_list); }, "self",
       "imp_idx", "block_list")};
-static const auto doc_d_6  = fun_6.doc(R"DOC(   [0]Remove an impurity from the embedding table ψ
-   Parameters
-   ----------
+static const auto doc_d_6  = fun_6.doc(R"DOC(
+Remove an impurity from the embedding table ψ
 
-      imp_idx:
-         Index of the impurity to remove from the table ψ
+Remove the impurity imp_idx, maps the corresponding α blocks to -1 (i.e. no longer connected to an impurity)          and relabel the other impurities with number > imp_idx.
 
-   Returns
-   -------
+.. raw:: html
 
-      [0]New embedding with the updated ψ map.
+   <hr>
+
+**Parameters**
+   :imp_idx:
+      Index of the impurity to remove from the table ψ
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   New embedding with the updated ψ map.
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_7  = fun_7.doc(R"DOC(   [0]Embed impurity solver self-energies into an embedded self-energy.
-   [1]Embed impurity solver self-energies into an embedded self-energy.
-   [2]Embed impurity solver self-energies into an embedded self-energy.
-   [3]embed block matrices
-   _{embed}^{ασ} =
-   _{imp}^{ψ(α,σ)} ψ(α,σ) -> (n_imp, γ, τ)
+static const auto doc_d_7  = fun_7.doc(R"DOC(
+[0, 1, 2] Embed impurity solver self-energies into an embedded self-energy.
 
-   _{embed}^{ασ} =
-   _{imp}^{ψ(α,σ)} ψ(α,σ) -> (n_imp, γ, τ)
+_{embed}^{ασ} =
+_{imp}^{ψ(α,σ)} ψ(α,σ) -> (n_imp, γ, τ)
 
-   _{embed}^{ασ} =
-   _{imp}^{ψ(α,σ)} ψ(α,σ) -> (n_imp, γ, τ)
+.. raw:: html
 
-   Parameters
-   ----------
+   <hr>
 
-      Sigma_imp_vec:
+[4] embed block matrices
+
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :Sigma_imp_vec:
 
 
-   Returns
-   -------
+   .. raw:: html
 
-      [0]Σ_embed in C space
-      [1]Σ_embed in C space
-      [2]Σ_embed in C space
+      <hr>
+
+**Returns**
+   Σ_embed in C space
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_8  = fun_8.doc(R"DOC(   [0]Extract the impurity Green's function
-   [1]Extract the impurity Green's function
-   [2]Extract the impurity Green's function
-   [3]extract matrices
-   Parameters
-   ----------
+static const auto doc_d_8  = fun_8.doc(R"DOC(
+[0, 1, 2] Extract the impurity Green's function
 
-      g_loc:
-         Block2Gf of gloc in MxM space
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>>
-      [1]local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>>
-      [2]local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>>
+[3] extract matrices
+
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :g_loc:
+      Block2Gf of gloc in MxM space
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>>
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_9  = fun_9.doc(R"DOC(   [0]Flip the spins (σ) for block α.
-   [1]Flip the spins (σ) for all [α].
-   Parameters
-   ----------
+static const auto doc_d_9  = fun_9.doc(R"DOC(
+[0] Flip the spins (σ) for block α.
 
-      alpha:
-         the index of the alpha block to flip the spins.
-      alphas:
-         a list of alpha blocks to flip the spins.
+For block α transforms (σ,σ') -> (τ, τ') to (σ, σ') -> (τ', τ).
 
-   Returns
-   -------
+.. raw:: html
 
-      [0]a new embedding with the updated ψ map.
-      [1]New embedding with the updated ψ map.
+   <hr>
+
+[1] Flip the spins (σ) for all [α].
+
+For block α transforms (σ,σ') -> (τ, τ') to (σ, σ') -> (τ', τ).
+
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :alpha:
+      the index of the alpha block to flip the spins.
+   :alphas:
+      a list of alpha blocks to flip the spins.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   [0] a new embedding with the updated ψ map.
+
+   [1] New embedding with the updated ψ map.
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_10 = fun_10.doc(R"DOC(   [0]The impurity decomposition
-   Parameters
-   ----------
+static const auto doc_d_10 = fun_10.doc(R"DOC(
+The impurity decomposition
 
+.. raw:: html
 
-   Returns
-   -------
-
+   <hr>
 )DOC");
-static const auto doc_d_11 = fun_11.doc(R"DOC(   [0]Number of blocks in γ for the Σ_imp[imp_idx]
-   Parameters
-   ----------
+static const auto doc_d_11 = fun_11.doc(R"DOC(
+Number of blocks in γ for the Σ_imp[imp_idx]
 
+.. raw:: html
 
-   Returns
-   -------
-
+   <hr>
 )DOC");
-static const auto doc_d_12 = fun_12.doc(R"DOC(   [0]Replaces one impurity in the embedding table ψ.
-   Parameters
-   ----------
+static const auto doc_d_12 = fun_12.doc(R"DOC(
+Replaces one impurity in the embedding table ψ.
 
-      imp_idx_to:
-         the index of the impurity solver to be replaced.
-      imp_idx_from:
-         the index of the impurity solver that will replace imp_idx_to.
+Replaces the impurity solver corresponding to imp_idx_to with the impurity solver at imp_idx_from  and updates the underlying table ψ.
 
-   Returns
-   -------
+.. raw:: html
 
-      [0]a new embedding with the updated ψ map.
+   <hr>
+
+**Parameters**
+   :imp_idx_to:
+      the index of the impurity solver to be replaced.
+   :imp_idx_from:
+      the index of the impurity solver that will replace imp_idx_to.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   a new embedding with the updated ψ map.
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_13 = fun_13.doc(R"DOC(   [0]Predicate p (long block_idx) -> 0 or 1.
-   [1]Split impurity imp_idx based on block_list
-   Parameters
-   ----------
+static const auto doc_d_13 = fun_13.doc(R"DOC(
+[0] Predicate p (long block_idx) -> 0 or 1.
 
-      imp_idx:
-         Impurity number
-      block_list:
-         A list of blocks of imp_idx to split off.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [1]New embedding with the updated ψ map.
+[1] Split impurity imp_idx based on block_list
+
+For impurity imp_idx, split part of its blocks into a new impurity. The blocks that were split off remain mapped to their original alpha blocks with the updated imp_idx.
+
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :imp_idx:
+      Impurity number
+   :block_list:
+      A list of blocks of imp_idx to split off.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   New embedding with the updated ψ map.
+
+   .. raw:: html
+
+      <hr>
 )DOC");
 
 // ----- Method table ----
@@ -749,29 +832,49 @@ static auto const fun_15 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::dc_solver &self,
                     const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) { return self.dc_self_energy(gimp); },
                  "self", "gimp")};
-static const auto doc_d_14 = fun_14.doc(R"DOC(   [0]Compute the double counting correction to the energy.
-   Parameters
-   ----------
+static const auto doc_d_14 = fun_14.doc(R"DOC(
+Compute the double counting correction to the energy.
 
-      gimp:
-         The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]nda::array<double, 2>
+**Parameters**
+   :gimp:
+      The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   Double counting energy term
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_15 = fun_15.doc(R"DOC(   [0]Compute the double-counting self-energy
-   Parameters
-   ----------
+static const auto doc_d_15 = fun_15.doc(R"DOC(
+Compute the double-counting self-energy
 
-      gimp:
-         The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]block_gf<imfreq, matrix_valued>
+**Parameters**
+   :gimp:
+      The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   Double counting self-energy
+
+   .. raw:: html
+
+      <hr>
 )DOC");
 
 // ----- Method table ----
@@ -1075,34 +1178,9 @@ static auto const fun_17 = c2py::dispatcher_f_kw_t{
 // get_R_idx
 static auto const fun_18 =
    c2py::dispatcher_f_kw_t{c2py::cmethod([](triqs::tb_hamiltonian const &self, std::array<long, 3> R) { return self.get_R_idx(R); }, "self", "R")};
-static const auto doc_d_16 = fun_16.doc(R"DOC(   [0]
-   [1]
-   Parameters
-   ----------
-
-
-   Returns
-   -------
-
-)DOC");
-static const auto doc_d_17 = fun_17.doc(R"DOC(   [0]
-   Parameters
-   ----------
-
-
-   Returns
-   -------
-
-)DOC");
-static const auto doc_d_18 = fun_18.doc(R"DOC(   [0]
-   Parameters
-   ----------
-
-
-   Returns
-   -------
-
-)DOC");
+static const auto doc_d_16 = fun_16.doc(R"DOC()DOC");
+static const auto doc_d_17 = fun_17.doc(R"DOC()DOC");
+static const auto doc_d_18 = fun_18.doc(R"DOC()DOC");
 
 // ----- Method table ----
 template <>
@@ -1204,9 +1282,9 @@ constinit PyGetSetDef c2py::tp_getset<triqs::lattice::bz_int_options>[] = {
    {"__dict__", (getter)prop_get_dict_8, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements> = "triqs_modest.module.OneBodyElements";
+template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements_tb> = "triqs_modest.module.OneBodyElementsTb";
 template <>
-inline constexpr const char *c2py::tp_doc<triqs::modest::one_body_elements> = R"DOC(   * C_space: triqs::modest::local_space
+inline constexpr const char *c2py::tp_doc<triqs::modest::one_body_elements_tb> = R"DOC(   * C_space: triqs::modest::local_space
       
    
    * H: std::vector<triqs::tb_hamiltonian>)DOC";
@@ -1214,27 +1292,27 @@ inline constexpr const char *c2py::tp_doc<triqs::modest::one_body_elements> = R"
 static int synth_constructor_9(PyObject *self, PyObject *args, PyObject *kwargs) {
   if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
     PyErr_SetString(PyExc_RuntimeError,
-                    ("Error in constructing triqs::modest::one_body_elements.\nNo positional arguments allowed. Use keywords arguments"));
+                    ("Error in constructing triqs::modest::one_body_elements_tb.\nNo positional arguments allowed. Use keywords arguments"));
     return -1;
   }
   c2py::pydict_extractor de{kwargs};
   try {
-    ((c2py::wrap<triqs::modest::one_body_elements> *)self)->_c = new triqs::modest::one_body_elements{};
+    ((c2py::wrap<triqs::modest::one_body_elements_tb> *)self)->_c = new triqs::modest::one_body_elements_tb{};
   } catch (std::exception const &e) {
-    PyErr_SetString(PyExc_RuntimeError, ("Error in constructing triqs::modest::one_body_elements from a Python dict.\n   "s + e.what()).c_str());
+    PyErr_SetString(PyExc_RuntimeError, ("Error in constructing triqs::modest::one_body_elements_tb from a Python dict.\n   "s + e.what()).c_str());
     return -1;
   }
-  auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements> *)self)->_c);
+  auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements_tb> *)self)->_c);
   de("C_space", self_c.C_space, false);
   de("H", self_c.H, false);
   return de.check();
 }
 
-template <> constexpr initproc c2py::tp_init<triqs::modest::one_body_elements> = synth_constructor_9;
+template <> constexpr initproc c2py::tp_init<triqs::modest::one_body_elements_tb> = synth_constructor_9;
 
 // ----- Method table ----
 template <>
-PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements>[] = {
+PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements_tb>[] = {
 
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
@@ -1242,7 +1320,7 @@ PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements>[] = {
 constexpr auto doc_member_34 = R"DOC()DOC";
 constexpr auto doc_member_35 = R"DOC()DOC";
 static PyObject *prop_get_dict_9(PyObject *self, void *) {
-  auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements> *)self)->_c);
+  auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements_tb> *)self)->_c);
   c2py::pydict dic;
   dic["C_space"] = self_c.C_space;
   dic["H"]       = self_c.H;
@@ -1252,9 +1330,9 @@ static PyObject *prop_get_dict_9(PyObject *self, void *) {
 // ----- Method table ----
 
 template <>
-constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::one_body_elements::C_space, triqs::modest::one_body_elements>("C_space", doc_member_34),
-   c2py::getsetdef_from_member<&triqs::modest::one_body_elements::H, triqs::modest::one_body_elements>("H", doc_member_35),
+constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements_tb>[] = {
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_tb::C_space, triqs::modest::one_body_elements_tb>("C_space", doc_member_34),
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_tb::H, triqs::modest::one_body_elements_tb>("H", doc_member_35),
    {"__dict__", (getter)prop_get_dict_9, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -1277,15 +1355,7 @@ static auto const fun_19 =
    c2py::dispatcher_f_kw_t{c2py::cmethod([](triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data> &self,
                                             const triqs::modest::iteration_data &x) { return self.append(x); },
                                          "self", "x")};
-static const auto doc_d_19 = fun_19.doc(R"DOC(   [0]
-   Parameters
-   ----------
-
-
-   Returns
-   -------
-
-)DOC");
+static const auto doc_d_19 = fun_19.doc(R"DOC()DOC");
 
 // ----- Method table ----
 template <>
@@ -1326,8 +1396,7 @@ PyMappingMethods c2py::tp_as_mapping<triqs::modest::checkpoint<triqs::modest::in
 static auto const fun_20 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::vector<triqs::tb_hamiltonian> &H_sigma,
                  const std::vector<triqs::modest::atomic_shell_t> &atomic_shells) { return triqs::modest::Hloc(H_sigma, atomic_shells); },
-              "H_sigma", "atomic_shells"),
-   c2py::cfun([](const triqs::modest::one_body_elements &obe) { return triqs::modest::Hloc(obe); }, "obe")};
+              "H_sigma", "atomic_shells")};
 
 // U_matrix_in_spherical_basis
 static auto const fun_21 = c2py::dispatcher_f_kw_t{
@@ -1352,11 +1421,11 @@ static auto const fun_24 = c2py::dispatcher_f_kw_t{
          const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
          const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_static); },
       "obe", "mu", "Sigma_dynamic", "Sigma_static"),
-   c2py::cfun([](const triqs::modest::one_body_elements &obe, double mu,
+   c2py::cfun([](const triqs::modest::one_body_elements_tb &obe, double mu,
                  const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                 const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree,
-                 const triqs::lattice::bz_int_options &opt) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_hartree, opt); },
-              "obe", "mu", "Sigma_dynamic", "Sigma_hartree", "opt")};
+                 const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static,
+                 const triqs::lattice::bz_int_options &opt) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_static, opt); },
+              "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt")};
 
 // density_nk
 static auto const fun_25 = c2py::dispatcher_f_kw_t{
@@ -1376,39 +1445,8 @@ static auto const fun_27 =
                                          const std::string method) { return triqs::modest::double_counting(density_matrix, U_int, J_hund, method); },
                                       "density_matrix", "U_int", "J_hund", "method")};
 
-// extract_delta
-static auto const fun_28 =
-   c2py::dispatcher_f_kw_t{c2py::cfun(
-                              [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
-                                 const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc,
-                                 const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                                 const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_static) {
-                                return triqs::modest::extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
-                              },
-                              "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
-                           c2py::cfun(
-                              [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
-                                 const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc,
-                                 const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                                 const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_static) {
-                                return triqs::modest::extract_delta(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
-                              },
-                              "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
-                           c2py::cfun(
-                              [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
-                                 const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc) {
-                                return triqs::modest::extract_delta(epsilon_levels, Gloc);
-                              },
-                              "epsilon_levels", "Gloc"),
-                           c2py::cfun(
-                              [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
-                                 const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc) {
-                                return triqs::modest::extract_delta(epsilon_levels, Gloc);
-                              },
-                              "epsilon_levels", "Gloc")};
-
 // find_chemical_potential
-static auto const fun_29 = c2py::dispatcher_f_kw_t{
+static auto const fun_28 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](double target_density, const triqs::modest::one_body_elements_on_grid &obe, double beta, std::string method, double precision,
                  bool verbosity) { return triqs::modest::find_chemical_potential(target_density, obe, beta, method, precision, verbosity); },
               "target_density", "obe", "beta", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
@@ -1420,24 +1458,26 @@ static auto const fun_29 = c2py::dispatcher_f_kw_t{
       },
       "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
    c2py::cfun(
-      [](double target_density, const triqs::modest::one_body_elements &obe,
+      [](double target_density, const triqs::modest::one_body_elements_tb &obe,
          const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree, const triqs::lattice::bz_int_options &opt, std::string method,
-         double x_init, double precision, double delta_x, long max_loops, std::string x_name, std::string y_name, bool verbosity) {
-        return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_hartree, opt, method, x_init, precision, delta_x,
-                                                      max_loops, x_name, y_name, verbosity);
+         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, const triqs::lattice::bz_int_options &opt, std::string method,
+         double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, opt, method, precision, verbosity);
       },
-      "target_density", "obe", "Sigma_dynamic", "Sigma_hartree", "opt", "method"_a = "dichotomy", "x_init"_a = 0.0, "precision"_a = 1.e-5,
-      "delta_x"_a = 0.5, "max_loops"_a = 1000, "x_name"_a = "Chemical Potential", "y_name"_a = "Total Density", "verbosity"_a = true)};
+      "target_density", "obe", "Sigma_dynamic", "Sigma_static", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun([](double target_density, const triqs::modest::one_body_elements_tb &obe, const triqs::mesh::imfreq &mesh,
+                 const triqs::lattice::bz_int_options &opt, std::string method, double precision,
+                 bool verbosity) { return triqs::modest::find_chemical_potential(target_density, obe, mesh, opt, method, precision, verbosity); },
+              "target_density", "obe", "mesh", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true)};
 
 // fold
-static auto const fun_30 = c2py::dispatcher_f_kw_t{
+static auto const fun_29 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::lattice::superlattice &sl, const triqs::tb_hamiltonian &tb) { return triqs::fold(sl, tb); }, "sl", "tb"),
-   c2py::cfun([](const triqs::lattice::superlattice &sl, const triqs::modest::one_body_elements &obe) { return triqs::modest::fold(sl, obe); }, "sl",
-              "obe")};
+   c2py::cfun([](const triqs::lattice::superlattice &sl, const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::fold(sl, obe); },
+              "sl", "obe")};
 
 // gloc
-static auto const fun_31 = c2py::dispatcher_f_kw_t{
+static auto const fun_30 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
          const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
@@ -1454,14 +1494,17 @@ static auto const fun_31 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::mesh::dlr_imfreq &mesh, const triqs::modest::one_body_elements_on_grid &obe,
                  double mu) { return triqs::modest::gloc(mesh, obe, mu); },
               "mesh", "obe", "mu"),
-   c2py::cfun([](const triqs::modest::one_body_elements &obe, double mu,
+   c2py::cfun([](const triqs::modest::one_body_elements_tb &obe, double mu,
                  const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                 const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_hartree,
-                 const triqs::lattice::bz_int_options &opt) { return triqs::modest::gloc(obe, mu, Sigma_dynamic, Sigma_hartree, opt); },
-              "obe", "mu", "Sigma_dynamic", "Sigma_hartree", "opt")};
+                 const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static,
+                 const triqs::lattice::bz_int_options &opt) { return triqs::modest::gloc(obe, mu, Sigma_dynamic, Sigma_static, opt); },
+              "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
+   c2py::cfun([](const triqs::mesh::imfreq &mesh, const triqs::modest::one_body_elements_tb &obe, double mu,
+                 const triqs::lattice::bz_int_options &opt) { return triqs::modest::gloc(mesh, obe, mu, opt); },
+              "mesh", "obe", "mu", "opt")};
 
 // h5_read
-static auto const fun_32 = c2py::dispatcher_f_kw_t{
+static auto const fun_31 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](h5::group g, const std::string &name, triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::h5_read(g, name, x); },
               "g", "name", "x"),
    c2py::cfun([](h5::group g, const std::string &name, triqs::modest::initial_data &data) { return triqs::modest::h5_read(g, name, data); }, "g",
@@ -1470,7 +1513,7 @@ static auto const fun_32 = c2py::dispatcher_f_kw_t{
               "name", "data")};
 
 // h5_write
-static auto const fun_33 = c2py::dispatcher_f_kw_t{
+static auto const fun_32 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](h5::group g, const std::string &name, const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::h5_write(g, name, x); },
       "g", "name", "x"),
@@ -1479,10 +1522,41 @@ static auto const fun_33 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](h5::group g, const std::string &name, const triqs::modest::iteration_data &data) { return triqs::modest::h5_write(g, name, data); },
               "g", "name", "data")};
 
+// hybridization
+static auto const fun_33 =
+   c2py::dispatcher_f_kw_t{c2py::cfun(
+                              [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
+                                 const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc,
+                                 const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+                                 const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_static) {
+                                return triqs::modest::hybridization(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
+                              },
+                              "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
+                           c2py::cfun(
+                              [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
+                                 const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc,
+                                 const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+                                 const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_static) {
+                                return triqs::modest::hybridization(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
+                              },
+                              "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
+                           c2py::cfun(
+                              [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
+                                 const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc) {
+                                return triqs::modest::hybridization(epsilon_levels, Gloc);
+                              },
+                              "epsilon_levels", "Gloc"),
+                           c2py::cfun(
+                              [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
+                                 const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc) {
+                                return triqs::modest::hybridization(epsilon_levels, Gloc);
+                              },
+                              "epsilon_levels", "Gloc")};
+
 // impurity_levels
 static auto const fun_34 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::impurity_levels(obe); }, "obe"),
-                           c2py::cfun([](const triqs::modest::one_body_elements &obe) { return triqs::modest::impurity_levels(obe); }, "obe")};
+                           c2py::cfun([](const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::impurity_levels(obe); }, "obe")};
 
 // make_embedding
 static auto const fun_35 = c2py::dispatcher_f_kw_t{c2py::cfun(
@@ -1590,540 +1664,730 @@ static auto const fun_50 = c2py::dispatcher_f_kw_t{
                  std::vector<std::vector<long>> degenerate_blocks) { return triqs::modest::symmetrize_gf(Gin, degenerate_blocks); },
               "Gin", "degenerate_blocks")};
 
-static const auto doc_d_20 = fun_20.doc(R"DOC(   [0]
-   [1]
-   Parameters
-   ----------
+static const auto doc_d_20 = fun_20.doc(R"DOC(
+Compute Hloc = H(R=0) given TB Hamiltonians
 
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
+**Parameters**
+   :H_sigma:
+      a list of TB Hamiltonians of length n_sigma
+   :atomic_shells:
+      a list of atomic shells corresponding to the orbitals contained in the TB Hamiltonian
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_21 = fun_21.doc(R"DOC(   [0]Construct a four-index Coulomb tensor in the basis of spherical harmonics.
-   Parameters
-   ----------
+static const auto doc_d_21 = fun_21.doc(R"DOC(
+Construct a four-index Coulomb tensor in the basis of spherical harmonics.
 
-      l:
-         angular quantum number
-      U_int:
-         screend Hubbard interaction
-      J_hund:
-         Hund's coupling
+We typically construct the four-index Coulomb tensor in the basis of spherical harmonics, $$ U_{m_{1}m_{2}m_{3}m_{4}}^{{spherical}} = _{k=0}^{2l} F_{k}  (l, k, m_{1}, m_{2}, m_{3}, m_{4}),$$ where $F_{k}$ are radial Slater integrals and
 
-   Returns
-   -------
+Utility functions for creating and working with the four index Coulomb tensor.
+@
+{
 
-      [0]nda::array<double, 4>
+
+denote angular Racah-Wigner numbers for a spherically symmetric interaction tensor.
+
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :l:
+      angular quantum number
+   :U_int:
+      screend Hubbard interaction
+   :J_hund:
+      Hund's coupling
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   nda::array<double, 4>
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_22 =
-   fun_22.doc(R"DOC(   [0]Find the generate blocks of a BlockGf by analyzing G(τ=0) or G(iω₀) using the union-find algorithm.
-   Parameters
-   ----------
+static const auto doc_d_22 = fun_22.doc(R"DOC(
+Find the generate blocks of a BlockGf by analyzing G(τ=0) or G(iω₀) using the union-find algorithm.
 
-      Gimp:
-         Block Green's function
-      threshold:
-         tolerance for equivalence of blocks
+We use the union-find algorithm to group the blocks of the BlockGf (matrices) into equivalence classes based on approximate numerical equality. If two matrices are approximately equal, their blocks are united into the same set. The final result is a partitioning of the blocks (matrices) into degenerate groups.
 
-   Returns
-   -------
+.. raw:: html
 
-      [0]A list of equivalent blocks
+   <hr>
+
+**Parameters**
+   :Gimp:
+      Block Green's function
+   :threshold:
+      tolerance for equivalence of blocks
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   A list of equivalent blocks
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_23 = fun_23.doc(R"DOC(   [0]Double counting formulas.
-   Parameters
-   ----------
+static const auto doc_d_23 = fun_23.doc(R"DOC(
+Double counting formulas.
 
-      method:
-         the double counting formula to use.
-      N_tot:
-         the total density
-      N_sigma:
-         the total density per spin
-      n_orb:
-         the number of orbitals
-      U:
-         the Hubbard U
-      J:
-         the Hund's coupling J
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]std::pair<double, double>
+**Parameters**
+   :method:
+      the double counting formula to use.
+   :N_tot:
+      the total density
+   :N_sigma:
+      the total density per spin
+   :n_orb:
+      the number of orbitals
+   :U:
+      the Hubbard U
+   :J:
+      the Hund's coupling J
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   std::pair<double, double>
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_24 = fun_24.doc(R"DOC(   [0]Compute the density of the lattice Green's function with a self-energy using Woodbury.
-   [1]
-   Parameters
-   ----------
+static const auto doc_d_24 = fun_24.doc(R"DOC(
+Compute the density of the lattice Green's function with a self-energy using Woodbury.
 
-      obe:
-         The one-body elements.
-      mu:
-         The chemical potential.
-      Sigma_dynamic:
-         The dynamic part of the embedded self-energy.
-      Sigma_static:
-         The static part of the embedded self-energy.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]double
+**Parameters**
+   :obe:
+      The one-body elements.
+   :mu:
+      The chemical potential.
+   :Sigma_dynamic:
+      The dynamic part of the embedded self-energy.
+   :Sigma_static:
+      The static part of the embedded self-energy.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   double
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_25 = fun_25.doc(R"DOC(   [0]Compute number of particles n = ∑f(β(e(k)-μ))
-   Parameters
-   ----------
+static const auto doc_d_25 = fun_25.doc(R"DOC(
+Compute number of particles n = ∑f(β(e(k)-μ))
 
+.. raw:: html
 
-   Returns
-   -------
-
+   <hr>
 )DOC");
-static const auto doc_d_26 = fun_26.doc(R"DOC(   [0]Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure.
-   Parameters
-   ----------
+static const auto doc_d_26 = fun_26.doc(R"DOC(
+Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure.
 
-      Hloc0:
-         the R = 0 part of the Hamiltonian as a vector of [n_atoms, n_sigma]
-      atomic_shells:
-         the list of atomic shells used to index Hloc
-      block_threshold:
-         the threshold of accuracy at which a symmetry is considered found
-      diagonalize_hloc:
-         whether or not to diagonalize hloc
+Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
 
-   Returns
-   -------
+.. raw:: html
 
-      [0]decomposition, U_rotation describing the block structure of GF based on Hloc
+   <hr>
+
+**Parameters**
+   :Hloc0:
+      the R = 0 part of the Hamiltonian as a vector of [n_atoms, n_sigma]
+   :atomic_shells:
+      the list of atomic shells used to index Hloc
+   :block_threshold:
+      the threshold of accuracy at which a symmetry is considered found
+   :diagonalize_hloc:
+      whether or not to diagonalize hloc
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   decomposition, U_rotation describing the block structure of GF based on Hloc
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_27 =
-   fun_27.doc(R"DOC(   [0]compute double counting correction (H_DC) for a dc_type (method) from the G𝓒 and interaction parameters.
-   Parameters
-   ----------
+static const auto doc_d_27 = fun_27.doc(R"DOC(
+compute double counting correction (H_DC) for a dc_type (method) from the G𝓒 and interaction parameters.
 
-      GC:
-         Green's function in C space
-      U_int:
-         Coulomb interaction parameter
-      J_hund:
-         Hund's coupling interaction parameter
-      method:
-         dc_formula (sFLL, cFLL, sAMF, cAMF, cHeld)
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]H_DC nda::array<dc_t, 2>
+**Parameters**
+   :GC:
+      Green's function in C space
+   :U_int:
+      Coulomb interaction parameter
+   :J_hund:
+      Hund's coupling interaction parameter
+   :method:
+      dc_formula (sFLL, cFLL, sAMF, cAMF, cHeld)
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   H_DC nda::array<dc_t, 2>
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_28 = fun_28.doc(
-   R"DOC(   [0]Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
-   [1]Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
-   [2]Compute the hybridization function from the effective impurity levels and the local Green's function.
-   [3]Compute the hybridization function from the effective impurity levels and the local Green's function.
-   Parameters
-   ----------
+static const auto doc_d_28 = fun_28.doc(R"DOC(
+[0] Find the chemical potenital from the local Green's function given a target density.
 
-      epsilon_levels:
-         The effective impurity levels.
-      Gloc:
-         The local Green's function of the impurity.
-      Sigma_dynamic:
-         The frequency dependent part of the impurity self-energy.
-      Sigma_static:
-         The static term of the impurity self-energy.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]block_gf<Mesh, matrix_valued>
-      [1]block_gf<Mesh, matrix_valued>
-      [2]block_gf<Mesh, matrix_valued>
-      [3]block_gf<Mesh, matrix_valued>
+[1, 2, 3] Find the chemical potenital from the local Green's function and self-energy given a target density.
+
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :target_density:
+      The total electron density.
+   :obe:
+      The one-body elements.
+   :beta:
+      The inverse temperature (units 1/eV).
+   :method:
+      The root finding method to use (default = dichotomy).
+   :precision:
+      The precision to end search (default = 1e-5).
+   :verbosity:
+      Printing of the root finder's progress (default = true).
+   :Sigma_dynamic:
+      The dynamic part of the embedded self-energy.
+   :Sigma_static:
+      The static part of the embedded self-energy.
+   :opt:
+      Container for options related to methods of integrating the BZ
+   :mesh:
+      The mesh on which Gloc will be computed
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   [0, 1] double
+
+   [2, 3] Chemical potential
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_29 = fun_29.doc(R"DOC(   [0]Find the chemical potenital from the local Green's function given a target density.
-   [1]Find the chemical potenital from the local Green's function and self-energy given a target density.
-   [2]Find the chemical potenital from the local Green's function and self-energy given a target density.
-   Parameters
-   ----------
+static const auto doc_d_29 = fun_29.doc(R"DOC(
+Folding with superlattice
 
-      target_density:
-         The total electron density.
-      obe:
-         The one-body elements.
-      beta:
-         The inverse temperature (units 1/eV).
-      method:
-         The root finding method to use (default = dichotomy).
-      precision:
-         The precision to end search (default = 1e-5).
-      verbosity:
-         Printing of the root finder's progress (default = true).
-      Sigma_dynamic:
-         The dynamic part of the embedded self-energy.
-      Sigma_static:
-         The static part of the embedded self-energy.
-      Sigma_hartree:
-         The static part of the embedded self-energy.
-      x_init:
-         The initial guess (default = 0.0).
-      delta_x:
-         The increment to guess when finding upper and lower bounds (default = 0.5).
-      max_loops:
-         The maximum number of iterations (default = 1000).
-      x_name:
-         default = Chemical Potential
-      y_name:
-         default = Total Density
+.. raw:: html
 
-   Returns
-   -------
-
-      [0]double
-      [1]double
-      [2]double
+   <hr>
 )DOC");
-static const auto doc_d_30 = fun_30.doc(R"DOC(   [0]
-   [1]Folding with superlattice
-   Parameters
-   ----------
+static const auto doc_d_30 = fun_30.doc(R"DOC(
+[0, 1] compute G𝓒 local Green's function on Mesh(MxM)
 
+@
+{
 
-   Returns
-   -------
+.. raw:: html
 
+   <hr>
+
+[2, 3, 4, 5] Compute the local Green's function without a self-energy.
+
+See gloc for more details.
+
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :obe:
+      one_body_elements_on_grid
+   :mu:
+      chemical potential
+   :Sigma_dynamic:
+      The dynamic part of the embedded self-energy in the embedded view.
+   :Sigma_static:
+      The static part of the embedded self-energy in the embedded view.
+   :mesh:
+      mesh triqs::meshes::{imfreq, dlr_imfreq}
+   :opt:
+      Container for options related to methods of integrating the BZ
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   [0, 1, 2, 3] The local Green's function.
+
+   [4] gloc[alpha][sigma] = gf on the mesh, as a vector of length alpha, storing block gfs dim sigma
+
+   [5] gloc[alpha][sigma], the local Green's function
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_31 = fun_31.doc(R"DOC(   [0]compute G𝓒 local Green's function on Mesh(MxM)
-   [1]compute G𝓒 local Green's function on Mesh(MxM)
-   [2]Compute G𝓒 on with a Mesh with no self-energy.
-   [3]Compute G𝓒 on with a Mesh with no self-energy.
-   [4]Compute local Green's function from a one_body_elements_tb object.
-   Parameters
-   ----------
+static const auto doc_d_31 = fun_31.doc(R"DOC()DOC");
+static const auto doc_d_32 = fun_32.doc(R"DOC()DOC");
+static const auto doc_d_33 = fun_33.doc(R"DOC(
+[0, 1] Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
 
-      obe:
-         one_body_elements_on_grid
-      mu:
-         chemical potential
-      Sigma_dynamic:
-         The dynamic part of the embedded self-energy in the embedded view.
-      Sigma_static:
-         The static part of the embedded self-energy in the embedded view.
-      mesh:
-         mesh triqs::meshes::{imfreq, dlr_imfreq}
-      one_body_elements_tb:
-         A one_body_elements object containing the tb_hamiltonian
-      Sigma_embed:
-         Self energy in the embedded basis? TODO I don't think this was relevant
-      Sigma_Hartree:
+.. raw:: html
 
-      bz_int_options:
-         Option of the BZ integration
-      d_H:
-         ? for magnetic fields etc?
+   <hr>
 
-   Returns
-   -------
+[2, 3] Compute the hybridization function from the effective impurity levels and the local Green's function.
 
-      [0]block2_gf<Mesh, matrix_valued>
-      [1]block2_gf<Mesh, matrix_valued>
-      [2]block2_gf<Mesh, matrix_valued>
-      [3]block2_gf<Mesh, matrix_valued>
-      [4]gloc[alpha][sigma] = gf on the mesh, as a vector of length alpha, storing block gfs dim sigma
+.. raw:: html
+
+   <hr>
+
+**Parameters**
+   :epsilon_levels:
+      The effective impurity levels.
+   :Gloc:
+      The local Green's function of the impurity.
+   :Sigma_dynamic:
+      The frequency dependent part of the impurity self-energy.
+   :Sigma_static:
+      The static term of the impurity self-energy.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   block_gf<Mesh, matrix_valued>
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_32 = fun_32.doc(R"DOC(   [0]
-   [1]
-   [2]
-   Parameters
-   ----------
+static const auto doc_d_34 = fun_34.doc(R"DOC(
+Compute the atomic (impurity) levels from an obe.
 
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
+**Parameters**
+   :obe:
+      One-body elements
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   [0] nda::array<nda::matrix<dcomplex>, 2>
+
+   [1] Atomic impurity levels
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_33 = fun_33.doc(R"DOC(   [0]
-   [1]
-   [2]
-   Parameters
-   ----------
+static const auto doc_d_35 = fun_35.doc(R"DOC(
+Construct the embedding class from the local space, a description of the block decomposition, and an equivalence         mapping between atom sites.
 
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
+**Parameters**
+   :C_space:
+      the local space from one_body_elements
+   :block_decomposition:
+      the decomposition of atomic orbitals into their irreducible representations
+   :atom_to_imp:
+      [optional] a mapping between equivalent atom sites.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   embedding
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_34 = fun_34.doc(R"DOC(   [0]Compute the local impurity levels from the single-particle dispersion.
-   [1]
-   Parameters
-   ----------
+static const auto doc_d_36 = fun_36.doc(R"DOC()DOC");
+static const auto doc_d_37 = fun_37.doc(R"DOC(
+Construct the embedding class from the local space using equivalences between atoms.
 
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
+**Parameters**
+   :C_space:
+      the local space from one_body_elements
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   embedding
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_35 = fun_35.doc(
-   R"DOC(   [0]Construct the embedding class from the local space, a description of the block decomposition, and an equivalence         mapping between atom sites.
-   Parameters
-   ----------
+static const auto doc_d_38 = fun_38.doc(R"DOC(
+Construct the embedding class from the local space without using equivalences between atoms.
 
-      C_space:
-         the local space from one_body_elements
-      block_decomposition:
-         the decomposition of atomic orbitals into their irreducible representations
-      atom_to_imp:
-         [optional] a mapping between equivalent atom sites.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]embedding
+**Parameters**
+   :C_space:
+      the local space from one_body_elements.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   embedding
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_36 = fun_36.doc(R"DOC(   [0]
-   Parameters
-   ----------
+static const auto doc_d_39 = fun_39.doc(R"DOC(
+Construct a Hubbard-Kanamori Hamiltonian
 
+Create a Hubbard-Kanamori Hamiltonian using the density-density, spin-flip, and pair-hopping interactions, $$ H_{{int}} = {1}{2} _{(i)(j^{})} U_{ij}^{^{}}n_{i}n_{j^{}} - _{i j}Jc_{i}^{}c_{i}c_{j}^{}c_{j} + _{i j} J c_{i}^{}c_{i}^{}c_{j}c_{j}.$$
 
-   Returns
-   -------
+.. raw:: html
 
+   <hr>
+
+**Parameters**
+   :tau_names:
+      names of tau indices ['up', 'down']
+   :dim_gamma:
+      dimension of the blocks γ
+   :U_int:
+      Hubbard U
+   :U_prime:
+      U' typical U' = U - 2J
+   :J_hund:
+      Kanamori J
+   :spin_flip:
+      spin flip term
+   :pair_hopping:
+      pair hopping term
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_37 = fun_37.doc(R"DOC(   [0]Construct the embedding class from the local space using equivalences between atoms.
-   Parameters
-   ----------
+static const auto doc_d_40 = fun_40.doc(R"DOC(
+Construct a new operators::many body operator make slater object
 
-      C_space:
-         the local space from one_body_elements
+Create a Slater Hamiltonian using fully rotationally-invariant four-index interactions: $$H_{{int}} = {1}{2} _{ijkl, ^{}} U_{ijkl}c^{}_{i}c^{}_{j^{}}c_{l^{}}c_{k}.$$
 
-   Returns
-   -------
+.. raw:: html
 
-      [0]embedding
+   <hr>
+
+**Parameters**
+   :tau_names:
+
+   :dim_gamma:
+
+   :U_int:
+
+   :J_hund:
+
+   :spherical_to_dft:
+
+   :dft_to_local:
+
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_38 = fun_38.doc(R"DOC(   [0]Construct the embedding class from the local space without using equivalences between atoms.
-   Parameters
-   ----------
+static const auto doc_d_41 = fun_41.doc(R"DOC(
+Create a one-body elements object with orthonormalized projectors. Using the data from the "dft_input" group, the band_dispersion, local_space,  downfolding_projector, and optional ibz_symmetry_ops are prepared to create a one-body  elements object. This object is intended to be used in DMFT calculations.
 
-      C_space:
-         the local space from one_body_elements.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]embedding
+**Parameters**
+   :filename:
+      Hdf5 file from dft_tools converter.
+   :threshold:
+      Off-diagonal threshold for discovery of symmetries.
+   :diagonalize_hloc:
+      Diagonalize the local non-interacting hamiltonian.
+   :verbosity:
+      Log steps of creating the one-body elements.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   The total electron density and a one-body elements.
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_39 = fun_39.doc(R"DOC(   [0]Construct a Hubbard-Kanamori Hamiltonian
-   Parameters
-   ----------
+static const auto doc_d_42 = fun_42.doc(R"DOC(
+Construct a obe_tb from Wannier90 in the case of a single spin index
 
-      tau_names:
-         names of tau indices ['up', 'down']
-      dim_gamma:
-         dimension of the blocks γ
-      U_int:
-         Hubbard U
-      U_prime:
-         U' typical U' = U - 2J
-      J_hund:
-         Kanamori J
-      spin_flip:
-         spin flip term
-      pair_hopping:
-         pair hopping term
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
+**Parameters**
+   :wannier_file_path:
+      string to Wannier90 files, including the prefix
+   :spin_kind:
+      enum telling us the spintype
+   :atomic_shells:
+      list of atomic shells input by the user
+   :wannier_file_path_up:
+      string to Wannier90 files, including the prefix
+   :wannier_file_path_dn:
+      string to Wannier90 files, including the prefix
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_40 = fun_40.doc(R"DOC(   [0]Construct a new operators::many body operator make slater object
-   Parameters
-   ----------
+static const auto doc_d_43 = fun_43.doc(R"DOC(
+Create a one-body elements object along specific k-grid.
 
-      tau_names:
+Using the data from the "dft_bands_input" group, the band_disperion and downfolding_projector are prepared to create one-body elements object. This object is intended to be used for post-processing the momentum-resolved spectral function.
 
-      dim_gamma:
+.. raw:: html
 
-      U_int:
+   <hr>
 
-      J_hund:
+**Parameters**
+   :filename:
+      Hdf5 file from the dft_tools converter.
+   :obe:
+      One-body elements that was ued in the DMFT calculation.
 
-      spherical_to_dft:
+   .. raw:: html
 
-      dft_to_local:
+      <hr>
 
+**Returns**
+   One-body elements along high-symmetry k-path.
 
-   Returns
-   -------
+   .. raw:: html
 
+      <hr>
 )DOC");
-static const auto doc_d_41 = fun_41.doc(R"DOC(   [0]Create a one-body elements object with orthonormalized projectors.
-   Parameters
-   ----------
+static const auto doc_d_44 = fun_44.doc(R"DOC(
+Create a one-body elements object with the Θ projectors.
 
-      filename:
-         Hdf5 file from dft_tools converter.
-      threshold:
-         Off-diagonal threshold for discovery of symmetries.
-      diagonalize_hloc:
-         Diagonalize the local non-interacting hamiltonian.
-      verbosity:
-         Log steps of creating the one-body elements.
+Using the data from the "dft_parproj_input" group, the local_space, downfolding_projectors,  and optional ibz_symmetry_ops are prepared to create a one-body elements object.  This object is  intended to be used for post-processing the atom- and orbitally-resolved k-summed spectral functions.
 
-   Returns
-   -------
+.. raw:: html
 
-      [0]The total electron density and a one-body elements.
+   <hr>
+
+**Parameters**
+   :filename:
+      Hdf5 file from DFTtools converter with dft_parproj_input group.
+   :obe:
+      One-body elements that was used in the DMFT calculation.
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   One-body elements using the Θ projectors.
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_42 = fun_42.doc(R"DOC(   [0]Construct a obe_tb from Wannier90 in the case of a single spin index
-   [1]
-   Parameters
-   ----------
+static const auto doc_d_45 = fun_45.doc(R"DOC()DOC");
+static const auto doc_d_46 = fun_46.doc(R"DOC(
+Compute the atom- and orbital-resolved spectral function (interacting density of states).
 
-      wannier_file_path:
-         string to Wannier90 files, including the prefix
-      spin_kind:
-         enum telling us the spintype
-      shells:
-         list of atomic shells input by the user
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
+**Parameters**
+   :obe_theta:
+      one-body elements on grid created from one_body_elements_with_theta_projectors (see obe factories).
+   :Pk:
+      downfolding_projector defined in the correlated space using to upfold the DMFT self-energies.
+   :mu:
+      chemical potential
+   :Sigma_w:
+      self-energy on real-frequency mesh
+   :Sigma_DC:
+      double counting term
+   :broadening:
+      spectral broadening
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   spectral_function_w
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_43 = fun_43.doc(R"DOC(   [0]Create a one-body elements object along specific k-grid.
-   Parameters
-   ----------
+static const auto doc_d_47 = fun_47.doc(R"DOC(
+Root finder f(x) = 0.
 
-      filename:
-         Hdf5 file from the dft_tools converter.
-      obe:
-         One-body elements that was ued in the DMFT calculation.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]One-body elements along high-symmetry k-path.
+**Parameters**
+   :method:
+      root finding method (dichtomy, bisection)
+   :f:
+      f(x) (double -> double)
+   :x_init:
+      initial value for x
+   :y_value:
+      target value for y
+   :precision:
+      precision for algorihtm
+   :delta_x:
+      increment of x
+   :max_loops:
+      max number of iterations for method
+   :x_name:
+      name of x variable
+   :y_name:
+      name of y variable f(x)
+   :verbosity:
+      logging of root finder
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   x, f(x) std::pair<double, double>
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_44 = fun_44.doc(R"DOC(   [0]Create a one-body elements object with the Θ projectors.
-   Parameters
-   ----------
+static const auto doc_d_48 = fun_48.doc(R"DOC()DOC");
+static const auto doc_d_49 = fun_49.doc(R"DOC(
+Compute momentum-resolved spectral function A(k, ω) along high-symmetry path.
 
-      filename:
-         Hdf5 file from DFTtools converter with dft_parproj_input group.
-      obe:
-         One-body elements that was used in the DMFT calculation.
+.. raw:: html
 
-   Returns
-   -------
+   <hr>
 
-      [0]One-body elements using the Θ projectors.
+**Parameters**
+   :obe:
+      one-body elements on grid created from one_body_elements_on_high_symmetry_path (see obe factories)
+   :mu:
+      chemical potential
+   :Sigma_w:
+      self-energy on real-frequency mesh
+   :Sigma_DC:
+      double-counting term
+   :broadening:
+      spectral broadening
+
+   .. raw:: html
+
+      <hr>
+
+**Returns**
+   spectral_function_kw
+
+   .. raw:: html
+
+      <hr>
 )DOC");
-static const auto doc_d_45 = fun_45.doc(R"DOC(   [0]
-   Parameters
-   ----------
+static const auto doc_d_50 = fun_50.doc(R"DOC(
+Symmetrize the blocks of a Green's function given a list of it's degenerate blocks.
 
+Average the degenerate blocks and replace the degenerate ones with their average.
 
-   Returns
-   -------
+.. raw:: html
 
-)DOC");
-static const auto doc_d_46 = fun_46.doc(R"DOC(   [0]Compute the atom- and orbital-resolved spectral function (interacting density of states).
-   Parameters
-   ----------
+   <hr>
 
-      obe_theta:
-         one-body elements on grid created from one_body_elements_with_theta_projectors (see obe factories).
-      Pk:
-         downfolding_projector defined in the correlated space using to upfold the DMFT self-energies.
-      mu:
-         chemical potential
-      Sigma_w:
-         self-energy on real-frequency mesh
-      Sigma_DC:
-         double counting term
-      broadening:
-         spectral broadening
+**Parameters**
+   :Gin:
+      Block Green's function
+   :degenerate_blocks:
+      a list of the degenerate blocks.
 
-   Returns
-   -------
+   .. raw:: html
 
-      [0]spectral_function_w
-)DOC");
-static const auto doc_d_47 = fun_47.doc(R"DOC(   [0]Root finder f(x) = 0.
-   Parameters
-   ----------
+      <hr>
 
-      method:
-         root finding method (dichtomy, bisection)
-      f:
-         f(x) (double -> double)
-      x_init:
-         initial value for x
-      y_value:
-         target value for y
-      precision:
-         precision for algorihtm
-      delta_x:
-         increment of x
-      max_loops:
-         max number of iterations for method
-      x_name:
-         name of x variable
-      y_name:
-         name of y variable f(x)
-      verbosity:
-         logging of root finder
+**Returns**
+   The symmetrized Green's function.
 
-   Returns
-   -------
+   .. raw:: html
 
-      [0]x, f(x) std::pair<double, double>
-)DOC");
-static const auto doc_d_48 = fun_48.doc(R"DOC(   [0]
-   Parameters
-   ----------
-
-
-   Returns
-   -------
-
-)DOC");
-static const auto doc_d_49 = fun_49.doc(R"DOC(   [0]Compute momentum-resolved spectral function A(k, ω) along high-symmetry path.
-   Parameters
-   ----------
-
-      obe:
-         one-body elements on grid created from one_body_elements_on_high_symmetry_path (see obe factories)
-      mu:
-         chemical potential
-      Sigma_w:
-         self-energy on real-frequency mesh
-      Sigma_DC:
-         double-counting term
-      broadening:
-         spectral broadening
-
-   Returns
-   -------
-
-      [0]spectral_function_kw
-)DOC");
-static const auto doc_d_50 = fun_50.doc(R"DOC(   [0]Symmetrize the blocks of a Green's function given a list of it's degenerate blocks.
-   Parameters
-   ----------
-
-      Gin:
-         Block Green's function
-      degenerate_blocks:
-         a list of the degenerate blocks.
-
-   Returns
-   -------
-
-      [0]The symmetrized Green's function.
+      <hr>
 )DOC");
 //--------------------- module function table  -----------------------------
 
@@ -2136,12 +2400,12 @@ static PyMethodDef module_methods[] = {
    {"density_nk", (PyCFunction)c2py::pyfkw<fun_25>, METH_VARARGS | METH_KEYWORDS, doc_d_25.c_str()},
    {"discover_symmetries", (PyCFunction)c2py::pyfkw<fun_26>, METH_VARARGS | METH_KEYWORDS, doc_d_26.c_str()},
    {"double_counting", (PyCFunction)c2py::pyfkw<fun_27>, METH_VARARGS | METH_KEYWORDS, doc_d_27.c_str()},
-   {"extract_delta", (PyCFunction)c2py::pyfkw<fun_28>, METH_VARARGS | METH_KEYWORDS, doc_d_28.c_str()},
-   {"find_chemical_potential", (PyCFunction)c2py::pyfkw<fun_29>, METH_VARARGS | METH_KEYWORDS, doc_d_29.c_str()},
-   {"fold", (PyCFunction)c2py::pyfkw<fun_30>, METH_VARARGS | METH_KEYWORDS, doc_d_30.c_str()},
-   {"gloc", (PyCFunction)c2py::pyfkw<fun_31>, METH_VARARGS | METH_KEYWORDS, doc_d_31.c_str()},
-   {"h5_read", (PyCFunction)c2py::pyfkw<fun_32>, METH_VARARGS | METH_KEYWORDS, doc_d_32.c_str()},
-   {"h5_write", (PyCFunction)c2py::pyfkw<fun_33>, METH_VARARGS | METH_KEYWORDS, doc_d_33.c_str()},
+   {"find_chemical_potential", (PyCFunction)c2py::pyfkw<fun_28>, METH_VARARGS | METH_KEYWORDS, doc_d_28.c_str()},
+   {"fold", (PyCFunction)c2py::pyfkw<fun_29>, METH_VARARGS | METH_KEYWORDS, doc_d_29.c_str()},
+   {"gloc", (PyCFunction)c2py::pyfkw<fun_30>, METH_VARARGS | METH_KEYWORDS, doc_d_30.c_str()},
+   {"h5_read", (PyCFunction)c2py::pyfkw<fun_31>, METH_VARARGS | METH_KEYWORDS, doc_d_31.c_str()},
+   {"h5_write", (PyCFunction)c2py::pyfkw<fun_32>, METH_VARARGS | METH_KEYWORDS, doc_d_32.c_str()},
+   {"hybridization", (PyCFunction)c2py::pyfkw<fun_33>, METH_VARARGS | METH_KEYWORDS, doc_d_33.c_str()},
    {"impurity_levels", (PyCFunction)c2py::pyfkw<fun_34>, METH_VARARGS | METH_KEYWORDS, doc_d_34.c_str()},
    {"make_embedding", (PyCFunction)c2py::pyfkw<fun_35>, METH_VARARGS | METH_KEYWORDS, doc_d_35.c_str()},
    {"make_embedding_with_clusters", (PyCFunction)c2py::pyfkw<fun_36>, METH_VARARGS | METH_KEYWORDS, doc_d_36.c_str()},
@@ -2206,7 +2470,7 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_module() {
   if (PyType_Ready(&c2py::wrap_pytype<triqs::lattice::superlattice>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<triqs::tb_hamiltonian>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<triqs::lattice::bz_int_options>) < 0) return NULL;
-  if (PyType_Ready(&c2py::wrap_pytype<triqs::modest::one_body_elements>) < 0) return NULL;
+  if (PyType_Ready(&c2py::wrap_pytype<triqs::modest::one_body_elements_tb>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>>) < 0) return NULL;
 
   m = PyModule_Create(&module_def);
@@ -2230,7 +2494,7 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_module() {
   c2py::add_type_object_to_main<triqs::lattice::superlattice>("Superlattice", m, conv_table);
   c2py::add_type_object_to_main<triqs::tb_hamiltonian>("TbHamiltonian", m, conv_table);
   c2py::add_type_object_to_main<triqs::lattice::bz_int_options>("BzIntOptions", m, conv_table);
-  c2py::add_type_object_to_main<triqs::modest::one_body_elements>("OneBodyElements", m, conv_table);
+  c2py::add_type_object_to_main<triqs::modest::one_body_elements_tb>("OneBodyElementsTb", m, conv_table);
   c2py::add_type_object_to_main<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>>("DMFTCheckpoint", m,
                                                                                                                        conv_table);
 

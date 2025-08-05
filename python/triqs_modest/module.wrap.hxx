@@ -17,6 +17,6 @@ template <> constexpr bool c2py::is_wrapped<triqs::modest::iteration_data>      
 template <> constexpr bool c2py::is_wrapped<triqs::lattice::superlattice>                                                          = true;
 template <> constexpr bool c2py::is_wrapped<triqs::tb_hamiltonian>                                                                 = true;
 template <> constexpr bool c2py::is_wrapped<triqs::lattice::bz_int_options>                                                        = true;
-template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements>                                                      = true;
+template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements_tb>                                                   = true;
 template <> constexpr bool c2py::is_wrapped<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>> = true;
 #endif
