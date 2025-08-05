@@ -274,9 +274,67 @@ namespace triqs::modest {
     return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }
 
-  // std::pair<one_body_elements_on_grid, embedding> make_embedding_with_clusters(one_body_elements_on_grid obe,
-  //                                                                              std::vector<std::vector<long>> const &atom_partition) {
-  //   // build permutation based on atom_partition
-  // }
+  // --------------------------------------------------------------------------------------------
+
+  std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract(nda::array<dcomplex, 4> const &g_loc) const {
+
+    auto imp_gf_stru_list = imp_block_shape();
+    auto n_w              = g_loc.extent(0);
+
+    auto gloc_E = nda::array<nda::array<dcomplex, 3>, 2>(n_alpha(), n_sigma());
+    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
+      for (auto sigma : range(n_sigma())) { gloc_E(alpha, sigma) = g_loc(r_all, sigma, r_alpha, r_alpha); }
+    }
+    auto extract_one_imp = [&](long n_imp) {
+      auto g_imp = std::vector<nda::array<dcomplex, 3>>{};
+      for (auto [bl, bl_size] : imp_gf_stru_list[n_imp]) { g_imp.emplace_back(n_w, bl_size, bl_size); }
+      auto const &rpsi = reverse_psi[n_imp];
+      for (auto [gamma, tau] : rpsi.indices()) {
+        auto [alpha, sigma]                 = rpsi(gamma, tau)[0];
+        g_imp[gamma + n_gamma(n_imp) * tau] = gloc_E(alpha, sigma);
+      }
+      return g_imp;
+    };
+
+    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
+  }
+  // --------------------------------------------------------------------------------------------
+
+  nda::array<nda::array<dcomplex, 3>, 2> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const {
+    auto Sigma_embed = nda::array<nda::array<dcomplex, 3>, 2>(n_alpha(), n_sigma());
+    for (auto &&[S, m] : zip(Sigma_embed, psi)) {
+      if (m.imp_idx == -1) continue;
+      S = Sigma_imp_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
+    }
+    return Sigma_embed;
+  }
+  // --------------------------------------------------------------------------------------------
+
+  //FIXME : protect this function as it will only work with a Pi_embed_decomp
+  std::vector<nda::array<dcomplex, 5>> embedding::extract(nda::array<dcomplex, 5> const &pi_loc) const {
+
+    auto Pi_E = std::vector<nda::array<dcomplex, 5>>{};
+    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { Pi_E.emplace_back(pi_loc(r_all, r_alpha, r_alpha, r_alpha, r_alpha)); }
+
+    auto extract_one_imp = [&](long n_imp) {
+      auto const &rpsi    = reverse_psi[n_imp];
+      auto [alpha, sigma] = rpsi(0, 0)[0];
+      return Pi_E[alpha];
+    };
+
+    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
+  }
+  // --------------------------------------------------------------------------------------------
+
+  //FIXME : protect this function as it will only work with a Pi_embed_decomp
+  std::vector<nda::array<dcomplex, 5>> embedding::embed(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const {
+    auto Pi_embed = std::vector<nda::array<dcomplex, 5>>(n_alpha());
+    for (auto alpha : range(n_alpha())) {
+      auto const &m = psi(alpha, 0);
+      if (m.imp_idx == -1) continue; // check
+      Pi_embed[alpha] = pi_imp_vec[m.imp_idx];
+    }
+    return Pi_embed;
+  }
 
 } // namespace triqs::modest

@@ -209,10 +209,11 @@ namespace triqs::modest {
     /// embed single-particle quantities
     template <typename Mesh> block2_gf<Mesh, matrix_valued> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const;
 
-    /// embed two-particle quantities
-    // template <typename Mesh> block2_gf<Mesh, tensor_valued<4>> embed(std::vector<block_gf<Mesh, tensor_valued<4>>> const &Pi_imp_vec) const;
-    //[n_w, n_spin, n_m, n_m]
-    nda::array<dcomplex, 5> embed(std::vector<nda::array<dcomplex, 5>> const &Pi_imp_vec) const;
+    /// embed single-particle quantities (coqui)
+    nda::array<nda::array<dcomplex, 3>, 2> embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const;
+
+    /// embed two-particle quantities (coqui)
+    std::vector<nda::array<dcomplex, 5>> embed(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const;
 
     /// embed block matrices
     nda::array<nda::matrix<dcomplex>, 2> embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_static_vec) const;
@@ -226,10 +227,10 @@ namespace triqs::modest {
     template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block2_gf<Mesh, matrix_valued> const &g_loc) const;
 
     /// extract single-particle quantities (CoQui)
-    template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block_gf<Mesh, matrix_valued> const &g_loc) const;
+    std::vector<std::vector<nda::array<dcomplex, 3>>> extract(nda::array<dcomplex, 4> const &g_loc) const;
 
     /// extract two-particle quantities (CoQui)
-    template <typename Mesh> std::vector<block_gf<Mesh, tensor_valued<4>>> extract(block_gf<Mesh, tensor_valued<4>> const &Pi_loc) const;
+    std::vector<nda::array<dcomplex, 5>> extract(nda::array<dcomplex, 5> const &Pi_loc) const;
 
     /// extract matrices
     std::vector<std::vector<nda::matrix<dcomplex>>> extract(nda::array<nda::matrix<dcomplex>, 2> const &matrix_C) const;
