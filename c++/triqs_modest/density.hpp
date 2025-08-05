@@ -4,6 +4,7 @@
 // See LICENSE in the root of this distribution for details.
 
 #pragma once
+//#include <mpi/generic_communication.hpp>
 #include <nda/nda.hpp>
 #include <triqs/gfs.hpp>
 #include <itertools/omp_chunk.hpp>
@@ -14,8 +15,8 @@
 
 namespace triqs::modest {
 
-  // #pragma omp declare reduction(gf_sum : gf<imfreq, scalar_valued> : omp_out += omp_in) initializer(omp_priv = gf{omp_orig.mesh()})
-  // #pragma omp declare reduction(gf_sum : gf<dlr_imfreq, scalar_valued> : omp_out += omp_in) initializer(omp_priv = gf{omp_orig.mesh()})
+#pragma omp declare reduction(gf_sum : gf<imfreq, scalar_valued> : omp_out += omp_in) initializer(omp_priv = gf{omp_orig.mesh()})
+#pragma omp declare reduction(gf_sum : gf<dlr_imfreq, scalar_valued> : omp_out += omp_in) initializer(omp_priv = gf{omp_orig.mesh()})
 
   // ============================================
   namespace detail {
@@ -106,8 +107,10 @@ namespace triqs::modest {
     auto calc_correction_term = detail::trace_G_B_m_G_KS(obe, mu, Sigma_dynamic, Sigma_static);
 
     // ---------
-    // TODO: OpenMP
-    for (auto k_idx : range(n_k)) {
+    mpi::communicator comm = {}; // for now using default comm in MPI
+#pragma omp parallel for collapse(2) reduction(gf_sum : corr) reduction(+ : KS_term) default(none)                                                   \
+   shared(n_k, comm, n_sigma, obe, Fermi, mu, calc_correction_term, beta)
+    for (auto k_idx : mpi::chunk(range(n_k), comm)) {
       for (auto sigma : range(n_sigma)) {
 
         // 1- KS term
@@ -121,7 +124,8 @@ namespace triqs::modest {
         corr.data() += calc_correction_term(sigma, k_idx);
       }
     }
-    // OP, JC : Fix the mpi. NB :  KS_term : REDUCE TOO
+    KS_term = mpi::all_reduce(KS_term);
+    corr    = mpi::all_reduce(corr);
     return KS_term + real(density(corr));
   }
 
@@ -169,11 +173,12 @@ namespace triqs::modest {
       return out;
     };
 
-    //TODO: OpenMP
-    for (auto k_idx : range(obe.H.n_k())) {
+    mpi::communicator comm = {}; // for now using default comm in MPI
+#pragma omp parallel for collapse(2) reduction(gf_sum : result) default(none) shared(obe, Glatt, comm)
+    for (auto k_idx : mpi::chunk(range(obe.H.n_k()), comm)) {
       for (auto sigma : range(obe.C_space.n_sigma())) { result.data() += obe.H.k_weights(k_idx) * Glatt(k_idx, sigma).data(); }
     }
-
+    result = mpi::all_reduce(result);
     return density_nk(obe, mu, beta) + real(density(result));
   }
   /** @endcond */

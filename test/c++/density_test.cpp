@@ -125,3 +125,5 @@ TEST(density_tests, lco_w90_fixed) { // NOLINT
 TEST(density_tests, root_lco_w90_fixed) { // NOLINT
   root_finder_test_case("ref_data/lco_qe_dp_w90_grid.ref.h5");
 }
+
+MPI_TEST_MAIN;
