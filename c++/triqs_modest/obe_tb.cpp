@@ -26,10 +26,10 @@ namespace triqs::modest {
   /** Construct a obe_tb from Wannier90 in the case of a single spin index 
    * @param wannier_file_path string to Wannier90 files, including the prefix // FIXME example 
    * @param spin_kind enum telling us the spintype 
-   * @param shells list of atomic shells input by the user 
+   * @param atomic_shells list of atomic shells input by the user 
    */
-  one_body_elements one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e const &spin_kind,
-                                                     std::vector<atomic_shell_t> atomic_shells) {
+  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e const &spin_kind,
+                                                        std::vector<atomic_shell_t> atomic_shells) {
     if (spin_kind == spin_kind_e::Polarized) {
       throw std::runtime_error("If performing a spin-polarized calculation, you need to supply two Wannier file paths for up and down channels.\n");
     }
@@ -44,8 +44,8 @@ namespace triqs::modest {
     return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   };
 
-  one_body_elements one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
-                                                     spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells) {
+  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
+                                                        spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells) {
     if (spin_kind != spin_kind_e::Polarized) {
       throw std::runtime_error("For a non-spin polarized calculation, you should specify only one Wannier Hamiltonian.\n");
     }
@@ -112,7 +112,7 @@ namespace triqs::modest {
   /** Compute the local impurity levels from the single-particle dispersion. 
   * This simply computes Hloc and returns it, but exists to match the syntax used in the fixed_grid case. 
   */
-  nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements const &obe) {
+  nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe) {
 
     auto n_shells = obe.C_space.n_atoms();
     auto n_sigma  = obe.C_space.n_sigma();
@@ -133,7 +133,8 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  one_body_elements make_obe_from_tb(std::vector<tb_hamiltonian> H_sigma, spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells) {
+  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> H_sigma, spin_kind_e const &spin_kind,
+                                        std::vector<atomic_shell_t> atomic_shells) {
 
     // calculate Hloc using helper function -- Hloc here is dim [nshells, nsigma]
     nda::array<nda::matrix<dcomplex>, 2> hloc = Hloc(H_sigma, atomic_shells);
@@ -147,11 +148,11 @@ namespace triqs::modest {
     auto LS = local_space(spin_kind, atomic_shells, decomposition, U, {});
 
     // construct and return obe_tb
-    return one_body_elements{.C_space = std::move(LS), .H = std::move(H_sigma)};
+    return one_body_elements_tb{.C_space = std::move(LS), .H = std::move(H_sigma)};
   }
 
   // -----------------------------------------------------------------------
-  one_body_elements fold(lattice::superlattice const &sl, one_body_elements const &obe) {
+  one_body_elements_tb fold(lattice::superlattice const &sl, one_body_elements_tb const &obe) {
     auto new_H = obe.H | stdv::transform([&](auto x) { return fold(sl, x); }) | tl::to<std::vector>();
     auto sh    = obe.C_space.atomic_shells();
     decltype(sh) new_atomic_shells;

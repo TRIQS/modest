@@ -25,9 +25,9 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
   atomic_shells.emplace_back(dim, l, type, atom);
 
   // load in a obe from a Wannier tb model
-  one_body_elements obe_tb = one_body_elements_from_wannier90("./ref_data/lco", spin_kind_e::NonPolarized, atomic_shells);
-  double beta              = 10.;
-  auto iw_mesh             = mesh::imfreq{beta, triqs::mesh::Fermion, 51};
+  one_body_elements_tb obe_tb = one_body_elements_from_wannier90("./ref_data/lco", spin_kind_e::NonPolarized, atomic_shells);
+  double beta                 = 10.;
+  auto iw_mesh                = mesh::imfreq{beta, triqs::mesh::Fermion, 51};
 
   // make a zero self energy
   long n_sigma      = 2;
@@ -80,9 +80,9 @@ TEST(obe_tb, svo_t2g_wannier90) { // NOLINT
   atomic_shells.emplace_back(dim, l, type, atom);
 
   // load in a obe from a Wannier tb model
-  one_body_elements obe_tb = one_body_elements_from_wannier90("../../../test/c++/ref_data_lfs/svo_t2g", spin_kind_e::NonPolarized, atomic_shells);
-  double beta              = 10.;
-  auto iw_mesh             = mesh::imfreq{beta, triqs::mesh::Fermion, 51};
+  one_body_elements_tb obe_tb = one_body_elements_from_wannier90("../../../test/c++/ref_data_lfs/svo_t2g", spin_kind_e::NonPolarized, atomic_shells);
+  double beta                 = 10.;
+  auto iw_mesh                = mesh::imfreq{beta, triqs::mesh::Fermion, 51};
 
   // make a zero self energy
   long n_blocks     = 1;
@@ -142,9 +142,10 @@ TEST(obe_tb, svo_t2g_eg_wannier90) { // NOLINT
   atomic_shells.emplace_back(dim, l, type, atom);
 
   // load in a obe from a Wannier tb model
-  one_body_elements obe_tb = one_body_elements_from_wannier90("../../../test/c++/ref_data_lfs/svo_t2g_eg", spin_kind_e::NonPolarized, atomic_shells);
-  double beta              = 10.;
-  auto iw_mesh             = mesh::imfreq{beta, triqs::mesh::Fermion, 51};
+  one_body_elements_tb obe_tb =
+     one_body_elements_from_wannier90("../../../test/c++/ref_data_lfs/svo_t2g_eg", spin_kind_e::NonPolarized, atomic_shells);
+  double beta  = 10.;
+  auto iw_mesh = mesh::imfreq{beta, triqs::mesh::Fermion, 51};
 
   // make a zero self energy
   long n_blocks     = 1;

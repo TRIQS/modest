@@ -121,7 +121,7 @@ namespace triqs::modest {
 
   /**
    * @ingroup hybridization
-   * @brief Comput the atomic (impurity) levels from an obe.
+   * @brief Compute the atomic (impurity) levels from an obe.
    * 
    * @param obe One-body elements
    * @return nda::array<nda::matrix<dcomplex>, 2> 

@@ -20,7 +20,7 @@ namespace triqs::modest {
 
   using triqs::lattice::superlattice;
 
-  struct one_body_elements {
+  struct one_body_elements_tb {
     local_space C_space;
     std::vector<tb_hamiltonian> H; // positibility to have two spin channels for spin pol
     //downfolding_projector P;
@@ -30,47 +30,67 @@ namespace triqs::modest {
   /** Construct a obe_tb from Wannier90 in the case of a single spin index 
    * @param wannier_file_path string to Wannier90 files, including the prefix 
    * @param spin_kind enum telling us the spintype 
-   * @param shells list of atomic shells input by the user 
+   * @param atomic_shells list of atomic shells input by the user 
    */
-  one_body_elements one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e const &spin_kind,
-                                                     std::vector<atomic_shell_t> atomic_shells);
+  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e const &spin_kind,
+                                                        std::vector<atomic_shell_t> atomic_shells);
 
-  one_body_elements one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
-                                                     spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells);
+  /** Construct a obe_tb from Wannier90 in the case of a single spin index 
+   * @param wannier_file_path_up string to Wannier90 files, including the prefix 
+   * @param wannier_file_path_dn string to Wannier90 files, including the prefix 
+   * @param spin_kind enum telling us the spintype 
+   * @param atomic_shells list of atomic shells input by the user 
+   */
+  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
+                                                        spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells);
 
-  C2PY_IGNORE one_body_elements make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e const &spin_kind,
-                                                 std::vector<atomic_shell_t> atomic_shells);
+  /// Helper to contruct and return an OBE_tb object given a list of tb_Hamiltonians of length n_sigma
+  C2PY_IGNORE one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e const &spin_kind,
+                                                    std::vector<atomic_shell_t> atomic_shells);
 
-  // FIXME docstring
+  /** Compute Hloc = H(R=0) given TB Hamiltonians 
+   * @param H_sigma a list of TB Hamiltonians of length n_sigma 
+   * @param atomic_shells a list of atomic shells corresponding to the orbitals contained in the TB Hamiltonian
+   */
   nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells);
-  nda::array<nda::matrix<dcomplex>, 2> Hloc(one_body_elements const &obe);
-  nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements const &obe);
+
+  /**
+   * @ingroup hybridization
+   * @brief Compute the atomic (impurity) levels from an obe.
+   * 
+   * @param obe One-body elements
+   * @return Atomic impurity levels 
+   */
+  nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe);
 
   /// Folding with superlattice
-  one_body_elements fold(superlattice const &sl, one_body_elements const &obe);
+  one_body_elements_tb fold(superlattice const &sl, one_body_elements_tb const &obe);
 
   //  -----------------------------------------------------------------------
-  // FIXME docstring
-  /** @brief Compute local Green's function from a one_body_elements_tb object.
-    *    
-    * @param one_body_elements_tb A one_body_elements object containing the tb_hamiltonian
+
+  /** 
+    * @ingroup gloc
+    * @brief Compute the local Green's function without a self-energy.
+    * 
+    * @details See gloc for more details.
+    * 
+    * @param obe A one_body_elements object containing the tb_hamiltonian
     * @param mu Chemical potential 
-    * @param Sigma_embed Self energy in the embedded basis? TODO I don't think this was relevant 
-    * @param Sigma_Hartree
-    * @param bz_int_options Option of the BZ integration
-    * @param d_H ? for magnetic fields etc? 
+    * @param Sigma_dynamic The dynamic part of the embedded self-energy.
+    * @param Sigma_static The static part of the embedded self-energy.
+    * @param opt Container for options related to methods of integrating the BZ
     * @return gloc[alpha][sigma] = gf on the mesh, as a vector of length alpha, storing block gfs dim sigma 
     */
   template <typename Mesh>
-  block2_gf<Mesh, matrix_valued> gloc(one_body_elements const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                                      nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, triqs::lattice::bz_int_options const &opt) {
+  block2_gf<Mesh, matrix_valued> gloc(one_body_elements_tb const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
+                                      nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt) {
 
     // Need a sigma Hartree
     auto &mesh       = Sigma_dynamic(0, 0).mesh();
     auto n_sigma     = obe.C_space.n_sigma();
     auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
     // TODO also check safety of orbital space sizes...
-    if (n_sigma != Sigma_hartree.shape(1)) { throw std::runtime_error("Mismatch between the spin channels in Sigma_Static and Sigma_Dynamic"); }
+    if (n_sigma != Sigma_static.shape(1)) { throw std::runtime_error("Mismatch between the spin channels in Sigma_Static and Sigma_Dynamic"); }
     if (n_sigma != obe.H.size()) { throw std::runtime_error("Mismatch between the spin channels in Sigma and spin channels in Hamiltonian."); }
 
     // Embedding decomposition from structure of Sigma -- provides a list of block names
@@ -82,7 +102,7 @@ namespace triqs::modest {
       auto Sigma_full_space = gfs::gf(mesh, {obe.H[sigma].n_orbitals(), obe.H[sigma].n_orbitals()}); //
       for (auto &&[block, R] : enumerated_sub_slices(embedding_decomp)) {
         for (auto [n, w] : enumerate(mesh)) {
-          Sigma_full_space.data()(n, R, R) = Sigma_dynamic(block, sigma).data()(n, r_all, r_all) + Sigma_hartree(block, sigma);
+          Sigma_full_space.data()(n, R, R) = Sigma_dynamic(block, sigma).data()(n, r_all, r_all) + Sigma_static(block, sigma);
         }
       }
       // Call the TRIQS version of this function
@@ -91,8 +111,20 @@ namespace triqs::modest {
     return gloc_result;
   }
 
+  /** 
+    * @ingroup gloc
+    * @brief Compute the local Green's function without a self-energy.
+    * 
+    * @details See gloc for more details.
+    * 
+    * @param mesh The mesh on which Gloc will be computed 
+    * @param obe A one_body_elements object containing the tb_hamiltonian
+    * @param mu Chemical potential 
+    * @param opt Container for options related to methods of integrating the BZ
+    * @return gloc[alpha][sigma], the local Green's function
+    */
   template <typename Mesh>
-  block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements const &obe, double mu, triqs::lattice::bz_int_options const &opt) {
+  block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements_tb const &obe, double mu, triqs::lattice::bz_int_options const &opt) {
     auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
     auto Sigma_static  = nda::array<nda::matrix<dcomplex>, 2>(1, obe.C_space.n_sigma());
     for (auto [i, j] : Sigma_static.indices()) { Sigma_static(i, j) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim()); }
@@ -100,16 +132,17 @@ namespace triqs::modest {
   }
 
   //  -----------------------------------------------------------------------
-  // FIXME docstring
+  //
+  // Gloc with structure (1, nspin, {norb, norb})
   template <typename Mesh>
-  double density(one_body_elements const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, triqs::lattice::bz_int_options const &opt) {
+  double density(one_body_elements_tb const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
+                 nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt) {
 
     //auto n_blocks = Sigma_dynamic.size1();
     auto n_sigma = obe.C_space.n_sigma();
 
     double n  = 0;
-    auto Gloc = gloc(obe, mu, Sigma_dynamic, Sigma_hartree, opt); // returns block2gf (1, nsigma, {norb, norb})
+    auto Gloc = gloc(obe, mu, Sigma_dynamic, Sigma_static, opt); // returns block2gf (1, nsigma, {norb, norb})
     // return type of Gloc is a B2GF with dimensions (1, nspin, {norb, norb})
     for (auto sigma : range(n_sigma)) { // spin index
       n += real(nda::trace(density(Gloc(0, sigma))));
@@ -118,22 +151,22 @@ namespace triqs::modest {
   }
 
   //  -----------------------------------------------------------------------
-  // FIXME docstring
   /**
- * @ingroup mu
- * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
- * 
- * @param target_density The total electron density.
- * @param obe The one-body elements
- * @param Sigma_dynamic The dynamic part of the embedded self-energy.
- * @param Sigma_static The static part of the embedded self-energy.
- * @param method The root finding method to use (default = dichotomy).
- * @param precision The precision to end search (default = 1e-5).
- * @param verbosity Printing of the root finder's progress (default = true).
- * @return double 
- */
+    * @ingroup mu
+    * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
+    *
+    * @param target_density The total electron density.
+    * @param obe The one-body elements
+    * @param Sigma_dynamic The dynamic part of the embedded self-energy.
+    * @param Sigma_static The static part of the embedded self-energy.
+    * @param opt Container for options related to methods of integrating the BZ
+    * @param method The root finding method to use (default = dichotomy).
+    * @param precision The precision to end search (default = 1e-5).
+    * @param verbosity Printing of the root finder's progress (default = true).
+    * @return Chemical potential  
+    */
   template <typename Mesh>
-  double find_chemical_potential(double const target_density, one_body_elements const &obe, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
+  double find_chemical_potential(double const target_density, one_body_elements_tb const &obe, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                  nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt,
                                  std::string method = "dichotomy", double precision = 1.e-5, bool verbosity = true) {
     std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static, &opt](double x) {
@@ -142,10 +175,24 @@ namespace triqs::modest {
     return std::get<0>(triqs::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
   }
 
+  /**
+  * @ingroup mu
+  * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
+  *      
+  * @param target_density The total electron density.
+  * @param obe The one-body elements
+  * @param mesh The mesh on which Gloc will be computed 
+  * @param opt Container for options related to methods of integrating the BZ
+  * @param method The root finding method to use (default = dichotomy).
+  * @param precision The precision to end search (default = 1e-5).
+  * @param verbosity Printing of the root finder's progress (default = true).
+  * @return Chemical potential  
+  */
   template <typename Mesh>
-  double find_chemical_potential(double const target_density, one_body_elements const &obe, Mesh const &mesh,
+  double find_chemical_potential(double const target_density, one_body_elements_tb const &obe, Mesh const &mesh,
                                  triqs::lattice::bz_int_options const &opt, std::string method = "dichotomy", double precision = 1.e-5,
                                  bool verbosity = true) {
+
     auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
     auto Sigma_static  = nda::array<nda::matrix<dcomplex>, 2>(1, obe.C_space.n_sigma());
     for (auto [i, j] : Sigma_static.indices()) { Sigma_static(i, j) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim()); }
@@ -155,23 +202,23 @@ namespace triqs::modest {
   // --------  instantiations --------------
 
   /** @cond DOXYGEN_SKIP_THIS */
-  template block2_gf<mesh::imfreq, matrix_valued> gloc(one_body_elements const &obe, double mu,
+  template block2_gf<mesh::imfreq, matrix_valued> gloc(one_body_elements_tb const &obe, double mu,
                                                        block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
-                                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree,
+                                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static,
                                                        triqs::lattice::bz_int_options const &opt);
 
-  template block2_gf<mesh::imfreq, matrix_valued> gloc(mesh::imfreq const &mesh, one_body_elements const &obe, double mu,
+  template block2_gf<mesh::imfreq, matrix_valued> gloc(mesh::imfreq const &mesh, one_body_elements_tb const &obe, double mu,
                                                        triqs::lattice::bz_int_options const &opt);
 
-  template double density(one_body_elements const &obe, double mu, block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
-                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_hartree, triqs::lattice::bz_int_options const &opt);
+  template double density(one_body_elements_tb const &obe, double mu, block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
+                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt);
 
-  template double find_chemical_potential(double const target_density, one_body_elements const &obe,
+  template double find_chemical_potential(double const target_density, one_body_elements_tb const &obe,
                                           block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
                                           nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt,
                                           std::string method, double precision, bool verbosity);
 
-  template double find_chemical_potential(double const target_density, one_body_elements const &obe, mesh::imfreq const &mesh,
+  template double find_chemical_potential(double const target_density, one_body_elements_tb const &obe, mesh::imfreq const &mesh,
                                           triqs::lattice::bz_int_options const &opt, std::string method, double precision, bool verbosity);
 
   /** @endcond */
