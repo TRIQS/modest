@@ -78,6 +78,27 @@ TEST(embed_desc_tests, extract_matrix) {
       for (auto s : range(n_sigma)) EXPECT_COMPLEX_NEAR(hloc_C(a, s)(o, o), h_imp[a][o + s * o](0, 0));
 }
 
+TEST(embed_desc_tests, embed_matrix) {
+  auto [target_density, obe] = one_body_elements_from_dft_converter("ref_data/lco_qe_dp_w90_grid.ref.h5");
+  auto E                     = make_embedding_with_equivalences(obe.C_space).drop(1);
+
+  double beta          = 40.0;
+  auto mesh            = mesh::imfreq{beta, statistic_enum::Fermion, 251};
+  auto G               = E.extract(gloc(mesh, obe, find_chemical_potential(target_density, obe, beta, "bisection", 1e-3, false)));
+  auto double_counting = dc_solver(E.sigma_names(), "sFLL", 2.0, 1.0);
+  auto Sigma_DC        = G | stdv::transform([&double_counting](auto &x) { return double_counting.dc_self_energy(x); }) | tl::to<std::vector>();
+  auto Sigma_static    = Sigma_DC
+     | stdv::transform([](auto const &bgf) { return bgf | stdv::transform([](auto const &y) { return y(0); }) | tl::to<std::vector>(); })
+     | tl::to<std::vector>();
+
+  auto Sigma_static_C = E.embed(Sigma_static);
+  EXPECT_ARRAY_EQ(Sigma_static_C(0, 0), Sigma_static[0][0]);
+  EXPECT_ARRAY_EQ(Sigma_static_C(0, 1), Sigma_static[0][1]);
+
+  for (auto i : range(1, 2))
+    for (auto s : range(2)) EXPECT_ARRAY_ZERO(Sigma_static_C(i, s));
+}
+
 TEST(embed_desc_tests, cluster) { // NOLINT
   auto [target_density, obe] = one_body_elements_from_dft_converter("ref_data/nio.ref.h5");
   auto partition             = std::vector<std::vector<long>>{{0, 1}};

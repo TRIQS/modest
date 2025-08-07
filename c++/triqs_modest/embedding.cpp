@@ -244,6 +244,11 @@ namespace triqs::modest {
 
   nda::array<nda::matrix<dcomplex>, 2> embedding::embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_static_vec) const {
     auto Sigma_static_embed = nda::array<nda::matrix<dcomplex>, 2>(n_alpha(), n_sigma());
+    for (auto &&[alpha, sigma] : psi.indices()) {
+      auto bl_size                     = sigma_embed_decomp[alpha];
+      Sigma_static_embed(alpha, sigma) = nda::zeros<dcomplex>(bl_size, bl_size);
+    }
+
     for (auto &&[S, m] : zip(Sigma_static_embed, psi)) {
       if (m.imp_idx == -1) continue;
       S = Sigma_imp_static_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
