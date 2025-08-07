@@ -159,8 +159,10 @@ namespace triqs::modest {
     auto const &dec = obe.C_space.atoms_block_decomposition();
     nda::array<std::vector<long>, 2> new_dec(dec.extent(0) * sl.n_cluster_sites(), dec.extent(1));
     for (auto i : nda::range(sl.n_cluster_sites())) {
-      for (auto const &shell : sh) { new_atomic_shells.emplace_back(shell); }
-      new_dec(i, r_all) = dec(i, r_all);
+      for (auto &&[j, shell] : enumerate(sh)) {
+        new_atomic_shells.emplace_back(shell);
+        new_dec(i * sh.size() + j, r_all) = dec(j, r_all);
+      }
     }
     return {.C_space = local_space{obe.C_space.spin_kind(), std::move(new_atomic_shells), new_dec, {}, {}}, .H = std::move(new_H)};
   }
