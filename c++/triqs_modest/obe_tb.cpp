@@ -108,13 +108,12 @@ namespace triqs::modest {
   }
 
   /** Compute the local impurity levels from the single-particle dispersion. 
-  * This simply computes Hloc and returns it, but exists to match the syntax used in the fixed_grid case. 
   */
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe) {
 
-    auto n_shells = obe.C_space.n_atoms();
-    auto n_sigma  = obe.C_space.n_sigma();
-    nda::array<nda::matrix<dcomplex>, 2> Hloc_result(n_shells, n_sigma);
+    auto n_atoms = obe.C_space.n_atoms();
+    auto n_sigma = obe.C_space.n_sigma();
+    nda::array<nda::matrix<dcomplex>, 2> Hloc_result(n_atoms, n_sigma);
 
     for (auto sigma : range(n_sigma)) {
 
