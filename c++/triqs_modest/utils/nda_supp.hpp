@@ -8,8 +8,6 @@
 using dcomplex = std::complex<double>;
 namespace nda {
 
-  CLEF_MAKE_FNT_LAZY(inverse);
-
   // FIXME : to be replace by linalg
   inline void Ainv_B(nda::matrix<dcomplex, nda::F_layout> A, nda::matrix_view<dcomplex, nda::F_layout> B) {
     nda::vector<int> ipiv(A.extent(0)); //

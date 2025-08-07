@@ -66,7 +66,8 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
 }
 
 // ----------------------------- SVO with t2g only test -----------------------------------------
-/* 
+
+#if LFS
 TEST(obe_tb, svo_t2g_wannier90) { // NOLINT
 
   // set up atomic shells
@@ -80,7 +81,7 @@ TEST(obe_tb, svo_t2g_wannier90) { // NOLINT
   atomic_shells.emplace_back(dim, l, type, atom);
 
   // load in a obe from a Wannier tb model
-  one_body_elements_tb obe_tb = one_body_elements_from_wannier90("../../../test/c++/ref_data_lfs/svo_t2g", spin_kind_e::NonPolarized, atomic_shells);
+  one_body_elements_tb obe_tb = one_body_elements_from_wannier90("./ref_data_lfs/svo_t2g", spin_kind_e::NonPolarized, atomic_shells);
   double beta                 = 10.;
   auto iw_mesh                = mesh::imfreq{beta, triqs::mesh::Fermion, 51};
 
@@ -96,7 +97,7 @@ TEST(obe_tb, svo_t2g_wannier90) { // NOLINT
   }
 
   // read in some reference data
-  auto [dft_density, obe_dft] = one_body_elements_from_dft_converter("../../../test/c++/ref_data_lfs/svo_t2g.h5");
+  auto [dft_density, obe_dft] = one_body_elements_from_dft_converter("./ref_data_lfs/svo_t2g.h5");
   double mu_dft               = find_chemical_potential(dft_density, obe_dft, beta);
   auto gloc_dft               = gloc(iw_mesh, obe_dft, mu_dft);
 
@@ -121,7 +122,10 @@ TEST(obe_tb, svo_t2g_wannier90) { // NOLINT
     for (auto sigma : nda::range(n_sigma)) { EXPECT_ARRAY_NEAR(impurity_levels(obe_dft)(is, sigma), impurity_levels(obe_tb)(is, sigma), 1e-8); }
   }
 }
+}
+#endif
 
+/*
 TEST(obe_tb, svo_t2g_eg_wannier90) { // NOLINT
 
   // set up atomic shells

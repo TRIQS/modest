@@ -115,17 +115,15 @@ namespace triqs::modest {
 
     for (auto sigma : range(n_sigma)) {
 
-      // convert sigma to full space. NOTE: could merge them here, as well.
-      auto Sigma_dyn_full_space    = gfs::gf(mesh, {obe.H[sigma].n_orbitals(), obe.H[sigma].n_orbitals()}); //
-      auto Sigma_static_full_space = gfs::gf(mesh, {obe.H[sigma].n_orbitals(), obe.H[sigma].n_orbitals()}); //
+      // spin index
+      auto Sigma_full_space = gfs::gf(mesh, {obe.H[sigma].n_orbitals(), obe.H[sigma].n_orbitals()}); //
       for (auto &&[block, R] : enumerated_sub_slices(embedding_decomp)) {
         for (auto [n, w] : enumerate(mesh)) {
-          Sigma_dyn_full_space.data()(n, R, R)  = Sigma_dynamic(block, sigma).data()(n, r_all, r_all);
-          Sigma_static_full_space.data(n, R, R) = Sigma_static(block, sigma);
+          Sigma_full_space.data()(n, R, R) = Sigma_dynamic(block, sigma).data()(n, r_all, r_all) + Sigma_static(block, sigma);
         }
       }
       // Call the TRIQS version of this function
-      gloc_result(0, sigma) = gloc(obe.H[sigma], mu, Sigma_dyn_full_space, Sigma_static_full_space, opt);
+      gloc_result(0, sigma) = gloc(obe.H[sigma], mu, Sigma_full_space, opt);
     }
     return gloc_result;
   }
@@ -145,10 +143,9 @@ namespace triqs::modest {
     */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements_tb const &obe, double mu, triqs::lattice::bz_int_options const &opt) {
-    auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
-    auto Sigma_static  = nda::array<nda::matrix<dcomplex>, 2>(1, obe.C_space.n_sigma());
-    for (auto [i, j] : Sigma_static.indices()) { Sigma_static(i, j) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim()); }
-    return gloc(obe, mu, Sigma_dynamic, Sigma_static, opt);
+    auto result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    for (auto sigma : range(obe.C_space.n_sigma())) { result(0, sigma) = gloc(mesh, obe.H[sigma], mu, opt); }
+    return result;
   }
 
   //  -----------------------------------------------------------------------
