@@ -17,9 +17,7 @@
 
 // DANGEROUS : no way to check that wannier hamiltonian has atoms in the same order if user specifies their positions/
 // the atomic shell info. We are relying on them to get this right somehow, so there should be some print check
-//
-// TODO feels like discover_symmetries should have a default threshold; almost always sensible with that kind of thing
-// TODO what do about sigma_hartree... forward it to gloc in triqs as something optional?
+//// TODO what do about sigma_hartree... forward it to gloc in triqs as something optional?
 
 namespace triqs::modest {
 
@@ -28,7 +26,7 @@ namespace triqs::modest {
    * @param spin_kind enum telling us the spintype 
    * @param atomic_shells list of atomic shells input by the user 
    */
-  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e const &spin_kind,
+  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e spin_kind,
                                                         std::vector<atomic_shell_t> atomic_shells) {
     if (spin_kind == spin_kind_e::Polarized) {
       throw std::runtime_error("If performing a spin-polarized calculation, you need to supply two Wannier file paths for up and down channels.\n");
@@ -45,7 +43,7 @@ namespace triqs::modest {
   };
 
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
-                                                        spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells) {
+                                                        spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells) {
     if (spin_kind != spin_kind_e::Polarized) {
       throw std::runtime_error("For a non-spin polarized calculation, you should specify only one Wannier Hamiltonian.\n");
     }
@@ -133,8 +131,7 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> H_sigma, spin_kind_e const &spin_kind,
-                                        std::vector<atomic_shell_t> atomic_shells) {
+  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> H_sigma, spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells) {
 
     // calculate Hloc using helper function -- Hloc here is dim [nshells, nsigma]
     nda::array<nda::matrix<dcomplex>, 2> hloc = Hloc(H_sigma, atomic_shells);
@@ -152,6 +149,7 @@ namespace triqs::modest {
   }
 
   // -----------------------------------------------------------------------
+
   one_body_elements_tb fold(lattice::superlattice const &sl, one_body_elements_tb const &obe) {
     auto new_H = obe.H | stdv::transform([&](auto x) { return fold(sl, x); }) | tl::to<std::vector>();
     auto sh    = obe.C_space.atomic_shells();

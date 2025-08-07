@@ -53,7 +53,7 @@ A central quantity of the DMFT self-consistency condition -- the local Green's f
  ModEST computes this efficiently:
 
  * **Woodbury**: reduces the cost of matrix inversion from cubic in the number of bands to linear.
- * **Adaptive Brillouin zone integration**: for tight-binding models, allows you to specify desired integratino accuracy, improving predictions of transport properties.
+ * **Adaptive Brillouin zone integration**: for tight-binding models, allows you to specify desired integration accuracy, improving predictions of transport properties.
 
 ## Hybridization function
 The hybridization function \f$\Delta(\omega)\f$ is a key input to TRIQS impurity solvers. It describes the coupling of each impurity to the bath:

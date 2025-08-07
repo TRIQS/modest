@@ -27,30 +27,40 @@ namespace triqs::modest {
     //C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
   };
 
-  /** Construct a obe_tb from Wannier90 in the case of a single spin index 
+  /** 
+   * @brief Construct a obe_tb from Wannier90 in the case of a single spin index. 
+   * 
    * @param wannier_file_path string to Wannier90 files, including the prefix 
-   * @param spin_kind enum telling us the spintype 
+   * @param spin_kind spin type for this calculation 
    * @param atomic_shells list of atomic shells input by the user 
+   * 
+   * @return One_body_elements object containing the Wannier90 tight binding Hamiltonian 
    */
-  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e const &spin_kind,
+  one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e spin_kind,
                                                         std::vector<atomic_shell_t> atomic_shells);
 
-  /** Construct a obe_tb from Wannier90 in the case of a single spin index 
-   * @param wannier_file_path_up string to Wannier90 files, including the prefix 
-   * @param wannier_file_path_dn string to Wannier90 files, including the prefix 
-   * @param spin_kind enum telling us the spintype 
+  /** 
+   * @brief Construct a obe_tb from Wannier90 in the case of a single spin index. 
+   * 
+   * @param wannier_file_path_up string to Wannier90 files, including the prefix, for the up spin channel  
+   * @param wannier_file_path_dn string to Wannier90 files, including the prefix, for the down spin channel  
+   * @param spin_kind spin type for this calculation 
    * @param atomic_shells list of atomic shells input by the user 
+   *
+   * @return One_body_elements object containing the Wannier90 tight binding Hamiltonian 
    */
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
-                                                        spin_kind_e const &spin_kind, std::vector<atomic_shell_t> atomic_shells);
+                                                        spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells);
 
   /// Helper to contruct and return an OBE_tb object given a list of tb_Hamiltonians of length n_sigma
-  C2PY_IGNORE one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e const &spin_kind,
+  C2PY_IGNORE one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e spin_kind,
                                                     std::vector<atomic_shell_t> atomic_shells);
 
-  /** Compute Hloc = H(R=0) given TB Hamiltonians 
+  /** @brief Compute Hloc = H(R=0) given n_sigma tight_binding Hamiltonians 
+   * 
    * @param H_sigma a list of TB Hamiltonians of length n_sigma 
    * @param atomic_shells a list of atomic shells corresponding to the orbitals contained in the TB Hamiltonian
+   * @return Hloc, formated with dimensions [alphsa,sigma] each containing (n_orbitals_atom, n_orbitals_atom)
    */
   nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells);
 
@@ -63,7 +73,13 @@ namespace triqs::modest {
    */
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe);
 
-  /// Folding with superlattice
+  /** 
+    * @brief Convert a tight binding Hamiltonian to it's superlattice equivalent.
+    * 
+    * @param sl The superlattice object containing it's lattice vectors and locations of cluster points.
+    * @param obe A one_body_elements object containing the tb_hamiltonian.
+    * @return one_body_elements object based on the superlattice tight binding Hamiltonian. 
+    */
   one_body_elements_tb fold(superlattice const &sl, one_body_elements_tb const &obe);
 
   //  -----------------------------------------------------------------------
@@ -74,12 +90,13 @@ namespace triqs::modest {
     * 
     * @details See gloc for more details.
     * 
+    * @tparam Mesh
     * @param obe A one_body_elements object containing the tb_hamiltonian
     * @param mu Chemical potential 
     * @param Sigma_dynamic The dynamic part of the embedded self-energy.
     * @param Sigma_static The static part of the embedded self-energy.
-    * @param opt Container for options related to methods of integrating the BZ
-    * @return gloc[alpha][sigma] = gf on the mesh, as a vector of length alpha, storing block gfs dim sigma 
+    * @param opt Container for options related integration of the BZ
+    * @return gloc[alpha][sigma], the local Green's function
     */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_tb const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
@@ -98,15 +115,17 @@ namespace triqs::modest {
 
     for (auto sigma : range(n_sigma)) {
 
-      // spin index
-      auto Sigma_full_space = gfs::gf(mesh, {obe.H[sigma].n_orbitals(), obe.H[sigma].n_orbitals()}); //
+      // convert sigma to full space. NOTE: could merge them here, as well.
+      auto Sigma_dyn_full_space    = gfs::gf(mesh, {obe.H[sigma].n_orbitals(), obe.H[sigma].n_orbitals()}); //
+      auto Sigma_static_full_space = gfs::gf(mesh, {obe.H[sigma].n_orbitals(), obe.H[sigma].n_orbitals()}); //
       for (auto &&[block, R] : enumerated_sub_slices(embedding_decomp)) {
         for (auto [n, w] : enumerate(mesh)) {
-          Sigma_full_space.data()(n, R, R) = Sigma_dynamic(block, sigma).data()(n, r_all, r_all) + Sigma_static(block, sigma);
+          Sigma_dyn_full_space.data()(n, R, R)  = Sigma_dynamic(block, sigma).data()(n, r_all, r_all);
+          Sigma_static_full_space.data(n, R, R) = Sigma_static(block, sigma);
         }
       }
       // Call the TRIQS version of this function
-      gloc_result(0, sigma) = gloc(obe.H[sigma], mu, Sigma_full_space, opt);
+      gloc_result(0, sigma) = gloc(obe.H[sigma], mu, Sigma_dyn_full_space, Sigma_static_full_space, opt);
     }
     return gloc_result;
   }
@@ -117,10 +136,11 @@ namespace triqs::modest {
     * 
     * @details See gloc for more details.
     * 
+    * @tparam Mesh 
     * @param mesh The mesh on which Gloc will be computed 
     * @param obe A one_body_elements object containing the tb_hamiltonian
     * @param mu Chemical potential 
-    * @param opt Container for options related to methods of integrating the BZ
+    * @param opt Container for options related integration of the BZ
     * @return gloc[alpha][sigma], the local Green's function
     */
   template <typename Mesh>
@@ -132,8 +152,19 @@ namespace triqs::modest {
   }
 
   //  -----------------------------------------------------------------------
-  //
-  // Gloc with structure (1, nspin, {norb, norb})
+
+  /**
+   * @ingroup mu
+   * @brief Compute the density of the lattice Green's function with a self-energy.
+   * 
+   * @tparam Mesh 
+   * @param obe The one-body elements.
+   * @param mu The chemical potential.
+   * @param Sigma_dynamic The dynamic part of the embedded self-energy.
+   * @param Sigma_static The static part of the embedded self-energy.
+   * @param opt Container for options related integration of the BZ
+   * @return density 
+   */
   template <typename Mesh>
   double density(one_body_elements_tb const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                  nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt) {
@@ -155,11 +186,12 @@ namespace triqs::modest {
     * @ingroup mu
     * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
     *
+    * @tparam Mesh
     * @param target_density The total electron density.
     * @param obe The one-body elements
     * @param Sigma_dynamic The dynamic part of the embedded self-energy.
     * @param Sigma_static The static part of the embedded self-energy.
-    * @param opt Container for options related to methods of integrating the BZ
+    * @param opt Container for options related integration of the BZ
     * @param method The root finding method to use (default = dichotomy).
     * @param precision The precision to end search (default = 1e-5).
     * @param verbosity Printing of the root finder's progress (default = true).
@@ -179,10 +211,11 @@ namespace triqs::modest {
   * @ingroup mu
   * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
   *      
+  * @tparam Mesh
   * @param target_density The total electron density.
   * @param obe The one-body elements
   * @param mesh The mesh on which Gloc will be computed 
-  * @param opt Container for options related to methods of integrating the BZ
+  * @param opt Container for options related integration of the BZ
   * @param method The root finding method to use (default = dichotomy).
   * @param precision The precision to end search (default = 1e-5).
   * @param verbosity Printing of the root finder's progress (default = true).
