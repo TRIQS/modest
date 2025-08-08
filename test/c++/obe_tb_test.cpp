@@ -25,8 +25,9 @@ double random_constant() {
 auto eps   = 1.e-12;
 auto w_max = 10.0;
 
-auto make_random_self(int M) {
-  auto g           = gfs::gf<mesh::dlr_imfreq>{{5.0, triqs::mesh::statistic_enum::Fermion, w_max, eps}, {M, M}};
+auto make_random_self(int M, double beta) {
+  auto iw_mesh  = mesh::imfreq{beta, triqs::mesh::Fermion, 51}; 
+  auto g           = gfs::gf<mesh::imfreq>{iw_mesh, {M, M}};
   auto const &mesh = g.mesh();
   auto A           = random_constant();
   auto B           = random_constant();
@@ -66,7 +67,7 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
   auto gloc_dft               = gloc(iw_mesh, obe_dft, mu_dft);
 
   // run gloc, forcing gloc to use PTR on the same grid as the DFT calculation was done
-  triqs::lattice::bz_int_options opt = {.k_grid = {7, 7, 7}, .k_grid_max = {7, 7, 7}, .run_adaptive = false, .verbose=true};
+  triqs::lattice::bz_int_options opt = {.k_grid = {7, 7, 7}, .k_grid_max = {7, 7, 7}, .run_adaptive = false};
   auto gloc_tb                       = gloc(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
 
   // Check equivalence
@@ -112,9 +113,7 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   auto Sigma_block2 = make_block2_gf(n_atoms, n_sigma, Sigma); // block, nsigma, fill with empty sigma
   nda::array<nda::matrix<dcomplex>, 2> Sigma_static(n_atoms, n_sigma);
   // spin up and down both zero for now, 3 orbitals in the single block
-  for (auto shell : atomic_shells) {
-    for (auto sigma : nda::range(n_sigma)) { Sigma_static(0, sigma) = nda::matrix<dcomplex>::zeros(shell.dim, shell.dim); }
-  } 
+  for (auto sigma : nda::range(n_sigma)) { Sigma_static(0, sigma) = nda::diag(nda::vector<dcomplex>{0.,0.,0.}); }
 
   // read in some reference data
   auto [dft_density, obe_dft] = one_body_elements_from_dft_converter("./ref_data_lfs/svo_t2g_w90_fixedgrid.ref.h5");
@@ -122,7 +121,7 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   auto gloc_dft               = gloc(iw_mesh, obe_dft, mu_dft);
 
   // run gloc, forcing gloc to use PTR on the same grid as the DFT calculation was done
-  triqs::lattice::bz_int_options opt = {.k_grid = {5, 5, 5}, .k_grid_max = {5, 5, 5}, .run_adaptive = false};
+  triqs::lattice::bz_int_options opt = {.k_grid = {5, 5, 5}, .k_grid_max = {5,5,5}, .run_adaptive = false};
   auto gloc_tb = gloc(iw_mesh, obe_tb, mu_dft, opt);
 
   // FIXME : something about this seems potentially wrong
@@ -152,7 +151,7 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   }
   
   // make a self energy, call self energy interfaces --------------------
-  auto Sigma_single = make_random_self(obe_tb.H[0].n_orbitals());
+  auto Sigma_single = make_random_self(obe_tb.H[0].n_orbitals(), beta);
   auto Sigma_dyn = make_block2_gf(n_atoms, n_sigma, Sigma_single); 
   // spin up/down, 3 orbitals in the single block
   for (auto sigma : nda::range(n_sigma)) { Sigma_static(0, sigma) = nda::diag(nda::vector<dcomplex>{0.6,0.6,0.8}); }
@@ -164,9 +163,9 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
 
   for (auto iw : iw_mesh) { //
     if (std::abs(dcomplex(iw.value())) < 1.7) {
-      EXPECT_COMPLEX_NEAR(gloc_tb(0, 0)[iw](0, 0), gloc_dft(0, 0)[iw](0, 0), 1e-2);
+      EXPECT_COMPLEX_NEAR(gloc_tb_SE(0, 0)[iw](0, 0), gloc_dft_SE(0, 0)[iw](0, 0), 1e-2);
     } else {
-      EXPECT_COMPLEX_NEAR(gloc_tb(0, 0)[iw](0, 0), gloc_dft(0, 0)[iw](0, 0), 1e-4);
+      EXPECT_COMPLEX_NEAR(gloc_tb_SE(0, 0)[iw](0, 0), gloc_dft_SE(0, 0)[iw](0, 0), 1e-4);
     }
   }
 }
