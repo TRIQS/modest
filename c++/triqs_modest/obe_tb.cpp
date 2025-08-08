@@ -121,7 +121,6 @@ namespace triqs::modest {
       auto iR0 = obe.H[sigma].get_R_idx({0, 0, 0});
 
       for (auto const &[atom, R_atom] : enumerated_sub_slices(obe.C_space.atomic_decomposition())) {
-        //auto shell               = obe.C_space.atomic_shells()[atom];
         Hloc_result(atom, sigma) = obe.H[sigma].hoppings()[iR0](R_atom, R_atom);
       }
     }
