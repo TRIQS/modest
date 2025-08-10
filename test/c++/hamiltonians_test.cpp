@@ -21,14 +21,14 @@ TEST(hamiltonian_tests, imp_model_from_embedding) {
   std::string filename = "ref_data/svo-wien2k.ref.h5";
   for (auto threshold : std::vector<double>{1.e-5, 1.e-3}) {
     auto [_, obe] = one_body_elements_from_dft_converter(filename, threshold);
-    auto E        = make_embedding_with_equivalences(obe.C_space);
+    auto E        = make_embedding(obe.C_space);
     auto model    = make_kanamori(E.sigma_names(), E.imp_decomposition(0), 3.0, 2.0, 0.5);
   }
 }
 
 TEST(hamiltonian_tests, slater_model_from_embedding) {
   auto [_, obe] = one_body_elements_from_dft_converter("ref_data/la5ni3o11-wien2k.ref.h5", 1e-2);
-  auto E        = make_embedding_with_equivalences(obe.C_space);
+  auto E        = make_embedding(obe.C_space);
   // FIXME: is this the cleanest way to map from atom_idx to imp_idx?
   for (auto imp_idx = 0; auto [atom, shell] : enumerate(obe.C_space.atomic_shells())) {
     if (obe.C_space.first_shell_of_its_equiv_cls(atom) == imp_idx) {

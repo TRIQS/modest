@@ -10,6 +10,11 @@
 #include "utils/range_supp.hpp"
 #include <fmt/ranges.h>
 
+namespace triqs {
+  using block_matrix_t  = std::vector<nda::matrix<dcomplex>>;
+  using block2_matrix_t = nda::array<nda::matrix<dcomplex>, 2>;
+} // namespace triqs
+
 namespace triqs::modest {
 
   /**
@@ -121,6 +126,8 @@ namespace triqs::modest {
     /// Gf block structure for the impurity solvers
     std::vector<gf_struct_t> imp_block_shape() const;
 
+    /// Summarize the embedding object
+    std::string description(bool verbosity = false) const;
     ///@}
 
     // ****************** Operation methods to change the embedding **********************
@@ -196,27 +203,48 @@ namespace triqs::modest {
     ///@}
 
     //------------------------------------------------------------------------------------
+    template <typename Mesh> std::vector<std::pair<block_gf<Mesh, matrix_valued>, block_matrix_t>> make_zero_imp_self_energies(Mesh const &mesh) {
+      auto make_block_matrix = [](auto const &gf_struct) {
+        return gf_struct | stdv::transform([](auto &x) {
+                 auto bl_size = x.second;
+                 return nda::zeros<dcomplex>(bl_size, bl_size);
+               })
+           | tl::to<std::vector<nda::matrix<dcomplex>>>();
+      };
+      return imp_block_shape() | stdv::transform([&](auto const &gf_struct) {
+               auto Sigma_static  = make_block_matrix(gf_struct);
+               auto Sigma_dynamic = block_gf<Mesh, matrix_valued>{mesh, gf_struct};
+               return std::make_pair(Sigma_dynamic, Sigma_static);
+             })
+         | tl::to<std::vector>();
+    }
+    //------------------------------------------------------------------------------------
 
     // ****************************************************
     //     Embedding Extract/Embed methods
     // ****************************************************
-
     //--------------------- Embed -----------------------------------------
     /** @name Complex Ops
     * Embedding methods which operate on a given object X where X ∈ (block2gf, block_gf, block_matrix, etc.)
     */
     ///@{
+
     /// embed single-particle quantities
     template <typename Mesh> block2_gf<Mesh, matrix_valued> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const;
+
+    /// embed single-particle quantities
+    template <typename Mesh>
+    std::pair<block2_gf<Mesh, matrix_valued>, block2_matrix_t> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec,
+                                                                     std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
+
+    /// embed block matrices
+    block2_matrix_t embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
 
     /// embed single-particle quantities (coqui)
     nda::array<nda::array<dcomplex, 3>, 2> embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const;
 
     /// embed two-particle quantities (coqui)
     std::vector<nda::array<dcomplex, 5>> embed(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const;
-
-    /// embed block matrices
-    nda::array<nda::matrix<dcomplex>, 2> embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_static_vec) const;
 
     /// embed tensors
     // nda::array<dcomplex, 4> embed(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const;
@@ -226,14 +254,14 @@ namespace triqs::modest {
     /// extract single-particle quantities (ModEST)
     template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block2_gf<Mesh, matrix_valued> const &g_loc) const;
 
+    /// extract matrices
+    std::vector<block_matrix_t> extract(block2_matrix_t const &matrix_C) const;
+
     /// extract single-particle quantities (CoQui)
     std::vector<std::vector<nda::array<dcomplex, 3>>> extract(nda::array<dcomplex, 4> const &g_loc) const;
 
     /// extract two-particle quantities (CoQui)
     std::vector<nda::array<dcomplex, 5>> extract(nda::array<dcomplex, 5> const &Pi_loc) const;
-
-    /// extract matrices
-    std::vector<std::vector<nda::matrix<dcomplex>>> extract(nda::array<nda::matrix<dcomplex>, 2> const &matrix_C) const;
 
     /// embed tensors
     // std::vector<nda::array<dcomplex, 4>> extract(nda::array<dcomplex, 4> const &U_tensor) const;
@@ -248,8 +276,8 @@ namespace triqs::modest {
  *  @{
  */
 
+  /** @cond DOXYGEN_SKIP_THIS */
   /**
- * @ingroup embedding
  * @brief Construct the embedding class from the local space, a description of the block decomposition, and an equivalence 
  *        mapping between atom sites.
  * 
@@ -258,26 +286,19 @@ namespace triqs::modest {
  * @param atom_to_imp [optional] a mapping between equivalent atom sites.
  * @return embedding 
  */
-  embedding make_embedding(local_space const &C_space, nda::array<std::vector<long>, 2> const &block_decomposition,
-                           std::optional<std::vector<long>> const &atom_to_imp = std::nullopt);
+  embedding make_embedding_impl(local_space const &C_space, nda::array<std::vector<long>, 2> const &block_decomposition,
+                                std::optional<std::vector<long>> const &atom_to_imp = std::nullopt);
+  /** @endcond */
 
   /**
  * @ingroup embedding
- * @brief Construct the embedding class from the local space using equivalences between atoms.
+ * @brief Make an embedding from the local space
  * 
- * @param C_space the local space from one_body_elements
- * @return embedding 
+ * @param C_space  The local space from a one-body elements (on grid/tight-binding).
+ * @param use_atom_equivalences Use the equivalences between different atoms when constructing the embedding.
+ * @return An embedding
  */
-  embedding make_embedding_with_equivalences(local_space const &C_space);
-
-  /**
- * @ingroup embedding
- * @brief Construct the embedding class from the local space without using equivalences between atoms.
- * 
- * @param C_space the local space from one_body_elements.
- * @return embedding 
- */
-  embedding make_embedding_with_no_equivalences(local_space const &C_space);
+  embedding make_embedding(local_space const &C_space, bool use_atom_equivalences = true);
 
   /** @} Embedding factories functions */
 
@@ -305,6 +326,12 @@ namespace triqs::modest {
       S() = Sigma_imp_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
     }
     return Sigma_embed;
+  }
+
+  template <typename Mesh>
+  std::pair<block2_gf<Mesh, matrix_valued>, block2_matrix_t> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec,
+                                                                              std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
+    return {this->embed(Sigma_imp_vec), this->embed(Sigma_imp_static_vec)};
   }
 
   // ---------------------------------------------------------------
@@ -341,7 +368,7 @@ namespace triqs::modest {
   inline std::pair<one_body_elements_on_grid, embedding> make_embedding_with_clusters(one_body_elements_on_grid obe,
                                                                                       std::vector<std::vector<long>> const &atom_partition) {
     auto new_obe = permute_local_space(atom_partition, obe);
-    auto E       = make_embedding_with_no_equivalences(new_obe.C_space);
+    auto E       = make_embedding(new_obe.C_space, false);
     return {new_obe, E};
   }
 
@@ -350,7 +377,10 @@ namespace triqs::modest {
 /** @cond DOXYGEN_SKIP_THIS */
 #define INSTANTIATE(Mesh)                                                                                                                            \
   template block2_gf<Mesh, matrix_valued> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &) const;                                \
-  template std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block2_gf<Mesh, matrix_valued> const &) const;
+  template std::pair<block2_gf<Mesh, matrix_valued>, block2_matrix_t> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &,           \
+                                                                                       std::vector<block_matrix_t> const &) const;                   \
+  template std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block2_gf<Mesh, matrix_valued> const &) const;                              \
+  template std::vector<std::pair<block_gf<Mesh, matrix_valued>, block_matrix_t>> embedding::make_zero_imp_self_energies(Mesh const &);
   INSTANTIATE(imfreq);
   INSTANTIATE(refreq);
   INSTANTIATE(dlr_imfreq);

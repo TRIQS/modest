@@ -19,7 +19,7 @@ std::tuple<double, one_body_elements_on_grid, block2_gf<dlr_imfreq, matrix_value
 load_data_w_selfenergy(std::string filename, bool zero_self = false) {
   auto root                  = h5::proxy{filename, 'r'};
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
-  auto E                     = make_embedding_with_equivalences(obe.C_space);
+  auto E                     = make_embedding(obe.C_space);
   auto eps                   = 1.e-12;
   auto w_max                 = 5.0 * nda::max_element(abs(obe.H.H_k)); // FIXME
   // std::cout << fmt::format("Sigma created with random DLR coefficents: w_max= {} eps= {}\n", w_max, eps);

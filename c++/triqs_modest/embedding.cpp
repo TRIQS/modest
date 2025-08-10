@@ -36,8 +36,8 @@ namespace triqs::modest {
     // FIXME : MAKE ALL NECESSARY CHECKS.... since
   }
 
-  embedding make_embedding(local_space const &C_space, nda::array<std::vector<long>, 2> const &block_decomposition,
-                           std::optional<std::vector<long>> const &atom_to_imp) {
+  embedding make_embedding_impl(local_space const &C_space, nda::array<std::vector<long>, 2> const &block_decomposition,
+                                std::optional<std::vector<long>> const &atom_to_imp) {
 
     long n_alpha = stdr::fold_left(block_decomposition(r_all, 0) | stdv::transform([](auto const &x) { return long(x.size()); }), 0, std::plus<>());
 
@@ -62,8 +62,6 @@ namespace triqs::modest {
 
   // -------------------------------------------------------------------------------------------
   embedding make_embedding_with_equivalences(local_space const &C_space) {
-
-    // cls_to_imp[alpha_to_cls[alpha]]
     std::unordered_map<long, long> atom_to_cls, cls_to_imp;
     long imp_idx = 0;
     for (auto const &[ish, sh] : enumerate(C_space.atomic_shells())) {
@@ -75,10 +73,18 @@ namespace triqs::modest {
 
     auto decomp = C_space.atoms_block_decomposition();
 
-    return make_embedding(C_space, decomp, atom_to_imp_idx);
+    return make_embedding_impl(C_space, decomp, atom_to_imp_idx);
   };
 
-  embedding make_embedding_with_no_equivalences(local_space const &C_space) { return make_embedding(C_space, C_space.atoms_block_decomposition()); }
+  // -------------------------------------------------------------------------------------------
+  embedding make_embedding_with_no_equivalences(local_space const &C_space) {
+    return make_embedding_impl(C_space, C_space.atoms_block_decomposition());
+  }
+
+  // -------------------------------------------------------------------------------------------
+  embedding make_embedding(local_space const &C_space, bool use_atom_equivalences) {
+    return (use_atom_equivalences) ? make_embedding_with_equivalences(C_space) : make_embedding_with_no_equivalences(C_space);
+  }
 
   // ------------------------------ PRINTING -------------------------------------------------------------
 
@@ -87,30 +93,48 @@ namespace triqs::modest {
     return fmt::format("(imp_idx = {}, γ = {}, τ = {})", p.imp_idx, p.gamma, p.tau);
   }
 
-  // ---------------------------
+  // -------------------------------------------------------------------------------------------------------
 
-  std::ostream &operator<<(std::ostream &out, embedding const &E) {
-    auto sigma_embed_shape     = E.sigma_embed_block_shape();
-    auto impurities_shape_list = E.imp_block_shape();
+  std::string embedding::description(bool verbosity) const {
+    auto sigma_embed_shape     = this->sigma_embed_block_shape();
+    auto impurities_shape_list = this->imp_block_shape();
 
-    out << "Embedding:\n";
+    std::ostringstream out;
     auto out1 = indented_ostream(out, 2); // same stream, but shifted by 2 spaces
     auto out2 = indented_ostream(out, 4);
     auto out3 = indented_ostream(out, 6);
 
-    out1 << fmt::format("Spin index (σ/τ) names: {}\n\n", E.sigma_names());
+    if (!verbosity) {
+      out << "Embedding: ";
+      out << fmt::format("{} impurities\n", this->n_impurities());
+      out1 << "Σ_embed block decomposition:\n";
+      auto pr_vec = [](auto const &V) {
+        return fmt::format("{}\n", fmt::join(V | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "));
+      };
+      out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
+      out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
+      out1 << "\nImpurities\n";
+      out2 << "Block dimensions, dim_γ for all γ:\n";
+      for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
+        auto head = fmt::format("[n_imp = {}]", n);
+        out3 << fmt::format("{} dim_γ = {}", head, pr_vec(dec));
+        out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
+      }
+      return out.str();
+    }
 
+    out << "Embedding:\n";
+    out1 << fmt::format("Spin index (σ/τ) names: {}\n\n", this->sigma_names());
     out1 << "Σ_embed block decomposition:\n";
     auto pr_vec = [](auto const &V) {
       return fmt::format("{}\n", fmt::join(V | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "));
     };
-    out2 << "dim_α: " << pr_vec(E.sigma_embed_decomp);
-    out2 << "    α: " << pr_vec(range(E.sigma_embed_decomp.size()));
+    out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
+    out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
     //out << fmt::format("  {}\n", enumerate(E.sigma_embed_decomp));
-
     out1 << "\nImpurities\n";
     out2 << "Block dimensions, dim_γ for all γ:\n";
-    for (auto &&[n, dec] : enumerate(E.imp_decomps)) {
+    for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
       auto head = fmt::format("[n_imp = {}]", n);
       out3 << fmt::format("{} dim_γ = {}", head, pr_vec(dec));
       out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
@@ -120,15 +144,18 @@ namespace triqs::modest {
       auto formatted_vec = ish | stdv::transform([](auto &&p) { return fmt::format("{} [{}]", p.first, p.second); }) | tl::to<std::vector>();
       out3 << fmt::format("[imp_idx = {}] {}\n", n, fmt::join(formatted_vec, ", "));
     }
-
     out1 << "\nMapping ψ(α,σ) = (imp_idx, γ, τ) \n";
-
     //out2 << fmt::format("{}", E.psi);
-    auto row_labels = range(E.n_alpha()) | stdv::transform([](auto x) { return fmt::format("α = {}", x); }) | tl::to<std::vector>();
-    auto col_labels =
-       range(E.n_sigma()) | stdv::transform([&](auto i) { return fmt::format("σ = {} / {}", i, E.sigma_names()[i]); }) | tl::to<std::vector>();
-    nda::format_as_table(out3, E.psi, row_labels, col_labels);
+    auto row_labels = range(this->n_alpha()) | stdv::transform([](auto x) { return fmt::format("α = {}", x); }) | tl::to<std::vector>();
+    auto col_labels = range(this->n_sigma()) | stdv::transform([&](auto i) { return fmt::format("σ = {} / {}", i, this->sigma_names()[i]); })
+       | tl::to<std::vector>();
+    nda::format_as_table(out3, this->psi, row_labels, col_labels);
 
+    return out.str();
+  }
+
+  std::ostream &operator<<(std::ostream &out, embedding const &E) {
+    out << E.description(false);
     return out;
   }
 
@@ -242,13 +269,12 @@ namespace triqs::modest {
 
   // ----------------------------------------------------------------------
 
-  nda::array<nda::matrix<dcomplex>, 2> embedding::embed(std::vector<std::vector<nda::matrix<dcomplex>>> const &Sigma_imp_static_vec) const {
+  block2_matrix_t embedding::embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
     auto Sigma_static_embed = nda::array<nda::matrix<dcomplex>, 2>(n_alpha(), n_sigma());
     for (auto &&[alpha, sigma] : psi.indices()) {
       auto bl_size                     = sigma_embed_decomp[alpha];
       Sigma_static_embed(alpha, sigma) = nda::zeros<dcomplex>(bl_size, bl_size);
     }
-
     for (auto &&[S, m] : zip(Sigma_static_embed, psi)) {
       if (m.imp_idx == -1) continue;
       S = Sigma_imp_static_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
@@ -257,25 +283,26 @@ namespace triqs::modest {
   }
 
   // ----------------------------------------------------------------------
+  std::vector<block_matrix_t> embedding::extract(block2_matrix_t const &matrix_C) const {
 
-  std::vector<std::vector<nda::matrix<dcomplex>>> embedding::extract(nda::array<nda::matrix<dcomplex>, 2> const &matrix_C) const {
     auto imp_gf_stru_list = imp_block_shape();
 
-    auto [_, n_sigma] = matrix_C.shape();
-    auto matrix_E     = nda::array<nda::matrix<dcomplex>, 2>{sigma_embed_decomp.size(), n_sigma};
-    for (auto [alpha, Ralpha] : enumerated_sub_slices(sigma_embed_decomp)) {
-      for (auto sigma : range(n_sigma)) { matrix_E(alpha, sigma) = matrix_C(0, sigma)(Ralpha, Ralpha); }
+    auto matrix_E = nda::matrix<nda::matrix<dcomplex>>(n_alpha(), n_sigma());
+    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
+      for (auto sigma : range(n_sigma())) { matrix_E(alpha, sigma) = matrix_C(0, sigma)(r_alpha, r_alpha); }
     }
+
     auto extract_one_imp = [&](long n_imp) {
-      auto h_imp = std::vector<nda::matrix<dcomplex>>{};
-      for (auto [bl, bl_size] : imp_gf_stru_list[n_imp]) { h_imp.emplace_back(bl_size, bl_size); }
+      auto matrix_imp = std::vector<nda::matrix<dcomplex>>{};
+      for (auto [bl, bl_size] : imp_gf_stru_list[n_imp]) { matrix_imp.emplace_back(bl_size, bl_size); }
       auto const &rpsi = reverse_psi[n_imp];
       for (auto [gamma, tau] : rpsi.indices()) {
-        auto [alpha, sigma]                 = rpsi(gamma, tau)[0];
-        h_imp[gamma + n_gamma(n_imp) * tau] = matrix_E(alpha, sigma);
+        auto [alpha, sigma]                      = rpsi(gamma, tau)[0];
+        matrix_imp[gamma + n_gamma(n_imp) * tau] = matrix_E(alpha, sigma);
       }
-      return h_imp;
+      return matrix_imp;
     };
+
     return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }
 

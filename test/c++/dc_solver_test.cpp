@@ -11,7 +11,7 @@ auto run_dc_solver_test_case(std::string filename, double threshold, std::string
   auto Edc_ref = to_vector<double>(sort_keys_as_int(root["ref_data"]["dc"][method]["E_dc"]));
 
   auto [_, obe]        = one_body_elements_from_dft_converter(filename, threshold);
-  auto E               = make_embedding_with_equivalences(obe.C_space);
+  auto E               = make_embedding(obe.C_space);
   auto Gimp            = E.extract(gloc(gloc_ref[0][0].mesh(), obe, 0.0));
   auto double_counting = dc_solver(E.sigma_names(), method, 2.0, 1.0);
   auto Sigma_DC        = Gimp | stdv::transform([&double_counting](auto &x) { return double_counting.dc_self_energy(x); }) | tl::to<std::vector>();

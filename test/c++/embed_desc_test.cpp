@@ -12,7 +12,7 @@ void fill_random(nda::MemoryArray auto &A) {
 
 void test_embed_desc_from_dft(std::string filename, double threshold) {
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename, threshold);
-  auto E                     = make_embedding_with_equivalences(obe.C_space);
+  auto E                     = make_embedding(obe.C_space);
   auto mesh                  = triqs::mesh::imfreq(40., triqs::mesh::Fermion);
   auto gf_solver             = make_vec_block_gf(mesh, E.imp_block_shape());
   auto gf_embed              = make_block2_gf(mesh, E.sigma_embed_block_shape());
@@ -27,7 +27,7 @@ void test_embed_desc_from_dft(std::string filename, double threshold) {
 
 template <typename Mesh> void test_embed_desc_embed(std::string filename, double threshold) {
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename, threshold);
-  auto E                     = make_embedding_with_equivalences(obe.C_space);
+  auto E                     = make_embedding(obe.C_space);
   auto root                  = h5::proxy{filename, 'r'};
   auto Sigma_imp             = to_vector<block_gf<Mesh, matrix_valued>>(sort_keys_as_int(root["ref_data"]["const_Sigma_input"]));
 }
@@ -68,7 +68,7 @@ TEST(embed_desc_tests, svo_wien2k) { // NOLINT
 TEST(embed_desc_tests, extract_matrix) {
   std::string filename       = "ref_data/SrVO3-cubic-t2g.ref.h5";
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
-  auto E                     = make_embedding_with_no_equivalences(obe.C_space);
+  auto E                     = make_embedding(obe.C_space, false);
   auto hloc_C                = impurity_levels(obe);
   auto h_imp                 = E.extract(hloc_C);
   auto n_orb                 = obe.C_space.dim();
@@ -80,7 +80,7 @@ TEST(embed_desc_tests, extract_matrix) {
 
 TEST(embed_desc_tests, embed_matrix) {
   auto [target_density, obe] = one_body_elements_from_dft_converter("ref_data/lco_qe_dp_w90_grid.ref.h5");
-  auto E                     = make_embedding_with_equivalences(obe.C_space).drop(1);
+  auto E                     = make_embedding(obe.C_space).drop(1);
 
   double beta          = 40.0;
   auto mesh            = mesh::imfreq{beta, statistic_enum::Fermion, 251};
@@ -143,7 +143,7 @@ TEST(embed_desc_tests, api) {
 
   auto filename              = "ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5";
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
-  auto E                     = make_embedding_with_equivalences(obe.C_space);
+  auto E                     = make_embedding(obe.C_space);
 
   auto sigma_embed_decomp = std::vector<long>{};
   for (auto &x : obe.C_space.atoms_block_decomposition()(r_all, 0)) {
@@ -232,7 +232,7 @@ TEST(embed_desc_tests, api2) {
 
   std::string filename       = "ref_data_lfs/liv2o4-r-3m-strained-wien2k.ref.h5";
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
-  auto E                     = make_embedding_with_equivalences(obe.C_space);
+  auto E                     = make_embedding(obe.C_space);
   auto Enew                  = E.split(0, {2}).drop(0).split(1, {1}).drop(1);
 
   auto sigma_embed_decomp = std::vector<long>{};
