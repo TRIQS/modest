@@ -17,15 +17,9 @@
 
 // DANGEROUS : no way to check that wannier hamiltonian has atoms in the same order if user specifies their positions/
 // the atomic shell info. We are relying on them to get this right somehow, so there should be some print check
-//// TODO what do about sigma_hartree... forward it to gloc in triqs as something optional?
 
 namespace triqs::modest {
 
-  /** Construct a obe_tb from Wannier90 in the case of a single spin index 
-   * @param wannier_file_path string to Wannier90 files, including the prefix // FIXME example 
-   * @param spin_kind enum telling us the spintype 
-   * @param atomic_shells list of atomic shells input by the user 
-   */
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e spin_kind,
                                                         std::vector<atomic_shell_t> atomic_shells) {
     if (spin_kind == spin_kind_e::Polarized) {
@@ -64,9 +58,7 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  //TODO docstring
-  /** Helper function to calculate Hloc given a vector of H with length sigma (contained in Wannier OBE)
-   */
+  /* Helper function to calculate Hloc given a vector of H with length sigma (contained in Wannier OBE) */
   nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells) {
 
     // group the shells into atom indices
@@ -107,7 +99,7 @@ namespace triqs::modest {
     return Hloc_result;
   }
 
-  /** Compute the local impurity levels from the single-particle dispersion. 
+  /** Compute the local impurity levels from the single-particle dispersion.
   */
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe) {
 
