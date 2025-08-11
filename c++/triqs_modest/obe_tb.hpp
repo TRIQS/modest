@@ -30,7 +30,8 @@ namespace triqs::modest {
   /** 
    * @brief Construct a obe_tb from Wannier90 in the case of a single spin index. 
    * 
-   * @param wannier_file_path string to Wannier90 files, including the prefix 
+   * @param wannier_file_path string to Wannier90 files, including the prefix, 
+   *       as in "path/to/file/seedname" to specify a Wannier files named in the format "seedname_tb.dat"
    * @param spin_kind spin type for this calculation 
    * @param atomic_shells list of atomic shells input by the user 
    * 
@@ -40,10 +41,12 @@ namespace triqs::modest {
                                                         std::vector<atomic_shell_t> atomic_shells);
 
   /** 
-   * @brief Construct a obe_tb from Wannier90 in the case of a single spin index. 
+   * @brief Construct a obe_tb from Wannier90 in the case with separate spin up/spin down channels.
    * 
-   * @param wannier_file_path_up string to Wannier90 files, including the prefix, for the up spin channel  
+   * @param wannier_file_path_up string to Wannier90 files, including the prefix, for the up spin channel, 
+   *     as in "path/to/file/seedname" to specify a Wannier files named in the format "seedname_tb.dat"
    * @param wannier_file_path_dn string to Wannier90 files, including the prefix, for the down spin channel  
+   *     as in "path/to/file/seedname" to specify a Wannier files named in the format "seedname_tb.dat"
    * @param spin_kind spin type for this calculation 
    * @param atomic_shells list of atomic shells input by the user 
    *
@@ -62,7 +65,7 @@ namespace triqs::modest {
    * @param atomic_shells a list of atomic shells corresponding to the orbitals contained in the TB Hamiltonian
    * @return Hloc, formated with dimensions [alphsa,sigma] each containing (n_orbitals_atom, n_orbitals_atom)
    */
-  nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells);
+  C2PY_IGNORE nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells);
 
   /**
    * @ingroup hybridization
@@ -74,9 +77,9 @@ namespace triqs::modest {
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe);
 
   /** 
-    * @brief Convert a tight binding Hamiltonian to it's superlattice equivalent.
+    * @brief Convert a tight binding Hamiltonian to its superlattice equivalent.
     * 
-    * @param sl The superlattice object containing it's lattice vectors and locations of cluster points.
+    * @param sl The superlattice object containing its lattice vectors and locations of cluster points.
     * @param obe A one_body_elements object containing the tb_hamiltonian.
     * @return one_body_elements object based on the superlattice tight binding Hamiltonian. 
     */
@@ -102,7 +105,6 @@ namespace triqs::modest {
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_tb const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, triqs::lattice::bz_int_options const &opt) {
 
-    // Need a sigma Hartree
     auto &mesh       = Sigma_dynamic(0, 0).mesh();
     auto n_sigma     = obe.C_space.n_sigma();
     auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
