@@ -35,8 +35,8 @@ namespace triqs::modest {
  * @param method dc_formula (sFLL, cFLL, sAMF, cAMF, cHeld)
  * @return H_DC nda::array<dc_t, 2> 
  */
-  std::pair<nda::array<nda::matrix<double>, 2>, nda::array<double, 2>> double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix,
-                                                                                       double U_int, double J_hund, std::string const method);
+  std::pair<nda::array<nda::matrix<double>, 2>, nda::matrix<double>> double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix,
+                                                                                     double U_int, double J_hund, std::string const method);
 
   /**
  * @ingroup double_counting
@@ -49,7 +49,7 @@ namespace triqs::modest {
 
     private:
     /// FIXME: should update to n_sigma
-    std::vector<std::string> spin_names;
+    long n_sigma;
     /// double counting method to use
     std::string method;
     /// U term used in the double counting formulas
@@ -69,12 +69,12 @@ namespace triqs::modest {
     /**
      * @brief Construct a double counting "solver".
      * 
-     * @param spin_names The names of the spin indices 
+     * @param n_sigma The dimension of the σ index.
      * @param method The double counting formula (method) to call (options: cFLL, sFLL, cAMF, sAMF, cHeld).
      * @param U_int  The Hubbard U to use in the DC formula.
      * @param J_hund The Hund's coupling J to use in the DC formula.
      */
-    dc_solver(std::vector<std::string> spin_names, std::string method, double U_int, double J_hund);
+    dc_solver(long n_sigma, std::string method, double U_int, double J_hund);
 
     /**
     * @brief Compute the double-counting self-energy
@@ -82,7 +82,7 @@ namespace triqs::modest {
     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
     * @return Double counting self-energy
     */
-    block_gf<imfreq, matrix_valued> dc_self_energy(block_gf<imfreq, matrix_valued> const &gimp);
+    std::vector<nda::matrix<dcomplex>> dc_self_energy(block_gf<imfreq, matrix_valued> const &gimp);
 
     /**
      * @brief Compute the double counting correction to the energy.
@@ -90,7 +90,7 @@ namespace triqs::modest {
      * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
      * @return Double counting energy term
      */
-    nda::array<double, 2> dc_energy(block_gf<imfreq, matrix_valued> const &gimp);
+    nda::matrix<double> dc_energy(block_gf<imfreq, matrix_valued> const &gimp);
   };
 
 } // namespace triqs::modest

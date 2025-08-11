@@ -85,11 +85,8 @@ TEST(embed_desc_tests, embed_matrix) {
   double beta          = 40.0;
   auto mesh            = mesh::imfreq{beta, statistic_enum::Fermion, 251};
   auto G               = E.extract(gloc(mesh, obe, find_chemical_potential(target_density, obe, beta, "bisection", 1e-3, false)));
-  auto double_counting = dc_solver(E.sigma_names(), "sFLL", 2.0, 1.0);
-  auto Sigma_DC        = G | stdv::transform([&double_counting](auto &x) { return double_counting.dc_self_energy(x); }) | tl::to<std::vector>();
-  auto Sigma_static    = Sigma_DC
-     | stdv::transform([](auto const &bgf) { return bgf | stdv::transform([](auto const &y) { return y(0); }) | tl::to<std::vector>(); })
-     | tl::to<std::vector>();
+  auto double_counting = dc_solver(E.n_sigma(), "sFLL", 2.0, 1.0);
+  auto Sigma_static    = G | stdv::transform([&double_counting](auto &x) { return double_counting.dc_self_energy(x); }) | tl::to<std::vector>();
 
   auto Sigma_static_C = E.embed(Sigma_static);
   EXPECT_ARRAY_EQ(Sigma_static_C(0, 0), Sigma_static[0][0]);

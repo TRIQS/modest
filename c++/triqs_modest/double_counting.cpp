@@ -54,13 +54,13 @@ namespace triqs::modest {
  * @param method dc_formula (sFLL, cFLL, sAMF, cAMF, cHeld)
  * @return H_DC nda::array<dc_t, 2> 
  */
-  std::pair<nda::array<nda::matrix<double>, 2>, nda::array<double, 2>>
+  std::pair<nda::array<nda::matrix<double>, 2>, nda::matrix<double>>
   //double_counting_from_gf(block2_gf<imfreq, matrix_valued> const &GC, double U_int, double J_hund,
   double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund, std::string const method) {
 
     auto [n_atoms, n_sigma] = density_matrix.shape();
     auto Sigma_DC           = nda::array<nda::matrix<double>, 2>(n_atoms, n_sigma);
-    auto E_DC               = nda::array<double, 2>(n_atoms, n_sigma);
+    auto E_DC               = nda::matrix<double>(n_atoms, n_sigma);
 
     //for (auto [atom, sigma] : indices(GC)) {
     for (auto atom : nda::range(n_atoms))
@@ -147,11 +147,10 @@ namespace triqs::modest {
   }
 
   //------------------------------------------------------------------------------------
-  dc_solver::dc_solver(std::vector<std::string> spin_names, std::string method, double U_int, double J_hund)
-     : spin_names{std::move(spin_names)}, method{std::move(method)}, U_int{U_int}, J_hund{J_hund} {};
+  dc_solver::dc_solver(long n_sigma, std::string method, double U_int, double J_hund)
+     : n_sigma{n_sigma}, method{std::move(method)}, U_int{U_int}, J_hund{J_hund} {};
 
   nda::array<nda::matrix<double>, 2> dc_solver::get_density_matrix_from_gf(block_gf<imfreq, matrix_valued> const &gimp) {
-    auto n_sigma        = spin_names.size();
     auto n_blocks       = gimp.size() / n_sigma;
     auto density_matrix = nda::array<nda::matrix<double>, 2>(n_blocks, n_sigma);
     for (auto bl : range(n_blocks))
@@ -159,19 +158,17 @@ namespace triqs::modest {
     return density_matrix;
   }
 
-  block_gf<imfreq, matrix_valued> dc_solver::dc_self_energy(block_gf<imfreq, matrix_valued> const &gimp) {
-    auto Sigma_DC            = gimp;
-    auto n_iw                = Sigma_DC(0).mesh().size();
-    auto density_matrix      = get_density_matrix_from_gf(gimp);
-    auto [n_blocks, n_sigma] = density_matrix.shape();
-    auto Sigma_dc_mat        = double_counting_sigma_dc(density_matrix, U_int, J_hund, method);
+  std::vector<nda::matrix<dcomplex>> dc_solver::dc_self_energy(block_gf<imfreq, matrix_valued> const &gimp) {
+    auto Sigma_DC       = std::vector<nda::matrix<dcomplex>>(gimp.size());
+    auto density_matrix = get_density_matrix_from_gf(gimp);
+    auto n_blocks       = density_matrix.extent(0);
+    auto Sigma_dc_mat   = double_counting_sigma_dc(density_matrix, U_int, J_hund, method);
     for (auto bl : range(n_blocks))
-      for (auto sigma : range(n_sigma))
-        for (auto n : range(n_iw)) Sigma_DC[bl + sigma * n_blocks].data()(n, r_all, r_all) = Sigma_dc_mat(bl, sigma);
+      for (auto sigma : range(n_sigma)) Sigma_DC[bl + sigma * n_blocks] = Sigma_dc_mat(bl, sigma);
     return Sigma_DC;
   }
 
-  nda::array<double, 2> dc_solver::dc_energy(block_gf<imfreq, matrix_valued> const &gimp) {
+  nda::matrix<double> dc_solver::dc_energy(block_gf<imfreq, matrix_valued> const &gimp) {
     return double_counting_energy_dc(get_density_matrix_from_gf(gimp), U_int, J_hund, method);
   }
 

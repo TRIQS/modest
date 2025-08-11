@@ -13,11 +13,11 @@ auto run_dc_solver_test_case(std::string filename, double threshold, std::string
   auto [_, obe]        = one_body_elements_from_dft_converter(filename, threshold);
   auto E               = make_embedding(obe.C_space);
   auto Gimp            = E.extract(gloc(gloc_ref[0][0].mesh(), obe, 0.0));
-  auto double_counting = dc_solver(E.sigma_names(), method, 2.0, 1.0);
+  auto double_counting = dc_solver(E.n_sigma(), method, 2.0, 1.0);
   auto Sigma_DC        = Gimp | stdv::transform([&double_counting](auto &x) { return double_counting.dc_self_energy(x); }) | tl::to<std::vector>();
   auto E_DC            = Gimp | stdv::transform([&double_counting](auto &x) { return double_counting.dc_energy(x); }) | tl::to<std::vector>();
   // HL : need to loop over all of the data but the reference data has a different shape. TODO: update the reference data
-  EXPECT_NEAR(real(Sigma_DC[0][0](0)(0, 0)), dc_ref[0][0](0, 0), 1.e-5);
+  EXPECT_NEAR(real(Sigma_DC[0][0](0, 0)), dc_ref[0][0](0, 0), 1.e-5);
   EXPECT_NEAR(E_DC[0](0, 0), Edc_ref[0], 1.e-5);
 }
 
