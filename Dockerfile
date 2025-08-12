@@ -19,6 +19,8 @@ RUN git clone https://github.com/flatironinstitute/clair --branch unstable $SRC/
     CXX="clang++-19" CXXFLAGS="" CPLUS_INCLUDE_PATH="" cmake -S $SRC/clair -B $BUILD/clair -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL && \
     cmake --build $BUILD/clair && cmake --install $BUILD/clair
 
+ENV OMP_NUM_THREADS=1
+
 ARG BUILD_ID
 ARG CMAKE_ARGS
 USER build
