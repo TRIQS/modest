@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [ unstable, clair, '[0-9]+.[0-9]+.x' ]
+    branches: [ unstable, '[0-9]+.[0-9]+.x' ]
   pull_request:
-    branches: [ unstable, clair, '[0-9]+.[0-9]+.x' ]
+    branches: [ unstable, '[0-9]+.[0-9]+.x' ]
   workflow_call:
   workflow_dispatch:
 
@@ -111,6 +111,18 @@ jobs:
       run: |
         git clone https://github.com/TRIQS/triqs --branch $TRIQS_BRANCH
         mkdir triqs/build && cd triqs/build
+        cmake .. -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
+        make -j1 install VERBOSE=1
+        cd ../
+
+    - name: Build & Install clair
+      env:
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
+        CXXFLAGS: ""
+      run: |
+        git clone https://github.com/flatironinstitute/clair --branch unstable
+        mkdir clair/build && cd clair/build
         cmake .. -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
         make -j1 install VERBOSE=1
         cd ../
