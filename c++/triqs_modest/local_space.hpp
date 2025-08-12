@@ -22,7 +22,7 @@ namespace triqs::modest {
 
   // --------------------------------------------------------------------
   /// Info on an atomic shell
-  struct atomic_shell_t {
+  struct atomic_orbs {
     long dim     = 0; // dimension of orbital space
     long l       = 0; // angular quantum number
     long cls_idx = 0; // Equivalent atoms will have the same sort index (sort)
@@ -41,7 +41,7 @@ namespace triqs::modest {
     spin_kind_e _spin_kind = spin_kind_e::Polarized;
 
     /// List of all atomic shells spanning the 𝓒 space
-    std::vector<atomic_shell_t> _atomic_shells;
+    std::vector<atomic_orbs> _atomic_shells;
 
     /// For each atom, a list of the dimensions of the irreps decomposition of the atomic shell
     nda::array<std::vector<long>, 2> _irreps_decomp_per_atom;
@@ -64,7 +64,7 @@ namespace triqs::modest {
     friend void h5_write(h5::group g, std::string const &name, local_space const &ls);
 
     public:
-    local_space(spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells, nda::array<std::vector<long>, 2> irreps_decomp_per_atom,
+    local_space(spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells, nda::array<std::vector<long>, 2> irreps_decomp_per_atom,
                 nda::array<nda::matrix<dcomplex>, 2> rotation_from_dft_to_local_basis,
                 nda::array<nda::matrix<dcomplex>, 1> rotation_from_spherical_to_dft_basis);
 
@@ -92,7 +92,7 @@ namespace triqs::modest {
     [[nodiscard]] long dim() const { return _dim_C; }
 
     /// List of all atomic shells spanning the 𝓒 space
-    [[nodiscard]] std::vector<atomic_shell_t> const &atomic_shells() const { return _atomic_shells; }
+    [[nodiscard]] std::vector<atomic_orbs> const &atomic_shells() const { return _atomic_shells; }
 
     /// The number of atoms
     [[nodiscard]] long n_atoms() const { return long(_atomic_shells.size()); }

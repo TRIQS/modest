@@ -26,8 +26,8 @@ namespace triqs::modest {
 
   namespace detail {
     /// inject an object T from the C space to W space (used in the context of post-processing).
-    nda::array<std::vector<long>, 2> inject_to_new_space(nda::array<std::vector<long>, 2> const &T, std::vector<atomic_shell_t> const &old_space,
-                                                         std::vector<atomic_shell_t> const &new_space) {
+    nda::array<std::vector<long>, 2> inject_to_new_space(nda::array<std::vector<long>, 2> const &T, std::vector<atomic_orbs> const &old_space,
+                                                         std::vector<atomic_orbs> const &new_space) {
       auto n_atoms = new_space.size();
       auto n_sigma = T.extent(1);
       auto Tembed  = nda::array<std::vector<long>, 2>(n_atoms, n_sigma);
@@ -51,7 +51,7 @@ namespace triqs::modest {
   /// Disovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
   /// Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
   std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<dcomplex>, 2>>
-  discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0, std::vector<atomic_shell_t> const &atomic_shells, double block_threshold,
+  discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0, std::vector<atomic_orbs> const &atomic_shells, double block_threshold,
                       bool diagonalize_hloc) {
 
     auto [n_atoms, n_sigma] = Hloc0.shape();
@@ -176,19 +176,19 @@ namespace triqs::modest {
 
   //-------------------------------------------------------
   /// Read atomic shells according to ReadMode. (internal)
-  std::vector<atomic_shell_t> read_atomic_shells(auto const &filename, ReadMode mode) {
+  std::vector<atomic_orbs> read_atomic_shells(auto const &filename, ReadMode mode) {
     auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
     return ((mode == ReadMode::Correlated) ? sort_keys_as_int(g_dft["corr_shells"]) : sort_keys_as_int(g_dft["shells"]))
        | stdv::transform([](auto const &g) {
              //NB: as<long>(g["atom"]), as<long>(g["dim"]), as<long>(g["equiv_cls_idx"]) );
-             return atomic_shell_t{long(g["dim"]), long(g["l"]), long(g["sort"]), long(g["atom"])};
+             return atomic_orbs{.dim = long(g["dim"]), .l = long(g["l"]), .cls_idx = long(g["sort"]), .dft_idx = long(g["atom"])};
            })
        | tl::to<std::vector>();
   }
 
   //-------------------------------------------------------
   /// Prepare the spherical Ylm to DFT orbital basis rotations. (internal)
-  nda::array<nda::matrix<dcomplex>, 1> read_spherical_to_dft_basis(std::string dft, std::vector<atomic_shell_t> const &atomic_shells) {
+  nda::array<nda::matrix<dcomplex>, 1> read_spherical_to_dft_basis(std::string dft, std::vector<atomic_orbs> const &atomic_shells) {
     //TODO: finish this!
     auto code = dft_code::dft_code_to_enum(dft);
     auto Ylms = nda::array<nda::matrix<dcomplex>, 1>(atomic_shells.size());

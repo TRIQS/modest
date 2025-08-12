@@ -72,7 +72,7 @@ namespace triqs::modest {
   * @return decomposition, U_rotation describing the block structure of GF based on Hloc
   */
   std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<dcomplex>, 2>>
-  discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0, std::vector<atomic_shell_t> const &atomic_shells, double block_threshold,
+  discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0, std::vector<atomic_orbs> const &atomic_shells, double block_threshold,
                       bool diagonalize_hloc);
 
 } // namespace triqs::modest

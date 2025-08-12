@@ -38,7 +38,7 @@ auto make_random_self(long M, double beta) {
 TEST(obe_tb, lco_wannier90) { // NOLINT
 
   // set up atomic shells
-  std::vector<atomic_shell_t> atomic_shells;
+  std::vector<atomic_orbs> atomic_shells;
   long dim  = 1;
   long l    = 2;
   long type = 0;
@@ -91,7 +91,7 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
 TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
 
   // set up atomic shells
-  std::vector<atomic_shell_t> atomic_shells;
+  std::vector<atomic_orbs> atomic_shells;
   // set up SVO shells, trying to keep the same order as the wannier hamiltonian does
   // try to make a shell with 3 d orbitals on the V atom
   long dim  = 3;
@@ -173,8 +173,10 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
 TEST(obe_tb, sr2moo4_wannier90) { // NOLINT
 
   // set up atomic shells
-  std::vector<atomic_shell_t> atomic_shells;
-  long dim  = 3;
+  std::vector<atomic_orbs> atomic_shells;
+
+  // a shell with 3 d orbitals on the V atom
+  long dim  = 2;
   long l    = 2;
   long type = 0;
   long atom = 0;

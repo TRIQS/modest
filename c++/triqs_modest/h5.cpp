@@ -62,14 +62,14 @@ namespace triqs::modest {
   }
 
   // atomic_shell
-  void h5_read(h5::group g, std::string const &name, atomic_shell_t &shell) {
+  void h5_read(h5::group g, std::string const &name, atomic_orbs &shell) {
     auto subgroup = g.open_group(name);
     h5_read(subgroup, "dim", shell.dim);
     h5_read(subgroup, "l", shell.l);
     h5_read(subgroup, "cls_idx", shell.cls_idx);
     h5_read(subgroup, "dft_idx", shell.dft_idx);
   }
-  void h5_write(h5::group g, std::string const &name, atomic_shell_t const &shell) {
+  void h5_write(h5::group g, std::string const &name, atomic_orbs const &shell) {
     auto subgroup = g.create_group(name);
     h5_write(subgroup, "dim", shell.dim);
     h5_write(subgroup, "l", shell.l);

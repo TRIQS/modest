@@ -38,7 +38,7 @@ namespace triqs::modest {
    * @return One_body_elements object containing the Wannier90 tight binding Hamiltonian 
    */
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e spin_kind,
-                                                        std::vector<atomic_shell_t> atomic_shells);
+                                                        std::vector<atomic_orbs> atomic_shells);
 
   /** 
    * @brief Construct a obe_tb from Wannier90 in the case with separate spin up/spin down channels.
@@ -53,11 +53,11 @@ namespace triqs::modest {
    * @return One_body_elements object containing the Wannier90 tight binding Hamiltonian 
    */
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
-                                                        spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells);
+                                                        spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells);
 
   /// Helper to contruct and return an OBE_tb object given a list of tb_Hamiltonians of length n_sigma
   C2PY_IGNORE one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e spin_kind,
-                                                    std::vector<atomic_shell_t> atomic_shells);
+                                                    std::vector<atomic_orbs> atomic_shells);
 
   /** @brief Compute Hloc = H(R=0) given n_sigma tight_binding Hamiltonians 
    * 
@@ -65,7 +65,7 @@ namespace triqs::modest {
    * @param atomic_shells a list of atomic shells corresponding to the orbitals contained in the TB Hamiltonian
    * @return Hloc, formated with dimensions [alphsa,sigma] each containing (n_orbitals_atom, n_orbitals_atom)
    */
-  C2PY_IGNORE nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells);
+  nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_orbs> const &atomic_shells);
 
   /**
    * @ingroup hybridization

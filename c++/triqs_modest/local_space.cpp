@@ -7,7 +7,7 @@
 
 namespace triqs::modest {
 
-  local_space::local_space(spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells, nda::array<std::vector<long>, 2> irreps_decomp_per_atom,
+  local_space::local_space(spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells, nda::array<std::vector<long>, 2> irreps_decomp_per_atom,
                            nda::array<nda::matrix<dcomplex>, 2> rotation_from_dft_to_local_basis,
                            nda::array<nda::matrix<dcomplex>, 1> rotation_from_spherical_to_dft_basis)
      : _spin_kind{spin_kind},

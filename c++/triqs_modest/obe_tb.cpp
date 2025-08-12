@@ -21,7 +21,7 @@
 namespace triqs::modest {
 
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e spin_kind,
-                                                        std::vector<atomic_shell_t> atomic_shells) {
+                                                        std::vector<atomic_orbs> atomic_shells) {
     if (spin_kind == spin_kind_e::Polarized) {
       throw std::runtime_error("If performing a spin-polarized calculation, you need to supply two Wannier file paths for up and down channels.\n");
     }
@@ -37,7 +37,7 @@ namespace triqs::modest {
   };
 
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
-                                                        spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells) {
+                                                        spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
     if (spin_kind != spin_kind_e::Polarized) {
       throw std::runtime_error("For a non-spin polarized calculation, you should specify only one Wannier Hamiltonian.\n");
     }
@@ -58,8 +58,10 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  /* Helper function to calculate Hloc given a vector of H with length sigma (contained in Wannier OBE) */
-  nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_shell_t> const &atomic_shells) {
+  //TODO docstring
+  /** Helper function to calculate Hloc given a vector of H with length sigma (contained in Wannier OBE)
+   */
+  nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_orbs> const &atomic_shells) {
 
     // group the shells into atom indices
     // makes a vector containing the dim of each atomic shell...
@@ -121,7 +123,7 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> H_sigma, spin_kind_e spin_kind, std::vector<atomic_shell_t> atomic_shells) {
+  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> H_sigma, spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
 
     // calculate Hloc using helper function -- Hloc here is dim [nshells, nsigma]
     nda::array<nda::matrix<dcomplex>, 2> hloc = Hloc(H_sigma, atomic_shells);
