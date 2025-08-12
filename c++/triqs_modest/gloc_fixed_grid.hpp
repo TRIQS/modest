@@ -21,7 +21,7 @@ namespace triqs::modest {
   /**
   * @brief [INTERNAL] compute G𝓒 local Green's function on Mesh(MxM) for cases where H(k) is not diagonal.
   * 
-  * @tparam Mesh triqs::mesh::{dlr_imfreq,imfreq}
+  * @tparam Mesh The mesh type (triqs::mesh::{dlr_imfreq,imfreq})
   * @param obe one_body_elements_on_grid
   * @param mu chemical potential
   * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view.
@@ -81,12 +81,12 @@ namespace triqs::modest {
  * @ingroup gloc
  * @brief compute G𝓒 local Green's function on Mesh(MxM) 
  * 
- * @tparam Mesh triqs::mesh::{dlr_imfreq,imfreq}
+ * @tparam Mesh The mesh type (triqs::mesh::{dlr_imfreq,imfreq})
  * @param obe one_body_elements_on_grid
  * @param mu chemical potential
- * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view.
- * @param Sigma_static The static part of the embedded self-energy in the embedded view.
- * @return The local Green's function.
+ * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view, Sigma_dynamic[alpha, sigma].
+ * @param Sigma_static The static part of the embedded self-energy in the embedded view, Sigma_static[alpha,sigma]
+ * @return gloc[0, sigma], the local Green's function in the full C space.
  */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
@@ -137,7 +137,7 @@ namespace triqs::modest {
    * 
    * @details See gloc for more details.
    * 
-   * @tparam Mesh 
+   * @tparam Mesh The mesh type
    * @param mesh mesh triqs::meshes::{imfreq, dlr_imfreq}
    * @param obe one-body elements
    * @param mu chemical potential
@@ -155,7 +155,7 @@ namespace triqs::modest {
    * @ingroup hybridization
    * @brief Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
    * 
-   * @tparam Mesh 
+   * @tparam Mesh The mesh type
    * @param epsilon_levels The effective impurity levels.
    * @param Gloc The local Green's function of the impurity.
    * @param Sigma_dynamic The frequency dependent part of the impurity self-energy.
@@ -182,7 +182,7 @@ namespace triqs::modest {
    * @ingroup hybridization
    * @brief Compute the hybridization function from the effective impurity levels and the local Green's function.
    * 
-   * @tparam Mesh 
+   * @tparam Mesh The mesh type
    * @param epsilon_levels The effective impurity levels.
    * @param Gloc The local Green's function of the impurity.
    * @return block_gf<Mesh, matrix_valued> 
@@ -197,9 +197,6 @@ namespace triqs::modest {
 
   // ------------------------------------------------------
 
-  /** @cond DOXYGEN_SKIP_THIS */
-  // FIXME: INSTANTIATE(Mesh) doesn't seem to work...
-  // Mesh = imfreq
   template block2_gf<imfreq, matrix_valued> gloc(one_body_elements_on_grid const &one_body, double mu,
                                                  block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
                                                  nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
@@ -220,6 +217,5 @@ namespace triqs::modest {
                                                              block_gf<dlr_imfreq, matrix_valued> const &Gloc,
                                                              block_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
                                                              std::vector<nda::matrix<dcomplex>> const &Sigma_static);
-  /** @endcond */
 
 } // namespace triqs::modest

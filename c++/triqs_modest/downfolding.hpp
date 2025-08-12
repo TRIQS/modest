@@ -25,11 +25,11 @@ namespace triqs::modest {
  * 
  */
   struct band_dispersion {
-    spin_kind_e spin_kind;             // FIXME : TO DO : change to diagonal ? Or make variant on this point for a general basis ? premature ?
-    nda::array<dcomplex, 4> H_k;       //< H_k [k_idx, σ', nu, nu']
-    nda::array<long, 2> n_bands_per_k; //< n_bands_per_k [k_idx, σ'] = # of nu
-    nda::array<double, 1> k_weights;   //< k_weights[k_idx] //FIXME : Do we want to make a mini- k grid object with the weights ??
-    bool matrix_valued;
+    spin_kind_e spin_kind;             ///< Spin kind of the one-body data
+    nda::array<dcomplex, 4> H_k;       ///< H_k [k_idx, σ', nu, nu']
+    nda::array<long, 2> n_bands_per_k; ///< n_bands_per_k [k_idx, σ'] = # of nu
+    nda::array<double, 1> k_weights;   ///< k_weights[k_idx]
+    bool matrix_valued;                ///< Is the dispersion matrix-valued?
 
     // public:
     // /// Constructor
@@ -71,8 +71,8 @@ namespace triqs::modest {
  */
   struct downfolding_projector {
     spin_kind_e spin_kind;
-    nda::array<dcomplex, 4> P_k;       //< Pk[alpha][k_idx, σ', m_alpha, nu]
-    nda::array<long, 2> n_bands_per_k; //< n_bands_per_k [k_idx, σ'] = # of nu
+    nda::array<dcomplex, 4> P_k;       ///< Pk[alpha][k_idx, σ', m_alpha, nu]
+    nda::array<long, 2> n_bands_per_k; ///< n_bands_per_k [k_idx, σ'] = # of nu
 
     // public:
     // /// Constructor
@@ -102,7 +102,7 @@ namespace triqs::modest {
     band_dispersion H;
     local_space C_space;
     downfolding_projector P;
-    C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
+    C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; ///< IBZ symmetrizer after a k-sum
   };
 
   std::ostream &operator<<(std::ostream &out, one_body_elements_on_grid const &);

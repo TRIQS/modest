@@ -24,7 +24,6 @@ namespace triqs::modest {
    * @param filename Hdf5 file from dft_tools converter.
    * @param threshold Off-diagonal threshold for discovery of symmetries.
    * @param diagonalize_hloc Diagonalize the local non-interacting hamiltonian.
-   * @param verbosity Log steps of creating the one-body elements.
    * @return The total electron density and a one-body elements.
    */
   std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold = 1.e-5,

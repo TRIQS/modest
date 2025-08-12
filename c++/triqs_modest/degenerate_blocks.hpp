@@ -41,6 +41,7 @@ namespace triqs::modest {
   // 4. if eigenvalues are the same to epsilon
   // 5. Rotate all blocks using the eigenvectors which constitute a unitary transformation.
   // Do we agree with this algorithm and want the same?
+
   /**
    * @ingroup deg
    * @brief Find the generate blocks of a BlockGf by analyzing G(τ=0) or G(iω₀) using the union-find algorithm.
@@ -49,13 +50,11 @@ namespace triqs::modest {
    * classes based on approximate numerical equality. If two matrices are approximately equal, their blocks are united
    * into the same set. The final result is a partitioning of the blocks (matrices) into degenerate groups.
    *
-   * @tparam Mesh 
    * @param Gimp Block Green's function
    * @param threshold tolerance for equivalence of blocks
    * @return A list of equivalent blocks
    */
-  template <typename Mesh>
-  std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<Mesh, matrix_valued> const &Gimp, double threshold = 1.e-5) {
+  inline std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<imfreq, matrix_valued> const &Gimp, double threshold = 1.e-5) {
     auto find_degenerate = [&](auto const &G) {
       auto are_matrices_equal = [threshold](auto const &A, auto const &B) {
         if (A.shape() != B.shape()) return false;
@@ -104,5 +103,4 @@ namespace triqs::modest {
     return Gsymm;
   }
 
-  template std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<imfreq, matrix_valued> const &Gimp, double threshold = 1.e-5);
 } // namespace triqs::modest

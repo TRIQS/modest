@@ -14,17 +14,17 @@ namespace triqs {
  * @ingroup root
  * @brief find upper and lower bounds of f(x)
  * 
- * @param f 
- * @param x_init 
- * @param y_value 
- * @param delta_x 
- * @param precision 
- * @param max_loops 
- * @param verbosity 
- * @return std::pair<double, double> 
+ * @param f function of f(x)
+ * @param x_init initial guess x
+ * @param y_value target value y = f(x)
+ * @param delta_x x increment
+ * @param precision f(x) - y_value < precision
+ * @param max_loops maximum number of loops
+ * @param verbosity verbosity of the algorithm
+ * @return x1, x2 where f(x1) and f(x2) bound y_value
  */
   inline std::pair<double, double> find_bounds(std::function<double(double)> f, double x_init, double y_value, double delta_x, double precision,
-                                               long max_loops = 1000, bool verbosity = true) {
+                                               long max_loops = 1000, bool verbosity = false) {
 
     auto out = ostream_with_verbosity(std::cout, verbosity);
     double x = x_init;
@@ -56,16 +56,16 @@ namespace triqs {
  * @ingroup root
  * @brief dichotomy algorithm
  * 
- * @param f 
- * @param x_low 
- * @param x_high 
- * @param y_target 
- * @param precision 
- * @param max_loops 
- * @param x_name 
- * @param y_name 
- * @param verbosity 
- * @return std::pair<double, double> 
+ * @param f function f(x)
+ * @param x_low lower bound on x
+ * @param x_high upper bound on x
+ * @param y_target target value for f(x)
+ * @param precision f(x) - y_target < precision
+ * @param max_loops maxmimum number of iterations
+ * @param x_name Name of x variable
+ * @param y_name Name of y variable
+ * @param verbosity Print progress
+ * @return x, f(x) where f(x) = y_target
  */
   inline std::pair<double, double> dichotomy(std::function<double(double)> f, double x_low, double x_high, double y_target, double precision,
                                              long max_loops, std::string x_name, std::string y_name, bool verbosity) {
@@ -113,16 +113,16 @@ namespace triqs {
  * @ingroup root
  * @brief bisection algorithm
  * 
- * @param f 
- * @param x_low 
- * @param x_high 
- * @param y_target 
- * @param precision 
- * @param max_loops 
- * @param x_name 
- * @param y_name 
- * @param verbosity 
- * @return std::pair<double, double> 
+ * @param f function f(x)
+ * @param x_low lower bound on f(x)
+ * @param x_high upper bound on f(x)
+ * @param y_target target value for f(x) = y_target
+ * @param precision f(x) - y_target < precision
+ * @param max_loops maximum number of attempts
+ * @param x_name Name of x variable
+ * @param y_name Name of y variable
+ * @param verbosity Print progress
+ * @return x, f(x) where f(x) = y_target
  */
   inline std::pair<double, double> bisection(std::function<double(double)> f, double x_low, double x_high, double y_target, double precision,
                                              long max_loops, std::string x_name, std::string y_name, bool verbosity) {
@@ -171,11 +171,11 @@ namespace triqs {
   * @param x_name name of x variable
   * @param y_name name of y variable f(x)
   * @param verbosity logging of root finder
-  * @return x, f(x) std::pair<double, double> 
+  * @return x, f(x) where f(x) = y_value
   */
   inline std::pair<double, double> root_finder(std::string method, std::function<double(double)> f, double x_init, double y_value, double precision,
                                                double delta_x, long max_loops = 1000, std::string x_name = "", std::string y_name = "",
-                                               bool verbosity = true) {
+                                               bool verbosity = false) {
 
     auto out = ostream_with_verbosity(std::cout, verbosity);
 

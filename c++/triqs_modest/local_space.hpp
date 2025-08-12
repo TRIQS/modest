@@ -123,19 +123,17 @@ namespace triqs::modest {
 
     // --------  Atomic "view" methods for Green functions and matrices -----------
 
+    // FIXME : IT IS NOT A VIEW, IT IS A COPY
+    // Where do we use this ? do we want a view or a copy ?
     /** @name Views and shapes */
     ///@{
     /**
-     * @brief Creates an atomic view of a block2_gf object by extracting specific slices
-     *        based on the atomic decomposition of the current object.
-     *
-     * @tparam Mesh The type of the mesh 
-     * @param G_C The input block2_gf object from which the atomic view is created.
-     * @return A new block2_gf object representing the atomic view.
-     *
+     * @brief  Views a block2gf according to the atomic decomposition.
+     * 
+     * @tparam Mesh The Green's function meesh
+     * @param G_C A block2_gf spanning the entire C space [0, sigma](M, M)
+     * @return A block2_gf in the atomic decomposition view [atom, sigma][m_orb, m_orb]
      */
-    // FIXME : IT IS NOT A VIEW, IT IS A COPY
-    // Where do we use this ? do we want a view or a copy ?
     template <typename Mesh> block2_gf<Mesh> atomic_view(block2_gf<Mesh> const &G_C) {
       // FIXME : ASSERT check the dimension of G_C m x m , one a block, n_sigma ...
       auto Gout    = make_block2_gf(G_C(0, 0).mesh(), this->Gatom_block_shape());

@@ -15,10 +15,10 @@ namespace triqs::modest {
 
   /**
  * @ingroup checkpoint
- * @brief 
+ * @brief A checkpoint manager for logging data after each DMFT iteration
  * 
- * @tparam InitialData 
- * @tparam IterationData 
+ * @tparam InitialData the initial data of the calculatoin (one_body_elements, embedding)
+ * @tparam IterationData the data after each DMFT iteration
  */
   template <typename InitialData, typename IterationData> class checkpoint {
 

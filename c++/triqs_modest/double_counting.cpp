@@ -45,15 +45,7 @@ namespace triqs::modest {
     }
   }
   //------------------------------------------------------------------------------------
-  /**
- * @brief compute double counting correction (H_DC) for a dc_type (method) from the G𝓒 and interaction parameters.
- * 
- * @param GC Green's function in C space
- * @param U_int Coulomb interaction parameter
- * @param J_hund Hund's coupling interaction parameter
- * @param method dc_formula (sFLL, cFLL, sAMF, cAMF, cHeld)
- * @return H_DC nda::array<dc_t, 2> 
- */
+
   std::pair<nda::array<nda::matrix<double>, 2>, nda::matrix<double>>
   //double_counting_from_gf(block2_gf<imfreq, matrix_valued> const &GC, double U_int, double J_hund,
   double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund, std::string const method) {
@@ -94,6 +86,7 @@ namespace triqs::modest {
     return {Sigma_DC, E_DC};
   }
 
+  //------------------------------------------------------------------------------------
   std::pair<double, nda::vector<double>> get_total_density(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix) {
     auto [n_blocks, n_sigma] = density_matrix.shape();
     auto N_per_sigma         = nda::zeros<double>(n_sigma);
@@ -110,6 +103,7 @@ namespace triqs::modest {
     }
     return {N_total, N_per_sigma};
   }
+  //------------------------------------------------------------------------------------
 
   nda::array<nda::matrix<double>, 2> double_counting_sigma_dc(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund,
                                                               std::string const method) {
@@ -129,6 +123,7 @@ namespace triqs::modest {
            * nda::eye<double>(density_matrix(bl, sigma).shape()[0]);
     return Sigma_DC;
   }
+  //------------------------------------------------------------------------------------
 
   nda::matrix<double> double_counting_energy_dc(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix, double U_int, double J_hund,
                                                 std::string const method) {
@@ -157,6 +152,7 @@ namespace triqs::modest {
       for (auto sigma : range(n_sigma)) density_matrix(bl, sigma) = real(density(gimp[bl + sigma * n_blocks]));
     return density_matrix;
   }
+  //------------------------------------------------------------------------------------
 
   std::vector<nda::matrix<dcomplex>> dc_solver::dc_self_energy(block_gf<imfreq, matrix_valued> const &gimp) {
     auto Sigma_DC       = std::vector<nda::matrix<dcomplex>>(gimp.size());
@@ -168,6 +164,7 @@ namespace triqs::modest {
     return Sigma_DC;
   }
 
+  //------------------------------------------------------------------------------------
   nda::matrix<double> dc_solver::dc_energy(block_gf<imfreq, matrix_valued> const &gimp) {
     return double_counting_energy_dc(get_density_matrix_from_gf(gimp), U_int, J_hund, method);
   }

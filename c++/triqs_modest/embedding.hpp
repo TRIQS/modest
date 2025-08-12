@@ -158,8 +158,8 @@ namespace triqs::modest {
     * @details Replaces the impurity solver corresponding to imp_idx_to with the impurity solver at imp_idx_from 
     * and updates the underlying table ψ.
     * 
-    * @param imp_idx_to the index of the impurity solver to be replaced.
-    * @param imp_idx_from the index of the impurity solver that will replace imp_idx_to.
+    * @param imp_idx_to_remove the index of the impurity solver to be replaced.
+    * @param imp_idx_to_replace_with the index of the impurity solver that will replace imp_idx_to.
     * @return a new embedding with the updated ψ map.
     */
     embedding replace(long imp_idx_to_remove, long imp_idx_to_replace_with) const;
@@ -309,18 +309,18 @@ namespace triqs::modest {
     *
     *    \Sigma_{embed}^{ασ} = \Sigma_{imp}^{ψ(α,σ)} 
     *     ψ(α,σ) -> (n_imp, γ, τ) 
-    * @param Sigma_imp_vec 
-    * @return Σ_embed in C space
+    * @param Sigma_imp_vec a list of impurity self-energies
+    * @return Σ_embed[alpha, sigma] in C space using the embed decomposition
     */
   template <typename Mesh> block2_gf<Mesh, matrix_valued> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const {
     // Check that all meshes are the same for Sigma_imp_vec
     if (not all_equal(Sigma_imp_vec | stdv::transform([](auto &&x) -> decltype(auto) { return x[0].mesh(); })))
       throw std::runtime_error{"[embedding_desc::embed]: meshes of solvers are not all equal"};
-    //
+
     auto const &mesh = Sigma_imp_vec[0][0].mesh();
+
     // build the result
     auto Sigma_embed = make_block2_gf(mesh, this->sigma_embed_block_shape());
-    // auto Sigma_embed= nda::array<gf<Mesh, matrix_valued>,2>(this->psi.shape());
     for (auto &&[S, m] : zip(Sigma_embed, psi)) {
       if (m.imp_idx == -1) continue;
       S() = Sigma_imp_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
@@ -328,9 +328,20 @@ namespace triqs::modest {
     return Sigma_embed;
   }
 
+  /**
+ * @brief Embed the impurity self-energy decomposed as a list of dynamic and a list of static parts.
+ * 
+ * @tparam Mesh The type of mesh
+ * @param Sigma_imp_vec A list of dynamic impurity self-energies
+ * @param Sigma_imp_static_vec A list of static impurity self-energies
+ * @return The self-energy in the C space as a pair (dynamic, static).
+ */
   template <typename Mesh>
   std::pair<block2_gf<Mesh, matrix_valued>, block2_matrix_t> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec,
                                                                               std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
+    if (Sigma_imp_vec.size() != Sigma_imp_static_vec.size()) {
+      throw std::runtime_error(fmt::format("The lists of self-energies are not equal {} != {}", Sigma_imp_vec.size(), Sigma_imp_static_vec.size()));
+    }
     return {this->embed(Sigma_imp_vec), this->embed(Sigma_imp_static_vec)};
   }
 
@@ -339,9 +350,9 @@ namespace triqs::modest {
   /**
  * @brief  Extract the impurity Green's function
  * 
- * @tparam Mesh  triqs::mesh::{dlr_imfreq, imfreq}
- * @param g_loc  Block2Gf of gloc in MxM space
- * @return local impurity Green's function std::vector<block_gf<Mesh, matrix_valued>> 
+ * @tparam Mesh The mesh type triqs::mesh::{dlr_imfreq, imfreq}
+ * @param g  Block2Gf of gloc in MxM space
+ * @return local impurity Green's function
  */
   template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block2_gf<Mesh, matrix_valued> const &g) const {
 
@@ -372,9 +383,8 @@ namespace triqs::modest {
     return {new_obe, E};
   }
 
-// ------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
 
-/** @cond DOXYGEN_SKIP_THIS */
 #define INSTANTIATE(Mesh)                                                                                                                            \
   template block2_gf<Mesh, matrix_valued> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &) const;                                \
   template std::pair<block2_gf<Mesh, matrix_valued>, block2_matrix_t> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &,           \
@@ -385,6 +395,5 @@ namespace triqs::modest {
   INSTANTIATE(refreq);
   INSTANTIATE(dlr_imfreq);
 #undef INSTANTIATE
-  /** @endcond */
 
 } // namespace triqs::modest

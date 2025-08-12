@@ -36,7 +36,7 @@ namespace triqs::modest {
   // }
 
   struct spectral_function_kw {
-    nda::array<double, 3> data; // A[σ](k,w)
+    nda::array<double, 3> data; ///< A[σ](k,w)
   };
 
   /**
@@ -45,16 +45,16 @@ namespace triqs::modest {
  * 
  * @param obe  one-body elements on grid created from one_body_elements_on_high_symmetry_path (see obe factories)
  * @param mu   chemical potential
- * @param Sigma_w  self-energy on real-frequency mesh 
- * @param Sigma_DC double-counting term
+ * @param Sigma_w  self-energy in real-frequencies
  * @param broadening spectral broadening
  * @return spectral_function_kw 
  */
   spectral_function_kw spectral_function_on_high_symmetry_path(one_body_elements_on_grid const &obe, double mu,
                                                                block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
+
   struct spectral_function_w {
-    nda::array<double, 2> total;     // A[σ](w)
-    nda::array<double, 4> per_theta; // A[a,σ](m,m',w)
+    nda::array<double, 2> total;     ///< A[σ](w)
+    nda::array<double, 4> per_theta; ///< A[a,σ](m,m',w)
   };
 
   /**
@@ -62,10 +62,9 @@ namespace triqs::modest {
  * @brief  Compute the atom- and orbital-resolved spectral function (interacting density of states).
  * 
  * @param obe_theta one-body elements on grid created from one_body_elements_with_theta_projectors (see obe factories).
- * @param Pk downfolding_projector defined in the correlated space using to upfold the DMFT self-energies.
+ * @param Proj downfolding_projector defined in the correlated space using to upfold the DMFT self-energies.
  * @param mu chemical potential
- * @param Sigma_w self-energy on real-frequency mesh
- * @param Sigma_DC double counting term
+ * @param Sigma_w self-energy in real-frequencies
  * @param broadening spectral broadening
  * @return spectral_function_w 
  */
@@ -73,8 +72,3 @@ namespace triqs::modest {
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
 
 } // namespace triqs::modest
-
-// ------------------------------------------------------
-
-/** @cond DOXYGEN_SKIP_THIS */
-/** @endcond */

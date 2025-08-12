@@ -22,18 +22,18 @@ namespace triqs::modest {
  * @param n_orb  the number of orbitals
  * @param U the Hubbard U
  * @param J the Hund's coupling J
- * @return std::pair<double, double> 
+ * @return ΣDC, EDC
  */
   std::pair<double, double> dc_formulas(std::string const method, double const N_tot, double const N_sigma, long const n_orb, double const U,
                                         double const J);
   /**
- * @brief compute double counting correction (H_DC) for a dc_type (method) from the G𝓒 and interaction parameters.
+ * @brief compute double counting correction for a dc_type (method) from the density matrix of a Green's function.
  * 
- * @param GC Green's function in C space
+ * @param density_matrix the density matrix [orbital, spin] indices
  * @param U_int Coulomb interaction parameter
  * @param J_hund Hund's coupling interaction parameter
  * @param method dc_formula (sFLL, cFLL, sAMF, cAMF, cHeld)
- * @return H_DC nda::array<dc_t, 2> 
+ * @return A pair of Σ_DC and E_DC
  */
   std::pair<nda::array<nda::matrix<double>, 2>, nda::matrix<double>> double_counting(nda::array<nda::matrix<dcomplex>, 2> const &density_matrix,
                                                                                      double U_int, double J_hund, std::string const method);
@@ -48,7 +48,7 @@ namespace triqs::modest {
   class dc_solver {
 
     private:
-    /// FIXME: should update to n_sigma
+    /// number of spins
     long n_sigma;
     /// double counting method to use
     std::string method;
@@ -80,7 +80,7 @@ namespace triqs::modest {
     * @brief Compute the double-counting self-energy
     * 
     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
-    * @return Double counting self-energy
+    * @return Double counting self-energy term 
     */
     std::vector<nda::matrix<dcomplex>> dc_self_energy(block_gf<imfreq, matrix_valued> const &gimp);
 

@@ -54,12 +54,12 @@ namespace triqs {
   * @details Create a Slater Hamiltonian using fully rotationally-invariant four-index interactions:
   * $$H_{\mathrm{int}} = \frac{1}{2} \sum_{ijkl, \sigma\sigma^{\prime}} U_{ijkl}c^{\dagger}_{i\sigma}c^{\dagger}_{j\sigma^{\prime}}c_{l\sigma^{\prime}}c_{k\sigma}.$$
   * 
-  * @param tau_names 
-  * @param dim_gamma 
-  * @param U_int 
-  * @param J_hund 
-  * @param spherical_to_dft 
-  * @param dft_to_local 
+  * @param tau_names names of the tau indices ['up', 'down']
+  * @param dim_gamma dimension of the blocks γ
+  * @param U_int Hubbard U
+  * @param J_hund Hund's J
+  * @param spherical_to_dft rotation matrices from spherical Ylm basis to DFT orbital basis
+  * @param dft_to_local rotation matrices from DFT basis to the local impurity basis
   */
   operators::many_body_operator make_slater(std::vector<std::string> const &tau_names, std::vector<long> const &dim_gamma, double U_int,
                                             double J_hund, nda::matrix<dcomplex> const &spherical_to_dft,
