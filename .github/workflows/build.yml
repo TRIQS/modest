@@ -52,6 +52,7 @@ jobs:
         ccache
         ninja-build
         clang-19
+        clang-tools-19
         g++
         gfortran
         hdf5-tools
