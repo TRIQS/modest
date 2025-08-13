@@ -26,10 +26,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-24.04, cxx: g++, clang_cxx: clang++-19}
-          - {os: ubuntu-24.04, cxx: clang++-19, clang_cxx: clang++-19}
-          - {os: macos-15, cxx: g++-15, clang_cxx: clang++}
-          - {os: macos-15, cxx: clang++, clang_cxx: clang++}
+          - {os: ubuntu-24.04, cxx: g++,         clang_cxx: clang++-19}
+          - {os: ubuntu-24.04, cxx: clang++-19,  clang_cxx: clang++-19}
+          - {os: macos-15,     cxx: g++-15,      clang_cxx: clang++}
+          - {os: macos-15,     cxx: clang++,     clang_cxx: clang++}
 
     runs-on: ${{ matrix.os }}
 
@@ -40,7 +40,7 @@ jobs:
       with:
         path: ${{ env.CCACHE_DIR }}
         key: ccache-${{ matrix.os }}-${{ matrix.cxx }}-${{ github.run_id }}
-        restore-keys:
+        restore-keys: |
           ccache-${{ matrix.os }}-${{ matrix.cxx }}-
 
     - name: Install ubuntu dependencies
@@ -50,6 +50,7 @@ jobs:
         sudo apt-get install lsb-release wget software-properties-common &&
         sudo apt-get install
         ccache
+        ninja-build
         clang-19
         g++
         gfortran
@@ -81,7 +82,7 @@ jobs:
 
     - name: Set up virtualenv
       run: |
-        mkdir $HOME/.venv
+        mkdir -p $HOME/.venv
         python3 -m venv --system-site-packages $HOME/.venv/my_python
         source $HOME/.venv/my_python/bin/activate
         echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
@@ -91,7 +92,7 @@ jobs:
       if: ${{ contains(matrix.os, 'macos') }}
       run: |
         brew update
-        brew install ccache gcc llvm libomp boost fftw hdf5 open-mpi openblas
+        brew install ccache ninja gcc llvm libomp boost fftw hdf5 open-mpi openblas
         pip install mako numpy scipy mpi4py
         pip install -r requirements.txt
         echo "PATH=$(brew --prefix llvm)/bin:$(brew --prefix gcc)/bin:$PATH" >> $GITHUB_ENV
@@ -106,13 +107,11 @@ jobs:
     - name: Build & Install TRIQS
       env:
         CXX: ${{ matrix.cxx }}
-        TRIQS_BRANCH: modest_updates #${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
+        TRIQS_BRANCH: modest_updates # ${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
       run: |
-        git clone https://github.com/TRIQS/triqs --branch $TRIQS_BRANCH
-        mkdir triqs/build && cd triqs/build
-        cmake .. -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
-        make -j1 install VERBOSE=1
-        cd ../
+        git clone https://github.com/TRIQS/triqs --branch "$TRIQS_BRANCH"
+        cmake -S triqs -B triqs/build -G Ninja -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX="$HOME/install"
+        cmake --build triqs/build --target install --verbose
 
     - name: Build & Install clair
       env:
@@ -120,18 +119,16 @@ jobs:
         CXXFLAGS: ""
       run: |
         git clone https://github.com/flatironinstitute/clair --branch unstable
-        mkdir clair/build && cd clair/build
-        cmake .. -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
-        make -j1 install VERBOSE=1
-        cd ../
+        cmake -S clair -B clair/build -G Ninja -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX="$HOME/install"
+        cmake --build clair/build --target install --verbose
 
     - name: Build triqs_modest
       env:
         CXX: ${{ matrix.cxx }}
       run: |
         source $HOME/install/share/triqs/triqsvars.sh
-        mkdir build && cd build && cmake ..
-        make -j2 || make -j1 VERBOSE=1
+        cmake -S . -B build -G Ninja
+        cmake --build build --verbose
 
     - name: Test triqs_modest
       env:
