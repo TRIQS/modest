@@ -58,9 +58,8 @@ jobs:
         llvm-19-dev
         libclang-19-dev
         libomp-19-dev
-        libc++-dev
-        libc++abi-dev
-        libomp-dev
+        libc++-19-dev
+        libc++abi-19-dev
         libfftw3-dev
         libgfortran5
         libgmp-dev
