@@ -1,25 +1,9 @@
-#include <gtest/gtest.h>
-#include <nda/basic_functions.hpp>
-#include <nda/gtest_tools.hpp>
-#include <nda/matrix_functions.hpp>
-#include <triqs/arrays.hpp>
-#include <triqs/mesh/imfreq.hpp>
-#include "triqs_modest/density.hpp"
-#include "triqs_modest/gloc_fixed_grid.hpp"
 #include "triqs_modest/obe_tb.hpp"
-#include "triqs_modest/utils/h5_proxy.hpp"
-#include "triqs_modest/utils/to_vector.hpp"
+#include "./common.hpp"
 
 using namespace triqs::modest;
 using namespace triqs::gfs;
 using namespace triqs;
-
-// REFACTOR This is partially duplicate with density_test.cpp
-double random_constant() {
-  std::mt19937 gen(std::random_device{}());
-  std::uniform_real_distribution<double> dist(0, 1);
-  return dist(gen);
-}
 
 ///-----------------------------------------
 auto eps   = 1.e-12;
@@ -154,7 +138,7 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   auto Sigma_single = make_random_self(obe_tb.H[0].n_orbitals(), beta);
   auto Sigma_dyn    = make_block2_gf(n_atoms, n_sigma, Sigma_single);
   // spin up/down, 3 orbitals in the single block
-  for (auto sigma : nda::range(n_sigma)) { Sigma_static(0, sigma) = nda::diag(nda::vector<dcomplex>{0.6, 0.6, 0.8}); }
+  for (auto sigma : nda::range(n_sigma)) { Sigma_static(0, sigma) = nda::diag(nda::vector<dcomplex>{0.7, 0.6, 0.8}); }
 
   // try with a self energy
   // TODO why does this not return exactly the same type as the earlier function call?
@@ -233,4 +217,4 @@ TEST(obe_tb, sr2moo4_wannier90) { // NOLINT
 */
 #endif
 
-MPI_TEST_MAIN
+MPI_TEST_MAIN;

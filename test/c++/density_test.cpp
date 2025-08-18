@@ -9,12 +9,6 @@ using namespace triqs;
 // decreasing the error. Therefore, we test the density funciton based on values pre-computed at μ = 0.0 for
 // n_iw = 30.
 
-double random_constant() {
-  std::mt19937 gen(std::random_device{}());
-  std::uniform_real_distribution<double> dist(0, 1);
-  return dist(gen);
-}
-
 std::tuple<double, one_body_elements_on_grid, block2_gf<dlr_imfreq, matrix_valued>, nda::array<nda::matrix<dcomplex>, 2>>
 load_data_w_selfenergy(std::string filename, bool zero_self = false) {
   auto root                  = h5::proxy{filename, 'r'};

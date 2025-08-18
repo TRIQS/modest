@@ -38,6 +38,20 @@ std::pair<std::vector<nda::matrix<dcomplex>>, block_gf<Mesh, matrix_valued>> spl
   return {Sigma_hartree, Sigma_dynamic};
 }
 
+// NOTE: mpi bcast is important here, otherwise each process generates its own random number;
+// this is problematic if one tests with MPI and possibily OMP
+double random_constant() {
+  double rc = 0;
+  mpi::communicator world;
+  if (world.rank() == 0) { // if this is head proc, generate number
+    std::mt19937 gen(std::random_device{}());
+    std::uniform_real_distribution<double> dist(0, 1);
+    rc = dist(gen);
+  }
+  mpi::broadcast(rc);
+  return rc;
+}
+
 namespace triqs {
   template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> make_vec_block_gf(Mesh const &mesh, std::vector<gf_struct_t> const &s_vec) {
     auto r = std::vector<block_gf<Mesh, matrix_valued>>{};

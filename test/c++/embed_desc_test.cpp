@@ -5,9 +5,7 @@
 using namespace triqs;
 
 void fill_random(nda::MemoryArray auto &A) {
-  std::mt19937 gen(std::random_device{}());
-  std::uniform_real_distribution<double> dist(0, 1);
-  for (auto &x : A) { x = dist(gen); }
+  for (auto &x : A) { x = random_constant(); }
 }
 
 void test_embed_desc_from_dft(std::string filename, double threshold) {
@@ -265,3 +263,5 @@ TEST(embed_desc_tests, api2) {
 }
 
 #endif
+
+MPI_TEST_MAIN;
