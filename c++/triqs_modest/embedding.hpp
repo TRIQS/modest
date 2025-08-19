@@ -200,10 +200,12 @@ namespace triqs::modest {
     embedding split(long imp_idx, std::vector<long> const &block_list) const;
 
     embedding split(long imp_idx, std::initializer_list<const char *> x) = delete;
+
     ///@}
 
     //------------------------------------------------------------------------------------
     template <typename Mesh> std::vector<std::pair<block_gf<Mesh, matrix_valued>, block_matrix_t>> make_zero_imp_self_energies(Mesh const &mesh) {
+
       auto make_block_matrix = [](auto const &gf_struct) {
         return gf_struct | stdv::transform([](auto &x) {
                  auto bl_size = x.second;
@@ -211,12 +213,14 @@ namespace triqs::modest {
                })
            | tl::to<std::vector<nda::matrix<dcomplex>>>();
       };
-      return imp_block_shape() | stdv::transform([&](auto const &gf_struct) {
-               auto Sigma_static  = make_block_matrix(gf_struct);
-               auto Sigma_dynamic = block_gf<Mesh, matrix_valued>{mesh, gf_struct};
-               return std::make_pair(Sigma_dynamic, Sigma_static);
-             })
-         | tl::to<std::vector>();
+
+      auto make_self_energy = [&](auto const &gf_struct) {
+        auto Sigma_static  = make_block_matrix(gf_struct);
+        auto Sigma_dynamic = block_gf<Mesh, matrix_valued>{mesh, gf_struct};
+        return std::make_pair(Sigma_dynamic, Sigma_static);
+      };
+
+      return imp_block_shape() | stdv::transform(make_self_energy) | tl::to<std::vector>();
     }
     //------------------------------------------------------------------------------------
 
@@ -241,13 +245,13 @@ namespace triqs::modest {
     block2_matrix_t embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
 
     /// embed single-particle quantities (coqui)
-    nda::array<nda::array<dcomplex, 3>, 2> embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const;
+    std::vector<nda::array<dcomplex, 3>> embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const;
 
     /// embed two-particle quantities (coqui)
-    std::vector<nda::array<dcomplex, 5>> embed(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const;
+    nda::array<dcomplex, 5> embed(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const;
 
     /// embed tensors
-    // nda::array<dcomplex, 4> embed(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const;
+    nda::array<dcomplex, 4> embed_tensor(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const;
 
     //--------------------- Extract ---------------------------------------
 
@@ -263,8 +267,9 @@ namespace triqs::modest {
     /// extract two-particle quantities (CoQui)
     std::vector<nda::array<dcomplex, 5>> extract(nda::array<dcomplex, 5> const &Pi_loc) const;
 
-    /// embed tensors
-    // std::vector<nda::array<dcomplex, 4>> extract(nda::array<dcomplex, 4> const &U_tensor) const;
+    /// extract tensors
+    std::vector<nda::array<dcomplex, 4>> extract_tensor(nda::array<dcomplex, 4> const &U_tensor) const;
+
     ///@}
   };
 
@@ -281,14 +286,25 @@ namespace triqs::modest {
  * @brief Construct the embedding class from the local space, a description of the block decomposition, and an equivalence 
  *        mapping between atom sites.
  * 
- * @param C_space the local space from one_body_elements
+ * @param spin_names the names of the spin indices
  * @param block_decomposition the decomposition of atomic orbitals into their irreducible representations
  * @param atom_to_imp [optional] a mapping between equivalent atom sites.
  * @return embedding 
  */
-  embedding make_embedding_impl(local_space const &C_space, nda::array<std::vector<long>, 2> const &block_decomposition,
-                                std::optional<std::vector<long>> const &atom_to_imp = std::nullopt);
+  embedding embedding_builder(std::vector<std::string> const &spin_names, nda::array<std::vector<long>, 2> const &block_decomposition,
+                              std::vector<long> const &atom_to_imp);
   /** @endcond */
+  /**
+ * @brief Construct the embedding class from the local space, a description of the block decomposition, and an equivalence 
+ *        mapping between atom sites.
+ * 
+ * @param spin_names the names of the spin indices
+ * @param block_decomposition the decomposition of atomic orbitals into their irreducible representations
+ * @param atom_to_imp [optional] a mapping between equivalent atom sites.
+ * @return embedding 
+ */
+  embedding embedding_builder(std::vector<std::string> const &spin_names, std::vector<std::vector<long>> const &block_decomposition,
+                              std::vector<long> const &atom_to_imp);
 
   /**
  * @ingroup embedding
@@ -296,9 +312,10 @@ namespace triqs::modest {
  * 
  * @param C_space  The local space from a one-body elements (on grid/tight-binding).
  * @param use_atom_equivalences Use the equivalences between different atoms when constructing the embedding.
+ * @param use_atom_decomp Use the atomic decomposition instead of the atomic orbital decomposition.
  * @return An embedding
  */
-  embedding make_embedding(local_space const &C_space, bool use_atom_equivalences = true);
+  embedding make_embedding(local_space const &C_space, bool use_atom_equivalences = true, bool use_atom_decomp = false);
 
   /** @} Embedding factories functions */
 
