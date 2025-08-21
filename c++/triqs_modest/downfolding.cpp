@@ -53,11 +53,11 @@ namespace triqs::modest {
     auto spin_kind     = obe.C_space.spin_kind();
     auto atomic_shells = atom_indices | stdv::transform([&](auto i) { return obe.C_space.atomic_shells()[i]; }) | tl::to<std::vector>();
 
-    auto rot_from_dft_to_local_basis = obe.C_space.rotation_from_dft_to_local_basis();
-    auto rot_from_sph_to_dft_basis   = obe.C_space.rotation_from_spherical_to_dft_basis();
+    auto new_rot_from_dft_to_local_basis = obe.C_space.rotation_from_dft_to_local_basis();
+    auto new_rot_from_sph_to_dft_basis   = obe.C_space.rotation_from_spherical_to_dft_basis();
     for (auto &&[iatom, atom] : enumerate(atom_indices)) {
-      rot_from_dft_to_local_basis(iatom, r_all) = obe.C_space.rotation_from_dft_to_local_basis()(atom, r_all);
-      rot_from_sph_to_dft_basis(iatom)          = obe.C_space.rotation_from_spherical_to_dft_basis()(atom);
+      new_rot_from_dft_to_local_basis(iatom, r_all) = obe.C_space.rotation_from_dft_to_local_basis()(atom, r_all);
+      new_rot_from_sph_to_dft_basis(iatom)          = obe.C_space.rotation_from_spherical_to_dft_basis()(atom);
     }
 
     auto n_atoms = atom_partition.size();
@@ -73,7 +73,7 @@ namespace triqs::modest {
       }
     }
 
-    auto new_C_space = local_space{spin_kind, atomic_shells, irreps_per_atom, rot_from_dft_to_local_basis, rot_from_sph_to_dft_basis};
+    auto new_C_space = local_space{spin_kind, atomic_shells, irreps_per_atom, new_rot_from_dft_to_local_basis, new_rot_from_sph_to_dft_basis};
 
     auto atom_decomp = obe.C_space.atomic_decomposition() | tl::to<std::vector>();
 
@@ -93,16 +93,21 @@ namespace triqs::modest {
       P_k(r_all, r_all, sli, r_all) = new_P_k_list[atom](r_all, r_all, nda::range(0, new_atom_decomp[atom]), r_all);
     }
 
-    auto n_bands_per_k = obe.P.n_bands_per_k;
-    downfolding_projector new_P{.spin_kind = spin_kind, .P_k = P_k, .n_bands_per_k = n_bands_per_k};
+    downfolding_projector new_P{.spin_kind = spin_kind, .P_k = P_k, .n_bands_per_k = obe.P.n_bands_per_k};
 
     if (!obe.ibz_symm_ops) return {.H = obe.H, .C_space = new_C_space, .P = new_P, .ibz_symm_ops = {}};
 
-    auto ibz_symm_ops     = obe.ibz_symm_ops.value();
-    auto new_ibz_symm_ops = ibz_symm_ops;
-    for (auto &&[isym, sym_op] : enumerate(new_ibz_symm_ops.ops)) {
-      sym_op.mats        = atom_indices | stdv::transform([&](auto i) { return ibz_symm_ops.ops[isym].mats[i]; }) | tl::to<std::vector>();
-      sym_op.permutation = atom_indices | stdv::transform([&](auto i) { return ibz_symm_ops.ops[isym].permutation[i]; }) | tl::to<std::vector>();
+    std::vector<long> inv_atom_indices(atom_indices.size());
+    for (long i = 0; i < atom_indices.size(); ++i) { inv_atom_indices[atom_indices[i]] = i; }
+
+    auto new_ibz_symm_ops = obe.ibz_symm_ops.value();
+    for (auto &op : new_ibz_symm_ops.ops) {
+      auto old_perm = op.permutation;
+      auto old_mats = op.mats;
+      for (auto i : range(atom_indices.size())) {
+        op.permutation[i] = inv_atom_indices[old_perm[atom_indices[i]]];
+        op.mats[i]        = old_mats[atom_indices[i]];
+      }
     }
     return {.H = obe.H, .C_space = new_C_space, .P = new_P, .ibz_symm_ops = new_ibz_symm_ops};
   }
@@ -126,18 +131,21 @@ namespace triqs::modest {
         results_per_atom(atom_idx, sigma) = hloc0;
       }
     }
+
     if (auto const &S = obe.ibz_symm_ops; S) results_per_atom = S->symmetrize(results_per_atom);
     // FIXME : why are we doing this ? If so, why did we compute all of them before ?
+
     for (auto atom_idx : range(n_atoms)) {
       if (auto inequiv = obe.C_space.first_shell_of_its_equiv_cls(atom_idx); atom_idx != inequiv) {
         results_per_atom(atom_idx, r_all) = results_per_atom(inequiv, r_all);
       }
     }
+
     auto result = nda::array<nda::matrix<dcomplex>, 2>{1, n_sigma};
     for (auto sigma : range(n_sigma)) {
       result(0, sigma) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim());
-      for (auto const &[atm, r_atom] : enumerated_sub_slices(obe.C_space.atomic_decomposition())) {
-        result(0, sigma)(r_atom, r_atom) = results_per_atom(atm, sigma);
+      for (auto const &[atom, r_atom] : enumerated_sub_slices(obe.C_space.atomic_decomposition())) {
+        result(0, sigma)(r_atom, r_atom) = results_per_atom(atom, sigma);
       }
     }
     return result;
