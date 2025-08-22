@@ -227,49 +227,59 @@ namespace triqs::modest {
     // ****************************************************
     //     Embedding Extract/Embed methods
     // ****************************************************
-    //--------------------- Embed -----------------------------------------
     /** @name Complex Ops
     * Embedding methods which operate on a given object X where X ∈ (block2gf, block_gf, block_matrix, etc.)
     */
     ///@{
 
-    /// embed single-particle quantities
+    //--------------------- Embed -----------------------------------------
+
+    /// embed single-particle quantities (TRIQS/ModEST)
     template <typename Mesh> block2_gf<Mesh, matrix_valued> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const;
 
-    /// embed single-particle quantities
+    /// embed single-particle quantities (TRIQS/ModEST)
     template <typename Mesh>
     std::pair<block2_gf<Mesh, matrix_valued>, block2_matrix_t> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec,
                                                                      std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
-
-    /// embed block matrices
+    /// embed block matrices (TRIQS/ModEST)
     block2_matrix_t embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
 
-    /// embed single-particle quantities (coqui)
-    std::vector<nda::array<dcomplex, 3>> embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const;
+    //--------------------- Extract ---------------------------------------
 
-    /// embed two-particle quantities (coqui)
-    nda::array<dcomplex, 5> embed(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const;
+    /// extract single-particle quantities (TRIQS/ModEST)
+    template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block2_gf<Mesh, matrix_valued> const &g_loc) const;
 
-    /// embed tensors
+    /// extract matrices (TRIQS/ModEST)
+    std::vector<block_matrix_t> extract(block2_matrix_t const &matrix_C) const;
+    ///@}
+
+    /** @name CoQui Ops
+    * Embedding methods which operate on a given object X where X ∈ (nda::array<dcomplex, 4>, nda::array<dcomplex, 5>, etc.)
+    * These methods are used to extract and embed quantities in the CoQui format.
+    */
+    ///@{
+
+    //--------------------- Embed -----------------------------------------
+
+    /// embed single-particle quantities (CoQui)
+    std::vector<nda::array<dcomplex, 3>> embed_1p(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const;
+
+    /// embed two-particle quantities (CoQui)
+    nda::array<dcomplex, 5> embed_2p(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const;
+
+    /// embed tensors (CoQui)
     nda::array<dcomplex, 4> embed_tensor(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const;
 
     //--------------------- Extract ---------------------------------------
 
-    /// extract single-particle quantities (ModEST)
-    template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block2_gf<Mesh, matrix_valued> const &g_loc) const;
-
-    /// extract matrices
-    std::vector<block_matrix_t> extract(block2_matrix_t const &matrix_C) const;
-
     /// extract single-particle quantities (CoQui)
-    std::vector<std::vector<nda::array<dcomplex, 3>>> extract(nda::array<dcomplex, 4> const &g_loc) const;
+    std::vector<std::vector<nda::array<dcomplex, 3>>> extract_1p(nda::array<dcomplex, 4> const &g_loc) const;
 
     /// extract two-particle quantities (CoQui)
-    std::vector<nda::array<dcomplex, 5>> extract(nda::array<dcomplex, 5> const &Pi_loc) const;
+    std::vector<nda::array<dcomplex, 5>> extract_2p(nda::array<dcomplex, 5> const &Pi_loc) const;
 
-    /// extract tensors
+    /// extract tensors (CoQui)
     std::vector<nda::array<dcomplex, 4>> extract_tensor(nda::array<dcomplex, 4> const &U_tensor) const;
-
     ///@}
   };
 
@@ -294,6 +304,7 @@ namespace triqs::modest {
   embedding embedding_builder(std::vector<std::string> const &spin_names, nda::array<std::vector<long>, 2> const &block_decomposition,
                               std::vector<long> const &atom_to_imp);
   /** @endcond */
+
   /**
  * @brief Construct the embedding class from the local space, a description of the block decomposition, and an equivalence 
  *        mapping between atom sites.
@@ -310,12 +321,36 @@ namespace triqs::modest {
  * @ingroup embedding
  * @brief Make an embedding from the local space
  * 
+ * @details This function creates an embedding object from the local space, which is typically used in ModEST for embedding calculations.
+ * The default behavior is to use the equivalences between different atoms when constructing the embedding and to use the irrep decomposition of the atomic orbitals.
+ * Instead of the irrep decomposition, one can use the atomic decomposition.
+ * 
  * @param C_space  The local space from a one-body elements (on grid/tight-binding).
  * @param use_atom_equivalences Use the equivalences between different atoms when constructing the embedding.
  * @param use_atom_decomp Use the atomic decomposition instead of the atomic orbital decomposition.
  * @return An embedding
  */
   embedding make_embedding(local_space const &C_space, bool use_atom_equivalences = true, bool use_atom_decomp = false);
+
+  // -----------------------------------------------------------------------
+  /**
+ * @ingroup embedding
+ * @brief Make an embedding for clusters of atoms.
+ *
+ * @details This function creates an embedding object from the one-body elements on grid (obe) and a partition of the atoms into clusters.
+ * The clusters are defined by the atom_partition, which is a vector of vectors, where each inner vector contains the indices of the atoms in the cluster.
+ * The resulting one-body elements on grid (new_obe) will have the atoms permuted according to the atom_partition.
+ * 
+ * @param obe one-body elements on grid (obe) to permute.
+ * @param atom_partition new partition of the atoms into clusters, where each inner vector contains the indices of the atoms in the cluster.
+ * @return a new one-body elements on grid (new_obe) and the corresponding embedding object.
+ */
+  inline std::pair<one_body_elements_on_grid, embedding> make_embedding_with_clusters(one_body_elements_on_grid obe,
+                                                                                      std::vector<std::vector<long>> const &atom_partition) {
+    auto new_obe = permute_local_space(atom_partition, obe);
+    auto E       = make_embedding(new_obe.C_space, false);
+    return {new_obe, E};
+  }
 
   /** @} Embedding factories functions */
 
@@ -390,14 +425,6 @@ namespace triqs::modest {
       return gimp;
     };
     return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-
-  // -----------------------------------------------------------------------
-  inline std::pair<one_body_elements_on_grid, embedding> make_embedding_with_clusters(one_body_elements_on_grid obe,
-                                                                                      std::vector<std::vector<long>> const &atom_partition) {
-    auto new_obe = permute_local_space(atom_partition, obe);
-    auto E       = make_embedding(new_obe.C_space, false);
-    return {new_obe, E};
   }
 
   // ------------------------------------------------------------------------------

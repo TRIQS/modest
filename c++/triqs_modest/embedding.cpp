@@ -381,7 +381,7 @@ namespace triqs::modest {
   }
   // --------------------------------------------------------------------------------------------
 
-  std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract(nda::array<dcomplex, 4> const &g_loc) const {
+  std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract_1p(nda::array<dcomplex, 4> const &g_loc) const {
 
     auto imp_gf_stru_list = imp_block_shape();
     auto n_w              = g_loc.extent(0);
@@ -405,7 +405,7 @@ namespace triqs::modest {
   }
   // --------------------------------------------------------------------------------------------
 
-  std::vector<nda::array<dcomplex, 3>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const {
+  std::vector<nda::array<dcomplex, 3>> embedding::embed_1p(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const {
 
     auto Sigma_embed = nda::array<nda::array<dcomplex, 3>, 2>(n_alpha(), n_sigma());
     auto n_w         = Sigma_imp_vec[0][0].extent(0);
@@ -432,7 +432,7 @@ namespace triqs::modest {
   // --------------------------------------------------------------------------------------------
 
   //FIXME : protect this function as it will only work with a Pi_embed_decomp
-  std::vector<nda::array<dcomplex, 5>> embedding::extract(nda::array<dcomplex, 5> const &pi_loc) const {
+  std::vector<nda::array<dcomplex, 5>> embedding::extract_2p(nda::array<dcomplex, 5> const &pi_loc) const {
 
     auto Pi_E = std::vector<nda::array<dcomplex, 5>>{};
     for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { Pi_E.emplace_back(pi_loc(r_all, r_alpha, r_alpha, r_alpha, r_alpha)); }
@@ -448,7 +448,7 @@ namespace triqs::modest {
   // --------------------------------------------------------------------------------------------
 
   //FIXME : protect this function as it will only work with a Pi_embed_decomp
-  nda::array<dcomplex, 5> embedding::embed(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const {
+  nda::array<dcomplex, 5> embedding::embed_2p(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const {
 
     auto n_w = pi_imp_vec[0].extent(0);
 
