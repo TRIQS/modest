@@ -320,7 +320,6 @@ namespace triqs::modest {
   // ----------------------------------------------------------------------
 
   std::vector<block_matrix_t> embedding::extract(block2_matrix_t const &matrix_C) const {
-    if (matrix_C.shape() != std::array<long, 2>{1, 2}) { throw std::runtime_error(fmt::format("Incorrect shape {} != (1,2)", matrix_C.shape())); }
 
     auto imp_gf_stru_list = imp_block_shape();
 
