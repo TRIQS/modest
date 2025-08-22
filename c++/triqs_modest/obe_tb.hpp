@@ -19,7 +19,10 @@
 namespace triqs::modest {
 
   using triqs::lattice::superlattice;
-
+  /**
+ * @ingroup one_body_elements
+ * @brief A one-body elements object using a tight-binding Hamiltonian.
+ */
   struct one_body_elements_tb {
     local_space C_space;
     std::vector<tb_hamiltonian> H; // positibility to have two spin channels for spin pol
@@ -27,7 +30,13 @@ namespace triqs::modest {
     //C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
   };
 
+  /** @name OBE factories using a TB Hamiltonian
+ *  Factory functions to create one_body_elements_on_tb
+ *  @{
+ */
+
   /** 
+   * @ingroup one_body_elements
    * @brief Construct a obe_tb from Wannier90 in the case of a single spin index. 
    * 
    * @param wannier_file_path string to Wannier90 files, including the prefix, 
@@ -41,6 +50,7 @@ namespace triqs::modest {
                                                         std::vector<atomic_orbs> atomic_shells);
 
   /** 
+   * @ingroup one_body_elements
    * @brief Construct a obe_tb from Wannier90 in the case with separate spin up/spin down channels.
    * 
    * @param wannier_file_path_up string to Wannier90 files, including the prefix, for the up spin channel, 
@@ -54,6 +64,8 @@ namespace triqs::modest {
    */
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
                                                         spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells);
+
+  /** @} */ // tb  factories
 
   /// Helper to contruct and return an OBE_tb object given a list of tb_Hamiltonians of length n_sigma
   C2PY_IGNORE one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> const tb_H_sigma, spin_kind_e spin_kind,
@@ -86,6 +98,10 @@ namespace triqs::modest {
   one_body_elements_tb fold(superlattice const &sl, one_body_elements_tb const &obe);
 
   //  -----------------------------------------------------------------------
+
+  /** @name Local Green's function using a TB Hamiltonian
+  */
+  ///@{
 
   /** 
     * @ingroup gloc
@@ -149,6 +165,8 @@ namespace triqs::modest {
     for (auto sigma : range(obe.C_space.n_sigma())) { result(0, sigma) = gloc(mesh, obe.H[sigma], mu, opt); }
     return result;
   }
+
+  ///@}
 
   //  -----------------------------------------------------------------------
 
