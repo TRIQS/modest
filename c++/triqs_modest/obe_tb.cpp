@@ -58,9 +58,6 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  //TODO docstring
-  /** Helper function to calculate Hloc given a vector of H with length sigma (contained in Wannier OBE)
-   */
   nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_orbs> const &atomic_shells) {
 
     // group the shells into atom indices
@@ -101,8 +98,6 @@ namespace triqs::modest {
     return Hloc_result;
   }
 
-  /** Compute the local impurity levels from the single-particle dispersion.
-  */
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe) {
 
     auto n_atoms = obe.C_space.n_atoms();

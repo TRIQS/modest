@@ -84,7 +84,7 @@ namespace triqs::modest {
    * @brief Compute the atomic (impurity) levels from an obe.
    * 
    * @param obe One-body elements
-   * @return Atomic impurity levels 
+   * @return Impurity levels stored in the format [n_atoms, n_sigma] 
    */
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe);
 
