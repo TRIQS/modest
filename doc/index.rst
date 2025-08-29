@@ -14,10 +14,9 @@ modest
          :target: https://github.com/triqs/modest
 
 
-An example application using cpp2py and :ref:`TRIQS <triqslibs:welcome>`.
+.. include:: ./common_docs/common_overview.md
 
-This documentation is generated based on `rst <https://de.wikipedia.org/wiki/ReStructuredText>`_ files
-and the comments in the sources and headers.
+To get started, see the :ref:`installation instructions <install>`.
 
 Learn how to use modest in the :ref:`documentation`.
 
