@@ -1,0 +1,45 @@
+# Name of the package if any. Package.ModuleName will be the module name 
+package_name = "triqs_modest"
+
+# The documentation string of the module. 
+documentation = '''The embedding abstraction in ModEST. 
+
+The **embedding** object is the central controller of the DMFT problem: it defines how the correlated subspace (:math:`\mathcal{C}`) 
+is partitioned into impurities and handles the bookkeeping needed to map back and forth between the lattice and the impurities.
+
+Typical use cases covered by embedding:
+
+- **Equivalent atoms**: use the same impurity model (i.e. same :math:`n_{\mathrm{imp}}`) for different blocks :math:`\alpha`.
+- **Magnetic order**: just reverse the spin for some atoms, :math:`\tau(\sigma) = 1-\sigma`
+- **Splitting impurity models** : Depending on the block structure of the problem, the corresponding impurity model connected to 
+  atom :math:`a` can be split. Different impurity solvers can then be used for each of these split impurity models. The self-energies 
+  from both models map back to the a single atom :math:`a`. Or a trivial solver is used to obtain zero self-energy (drop).
+- **cluster DMFT**: re-group a subset of atoms :math:`a` into a larger super atom which will be treated as a cluster DMFT problem.
+
+The embedding object provides:
+
+* Factory functions to conveniently construct common embeddings.
+* Operations to adapt and modify an embedding (e.g., split, drop, etc.).
+* Methods to map data between impurity and embed spaces.
+
+This abstrction simplifies the DMFT loop, making it easy to construct arbitrary embedding scenarios.
+'''
+
+# Namespace. 
+# Only the classes/functions/enums declared in this namespace will be wrapped
+namespaces = "triqs triqs::modest  triqs::lattice"
+
+# Match/reject elements according to regex
+# If match_names/match_names are both set, filter for all elements 
+# Algorithm is (for an element X of fully qualified name Qname)
+#    if match_names and not match_names match Qname : skip X
+#    if reject_names and reject_names match Qname : skip X
+#    else keep X.
+
+match_names = "triqs::modest::(embedding|make_embedding|make_embedding_with_clusters|embedding_builder)"
+
+# Only keep elements declared in files matching the pattern
+# match_files = "" # String must be a regex
+
+exclude_system_headers = false
+wrap_no_arg_methods_as_properties = true

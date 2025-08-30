@@ -14,8 +14,8 @@
 #include "triqs_modest/obe_tb.hpp"
 #include "triqs/lattice/superlattice.hpp"
 
-namespace c2py_module {
-  using DMFTCheckpoint = triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>;
-} // namespace c2py_module
+#include "embedding.wrap.hxx"
+#include "obe.wrap.hxx"
+#include "utils/file_io.wrap.hxx"
 
-#include "module.wrap.cxx"
+#include "misc.wrap.cxx"

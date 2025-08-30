@@ -1,0 +1,43 @@
+# Name of the package if any. Package.ModuleName will be the module name 
+package_name = "triqs_modest"
+
+# The documentation string of the module. 
+documentation = '''Local Green's functions.
+
+Compute the local Green's function defined as:
+
+.. math::
+  
+    [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big  [ (\omega + \mu)\delta_{\nu\nu'} - 
+    H^{\sigma}_{\nu\nu'}(\mathbf{k}) - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} 
+    [P_{m'\nu'}^{\sigma}]^{\dagger},
+
+where :math:`\omega` is a frequency (either real- or Matsubra), :math:`\mu` is the chemical potential, :math:`H(\mathbf{k})` is the one-body 
+Hamiltonian, :math:`P(\mathbf{k})` are the projectors from the band to the orbital basis, and :math:`\Sigma_{\mathrm{embed}}` is the embedded 
+self-energy.
+
+ModEST computes this efficiently:
+
+* **Woodbury**: reduces the cost of matrix inversion from cubic in the number of bands to linear.
+* **Adaptive Brillouin zone integration**: for tight-binding models, allows you to specify desired integration accuracy, 
+  improving predictions of transport properties.
+'''
+
+# Namespace. 
+# Only the classes/functions/enums declared in this namespace will be wrapped
+namespaces = "triqs triqs::modest  triqs::lattice"
+
+# Match/reject elements according to regex
+# If match_names/match_names are both set, filter for all elements 
+# Algorithm is (for an element X of fully qualified name Qname)
+#    if match_names and not match_names match Qname : skip X
+#    if reject_names and reject_names match Qname : skip X
+#    else keep X.
+
+match_names = "triqs::modest::gloc"
+
+# Only keep elements declared in files matching the pattern
+# match_files = "" # String must be a regex
+
+exclude_system_headers = false
+wrap_no_arg_methods_as_properties = true

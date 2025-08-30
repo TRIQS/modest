@@ -1,0 +1,42 @@
+# Name of the package if any. Package.ModuleName will be the module name 
+package_name = "triqs_modest"
+
+# The documentation string of the module. 
+documentation = '''Impurity levels and hybridization function.
+
+Compute the hybridziation function
+
+.. math::
+
+    [ \Delta^{\sigma} ]_{m m'} = \omega  -\tilde{\varepsilon} - G_{\mathrm{loc}}^{-1}(\omega) - \Sigma_{\mathrm{imp}}(\omega),
+
+where :math:`\omega` is a frequency, :math:`\tilde{\varepsilon}` are the effective local levels of the impurity, and 
+:math:`\Sigma_{\mathrm{imp}}` is the impurity self-energy.
+
+The effecitve local levels are defined as:
+
+.. math::
+
+    \tilde{\varepsilon} = \varepsilon - \mu - \Sigma_{\mathrm{DC}},
+
+where :math:`\mu` is the chemical potential and :math:`\Sigma_{\mathrm{DC}}` is the double counting self-energy.
+'''
+
+# Namespace. 
+# Only the classes/functions/enums declared in this namespace will be wrapped
+namespaces = "triqs triqs::modest  triqs::lattice"
+
+# Match/reject elements according to regex
+# If match_names/match_names are both set, filter for all elements 
+# Algorithm is (for an element X of fully qualified name Qname)
+#    if match_names and not match_names match Qname : skip X
+#    if reject_names and reject_names match Qname : skip X
+#    else keep X.
+
+match_names = "triqs::modest::(hybridization|impurity_levels)"
+
+# Only keep elements declared in files matching the pattern
+# match_files = "" # String must be a regex
+
+exclude_system_headers = false
+wrap_no_arg_methods_as_properties = true

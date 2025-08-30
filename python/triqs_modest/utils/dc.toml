@@ -1,0 +1,32 @@
+# Name of the package if any. Package.ModuleName will be the module name 
+package_name = "triqs_modest.utils"
+
+# The documentation string of the module. 
+documentation = '''The implementation of the double counting correction within DFT+DMFT. 
+
+DFT+DMFT requires subtracting a "double counting" term :math:`\Sigma_{\mathrm{DC}}` to avoid counting static correlations twice. 
+ModEST abstracts this into a dedicated solver that computes :math:`\Sigma_{\mathrm{DC}}` based on dirrect formulas.
+
+We abstract phenomenological term into an additional "solver" that takes as input a Green's function and returns the double counting 
+correction to the self-energy and/or the doube counting correction to the total energy.
+This solver is useful for cases when the double counting can not be absorbed into the chemical potential (e.g., charge self-consistent 
+DFT+DMFT d-p models, etc.).'''
+
+# Namespace. 
+# Only the classes/functions/enums declared in this namespace will be wrapped
+namespaces = "triqs triqs::modest  triqs::lattice"
+
+# Match/reject elements according to regex
+# If match_names/match_names are both set, filter for all elements 
+# Algorithm is (for an element X of fully qualified name Qname)
+#    if match_names and not match_names match Qname : skip X
+#    if reject_names and reject_names match Qname : skip X
+#    else keep X.
+
+match_names = "triqs::modest::(dc_solver|dc_formulas)"
+
+# Only keep elements declared in files matching the pattern
+# match_files = "" # String must be a regex
+
+exclude_system_headers = false
+wrap_no_arg_methods_as_properties = true

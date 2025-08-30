@@ -2,7 +2,13 @@
 package_name = "triqs_modest"
 
 # The documentation string of the module. 
-documentation = "Python Module for TRIQS Modular Electronic Structure Toolkit"
+documentation = '''Functions to calculate the total electron density of lattice Green's functions using different methods 
+and methods for chemical potenital searching given a target density.
+
+Calculate the total electronic density from the lattice Green's function and search for the chemical potential that gives a 
+target electron count. We provide several algorithms optimized for speed and robustness. Due to the modularity you can also 
+leverage external root finding routines to write a custom chemical potential search.
+'''
 
 # Namespace. 
 # Only the classes/functions/enums declared in this namespace will be wrapped
@@ -15,8 +21,7 @@ namespaces = "triqs triqs::modest  triqs::lattice"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::|triqs::(root_finder|make_kanamori|make_slater|make_density_density|U_matrix_in_spherical_basis|tb_hamiltonian|fold)|triqs::lattice::(superlattice|bz_int_options)"
-reject_names = "triqs::modest::(ibz_symmetry_ops|rotate_local_basis)"
+match_names = "triqs::modest::(density|find_chemical_potential|density_nk)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex

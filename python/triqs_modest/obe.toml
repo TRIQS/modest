@@ -1,0 +1,37 @@
+# Name of the package if any. Package.ModuleName will be the module name 
+package_name = "triqs_modest"
+
+# The documentation string of the module. 
+documentation = '''The one-body elements abstraction in ModEST.
+
+One-body elements (obe for short) contains all of the one-body data that is typically converted from a density-functional theory (DFT) 
+calculation or Wannier90 calculation. The one-body elements struct contains four components:
+
+- **Local space** defines the local correlated subspace to be solved within DMFT.
+- **Band dispersion** contains the band dispersion :math:`\varepsilon(k, \nu, \sigma)`  where :math:`\varepsilon` is the energy at 
+  momentum k, band index :math:`\sigma`, and spin :math:`\sigma`.
+- **Downfolding projector** contains the projector which downfolds from Bloch space :math:`\mathcal{B}` (indexed by :math:`\nu`) to the 
+  correlated space (index by :math:`m`).    
+
+To make it easy to build this object, ModEST provides factory functions that convert raw DFT data (from codes like VASP, Wien2k, or 
+Wannier90) into fully prepared OBE objects ready for DMFT.
+'''
+
+# Namespace. 
+# Only the classes/functions/enums declared in this namespace will be wrapped
+namespaces = "triqs triqs::modest  triqs::lattice"
+
+# Match/reject elements according to regex
+# If match_names/match_names are both set, filter for all elements 
+# Algorithm is (for an element X of fully qualified name Qname)
+#    if match_names and not match_names match Qname : skip X
+#    if reject_names and reject_names match Qname : skip X
+#    else keep X.
+
+match_names = "triqs::modest::(band_dispersion|downfolding_projector|local_space|one_body_elements_on_grid|one_body_elements_tb|one_body_elements_from_dft_converter|one_body_elements_with_theta_projectors|one_body_elements_on_high_symmetry_path|one_body_elements_from_wannier90)"
+
+# Only keep elements declared in files matching the pattern
+# match_files = "" # String must be a regex
+
+exclude_system_headers = false
+wrap_no_arg_methods_as_properties = true
