@@ -28,6 +28,12 @@ template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements_tb>
 
 // ==================== enums =====================
 
+template <>
+std::map<triqs::modest::spin_kind_e, str_t> c2py::enum_to_string<triqs::modest::spin_kind_e> = {
+   {triqs::modest::spin_kind_e::Polarized, "Polarized"},
+   {triqs::modest::spin_kind_e::NonPolarized, "NonPolarized"},
+   {triqs::modest::spin_kind_e::NonColinear, "NonColinear"}};
+
 // ==================== module classes =====================
 
 template <> inline constexpr auto c2py::tp_name<triqs::modest::local_space> = "triqs_modest.obe.LocalSpace";
