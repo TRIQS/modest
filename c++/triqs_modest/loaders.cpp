@@ -11,9 +11,9 @@
 #include "utils/graph_algo.hpp"
 
 namespace triqs::modest {
-  /// utility to flatten a nested vector (move to utils/ ?)
+  // utility to flatten a nested vector (move to utils/ ?)
 
-  /// free function for svd (FIXME: nda::linalg::svd) (see TRIQS/nda PR#103)
+  // free function for svd (FIXME: nda::linalg::svd) (see TRIQS/nda PR#103)
   nda::matrix<dcomplex> svd(const nda::matrix<dcomplex> &A) {
     auto Acopy = nda::matrix<dcomplex, nda::F_layout>{transpose(A)};
     long m     = Acopy.extent(0);
@@ -25,7 +25,7 @@ namespace triqs::modest {
   }
 
   namespace detail {
-    /// inject an object T from the C space to W space (used in the context of post-processing).
+    // inject an object T from the C space to W space (used in the context of post-processing).
     nda::array<std::vector<long>, 2> inject_to_new_space(nda::array<std::vector<long>, 2> const &T, std::vector<atomic_orbs> const &old_space,
                                                          std::vector<atomic_orbs> const &new_space) {
       auto n_atoms = new_space.size();
@@ -48,8 +48,8 @@ namespace triqs::modest {
   } // namespace detail
 
   //-------------------------------------------------------
-  /// Disovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
-  /// Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
+  // Disovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
+  // Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
   std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<dcomplex>, 2>>
   discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0, std::vector<atomic_orbs> const &atomic_shells, double block_threshold,
                       bool diagonalize_hloc) {
@@ -79,7 +79,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Enumerate the different reading modes for the obe factory functions.
+  // Enumerate the different reading modes for the obe factory functions.
   enum class ReadMode {
     Correlated,      // reads bands, projectors, and correlated shells from "dft_input"
     ThetaProjectors, // read bands ands shells from "dft_input" and projectors from "dft_parproj_input" ("proj_mat_all")
@@ -87,7 +87,7 @@ namespace triqs::modest {
   };
 
   //-------------------------------------------------------
-  /// Read rotation matrices from hdf5. (internal)
+  // Read rotation matrices from hdf5. (internal)
   std::vector<cmat_t> read_rotation_matrices(std::string const &filename, ReadMode mode) {
 
     auto root = h5::proxy{filename, 'r'};
@@ -110,7 +110,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Read projectors using ReadMode, rotate to local frame, and embed them in the M space. (internal)
+  // Read projectors using ReadMode, rotate to local frame, and embed them in the M space. (internal)
   nda::array<dcomplex, 4> load_rotate_and_format_projectors(std::string const &filename, ReadMode mode, std::vector<cmat_t> const &rot_mats,
                                                             std::vector<long> const &atom_decomp) {
     auto load_Pks = [](auto f, auto m) {
@@ -151,7 +151,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Read band dispersion and k-weights according to ReadMode. (internal)
+  // Read band dispersion and k-weights according to ReadMode. (internal)
   std::tuple<nda::array<dcomplex, 4>, nda::matrix<long>, nda::array<double, 1>> read_bands_and_weights(std::string filename, ReadMode mode) {
     auto root = h5::proxy{filename, 'r'};
     if (mode == ReadMode::Correlated || mode == ReadMode::ThetaProjectors) {
@@ -167,7 +167,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Setup spin_kind enum. (internal)
+  // Setup spin_kind enum. (internal)
   spin_kind_e read_spin_kind(auto const &filename) {
     // set up spin_type
     auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
@@ -175,7 +175,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Read atomic shells according to ReadMode. (internal)
+  // Read atomic shells according to ReadMode. (internal)
   std::vector<atomic_orbs> read_atomic_shells(auto const &filename, ReadMode mode) {
     auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
     return ((mode == ReadMode::Correlated) ? sort_keys_as_int(g_dft["corr_shells"]) : sort_keys_as_int(g_dft["shells"]))
@@ -187,7 +187,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Prepare the spherical Ylm to DFT orbital basis rotations. (internal)
+  // Prepare the spherical Ylm to DFT orbital basis rotations. (internal)
   nda::array<nda::matrix<dcomplex>, 1> read_spherical_to_dft_basis(std::string dft, std::vector<atomic_orbs> const &atomic_shells) {
     //TODO: finish this!
     auto code = dft_code::dft_code_to_enum(dft);
@@ -197,7 +197,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Construct the ibz_symmetry_ops according to ReadMode.
+  // Construct the ibz_symmetry_ops according to ReadMode.
   ibz_symmetry_ops read_ibz_symmetry_ops(auto const &filename, ReadMode mode) {
 
     auto root = h5::proxy{filename, 'r'};
@@ -249,7 +249,7 @@ namespace triqs::modest {
   };
 
   //-------------------------------------------------------
-  /// Prepare one-body elements for a DMFT calculation.
+  // Prepare one-body elements for a DMFT calculation.
   std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold,
                                                                                     bool diagonalize_hloc) {
     //TODO: add verbosity, currently not used.
@@ -263,23 +263,23 @@ namespace triqs::modest {
        as<long>(g_dft["charge_below"]);
     total_density -= charge_below;
 
-    /// set up spin_type
+    // set up spin_type
     auto spin_kind = read_spin_kind(filename);
 
-    /// set up atomic shells
+    // set up atomic shells
     auto atomic_shells = read_atomic_shells(filename, ReadMode::Correlated);
 
-    /// disperion and k weights
+    // disperion and k weights
     auto [H_k, n_bands_per_k, k_weights] = read_bands_and_weights(filename, ReadMode::Correlated);
 
-    /// rotation matrices in csc mode
+    // rotation matrices in csc mode
     auto rot_mats = read_rotation_matrices(filename, ReadMode::Correlated);
 
-    /// read and rotate projectors
+    // read and rotate projectors
     auto atom_decomp = atomic_shells | stdv::transform([](auto &x) { return x.dim; }) | tl::to<std::vector<long>>();
     auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::Correlated, rot_mats, atom_decomp);
 
-    /// read symmetry ops
+    // read symmetry ops
     //FIXME: auto symm_ops = (long(g_dft["symm_op"]) == 0) ? ibz_symmetry_ops{} : read_ibz(root, atomic_shells, Rmats);
     auto symm_ops        = (long(g_dft["symm_op"]) == 0) ? std::optional<ibz_symmetry_ops>{} :
                                                            std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::Correlated));
@@ -288,7 +288,7 @@ namespace triqs::modest {
                  .spin_kind = spin_kind, .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = k_weights, .matrix_valued = !H_k_is_diagonal};
     auto proj = downfolding_projector{.spin_kind = spin_kind, .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
 
-    /// build a first version without symmetries
+    // build a first version without symmetries
     auto C_space_no_symm = local_space{spin_kind, atomic_shells, {}, {}, {}};
     auto obe             = one_body_elements_on_grid{.H = eps_k, .C_space = C_space_no_symm, .P = proj, .ibz_symm_ops = std::move(symm_ops)};
 
@@ -324,7 +324,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Prepare one-body elements with the Θ projectors.
+  // Prepare one-body elements with the Θ projectors.
   one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe) {
     //check for group and throw error
     auto root = h5::proxy{filename, 'r'};
@@ -332,24 +332,24 @@ namespace triqs::modest {
       throw std::runtime_error{fmt::format("The hdf5 file {} does not contain the group dft_parproj_input", filename)};
     }
 
-    /// all the atomic shells
+    // all the atomic shells
     auto atomic_shells = read_atomic_shells(filename, ReadMode::ThetaProjectors);
 
-    /// The decomposition and rotations must be embedded from the C spcae to the W space
+    // The decomposition and rotations must be embedded from the C spcae to the W space
     auto new_block_decomposition = detail::inject_to_new_space(obe.C_space.atoms_block_decomposition(), obe.C_space.atomic_shells(), atomic_shells);
 
-    /// The local space expanded from C to W
+    // The local space expanded from C to W
     auto W_space = local_space{obe.C_space.spin_kind(), atomic_shells, new_block_decomposition, {}, {}};
 
-    /// rotation matrices using ThetaProjector mode
+    // rotation matrices using ThetaProjector mode
     auto rot_mats = read_rotation_matrices(filename, ReadMode::ThetaProjectors);
 
-    /// read and rotate projectors
+    // read and rotate projectors
     auto atom_decomp = W_space.atomic_decomposition() | tl::to<std::vector<long>>();
     auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::ThetaProjectors, rot_mats, atom_decomp);
     auto theta_proj  = downfolding_projector{.spin_kind = obe.C_space.spin_kind(), .P_k = std::move(P_k), .n_bands_per_k = obe.H.n_bands_per_k};
 
-    /// create a new IBZ symmetrizer that spans all atoms instead of just the correlated atoms
+    // create a new IBZ symmetrizer that spans all atoms instead of just the correlated atoms
     auto symm_ops = (obe.ibz_symm_ops) ? std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::ThetaProjectors)) :
                                          std::optional<ibz_symmetry_ops>{};
 
@@ -357,31 +357,31 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  /// Prepare one-body elements along high-symmetry k-path.
+  // Prepare one-body elements along high-symmetry k-path.
   one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe) {
-    /// check for group and throw error
+    // check for group and throw error
     auto root = h5::proxy{filename, 'r'};
     if (!root.has_group("dft_bands_input")) {
       throw std::runtime_error{fmt::format("The hdf5 file {} does not contain the group dft_bands_input", filename)};
     }
 
-    /// disperion and k weights
+    // disperion and k weights
     auto [H_k, n_bands_per_k, k_weights] = read_bands_and_weights(filename, ReadMode::Bands);
 
-    /// rotation matrices in csc mode
+    // rotation matrices in csc mode
     auto rot_mats = read_rotation_matrices(filename, ReadMode::Correlated);
 
-    /// read and rotate projectors
+    // read and rotate projectors
     auto atom_decomp = obe.C_space.atomic_decomposition() | tl::to<std::vector<long>>();
     auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::Bands, rot_mats, atom_decomp);
 
-    /// construct one-body elements (ibz_symm_ops are needed so we drop)
+    // construct one-body elements (ibz_symm_ops are needed so we drop)
     auto eps_k = band_dispersion{
        .spin_kind = obe.C_space.spin_kind(), .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = {}, .matrix_valued = false};
     auto proj = downfolding_projector{.spin_kind = obe.C_space.spin_kind(), .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
     auto obe1 = one_body_elements_on_grid{.H = eps_k, .C_space = obe.C_space, .P = proj, .ibz_symm_ops = {}};
 
-    /// rotate to the local basis that the self-energies will be defined in.
+    // rotate to the local basis that the self-energies will be defined in.
     return rotate_local_basis(obe.C_space.rotation_from_dft_to_local_basis(), std::move(obe1));
   }
 } // namespace triqs::modest

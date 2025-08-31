@@ -1,202 +1,109 @@
 /**
  * @defgroup one_body_elements One-body elements
  * @brief The one-body elements abstraction in ModEST.
- * 
  */
 
 /**
- * @fn std::pair<double, triqs::modest::one_body_elements_on_grid> triqs::modest::one_body_elements_from_dft_converter(std::string const &, double, bool);
- * @ingroup obe_factories
- * @details Our strategy is to decompose the \f${\cal C}\f$ space using the suitable basis for embedding. Each block of embedded self-energy will then be mapped to 
- * corresponding impurity models self-energy (@ref embedding).
- * 
- * The projectors are obtained from the DFT code or Wannier90, in some global coordinate system of the crystal.
- * Some basis transformations are required before performing the embedding.
- * 
- * 
- * 1. A coordinate system rotation \f$R^{a}_{m_{a},m_{a}'}\f$ from the global coordinate system of atom (site) \f$a\f$ into the local
- *    coordinate system of the crystal. This rotations ensure that equivalent atoms have the same self-energy in the new basis, hence can be solved by the same impurity model.   
- * 
- * 2. Optionally, we perform a second rotation $U$ to infer the irreps from the local Hamiltonian.
- *    Unfortunately, at this stage, the proper information about irreps is not retrieved from the electronic structure code.
- *    A workaround has been to examine the local non-interacting Hamiltonian:
- *  $$ [H_{\mathrm{loc}}^{0}]_{m_{a} m_{a}'}^{a,\sigma} \equiv \sum_{\mathbf{k}} P_{(a,m_{a})\nu}^{\sigma}(\mathbf{k})\varepsilon_{\nu\nu'}^{\sigma}(\mathbf{k}) [P_{(a',m_{\alpha}')\nu'}^{\sigma}(\mathbf{k})]^{\dagger}.$$
-
- * Its block structure is infered (up to a user-defined threshold), by discovering  a permutation of the orbitals \f$m_{a}\f$ which renders \f$H_{\mathrm{loc}}^{0}\f$ block-diagonal.
- * Optionally, we can diagonalize these smaller blocks of the local non-interacting Hamiltonian (to reduce the off-diagonal elements in the impurity model hybridization functions \f$\Delta_{mm'}^{\sigma}\f$).
- * 
- * The Wannier basis is therefore transformed as: 
- *
- * $$ P^{\sigma}_{m\nu}(\mathbf{k}) \leftarrow (RU)^{\dagger}_{m, m'} P^{\sigma}_{m'\nu}(\mathbf{k}).$$
- */
-
-
- /**
- * @class triqs::modest::local_space
- * \ingroup one_body_elements
- *  
- * @brief The local space 𝓒 defines the correlated subspace which defines impurities to be solved within DMFT.
- *
- *
- * @details The DFT + DMFT equations involve three different spaces, following (mostly) the notations of [S. Beck et al. 2022]():
- * 
- * - The (_reduced_) Bloch space \f${\cal B}\f$ contains bands of dispersion \f$\varepsilon_{\nu}^{\sigma}(\mathbf{k})\f$, in some  window of energy. 
- * Here, \f$\nu\f$ is the band index (\f$0 \leq \nu < N_\nu^{\mathbf{k}}\f$) and  \f$\mathbf{k}\f$ is a point in the Brillouin zone. We define \f$N_\nu \equiv \mathrm{max}_{\mathbf{k}} N_\nu^{\mathbf{k}}\f$.
- * 
- * - The _Wannier space_ \f${\cal W}\f$ is spanned from Wannier functions constructed from \f${\cal B}\f$. 
- * - The _correlated space_ \f${\cal C} \subseteq {\cal W}\f$ 
- * containing \f$M\f$ Wannier orbitals, is a subspace of the Wannier space, in which the self-energy is approximated by the embedding. \f${\cal C}\f$ is spanned by Wannier functions at several atoms/sites with index \f$a\f$ at position \f$R_a\f$ and orbital/Wannier index \f$m_{a}\f$. \f${\cal C}\f$ is  indexed by a _composite index_ \f$m = (a, m_{a})\f$, with \f$0\leq m \leq M-1\f$ and \f$M=\sum_{a}\mathrm{max}(m_{a}\f$). We will write the main equations with the composite \f$m\f$ index, as the \f$m = (a, m_{a})\f$ decomposition of \f$m\f$ is not, in general,  appropriate for embeddings.
- * 
- * 
- * The \f$\sigma\f$ index is a general _block diagonal index_. In simple cases, it is the spin index, but not always.
- * 
- *  - In "spin (non-)polarized" computations, $\sigma$ is the spin index.
- *  - In spin-orbit or Nambu computations, the spin index is merged with \f$m\f$ and \f$\nu\f$, so \f$\sigma =0\f$ (i.e. one value of the index, equivalent to no index at all).
- * 
- */
-
- /**
- * @class triqs::modest::band_dispersion
- * \ingroup one_body_elements
- *
- * @brief The band dispersion in momentum space.
- * 
- * @details The band dispersion typically corresponds to the solution of a (Kohn-Sham) Hamiltonian which has been diagonalized in momentum space and formulated in 
- * a basis of Bloch states \f$\ket{\phi_{\nu\mathbf{k}}}\f$ with corresponding eigenvalues (\f$\varepsilon_{\nu\mathbf{k}}^{\sigma}\f$).
- * 
- */
-
- /**
- * @class triqs::modest::downfolding_projector
- * \ingroup one_body_elements
- *
- * @brief The projector that downfolds the energy bands onto a set of localized atomic-like orbitals.
- *
- *
- * The projectors \f$P_{m\nu}^{\sigma}(\mathbf{k})\f$ connect the Bloch space \f${\cal B}\f$ to  \f${\cal C}\f$. The projectors are obtained from DFT codes or Wannier90. They are defined by 
- * 
- * $$ P_{(a,m_{a})\nu}^{\sigma}(\mathbf{k})\equiv 
- *    e^{-i \mathbf{k} R_a} 
- *   \bra{\chi_{m_{a}}^{R_a \sigma}}\ket{\psi_{\nu}^{\sigma}(\mathbf{k})},$$
- * 
- * where \f$\ket{\chi_{m_{a}}^{R_a \sigma}}\f$ is a Wannier function localized at atom $a$ with index \f$m_a\f$ at position \f$R_a\f$ 
- * and \f$\ket{\psi_{\nu}^{\sigma}(\mathbf{k})}\f$ is the Kohn-Sham wavefunction. The relation between the Wannier and  Bloch function is therefore 
- * 
- * $$ \ket{\chi_{m_{a}}^{R_a \sigma}} = \sum_{\mathbf{k} \nu} e^{-i \mathbf{k} R_a} \bigl(P^\sigma_{(a,m_{a})\nu}(\mathbf{k})\bigr)^* \ket{\psi_{\nu}^{\sigma}(\mathbf{k})}.$$
- * 
- * Some properties:
- *     - _Basis change in_ \f$\cal C\f$ _space._ They are  given by a unitary matrix \f$U\f$, the projector transforms as 
- * $$ P^{'\sigma}_{m\nu}(\mathbf{k}) = U^{\dagger}_{m, m'} P^{\sigma}_{m'\nu}(\mathbf{k}).$$
- *     - _Partial unitarity property_: In general \f$P\f$ is not unitary as \f$N_\nu^{\mathbf{k}} > M\f$. However, if the Wannier functions are reorthonormalized with respect to the truncated band basis, we have
- * $$ \sum_{ \nu} P^{\sigma}_{m\nu}(\mathbf{k}) P^{\dagger\sigma}_{\nu m'}(\mathbf{k}) = \delta_{mm'}$$
- *
- * 
- */
-
- /**
- * @class triqs::modest::ibz_symmetry_ops
- * \ingroup one_body_elements
- *
- * @brief Irreducible Brillouin Zone (IBZ) symmetry operations to symmetrize observables over the entire Brillouin zone.
- * 
- * @details The IBZ symmetry operations are optional and specific to DFT codes that work in the IBZ instead of the full BZ. Currently, this is only
- * used when DFT data is converted from Wien2k.
- * 
- * For computational efficiency, we can perform the one-body calculation on the irreducible Brillouin zone (IBZ). However, in order to obtain observable quantities like the local Green's function, one needs to _symmetrize_ the obversable summed on only the IBZ. 
- For any observable \f$\mathcal{O}\f$, the unsymmetrized quantity is
- *  $$ [\mathcal{O}^{\sigma}_{mm'}]_{\mathrm{unsymm}} = \sum_{\mathbf{k}\in\mathrm{IBZ}}\sum_{\nu\nu'}P_{m,\nu}^{\sigma}(\mathbf{k})O_{\nu\nu'}^{\sigma}(\mathbf{k})[P_{m'\nu'}^{\sigma}(\mathbf{k})]^{\dagger}.$$
- * To symmetrize, we must by apply all operations symmetry operations \f$\mathcal{S}\f$ of the crystallographic space group \f$\mathcal{G}\f$:
- * $$ [\mathcal{O}^{\sigma}_{(am_{a}), (a'm_{a}')}]_{\mathrm{symm}}^{\mathcal{G}} = \sum_{\mathcal{S}\in\mathcal{G}}\sum_{n_{a}n_{a}'} \mathcal{D}_{m_{a} n_{a}}(\mathcal{S})[(\mathcal{O}^{\mathcal{S}^{-1}a,\mathcal{S}^{-1}\sigma})_{n_{a}n_{a}'}]_{\mathrm{unsymm}}\mathcal{D}(\mathcal{S}^{-1})_{n_{a}'m_{a}'} $$
- *
- */
-
- /**
  * @defgroup embedding Embedding
+ * @brief The embedding abstraction in ModEST. 
  * 
- * @brief The embedding abstraction in ModEST. The embedding class describes a mapping between the impurity solvers and the the local correlated space \f$\mathcal{C}\f$. 
- * We provide factory functions to construct the embedding from the @ref local_space. The embedding class has 
- * unary operations and complex operations.
- * 
+ * @details The embedding class describes a mapping between the impurity solvers and the the local correlated space 
+ * \f$\mathcal{C}\f$. We provide factory functions to construct the embedding from the triqs::modest::local_space. The 
+ * embedding class has unary operations and complex operations. 
  */
 
-
- /**
+/**
  * @defgroup hamiltonian Hamiltonians
  * @brief Functions and utilities to construct interaction Hamiltonians using TRIQS many-body operators.
  */
 
-
- /**
+/**
  * @defgroup gloc Local Green's function
-
- * @brief Compute the local Green's function defined as:
- * $$ [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big  [ (\omega + \mu)\delta_{\nu\nu'} - H^{\sigma}_{\nu\nu'}(\mathbf{k}) - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger},$$
- * where \f$\omega\f$ is a frequency (either real- or Matsubra), \f$\mu\f$ is the chemical potential, \f$H(\mathbf{k})\f$ is the one-body Hamiltonian, \f$P(\mathbf{k})\f$ are the projectors from the band to the orbital basis, and \f$\Sigma_{\mathrm{embed}}\f$ is the embedded self-energy.
+ * @brief Central quantity of the DMFT self-consistency condition - the local Green's function.
+ * 
+ * @details Compute the local Green's function defined as:
+ * \f[
+ *   [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big  [ (\omega + \mu)
+ *   \delta_{\nu\nu'} - H^{\sigma}_{\nu\nu'}(\mathbf{k}) - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}
+ *   P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger},
+ * \f]
+ * where \f$\omega\f$ is a frequency (either real- or Matsubra), \f$\mu\f$ is the chemical potential, 
+ * \f$H(\mathbf{k})\f$ is the one-body Hamiltonian, \f$P(\mathbf{k})\f$ are the projectors from the band to the orbital 
+ * basis, and \f$\Sigma_{\mathrm{embed}}\f$ is the embedded self-energy.
  */
 
- /**
+/**
  * @defgroup hybridization Atomic levels and Hybridization function
-
- * @brief Compute the hybridziation function
- * $$ [ \Delta^{\sigma} ]_{m m'} = \omega  -\tilde{\varepsilon} - G_{\mathrm{loc}}^{-1}(\omega) - \Sigma_{\mathrm{imp}}(\omega),$$
- * where \f$\omega\f$ is a frequency, \f$\tilde{\varepsilon}\f$ are the effective local levels of the impurity, and \f$\Sigma_{\mathrm{imp}}\f$ is the impurity self-energy.
+ * @brief Atomic levels and hybridization function.
+ * 
+ * @details Compute the hybridziation function
+ * \f[
+ *   [ \Delta^{\sigma} ]_{m m'} = \omega  -\tilde{\varepsilon} - G_{\mathrm{loc}}^{-1}(\omega) - 
+ *   \Sigma_{\mathrm{imp}}(\omega),
+ * \f]
+ * where \f$\omega\f$ is a frequency, \f$\tilde{\varepsilon}\f$ are the effective local levels of the impurity, and 
+ * \f$\Sigma_{\mathrm{imp}}\f$ is the impurity self-energy.
+ * 
  * The effecitve local levels are defined as:
- * $$ \tilde{\varepsilon} = \varepsilon - \mu - \Sigma_{\mathrm{DC}}, $$
+ * \f[ 
+ *   \tilde{\varepsilon} = \varepsilon - \mu - \Sigma_{\mathrm{DC}},
+ * \f]
  * where \f$\mu\f$ is the chemical potential and \f$\Sigma_{\mathrm{DC}}\f$ is the double counting self-energy.
  */
 
- /**
- * @fn template <typename Mesh> block2_gf<Mesh, matrix_valued> triqs::modest::gloc(one_body_elements_on_grid const &, double, block2_gf<Mesh, matrix_valued> const &, nda::array<nda::matrix<dcomplex>, 2> const &);
- * \ingroup gloc
- * @details When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes (e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, \f$H(\mathbf{k})\f$ is diagonal in the band basis and reduces to \f$\varepsilon_{\nu}^{\sigma}(\mathbf{k})\f$. The local Green's function becomes: 
- * $$ [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big  [ (\omega + \mu - \varepsilon_{\nu}^{\sigma}(\mathbf{k}))\delta_{\nu\nu'} - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger}.$$
- * For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (\f$N_{\nu}\f$) using the Woodbury formula which allows us to perform the matrix inversion in the smaller orbital basis \f$N_{M}\f$.
- */
-
- /**
+/**
  * @defgroup mu Densities and Chemical Potentials
- * @brief Functions to calculate the total electron density of lattice Green's functions using different methods and methods
- * for chemical potenital searching given a target density.
+ * @brief Functions to calculate the total electron density of lattice Green's functions using different methods and 
+ * methods for chemical potenital searching given a target density.
  */
 
- /**
+/**
  * @defgroup utils Utilities
  */
 
- /**
+/**
  * @defgroup double_counting Double Counting
- * \ingroup utils
- * @brief The implementation of the double counting correction within DFT+DMFT. We abstract phenomenological term into an additional "solver" 
- * that takes as input a Green's function and returns the double counting correction to the self-energy and/or the doube counting correction to the total energy.
- * This solver is useful for cases when the double counting can not be absorbed into the chemical potential (e.g., charge self-consistent DFT+DMFT d-p models, etc.).
+ * @ingroup utils
+ * @brief The implementation of the double counting correction within DFT+DMFT. 
+ * 
+ * @details We abstract phenomenological term into an additional "solver" that takes as input a Green's function and 
+ * returns the double counting correction to the self-energy and/or the doube counting correction to the total energy.
+ * This solver is useful for cases when the double counting can not be absorbed into the chemical potential (e.g., 
+ * charge self-consistent DFT+DMFT d-p models, etc.).
  */
 
-
- /**
+/**
  * @defgroup checkpoint File I/O
- * \ingroup utils
- * @brief The checkpoint object allows users to seamlessly save their results within their DMFT calculation to an organized HDF5 file.
+ * @ingroup utils
+ * @brief The checkpoint object allows users to seamlessly save their results within their DMFT calculation to an 
+ * organized HDF5 file.
  */
 
- /**
+/**
  * @defgroup root Root finders
- * \ingroup utils
+ * @ingroup utils
  * @brief Generic root finder methods for finding the roots of a scalar function \f$f(x)\f$.
  */
 
- /**
+/**
  * @defgroup deg Analyze Green's functions
- * \ingroup utils
- * @brief Methods to analyze the degenerate blocks of a Green's function and use those blocks to symmetrize the Green's function object.
+ * @ingroup utils
+ * @brief Methods to analyze the degenerate blocks of a Green's function and use those blocks to symmetrize the Green's 
+ * function object.
  */
 
- /**
+/**
  * @defgroup post Post processing
  * @brief Methods to compute spectral functions.
  *
- * The momentum-resolved spectral function from the lattice Green's function:
- * $$ A(\mathbf{k}, \omega) = -\frac{1}{\pi} \mathrm{Im} \mathrm{Tr}G_{\nu\nu'}(\mathbf{k}, \omega).$$
+ * @details The momentum-resolved spectral function from the lattice Green's function:
+ * \f[
+ *   A(\mathbf{k}, \omega) = -\frac{1}{\pi} \mathrm{Im} \mathrm{Tr}G_{\nu\nu'}(\mathbf{k}, \omega).
+ * \f]
  *
  * The atom- and orbital-resolved \f$k\f$-summed spectral function:
- * $$ [A(\omega)]_{mm'} = -\frac{1}{\pi} \mathrm{Im} \Big [ \sum_{\mathbf{k}} \Theta_{m\nu}G_{\nu\nu'}(\mathbf{k}, \omega)\Theta_{m'\nu'}^{\dagger} \Big ].$$
+ * \f[
+ *   A(\omega)]_{mm'} = -\frac{1}{\pi} \mathrm{Im} \Big [ \sum_{\mathbf{k}} \Theta_{m\nu}G_{\nu\nu'}(\mathbf{k}, \omega)
+ *   \Theta_{m'\nu'}^{\dagger} \Big ].
+ * \f]
  */

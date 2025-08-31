@@ -18,12 +18,16 @@ namespace triqs::modest {
   [[nodiscard]] inline long sigma_to_data_idx(spin_kind_e spin_kind, long sigma) { return (spin_kind == spin_kind_e::Polarized) ? sigma : 0; };
 
   /**
- * @ingroup one_body_elements
- * @brief The one-body dispersion as a function of momentum.
- *
- * @details A band dispersion containing the DFT band structure ε(ν,k,σ), weights in the Brillouin zone, and the spin kind used in the DFT calculation.
- * 
- */
+   * @ingroup one_body_elements
+   * @brief The one-body dispersion as a function of momentum.
+   *
+   * @details The band dispersion typically corresponds to the solution of a (Kohn-Sham) Hamiltonian which has been 
+   * diagonalized in momentum space and formulated in a basis of Bloch states \f$ | \phi_{\nu\mathbf{k}} \rangle \f$ with 
+   * corresponding eigenvalues (\f$\varepsilon_{\nu\mathbf{k}}^{\sigma}\f$).
+   *
+   * A band dispersion object contains the DFT band structure \f$\varepsilon_{\nu\mathbf{k}}^{\sigma}\f$, weights in the 
+   * Brillouin zone, and the spin kind used in the DFT calculation.
+   */
   struct band_dispersion {
     spin_kind_e spin_kind;             ///< Spin kind of the one-body data
     nda::array<dcomplex, 4> H_k;       ///< H_k [k_idx, σ', nu, nu']
@@ -63,12 +67,34 @@ namespace triqs::modest {
   };
 
   /**
- * @ingroup one_body_elements
- * @brief The projector that downfolds the one-body dispersion (ν) onto local orbitals (m).
- * 
- * @details A downfoldin projector contains the projector, the kind of spin used in the projection, and the number of bands per k-point for cases
- * when a band goes outside of the projection window.
- */
+   * @ingroup one_body_elements
+   * @brief The projector that downfolds the energy bands onto a set of localized atomic-like orbitals.
+   *
+   * A downfolding projector contains the projector, the kind of spin used in the projection, and the number of bands 
+   * per k-point for cases when a band goes outside of the projection window.
+   *
+   * The projectors \f$P_{m\nu}^{\sigma}(\mathbf{k})\f$ connect the Bloch space \f${\cal B}\f$ to \f${\cal C}\f$. The
+   * projectors are obtained from DFT codes or Wannier90. They are defined by
+   * \f[
+   *   P_{(a,m_{a})\nu}^{\sigma}(\mathbf{k})\equiv e^{-i \mathbf{k} R_a}
+   *   \langle \chi_{m_{a}}^{R_a \sigma} | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle,
+   * \f]
+   * where \f$ | \chi_{m_{a}}^{R_a \sigma} \rangle \f$ is a Wannier function localized at atom \f$ a \f$ with index 
+   * \f$m_a\f$ at position \f$R_a\f$ and \f$ | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle \f$ is the Kohn-Sham wavefunction. 
+   * The relation between the Wannier and  Bloch function is therefore
+   * \f[
+   *   | \chi_{m_{a}}^{R_a \sigma} \rangle = \sum_{\mathbf{k} \nu} e^{-i \mathbf{k} R_a} \bigl(P^\sigma_{(a,m_{a})\nu}
+   *   (\mathbf{k})\bigr)^* | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle.
+   * \f]
+   *
+   * Some properties:
+   *
+   * * Basis change in \f$\cal C\f$ space: They are given by a unitary matrix \f$U\f$, the projector transforms as
+   *   \f$ P^{'\sigma}_{m\nu}(\mathbf{k}) = U^{\dagger}_{m, m'} P^{\sigma}_{m'\nu}(\mathbf{k}).\f$
+   * * Partial unitarity property: In general \f$P\f$ is not unitary as \f$N_\nu^{\mathbf{k}} > M\f$. However, if the 
+   *   Wannier functions are reorthonormalized with respect to the truncated band basis, we have
+   *   \f$ \sum_{ \nu} P^{\sigma}_{m\nu}(\mathbf{k}) P^{\dagger\sigma}_{\nu m'}(\mathbf{k}) = \delta_{mm'} \f$.
+   */
   struct downfolding_projector {
     spin_kind_e spin_kind;
     nda::array<dcomplex, 4> P_k;       ///< Pk[alpha][k_idx, σ', m_alpha, nu]
@@ -122,9 +148,9 @@ namespace triqs::modest {
   /**
    * @ingroup hybridization
    * @brief Compute the atomic (impurity) levels from an obe.
-   * 
+   *
    * @param obe One-body elements
-   * @return Impurity levels stored in the format [n_atoms, n_sigma] 
+   * @return Impurity levels stored in the format [n_atoms, n_sigma]
    */
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_on_grid const &obe);
   // -------------------------------------------------------------

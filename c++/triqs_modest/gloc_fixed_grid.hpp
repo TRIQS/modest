@@ -77,17 +77,30 @@ namespace triqs::modest {
   /** @name Local Green's function using a fixed k-grid
   */
   ///@{
+
   /**
- * @ingroup gloc
- * @brief compute G𝓒 local Green's function on Mesh(MxM) 
- * 
- * @tparam Mesh The mesh type (triqs::mesh::{dlr_imfreq,imfreq})
- * @param obe one_body_elements_on_grid
- * @param mu chemical potential
- * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view, Sigma_dynamic[alpha, sigma].
- * @param Sigma_static The static part of the embedded self-energy in the embedded view, Sigma_static[alpha,sigma]
- * @return gloc[0, sigma], the local Green's function in the full C space.
- */
+   * @ingroup gloc
+   * @brief Compute local Green's function on Mesh(MxM).
+   * 
+   * @details When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes 
+   * (e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, \f$H(\mathbf{k})\f$ 
+   * is diagonal in the band basis and reduces to \f$\varepsilon_{\nu}^{\sigma}(\mathbf{k})\f$. The local Green's 
+   * function becomes: 
+   * \f[
+   *   [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big [ (\omega + \mu - 
+   *   \varepsilon_{\nu}^{\sigma}(\mathbf{k}))\delta_{\nu\nu'} - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}
+   *   P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger}.
+   * \f]
+   * For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (\f$N_{\nu}\f$) 
+   * using the Woodbury formula which allows us to perform the matrix inversion in the smaller orbital basis \f$N_{M}\f$. 
+   * 
+   * @tparam Mesh The mesh type (triqs::mesh::{dlr_imfreq,imfreq})
+   * @param obe one_body_elements_on_grid
+   * @param mu chemical potential
+   * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view, Sigma_dynamic[alpha, sigma].
+   * @param Sigma_static The static part of the embedded self-energy in the embedded view, Sigma_static[alpha,sigma]
+   * @return gloc[0, sigma], the local Green's function in the full C space.
+   */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {

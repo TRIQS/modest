@@ -18,11 +18,30 @@ namespace triqs::modest {
   // FIXME : OP : document the size of matrices, meaning of permutations.
   // FIXME OP : rename into ibz_symmetrizer
   // FIMXE HL : can we generalize to work on any type T that supports matrix multiplication?
+
   /**
- * @ingroup one_body_elements
- * @brief ibz symmetry operations
- * 
- */
+   * @ingroup one_body_elements
+   * @brief Irreducible Brillouin Zone (IBZ) symmetry operations to symmetrize observables over the entire Brillouin 
+   * zone.
+   * 
+   * @details The IBZ symmetry operations are optional and specific to DFT codes that work in the IBZ instead of the 
+   * full BZ. Currently, this is only used when DFT data is converted from Wien2k.
+   * 
+   * For computational efficiency, we can perform the one-body calculation on the irreducible Brillouin zone (IBZ). 
+   * However, in order to obtain observable quantities like the local Green's function, one needs to _symmetrize_ the 
+   * obversable summed on only the IBZ. For any observable \f$\mathcal{O}\f$, the unsymmetrized quantity is
+   * \f[
+   *   [\mathcal{O}^{\sigma}_{mm'}]_{\mathrm{unsymm}} = \sum_{\mathbf{k}\in\mathrm{IBZ}}\sum_{\nu\nu'}P_{m,\nu}^{\sigma}
+   *   (\mathbf{k})O_{\nu\nu'}^{\sigma}(\mathbf{k})[P_{m'\nu'}^{\sigma}(\mathbf{k})]^{\dagger}.
+   * \f]
+   * To symmetrize, we must by apply all operations symmetry operations \f$\mathcal{S}\f$ of the crystallographic space 
+   * group \f$\mathcal{G}\f$:
+   * \f[
+   *   [\mathcal{O}^{\sigma}_{(am_{a}), (a'm_{a}')}]_{\mathrm{symm}}^{\mathcal{G}} = \sum_{\mathcal{S}\in\mathcal{G}}
+   *   \sum_{n_{a}n_{a}'} \mathcal{D}_{m_{a} n_{a}}(\mathcal{S})[(\mathcal{O}^{\mathcal{S}^{-1}a,\mathcal{S}^{-1}
+   *   \sigma})_{n_{a}n_{a}'}]_{\mathrm{unsymm}}\mathcal{D}(\mathcal{S}^{-1})_{n_{a}'m_{a}'}.
+   * \f]
+   */
   struct ibz_symmetry_ops {
 
     //-----------------------------------------------------------------------------------

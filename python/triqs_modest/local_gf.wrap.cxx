@@ -55,7 +55,21 @@ static auto const fun_0 = c2py::dispatcher_f_kw_t{
 
 static const auto doc_d_0 = fun_0.doc(
    R"DOC(
-[1, 2] compute G𝓒 local Green's function on Mesh(MxM)
+[1, 2] Compute local Green's function on Mesh(MxM).
+
+When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes 
+(e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, :math:`H(\mathbf{k})` 
+is diagonal in the band basis and reduces to :math:`\varepsilon_{\nu}^{\sigma}(\mathbf{k})`. The local Green's 
+function becomes: 
+
+.. math::
+
+   [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big [ (\omega + \mu -
+   \varepsilon_{\nu}^{\sigma}(\mathbf{k}))\delta_{\nu\nu'} - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}
+   P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger}.
+
+For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (:math:`N_{\nu}`) 
+using the Woodbury formula which allows us to perform the matrix inversion in the smaller orbital basis :math:`N_{M}`.
 
 ------
 

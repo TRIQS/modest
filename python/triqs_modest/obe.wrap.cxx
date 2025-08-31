@@ -135,7 +135,30 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::local_space>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <>
-const std::string c2py::tp_doc<triqs::modest::local_space> = R"DOC(Describe the atomic orbitals within downfolded :math:`\mathcal{C}` space.)DOC"
+const std::string c2py::tp_doc<triqs::modest::local_space> = R"DOC(Describe the atomic orbitals within downfolded :math:`\mathcal{C}` space.
+
+The local space :math:`\mathcal{C}` defines the correlated subspace which defines impurities to be solved 
+within DMFT.
+
+The DFT + DMFT equations involve three different spaces, following (mostly) the notations of [S. Beck et al. 2022]:
+
+* The (reduced) Bloch space :math:`{\cal B}` contains bands of dispersion :math:`\varepsilon_{\nu}^{\sigma}(\mathbf{k})`, 
+  in some window of energy. Here, :math:`\nu` is the band index (:math:`0 \leq \nu < N_\nu^{\mathbf{k}}`) and 
+  :math:`\mathbf{k}` is a point in the Brillouin zone. We define 
+  :math:`N_\nu \equiv \mathrm{max}_{\mathbf{k}} N_\nu^{\mathbf{k}}`.
+* The Wannier space :math:`{\cal W}` is spanned from Wannier functions constructed from :math:`{\cal B}`. 
+* The correlated space :math:`{\cal C} \subseteq {\cal W}` containing :math:`M` Wannier orbitals, is a subspace of the 
+  Wannier space, in which the self-energy is approximated by the embedding. :math:`{\cal C}` is spanned by Wannier 
+  functions at several atoms/sites with index :math:`a` at position :math:`R_a` and orbital/Wannier index :math:`m_{a}`. 
+  :math:`{\cal C}` is indexed by a composite index :math:`m = (a, m_{a})`, with :math:`0\leq m \leq M-1` and 
+  :math:`M=\sum_{a}\mathrm{max}(m_{a}`). We will write the main equations with the composite :math:`m` index, as the 
+  :math:`m = (a, m_{a})` decomposition of :math:`m` is not, in general, appropriate for embeddings.
+
+The :math:`\sigma` index is a general block diagonal index. In simple cases, it is the spin index, but not always.
+
+* In "spin (non-)polarized" computations, :math:`\sigma` is the spin index.
+* In spin-orbit or Nambu computations, the spin index is merged with :math:`m` and :math:`\nu`, so :math:`\sigma =0` 
+  (i.e. one value of the index, equivalent to no index at all).)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::local_space>;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::band_dispersion> = "triqs_modest.obe.BandDispersion";
 
@@ -242,7 +265,12 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::band_dispersion>[] = {
 template <>
 const std::string c2py::tp_doc<triqs::modest::band_dispersion> = R"DOC(The one-body dispersion as a function of momentum.
 
-A band dispersion containing the DFT band structure ε(ν,k,σ), weights in the Brillouin zone, and the spin kind used in the DFT calculation.)DOC"
+The band dispersion typically corresponds to the solution of a (Kohn-Sham) Hamiltonian which has been diagonalized in
+momentum space and formulated in a basis of Bloch states :math:`| \phi_{\nu\mathbf{k}} \rangle` with corresponding eigenvalues
+(:math:`\varepsilon_{\nu\mathbf{k}}^{\sigma}`).
+
+A band dispersion object contains the DFT band structure :math:`\varepsilon_{\nu\mathbf{k}}^{\sigma}`, weights in the Brillouin zone,
+and the spin kind used in the DFT calculation.)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::band_dispersion>;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::downfolding_projector> = "triqs_modest.obe.DownfoldingProjector";
 
@@ -336,10 +364,35 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::downfolding_projector>[] = 
 
 template <>
 const std::string c2py::tp_doc<triqs::modest::downfolding_projector> =
-   R"DOC(The projector that downfolds the one-body dispersion (ν) onto local orbitals (m).
+   R"DOC(The projector that downfolds the energy bands onto a set of localized atomic-like orbitals.
 
-A downfoldin projector contains the projector, the kind of spin used in the projection, and the number of bands per k-point for cases
-when a band goes outside of the projection window.)DOC"
+A downfolding projector contains the projector, the kind of spin used in the projection, and the number of bands 
+per k-point for cases when a band goes outside of the projection window.
+
+The projectors :math:`P_{m\nu}^{\sigma}(\mathbf{k})` connect the Bloch space :math:`{\cal B}` to :math:`{\cal C}`. The
+projectors are obtained from DFT codes or Wannier90. They are defined by
+
+.. math::
+
+   P_{(a,m_{a})\nu}^{\sigma}(\mathbf{k})\equiv e^{-i \mathbf{k} R_a}
+   \langle \chi_{m_{a}}^{R_a \sigma} | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle,
+
+where :math:`| \chi_{m_{a}}^{R_a \sigma} \rangle` is a Wannier function localized at atom :math:`a` with index 
+:math:`m_a` at position :math:`R_a` and :math:`| \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle` is the Kohn-Sham wavefunction. 
+The relation between the Wannier and  Bloch function is therefore
+
+.. math::
+
+   | \chi_{m_{a}}^{R_a \sigma} \rangle = \sum_{\mathbf{k} \nu} e^{-i \mathbf{k} R_a} \bigl(P^\sigma_{(a,m_{a})\nu}
+   (\mathbf{k})\bigr)^* | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle.
+
+Some properties:
+
+* Basis change in :math:`\cal C` space: They are given by a unitary matrix :math:`U`, the projector transforms as
+  :math:`P^{'\sigma}_{m\nu}(\mathbf{k}) = U^{\dagger}_{m, m'} P^{\sigma}_{m'\nu}(\mathbf{k}).`
+* Partial unitarity property: In general :math:`P` is not unitary as :math:`N_\nu^{\mathbf{k}} > M`. However, if the 
+  Wannier functions are reorthonormalized with respect to the truncated band basis, we have
+  :math:`\sum_{ \nu} P^{\sigma}_{m\nu}(\mathbf{k}) P^{\dagger\sigma}_{\nu m'}(\mathbf{k}) = \delta_{mm'}`.)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::downfolding_projector>;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements_on_grid> = "triqs_modest.obe.OneBodyElementsOnGrid";
 
@@ -523,9 +576,43 @@ static auto const fun_9 = c2py::dispatcher_f_kw_t{c2py::cfun(
 
 static const auto doc_d_6 = fun_6.doc(
    R"DOC(
-Create a one-body elements object with orthonormalized projectors. Using the data from the "dft_input" group, the band_dispersion, local_space, 
-downfolding_projector, and optional ibz_symmetry_ops are prepared to create a one-body 
-elements object. This object is intended to be used in DMFT calculations.
+Create a one-body elements object with orthonormalized projectors.
+
+Using the data from the "dft_input" group, the band dispersion, local space, downfolding projector, and optional 
+IBZ symmetry ops are prepared to create a one-body elements object. This object is intended to be used in DMFT 
+calculations.
+
+Our strategy is to decompose the :math:`{\cal C}` space using the suitable basis for embedding. Each block of 
+embedded self-energy will then be mapped to corresponding impurity models self-energy.
+
+The projectors are obtained from the DFT code or Wannier90, in some global coordinate system of the crystal.
+Some basis transformations are required before performing the embedding.
+
+1. A coordinate system rotation :math:`R^{a}_{m_{a},m_{a}'}` from the global coordinate system of atom (site) :math:`a` 
+   into the local coordinate system of the crystal. This rotations ensure that equivalent atoms have the same 
+   self-energy in the new basis, hence can be solved by the same impurity model.
+
+2. Optionally, we perform a second rotation :math:`U` to infer the irreps from the local Hamiltonian.
+   Unfortunately, at this stage, the proper information about irreps is not retrieved from the electronic structure 
+   code. A workaround has been to examine the local non-interacting Hamiltonian:
+   
+
+.. math::
+
+   [H_{\mathrm{loc}}^{0}]_{m_{a} m_{a}'}^{a,\sigma} \equiv \sum_{\mathbf{k}} P_{(a,m_{a})\nu}^{\sigma}
+   (\mathbf{k}) \varepsilon_{\nu\nu'}^{\sigma}(\mathbf{k}) [P_{(a',m_{\alpha}')\nu'}^{\sigma}
+   (\mathbf{k})]^{\dagger}.
+
+Its block structure is infered (up to a user-defined threshold), by discovering  a permutation of the orbitals 
+:math:`m_{a}` which renders :math:`H_{\mathrm{loc}}^{0}` block-diagonal. Optionally, we can diagonalize these smaller 
+blocks of the local non-interacting Hamiltonian (to reduce the off-diagonal elements in the impurity model 
+hybridization functions :math:`\Delta_{mm'}^{\sigma}`).
+
+The Wannier basis is therefore transformed as:
+
+.. math::
+
+   P^{\sigma}_{m\nu}(\mathbf{k}) \leftarrow (RU)^{\dagger}_{m, m'} P^{\sigma}_{m'\nu}(\mathbf{k}).
 
 Parameters
 ----------
@@ -609,8 +696,8 @@ static const auto doc_d_9 = fun_9.doc(
    R"DOC(
 Create a one-body elements object with the Θ projectors.
 
-Using the data from the "dft_parproj_input" group, the local_space, downfolding_projectors, 
-and optional ibz_symmetry_ops are prepared to create a one-body elements object.  This object is 
+Using the data from the "dft_parproj_input" group, the local_space, downfolding_projectors,
+and optional ibz_symmetry_ops are prepared to create a one-body elements object.  This object is
 intended to be used for post-processing the atom- and orbitally-resolved k-summed spectral functions.
 
 Parameters
