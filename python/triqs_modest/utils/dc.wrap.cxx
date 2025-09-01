@@ -38,13 +38,13 @@ Construct a double counting "solver".
 Parameters
 ----------
 n_sigma : {par_0}
-   The dimension of the σ index.
+   Dimension of the :math:`\sigma` index.
 method : {par_1}
-   The double counting formula (method) to call (options: cFLL, sFLL, cAMF, sAMF, cHeld).
+   Double counting formula (method) to call (options: `cFLL`, `sFLL`, `cAMF`, `sAMF`, `cHeld`).
 U_int : {par_2}
-   The Hubbard U to use in the DC formula.
+   Hubbard :math:`U` to use in the DC formula.
 J_hund : {par_3}
-   The Hund's coupling J to use in the DC formula.
+   Hund's coupling :math:`J` to use in the DC formula.
 )DOC",
               std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
@@ -70,29 +70,31 @@ Compute the double counting correction to the energy.
 Parameters
 ----------
 gimp : {par_0}
-   The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
+   The impurity Green's function which is used to calculate the orbital-resolved density matrices to 
+   evaluate the double counting formula.
 
 Returns
 -------
 {ret_0}
-   Double counting energy term
+   Double counting energy term.
 )DOC",
    std::vector<std::string>{c2py::join(
       std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}, ", ")},
    std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::matrix<double>>()}});
 static const auto doc_d_1 = fun_1.doc(
    R"DOC(
-Compute the double-counting self-energy
+Compute the double-counting self-energy.
 
 Parameters
 ----------
 gimp : {par_0}
-   The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
+   The impurity Green's function which is used to calculate the orbital-resolved density matrices to 
+   evaluate the double counting formula.
 
 Returns
 -------
 {ret_0}
-   Double counting self-energy term
+   Double counting self-energy term.
 )DOC",
    std::vector<std::string>{c2py::join(
       std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}, ", ")},
@@ -114,10 +116,11 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::dc_solver>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <>
-const std::string c2py::tp_doc<triqs::modest::dc_solver> =
-   R"DOC(Double counting "solver" implements the double counting correction for DFT+DMFT, which is a phenomenlogical introduced
-double counting the interactions already taken into account at the mean-field level within DFT. This class implements several
-double counting formulas (all of which are functions of the density) relevant for different scenarios.)DOC"
+const std::string c2py::tp_doc<triqs::modest::dc_solver> = R"DOC(Double counting "solver".
+
+It implements the double counting correction for DFT+DMFT, which is a phenomenlogical introduced double 
+counting the interactions already taken into account at the mean-field level within DFT. This class implements 
+several double counting formulas (all of which are functions of the density) relevant for different scenarios.)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::dc_solver>;
 
 // ==================== module functions ====================
@@ -133,22 +136,22 @@ Double counting formulas.
 Parameters
 ----------
 method : {par_0}
-   the double counting formula to use.
+   Double counting formula to use.
 N_tot : {par_1}
-   the total density
+   Total density.
 N_sigma : {par_2}
-   the total density per spin
+   Total density per spin.
 n_orb : {par_3}
-   the number of orbitals
+   Number of orbitals.
 U : {par_4}
-   the Hubbard U
+   Hubbard :math:`U`.
 J : {par_5}
-   the Hund's coupling J
+   Hund's coupling :math:`J`.
 
 Returns
 -------
 {ret_0}
-   ΣDC, EDC
+   :math:`\Sigma_{DC}` and :math:`E_{DC}`.
 )DOC",
                                       std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::string>()}, ", "),
                                                                c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),

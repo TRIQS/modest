@@ -85,10 +85,10 @@ Sigma_static : {par_3}
 Returns
 -------
 [1, 3] : {ret_0}
-   block_gf<Mesh, matrix_valued>
+   Hybridization function :math:`\Delta`.
 
 [2, 4] : {ret_1}
-   block_gf<Mesh, matrix_valued>
+   Hybridization function :math:`\Delta`.
 )DOC",
    std::vector<std::string>{
       c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()}, ", "),
@@ -109,12 +109,12 @@ Compute the atomic (impurity) levels from an obe.
 Parameters
 ----------
 obe : {par_0}
-   One-body elements
+   One-body elements.
 
 Returns
 -------
 {ret_0}
-   Impurity levels stored in the format [n_atoms, n_sigma]
+   Impurity levels stored in the format [n_atoms, n_sigma].
 )DOC",
              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
                                                                           c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},

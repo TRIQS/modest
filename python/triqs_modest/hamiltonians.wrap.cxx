@@ -53,26 +53,28 @@ static auto const fun_3 = c2py::dispatcher_f_kw_t{c2py::cfun(
 static const auto doc_d_0 = fun_0.doc(R"DOC(
 Construct a four-index Coulomb tensor in the basis of spherical harmonics.
 
-@{
-
 We typically construct the four-index Coulomb tensor in the basis of spherical harmonics,
-$$ U_{m_{1}m_{2}m_{3}m_{4}}^{{spherical}} = _{k=0}^{2l} F_{k}  (l, k, m_{1}, m_{2}, m_{3}, m_{4}),$$
-where $F_{k}$ are radial Slater integrals and :math:`\alpha(l, k, m_{1}, m_{2}, m_{3}, m_{4})` denote angular Racah-Wigner numbers for a spherically symmetric
-interaction tensor.
+
+.. math::
+
+   U_{m_{1}m_{2}m_{3}m_{4}}^{\mathrm{spherical}} = \sum_{k=0}^{2l} F_{k} \alpha (l, k, m_{1}, m_{2}, m_{3}, m_{4}),
+
+where :math:`F_{k}` are radial Slater integrals and :math:`\alpha(l, k, m_{1}, m_{2}, m_{3}, m_{4})` denote angular 
+Racah-Wigner numbers for a spherically symmetric interaction tensor.
 
 Parameters
 ----------
 l : {par_0}
-   angular quantum number
+   Angular quantum number.
 U_int : {par_1}
-   screend Hubbard interaction
+   Screened Hubbard interaction.
 J_hund : {par_2}
-   Hund's coupling
+   Hund's coupling.
 
 Returns
 -------
 {ret_0}
-   nda::array<double, 4>
+   Coulomb tensor.
 )DOC",
                                       std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
                                                                c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
@@ -80,55 +82,72 @@ Returns
                                       std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::array<double, 4>>()}});
 static const auto doc_d_1 =
    fun_1.doc(R"DOC(
-Construct a density-density interation
-
-@{
+Construct a density-density interaction Hamiltonian.
 
 Create a density-density Hamiltonian
-$$ H_{{int}} = {1}{2} _{(i)(j^{})} U_{ij}^{^{}}n_{i}n_{j^{}}.$$
+
+.. math::
+
+   H_{\mathrm{int}} = \frac{1}{2} \sum_{(i\sigma)\neq(j\sigma^{\prime})} U_{ij}^{\sigma\sigma^{\prime}}n_{i\sigma}
+   n_{j\sigma^{\prime}}.
 
 Parameters
 ----------
 tau_names : {par_0}
-   names of tau indices ['up', 'down']
+   Names of tau indices ['up', 'down'].
 dim_gamma : {par_1}
-   dimension of the blocks γ
+   Dimension of the blocks :math:`\gamma`.
 U_int : {par_2}
-   Hubbard U
+   Hubbard :math:`U`.
 U_prime : {par_3}
-   U' (typically U' = U - 2J)
+   :math:`U'` (typically :math:`U' = U - 2J`).
 J_hund : {par_4}
-   Kanamori J
+   Kanamori :math:`J`.
+
+Returns
+-------
+{ret_0}
+   Many-body operator representing the Hamiltonian.
 )DOC",
              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::string> &>()}, ", "),
                                       c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", "),
                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", ")},
-             std::vector<std::string>{});
+             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::operators::many_body_operator>()}});
 static const auto doc_d_2 =
    fun_2.doc(R"DOC(
-Construct a Hubbard-Kanamori Hamiltonian
+Construct a Hubbard-Kanamori Hamiltonian.
 
 Create a Hubbard-Kanamori Hamiltonian using the density-density, spin-flip, and pair-hopping interactions,
-$$ H_{{int}} = {1}{2} _{(i)(j^{})} U_{ij}^{^{}}n_{i}n_{j^{}} - _{i j}Jc_{i}^{}c_{i}c_{j}^{}c_{j} + _{i j} J c_{i}^{}c_{i}^{}c_{j}c_{j}.$$
+
+.. math::
+
+   H_{\mathrm{int}} = \frac{1}{2} \sum_{(i\sigma)\neq(j\sigma^{\prime})} U_{ij}^{\sigma\sigma^{\prime}}n_{i\sigma}
+   n_{j\sigma^{\prime}} - \sum_{i\neq j}Jc_{i\uparrow}^{\dagger}c_{i\downarrow}c_{j\downarrow}^{\dagger}
+   c_{j\uparrow} + \sum_{i\neq j} J c_{i\uparrow}^{\dagger}c_{i\downarrow}^{\dagger}c_{j\downarrow}c_{j\uparrow}.
 
 Parameters
 ----------
 tau_names : {par_0}
-   names of tau indices ['up', 'down']
+   Names of tau indices ['up', 'down'].
 dim_gamma : {par_1}
-   dimension of the blocks γ
+   Dimension of the blocks :math:`\gamma`.
 U_int : {par_2}
-   Hubbard U
+   Hubbard :math:`U`.
 U_prime : {par_3}
-   U' typical U' = U - 2J
+   :math:`U'` (typically :math:`U' = U - 2J`).
 J_hund : {par_4}
-   Kanamori J
+   Kanamori :math:`J`.
 spin_flip : {par_5}
-   spin flip term
+   Spin flip term.
 pair_hopping : {par_6}
-   pair hopping term
+   Pair-hopping term.
+
+Returns
+-------
+{ret_0}
+   Many-body operator representing the Hamiltonian.
 )DOC",
              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::string> &>()}, ", "),
                                       c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", "),
@@ -137,28 +156,32 @@ pair_hopping : {par_6}
                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
                                       c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", "),
                                       c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
-             std::vector<std::string>{});
+             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::operators::many_body_operator>()}});
 static const auto doc_d_3 = fun_3.doc(
    R"DOC(
-Construct a new operators::many body operator make slater object
+Construct a Slater Hamiltonian.
 
 Create a Slater Hamiltonian using fully rotationally-invariant four-index interactions:
-$$H_{{int}} = {1}{2} _{ijkl, ^{}} U_{ijkl}c^{}_{i}c^{}_{j^{}}c_{l^{}}c_{k}.$$
+
+.. math::
+
+   H_{\mathrm{int}} = \frac{1}{2} \sum_{ijkl, \sigma\sigma^{\prime}} U_{ijkl}c^{\dagger}_{i\sigma}
+   c^{\dagger}_{j\sigma^{\prime}}c_{l\sigma^{\prime}}c_{k\sigma}.
 
 Parameters
 ----------
 tau_names : {par_0}
-   names of the tau indices ['up', 'down']
+   Names of tau indices ['up', 'down'].
 dim_gamma : {par_1}
-   dimension of the blocks γ
+   Dimension of the blocks :math:`\gamma`.
 U_int : {par_2}
-   Hubbard U
+   Hubbard :math:`U`.
 J_hund : {par_3}
-   Hund's J
+   Hund's :math:`J`.
 spherical_to_dft : {par_4}
-   rotation matrices from spherical Ylm basis to DFT orbital basis
+   Rotation matrices from spherical :math:`Y_l^m` basis to DFT orbital basis.
 dft_to_local : {par_5}
-   rotation matrices from DFT basis to the local impurity basis
+   Rotation matrices from DFT basis to the local impurity basis.
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::string> &>()}, ", "),
                             c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", "),

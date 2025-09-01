@@ -44,7 +44,29 @@ static auto init_0                                                          = c2
    c2py::c_constructor<triqs::modest::local_space>()};
 template <> constexpr initproc c2py::tp_init<triqs::modest::local_space> = c2py::pyfkw_constructor<init_0>;
 template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::local_space> = init_0.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
+const std::string c2py::tp_ctor_doc<triqs::modest::local_space> = init_0.doc(
+   R"DOC(
+Construct a new local space object.
+
+Parameters
+----------
+spin_kind : {par_0}
+   Kind of :math:`\sigma` index.
+atomic_shells : {par_1}
+   List of all atomic orbitals.
+irreps_decomp_per_atom : {par_2}
+   List of all blocks spanning :math:`\mathcal{C}` space -> atoms_block_decomposition.
+rotation_from_dft_to_local_basis : {par_3}
+   Rotation matices from DFT to local basis.
+rotation_from_spherical_to_dft_basis : {par_4}
+   Rotation matrices from spherical to DFT basis.
+)DOC",
+   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<triqs::modest::spin_kind_e>()}, ", "),
+                            c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<triqs::modest::atomic_orbs>>()}, ", "),
+                            c2py::join(std::vector<std::string>{c2py::python_typename<nda::array<std::vector<long>, 2>>()}, ", "),
+                            c2py::join(std::vector<std::string>{c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()}, ", "),
+                            c2py::join(std::vector<std::string>{c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 1>>()}, ", ")},
+   std::vector<std::string>{});
 // atomic_view
 static auto const fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::local_space &self, const triqs::gfs::block2_gf<triqs::mesh::imfreq> &G_C) { return self.atomic_view(G_C); },
@@ -59,36 +81,36 @@ static auto const fun_1 = c2py::dispatcher_f_kw_t{
 
 static const auto doc_d_0 = fun_0.doc(
    R"DOC(
-[1] Views a block2gf according to the atomic decomposition.
+[1] Views a 2-dim block GF according to the atomic decomposition.
 
 ------
 
-[2] Creates an atomic view of block matrices  by extracting specific slices
-       based on the atomic decomposition of the current object.
+[2] Creates an atomic view of block matrices by extracting specific slices based on the atomic decomposition 
+of the current object.
 
 ------
 
 Parameters
 ----------
 G_C : {par_0}
-   A block2_gf spanning the entire C space [0, sigma](M, M)
+   A 2-dim block GF spanning the entire :math:`\mathcal{C}` space [0, sigma](M, M).
 matrix_C : {par_1}
    The input block matrices object from which the atomic view is created.
 
 Returns
 -------
 [1] : {ret_0}
-   A block2_gf in the atomic decomposition view [atom, sigma][m_orb, m_orb]
+   A 2-dim block GF in the atomic decomposition view [atom, sigma][m_orb, m_orb].
 
 [2] : {ret_1}
-   new block matrices in the atomic view.
+   2-dim array containing the new block matrices in the atomic view.
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq> &>()}, ", "),
                             c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", ")},
    std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq>>(),
                                                      c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()}});
 static const auto doc_d_1 = fun_1.doc(R"DOC(
-Given the index idx of an atomic shell, return the index of the first atomic shell of its equivalence class
+Given the index of an atomic shell, return the index of the first atomic shell of its equivalence class.
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 
@@ -101,16 +123,16 @@ PyMethodDef c2py::tp_methods<triqs::modest::local_space>[] = {
 };
 
 static constexpr auto prop_doc_0  = R"DOC(Names of the atoms in the orbital set.)DOC";
-static constexpr auto prop_doc_1  = R"DOC(Generates [dimension of the atomic shell].)DOC";
-static constexpr auto prop_doc_2  = R"DOC(List of all atomic shells spanning the 𝓒 space)DOC";
-static constexpr auto prop_doc_3  = R"DOC(List of all blocks spanning 𝓒 space -> atoms_block_decomposition)DOC";
-static constexpr auto prop_doc_4  = R"DOC(Dimension of the correlated space)DOC";
-static constexpr auto prop_doc_5  = R"DOC(The number of atoms)DOC";
-static constexpr auto prop_doc_6  = R"DOC(Dimension of the σ index)DOC";
-static constexpr auto prop_doc_7  = R"DOC(List of all (a, sigma) local rotation matices that rotate the data)DOC";
-static constexpr auto prop_doc_8  = R"DOC(List of rotation matrices from spherical harmonics to dft specific orbital basis)DOC";
-static constexpr auto prop_doc_9  = R"DOC(names of spin indices for naming blocks in block_gf)DOC";
-static constexpr auto prop_doc_10 = R"DOC()DOC";
+static constexpr auto prop_doc_1  = R"DOC(Transformed view containing the dimension of each atomic shell.)DOC";
+static constexpr auto prop_doc_2  = R"DOC(List of all atomic shells spanning the :math:`\mathcal{C}` space.)DOC";
+static constexpr auto prop_doc_3  = R"DOC(2-dim array of all blocks spanning :math:`\mathcal{C}` space -> atoms_block_decomposition.)DOC";
+static constexpr auto prop_doc_4  = R"DOC(Dimension of the correlated space.)DOC";
+static constexpr auto prop_doc_5  = R"DOC(The number of atoms.)DOC";
+static constexpr auto prop_doc_6  = R"DOC(Dimension of the :math:`\sigma` index.)DOC";
+static constexpr auto prop_doc_7  = R"DOC(2-dim array of all :math:`(a, \sigma)` local rotation matices that rotate the data.)DOC";
+static constexpr auto prop_doc_8  = R"DOC(Array of rotation matrices from spherical harmonics to dft specific orbital basis.)DOC";
+static constexpr auto prop_doc_9  = R"DOC(Names of spin indices for naming blocks in block GFs.)DOC";
+static constexpr auto prop_doc_10 = R"DOC(Spin kind of :math:`\sigma` index.)DOC";
 
 // ----- Method table ----
 
@@ -215,12 +237,28 @@ static auto const fun_2 = c2py::dispatcher_f_kw_t{
 static auto const fun_3 = c2py::dispatcher_f_kw_t{c2py::cmethod(
    [](triqs::modest::band_dispersion const &self, long sigma, long k_idx) { return self.N_nu(sigma, k_idx); }, "self", "sigma", "k_idx")};
 
-static const auto doc_d_2 = fun_2.doc(R"DOC(
-H^σ(k)_ν, returned as a MATRIX in (ν, ν)
+static const auto doc_d_2 =
+   fun_2.doc(R"DOC(
+Get :math:`H^{\sigma}_{\nu\nu'}(\mathbf{k})` for a given :math:`\mathbf{k}` and :math:`\sigma`.
+
+Parameters
+----------
+sigma : {par_0}
+   Spin index :math:`\sigma`.
+k_idx : {par_1}
+   Index of the k-point in the grid.
+
+Returns
+-------
+{ret_0}
+   Matrix view of :math:`H^{\sigma}_{\nu\nu'}(\mathbf{k})` in :math:`(\nu, \nu')` for a given 
+   :math:`\mathbf{k}` and :math:`\sigma`.
 )DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+             std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
+                                      c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
+             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::matrix_const_view<triqs::dcomplex>>()}});
 static const auto doc_d_3 = fun_3.doc(R"DOC(
-Number of bands #ν
+Number of bands for a given k-point and spin :math:`\sigma`.
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 
@@ -232,10 +270,10 @@ PyMethodDef c2py::tp_methods<triqs::modest::band_dispersion>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_0 = R"DOC(Spin kind of the one-body data)DOC";
-constexpr auto doc_member_1 = R"DOC(H_k [k_idx, σ', nu, nu'])DOC";
-constexpr auto doc_member_2 = R"DOC(n_bands_per_k [k_idx, σ'] = # of nu)DOC";
-constexpr auto doc_member_3 = R"DOC(k_weights[k_idx])DOC";
+constexpr auto doc_member_0 = R"DOC(Spin kind of the one-body data.)DOC";
+constexpr auto doc_member_1 = R"DOC(Hamiltonian :math:`H^{\sigma}_{\nu\nu'}(\mathbf{k})`.)DOC";
+constexpr auto doc_member_2 = R"DOC(Number of bands for each k-point and :math:`\sigma`.)DOC";
+constexpr auto doc_member_3 = R"DOC(Weight in the BZ for each k-point.)DOC";
 constexpr auto doc_member_4 = R"DOC(Is the dispersion matrix-valued?)DOC";
 static PyObject *prop_get_dict_0(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::band_dispersion> *)self)->_c);
@@ -247,7 +285,7 @@ static PyObject *prop_get_dict_0(PyObject *self, void *) {
   dic["matrix_valued"] = self_c.matrix_valued;
   return dic.new_ref();
 }
-static constexpr auto prop_doc_11 = R"DOC(Number of k points in the grid)DOC";
+static constexpr auto prop_doc_11 = R"DOC(Number of k-points in the grid.)DOC";
 
 // ----- Method table ----
 
@@ -265,12 +303,12 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::band_dispersion>[] = {
 template <>
 const std::string c2py::tp_doc<triqs::modest::band_dispersion> = R"DOC(The one-body dispersion as a function of momentum.
 
-The band dispersion typically corresponds to the solution of a (Kohn-Sham) Hamiltonian which has been diagonalized in
-momentum space and formulated in a basis of Bloch states :math:`| \phi_{\nu\mathbf{k}} \rangle` with corresponding eigenvalues
-(:math:`\varepsilon_{\nu\mathbf{k}}^{\sigma}`).
+The band dispersion typically corresponds to the solution of a (Kohn-Sham) Hamiltonian which has been 
+diagonalized in momentum space and formulated in a basis of Bloch states :math:`| \phi_{\nu\mathbf{k}} \rangle` with 
+corresponding eigenvalues (:math:`\varepsilon_{\nu\mathbf{k}}^{\sigma}`).
 
-A band dispersion object contains the DFT band structure :math:`\varepsilon_{\nu\mathbf{k}}^{\sigma}`, weights in the Brillouin zone,
-and the spin kind used in the DFT calculation.)DOC"
+A band dispersion object contains the DFT band structure :math:`\varepsilon_{\nu\mathbf{k}}^{\sigma}`, weights in the 
+Brillouin zone, and the spin kind used in the DFT calculation.)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::band_dispersion>;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::downfolding_projector> = "triqs_modest.obe.DownfoldingProjector";
 
@@ -322,12 +360,28 @@ static auto const fun_5 = c2py::dispatcher_f_kw_t{c2py::cmethod(
    [](triqs::modest::downfolding_projector const &self, const nda::array<nda::matrix<triqs::dcomplex>, 2> &U) { return self.rotate_local_basis(U); },
    "self", "U")};
 
-static const auto doc_d_4 = fun_4.doc(R"DOC(
-P^σ(k)_mν, returned as a matrix in (m ν)
+static const auto doc_d_4 =
+   fun_4.doc(R"DOC(
+Get :math:`P_{m\nu}^{\sigma}(\mathbf{k})` for a given :math:`\mathbf{k}` and :math:`\sigma`.
+
+Parameters
+----------
+sigma : {par_0}
+   Spin index :math:`\sigma`.
+k_idx : {par_1}
+   Index of the k-point in the grid.
+
+Returns
+-------
+{ret_0}
+   Matrix view of :math:`P_{m\nu}^{\sigma}(\mathbf{k})` in :math:`(m, \nu)` for the given :math:`\mathbf{k}` 
+   and :math:`\sigma`.
 )DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+             std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
+                                      c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
+             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::matrix_const_view<triqs::dcomplex>>()}});
 static const auto doc_d_5 = fun_5.doc(R"DOC(
-Rotates the local basis of the downfolding projector
+Rotates the local basis of the downfolding projector.
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 
@@ -339,9 +393,9 @@ PyMethodDef c2py::tp_methods<triqs::modest::downfolding_projector>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_5 = R"DOC()DOC";
-constexpr auto doc_member_6 = R"DOC(Pk[alpha][k_idx, σ', m_alpha, nu])DOC";
-constexpr auto doc_member_7 = R"DOC(n_bands_per_k [k_idx, σ'] = # of nu)DOC";
+constexpr auto doc_member_5 = R"DOC(Spin kind of the one-body data.)DOC";
+constexpr auto doc_member_6 = R"DOC(Projector :math:`P_{m\nu}^{\sigma}(\mathbf{k})`.)DOC";
+constexpr auto doc_member_7 = R"DOC(Number of bands for each k-point and :math:`\sigma`.)DOC";
 static PyObject *prop_get_dict_1(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::downfolding_projector> *)self)->_c);
   c2py::pydict dic;
@@ -444,9 +498,9 @@ PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements_on_grid>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_8  = R"DOC()DOC";
-constexpr auto doc_member_9  = R"DOC()DOC";
-constexpr auto doc_member_10 = R"DOC()DOC";
+constexpr auto doc_member_8  = R"DOC(Band dispersion.)DOC";
+constexpr auto doc_member_9  = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
+constexpr auto doc_member_10 = R"DOC(Downfolding projector :math:`P`.)DOC";
 static PyObject *prop_get_dict_2(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements_on_grid> *)self)->_c);
   c2py::pydict dic;
@@ -515,8 +569,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements_tb>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_11 = R"DOC()DOC";
-constexpr auto doc_member_12 = R"DOC()DOC";
+constexpr auto doc_member_11 = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
+constexpr auto doc_member_12 = R"DOC(List of TB Hamiltonians.)DOC";
 static PyObject *prop_get_dict_3(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements_tb> *)self)->_c);
   c2py::pydict dic;
@@ -535,7 +589,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements_tb>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <>
-const std::string c2py::tp_doc<triqs::modest::one_body_elements_tb> = R"DOC(A one-body elements object using a tight-binding Hamiltonian.)DOC"
+const std::string c2py::tp_doc<triqs::modest::one_body_elements_tb> = R"DOC(A one-body elements using a tight-binding Hamiltonian.)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::one_body_elements_tb>;
 
 // ==================== module functions ====================
@@ -576,10 +630,10 @@ static auto const fun_9 = c2py::dispatcher_f_kw_t{c2py::cfun(
 
 static const auto doc_d_6 = fun_6.doc(
    R"DOC(
-Create a one-body elements object with orthonormalized projectors.
+Create a one-body elements with orthonormalized projectors.
 
 Using the data from the "dft_input" group, the band dispersion, local space, downfolding projector, and optional 
-IBZ symmetry ops are prepared to create a one-body elements object. This object is intended to be used in DMFT 
+IBZ symmetry ops are prepared to create a one-body elements. This object is intended to be used in DMFT 
 calculations.
 
 Our strategy is to decompose the :math:`{\cal C}` space using the suitable basis for embedding. Each block of 
@@ -634,34 +688,34 @@ Returns
    std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::pair<double, triqs::modest::one_body_elements_on_grid>>()}});
 static const auto doc_d_7 =
    fun_7.doc(R"DOC(
-[1] Construct a obe_tb from Wannier90 in the case of a single spin index.
+[1] Construct a one-body elements TB object from Wannier90 in the case of a single spin index.
 
 ------
 
-[2] Construct a obe_tb from Wannier90 in the case with separate spin up/spin down channels.
+[2] Construct a one-body elements TB object from Wannier90 in the case with separate spin up/spin down channels.
 
 ------
 
 Parameters
 ----------
 wannier_file_path : {par_0}
-   string to Wannier90 files, including the prefix, 
-         as in "path/to/file/seedname" to specify a Wannier files named in the format "seedname_tb.dat"
+   String to Wannier90 files, including the prefix, as in "path/to/file/seedname" to specify 
+   a Wannier files named in the format "seedname_tb.dat".
 spin_kind : {par_1}
-   spin type for this calculation
+   Spin kind for this calculation.
 atomic_shells : {par_2}
-   list of atomic shells input by the user
+   List of atomic shells input by the user.
 wannier_file_path_up : {par_3}
-   string to Wannier90 files, including the prefix, for the up spin channel, 
-       as in "path/to/file/seedname" to specify a Wannier files named in the format "seedname_tb.dat"
+   String to Wannier90 files, including the prefix, for the up spin channel, as in 
+   "path/to/file/seedname" to specify a Wannier files named in the format "seedname_tb.dat".
 wannier_file_path_dn : {par_4}
-   string to Wannier90 files, including the prefix, for the down spin channel  
-       as in "path/to/file/seedname" to specify a Wannier files named in the format "seedname_tb.dat"
+   String to Wannier90 files, including the prefix, for the down spin channel as in 
+   "path/to/file/seedname" to specify a Wannier files named in the format "seedname_tb.dat"
 
 Returns
 -------
 {ret_0}
-   One_body_elements object containing the Wannier90 tight binding Hamiltonian
+   One-body elements containing the Wannier90 tight binding Hamiltonian.
 )DOC",
              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::string &>()}, ", "),
                                       c2py::join(std::vector<std::string>{c2py::python_typename<triqs::modest::spin_kind_e>()}, ", "),
@@ -671,16 +725,16 @@ Returns
              std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_tb>()}});
 static const auto doc_d_8 = fun_8.doc(
    R"DOC(
-Create a one-body elements object along specific k-grid.
+Create a one-body elements along specific k-path.
 
-Using the data from the "dft_bands_input" group, the band_disperion and downfolding_projector
-are prepared to create one-body elements object. This object is intended to be used for post-processing
+Using the data from the "dft_bands_input" group, the band disperion and downfolding projector
+are prepared to create one-body elements. This object is intended to be used for post-processing
 the momentum-resolved spectral function.
 
 Parameters
 ----------
 filename : {par_0}
-   Hdf5 file from the dft_tools converter.
+   Hdf5 file from the DFTtools converter.
 obe : {par_1}
    One-body elements that was ued in the DMFT calculation.
 
@@ -694,23 +748,23 @@ Returns
    std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_on_grid>()}});
 static const auto doc_d_9 = fun_9.doc(
    R"DOC(
-Create a one-body elements object with the Θ projectors.
+Create a one-body elements with the :math:`\Theta` projectors.
 
-Using the data from the "dft_parproj_input" group, the local_space, downfolding_projectors,
-and optional ibz_symmetry_ops are prepared to create a one-body elements object.  This object is
+Using the data from the "dft_parproj_input" group, the local space, downfolding projectors,
+and optional IBZ symmetry ops are prepared to create a one-body elements. This object is
 intended to be used for post-processing the atom- and orbitally-resolved k-summed spectral functions.
 
 Parameters
 ----------
 filename : {par_0}
-   Hdf5 file from DFTtools converter with dft_parproj_input group.
+   Hdf5 file from DFTtools converter with "dft_parproj_input" group.
 obe : {par_1}
    One-body elements that was used in the DMFT calculation.
 
 Returns
 -------
 {ret_0}
-   One-body elements using the Θ projectors.
+   One-body elements using the :math:`\Theta` projectors.
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::string &>()}, ", "),
                             c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", ")},

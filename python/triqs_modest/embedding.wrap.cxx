@@ -36,24 +36,26 @@ template <> constexpr initproc c2py::tp_init<triqs::modest::embedding> = c2py::p
 template <>
 const std::string c2py::tp_ctor_doc<triqs::modest::embedding> = init_0.doc(
    R"DOC(
-Constructor
+[1] Construct an embedding object.
 
-Default constructor
+------
 
-.. note::
+[2] Default constructor for reading from HDF5.
 
-   The decompositions are given for α, γ index, and are independent of σ
+------
 
 Parameters
 ----------
 sigma_embed_decomposition : {par_0}
-   Decomposition (list of block sizes) for Σ_embed: [α] = block size
+   Decomposition (list of block sizes) for :math:`\Sigma_{\text{embed}}`:
+   :math:`[ \alpha ] =` block size. Note that the decompositions are given for :math:`\alpha`, :math:`\gamma` index,
+   and are independent of :math:`\sigma`.
 imp_decompositions : {par_1}
-   List of decomposition of solvers: [n_imp][γ] = block size
+   List of decomposition of solvers: [n_imp][:math:`\gamma`] = block size.
 psi : {par_2}
-   The mapping ψ[α,σ] -> n_imp, γ, τ
+   The mapping :math:`\psi[\alpha,\sigma]` -> n_imp, :math:`\gamma`, :math:`\tau`.
 sigma_names : {par_3}
-   Names for the values of the σ index (e.g., "up", "down")
+   Names for the values of the :math:`\sigma` index (e.g., "up", "down").
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<long>>()}, ", "),
                             c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<std::vector<long>>>()}, ", "),
@@ -124,14 +126,14 @@ static auto const fun_5 = c2py::dispatcher_f_kw_t{
 // extract
 static auto const fun_6 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self,
-                    const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &g) { return self.extract(g); },
-                 "self", "g"),
+                    const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &g_loc) { return self.extract(g_loc); },
+                 "self", "g_loc"),
    c2py::cmethod([](triqs::modest::embedding const &self,
-                    const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &g) { return self.extract(g); },
-                 "self", "g"),
+                    const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &g_loc) { return self.extract(g_loc); },
+                 "self", "g_loc"),
    c2py::cmethod([](triqs::modest::embedding const &self,
-                    const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &g) { return self.extract(g); },
-                 "self", "g"),
+                    const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &g_loc) { return self.extract(g_loc); },
+                 "self", "g_loc"),
    c2py::cmethod([](triqs::modest::embedding const &self, const triqs::block2_matrix_t &matrix_C) { return self.extract(matrix_C); }, "self",
                  "matrix_C")};
 
@@ -185,70 +187,74 @@ static auto const fun_15 = c2py::dispatcher_f_kw_t{
       "imp_idx", "block_list")};
 
 static const auto doc_d_0 = fun_0.doc(R"DOC(
-Summarize the embedding object
+Summarize the embedding object.
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_1 = fun_1.doc(R"DOC(
-Remove an impurity from the embedding table ψ
+Remove an impurity from the embedding table :math:`\psi`.
 
-Remove the impurity imp_idx, maps the corresponding α blocks to -1 (i.e. no longer connected to an impurity)
-         and relabel the other impurities with number > imp_idx.
+Remove the impurity `imp_idx`, map the corresponding :math:`\alpha` blocks to -1 (i.e. no longer
+connected to an impurity) and relabel the other impurities with a number > `imp_idx`.
 
 Parameters
 ----------
 imp_idx : {par_0}
-   Index of the impurity to remove from the table ψ
+   Index of the impurity to remove from the table :math:`\psi`.
 
 Returns
 -------
 {ret_0}
-   New embedding with the updated ψ map.
+   New embedding with the updated :math:`\psi` map.
 )DOC",
                                       std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
                                       std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
 static const auto doc_d_2 = fun_2.doc(
    R"DOC(
-[1, 2, 3] Embed impurity solver self-energies into an embedded self-energy.
+[1, 2, 3] Embed single-particle quantities (TRIQS/ModEST).
 
-_{embed}^{ασ} = _{imp}^{ψ(α,σ)} 
-    ψ(α,σ) -> (n_imp, γ, τ)
+Embed impurity solver self-energies into an embedded self-energy.
 
-------
-
-[4, 5, 6] Embed the impurity self-energy decomposed as a list of dynamic and a list of static parts.
+* :math:`\Sigma_{\text{embed}}^{ασ} = \Sigma_{\text{imp}}^{ψ(α,σ)}`,
+* :math:`\psi(\alpha,\sigma) \to` (n_imp, :math:`\gamma`, :math:`\tau`).
 
 ------
 
-[7] embed block matrices (TRIQS/ModEST)
+[4, 5, 6] Embed single-particle quantities (TRIQS/ModEST).
+
+Embed the impurity self-energy decomposed as a list of dynamic and a list of static parts.
+
+------
+
+[7] Embed block matrices (TRIQS/ModEST).
 
 ------
 
 Parameters
 ----------
 Sigma_imp_vec : {par_0}
-   a list of impurity self-energies
+   A list of impurity self-energies.
 Sigma_imp_static_vec : {par_1}
-   A list of static impurity self-energies
+   A list of static impurity self-energies.
 
 Returns
 -------
 [1] : {ret_0}
-   Σ_embed[alpha, sigma] in C space using the embed decomposition
+   :math:`\Sigma_{\text{embed}}[\alpha, \sigma]` in :math:`\mathcal{C}` space using the embed decomposition.
 
 [2] : {ret_1}
-   Σ_embed[alpha, sigma] in C space using the embed decomposition
+   :math:`\Sigma_{\text{embed}}[\alpha, \sigma]` in :math:`\mathcal{C}` space using the embed decomposition.
 
 [3] : {ret_2}
-   Σ_embed[alpha, sigma] in C space using the embed decomposition
+   :math:`\Sigma_{\text{embed}}[\alpha, \sigma]` in :math:`\mathcal{C}` space using the embed decomposition.
 
 [4] : {ret_3}
-   The self-energy in the C space as a pair (dynamic, static).
+   The self-energy in the :math:`\mathcal{C}` space as a pair (dynamic, static).
 
 [5] : {ret_4}
-   The self-energy in the C space as a pair (dynamic, static).
+   The self-energy in the :math:`\mathcal{C}` space as a pair (dynamic, static).
 
 [6] : {ret_5}
-   The self-energy in the C space as a pair (dynamic, static).
+   The self-energy in the :math:`\mathcal{C}` space as a pair (dynamic, static).
 )DOC",
    std::vector<std::string>{
       c2py::join(
@@ -266,42 +272,42 @@ Returns
       c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>(),
       c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>()}});
 static const auto doc_d_3 = fun_3.doc(R"DOC(
-embed single-particle quantities (CoQui)
+Embed single-particle quantities (CoQui).
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_4 = fun_4.doc(R"DOC(
-embed two-particle quantities (CoQui)
+Embed two-particle quantities (CoQui).
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_5 = fun_5.doc(R"DOC(
-embed tensors (CoQui)
+Embed tensors (CoQui).
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_6 = fun_6.doc(
    R"DOC(
-[1, 2, 3] Extract the impurity Green's function
+[1, 2, 3] Extract single-particle quantities (TRIQS/ModEST).
 
 ------
 
-[4] extract matrices (TRIQS/ModEST)
+[4] Extract matrices (TRIQS/ModEST).
 
 ------
 
 Parameters
 ----------
-g : {par_0}
-   Block2Gf of gloc in MxM space
+g_loc : {par_0}
+   Block2Gf of gloc in :math:`M \times M` space.
 
 Returns
 -------
 [1] : {ret_0}
-   local impurity Green's function
+   Local impurity Green's function.
 
 [2] : {ret_1}
-   local impurity Green's function
+   Local impurity Green's function.
 
 [3] : {ret_2}
-   local impurity Green's function
+   Local impurity Green's function.
 )DOC",
    std::vector<std::string>{
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
@@ -313,107 +319,107 @@ Returns
                                c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>>(),
                                c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>()}});
 static const auto doc_d_7 = fun_7.doc(R"DOC(
-extract single-particle quantities (CoQui)
+Extract single-particle quantities (CoQui).
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_8 = fun_8.doc(R"DOC(
-extract two-particle quantities (CoQui)
+Extract two-particle quantities (CoQui).
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_9 = fun_9.doc(R"DOC(
-extract tensors (CoQui)
+Extract tensors (CoQui).
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_10 =
    fun_10.doc(R"DOC(
-[1] Flip the spins (σ) for block α.
+[1] Flip the spins (:math:`\sigma`) for block :math:`\alpha`.
 
-For block α transforms (σ,σ') -> (τ, τ') to (σ, σ') -> (τ', τ).
+For block :math:`\alpha` transforms :math:`(\sigma,\sigma') \to (\tau, \tau')` to
+:math:`(\sigma, \sigma') \to (\tau', \tau)`.
 
 ------
 
-[2] Flip the spins (σ) for all [α].
+[2] Flip the spins (:math:`\sigma`) for all :math:`[\alpha]`.
 
-For block α transforms (σ,σ') -> (τ, τ') to (σ, σ') -> (τ', τ).
+For block :math:`\alpha` transforms :math:`(\sigma,\sigma') \to (\tau, \tau')` to
+:math:`(\sigma, \sigma') \to (\tau', \tau)`.
 
 ------
 
 Parameters
 ----------
 alpha : {par_0}
-   the index of the alpha block to flip the spins.
+   The index of the alpha block to flip the spins.
 alphas : {par_1}
-   a list of alpha blocks to flip the spins.
-
-Returns
--------
-[1] : {ret_0}
-   a new embedding with the updated ψ map.
-
-[2] : {ret_1}
-   New embedding with the updated ψ map.
-)DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<long>>()}, ", ")},
-              std::vector<std::string>{
-                 std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>(), c2py::python_typename<triqs::modest::embedding>()}});
-static const auto doc_d_11 = fun_11.doc(R"DOC(
-The impurity decomposition
-)DOC",
-                                        std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_12 = fun_12.doc(R"DOC(
-@}
-)DOC",
-                                        std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_13 = fun_13.doc(R"DOC(
-Number of blocks in γ for the Σ_imp[imp_idx]
-)DOC",
-                                        std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_14 = fun_14.doc(R"DOC(
-Replaces one impurity in the embedding table ψ.
-
-Replaces the impurity solver corresponding to imp_idx_to with the impurity solver at imp_idx_from 
-and updates the underlying table ψ.
-
-Parameters
-----------
-imp_idx_to_remove : {par_0}
-   the index of the impurity solver to be replaced.
-imp_idx_to_replace_with : {par_1}
-   the index of the impurity solver that will replace imp_idx_to.
+   A list of alpha blocks to flip the spins.
 
 Returns
 -------
 {ret_0}
-   a new embedding with the updated ψ map.
+   New embedding with the updated :math:`\psi` map.
+)DOC",
+              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
+                                       c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<long>>()}, ", ")},
+              std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
+static const auto doc_d_11 = fun_11.doc(R"DOC(
+The impurity decomposition.
+)DOC",
+                                        std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_12 = fun_12.doc(R"DOC(
+Zero initialize impurity self-energies.
+)DOC",
+                                        std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_13 = fun_13.doc(R"DOC(
+Number of blocks in :math:`\gamma` for the :math:`\Sigma_{\text{imp}}` [imp_idx].
+)DOC",
+                                        std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_14 = fun_14.doc(R"DOC(
+Replaces one impurity in the embedding table :math:`\psi`.
+
+Replaces the impurity solver corresponding to `imp_idx_to_remove` with the impurity solver at
+`imp_idx_to_replace_with` and updates the underlying table :math:`\psi`.
+
+Parameters
+----------
+imp_idx_to_remove : {par_0}
+   The index of the impurity solver to be replaced.
+imp_idx_to_replace_with : {par_1}
+   The index of the impurity solver that will replace `imp_idx_to_remove`.
+
+Returns
+-------
+{ret_0}
+   A new embedding with the updated :math:`\psi` map.
 )DOC",
                                         std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
                                                                  c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
                                         std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
 static const auto doc_d_15 =
    fun_15.doc(R"DOC(
-[1] Predicate p (long block_idx) -> 0 or 1.
+[1] Split impurity `imp_idx`.
+
+Predicate p (long block_idx) -> 0 or 1.
 
 ------
 
-[2] Split impurity imp_idx based on block_list
+[2] Split impurity `imp_idx` based on `block_list`.
 
-For impurity imp_idx, split part of its blocks into a new impurity.
-The blocks that were split off remain mapped to their original alpha blocks with the updated imp_idx.
+For impurity `imp_idx`, split part of its blocks into a new impurity.
+The blocks that were split off remain mapped to their original alpha blocks with the updated `imp_idx`.
 
 ------
 
 Parameters
 ----------
 imp_idx : {par_0}
-   Impurity number
+   Impurity number.
 block_list : {par_1}
-   A list of blocks of imp_idx to split off.
+   A list of blocks of `imp_idx` to split off.
 
 Returns
 -------
 {ret_0}
-   New embedding with the updated ψ map.
+   New embedding with the updated :math:`\psi` map.
 )DOC",
               std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", ")},
@@ -441,12 +447,12 @@ PyMethodDef c2py::tp_methods<triqs::modest::embedding>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-static constexpr auto prop_doc_0 = R"DOC(the mapping table ψ)DOC";
-static constexpr auto prop_doc_1 = R"DOC(Gf block structure for the impurity solvers)DOC";
-static constexpr auto prop_doc_2 = R"DOC(Number of blocks in α for the Σ_embed)DOC";
-static constexpr auto prop_doc_3 = R"DOC(Number of impurities)DOC";
-static constexpr auto prop_doc_4 = R"DOC(Number of blocks in σ for the Σ_embed)DOC";
-static constexpr auto prop_doc_5 = R"DOC(The names of the sigma indices)DOC";
+static constexpr auto prop_doc_0 = R"DOC(The mapping table :math:`\psi`.)DOC";
+static constexpr auto prop_doc_1 = R"DOC(Gf block structure for the impurity solvers.)DOC";
+static constexpr auto prop_doc_2 = R"DOC(Number of blocks in :math:`\alpha` for the :math:`\Sigma_{\text{embed}}`.)DOC";
+static constexpr auto prop_doc_3 = R"DOC(Number of impurities.)DOC";
+static constexpr auto prop_doc_4 = R"DOC(Number of blocks in :math:`\sigma` for the :math:`\Sigma_{\text{embed}}`.)DOC";
+static constexpr auto prop_doc_5 = R"DOC(The names of the sigma indices.)DOC";
 
 // ----- Method table ----
 
@@ -471,9 +477,10 @@ template <> PyMappingMethods c2py::tp_as_mapping<triqs::modest::embedding> = {nu
 template <>
 const std::string c2py::tp_doc<triqs::modest::embedding> = R"DOC(The embedding class.
 
-The embeddding class encodes the mapping between impurities and the correlated space 𝓒 (cf. ModEST implementation notes). 
-In particular, it maps the individual "blocks" within an impurity self-energy to a block and spin of the embedded self-energy function,
-which can then be upfolded (downfolded) to obtain the lattice self-energy and the local Green's function.)DOC"
+The embedding class encodes the mapping between impurities and the correlated space :math:`\mathcal{C}`
+(cf. ModEST implementation notes). In particular, it maps the individual "blocks" within an impurity self-energy to
+a block and spin of the embedded self-energy function, which can then be upfolded (downfolded) to obtain the
+lattice self-energy and the local Green's function.)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::embedding>;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::embedding::imp_block_t> = "triqs_modest.embedding.ImpBlockT";
 static auto init_1 = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::embedding::imp_block_t>(),
@@ -490,9 +497,9 @@ PyMethodDef c2py::tp_methods<triqs::modest::embedding::imp_block_t>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_0 = R"DOC()DOC";
-constexpr auto doc_member_1 = R"DOC()DOC";
-constexpr auto doc_member_2 = R"DOC()DOC";
+constexpr auto doc_member_0 = R"DOC(Index of the impurity.)DOC";
+constexpr auto doc_member_1 = R"DOC(First index :math:`\gamma` of the block in the :math:`\Sigma_{\text{imp}}`.)DOC";
+constexpr auto doc_member_2 = R"DOC(Second index :math:`\tau` of the block in the :math:`\Sigma_{\text{imp}}`.)DOC";
 
 // ----- Method table ----
 
@@ -505,7 +512,8 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::embedding::imp_block_t>[] =
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <>
-const std::string c2py::tp_doc<triqs::modest::embedding::imp_block_t> = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::modest::embedding::imp_block_t>;
+const std::string c2py::tp_doc<triqs::modest::embedding::imp_block_t> =
+   R"DOC(Struct representing an impurity block.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::embedding::imp_block_t>;
 
 // ==================== module functions ====================
 
@@ -532,22 +540,22 @@ static auto const fun_18 = c2py::dispatcher_f_kw_t{
 
 static const auto doc_d_16 =
    fun_16.doc(R"DOC(
-Construct the embedding class from the local space, a description of the block decomposition, and an equivalence 
-       mapping between atom sites.
+Construct the embedding class from the local space, a description of the block decomposition, and an
+equivalence mapping between atom sites.
 
 Parameters
 ----------
 spin_names : {par_0}
-   the names of the spin indices
+   The names of the spin indices.
 block_decomposition : {par_1}
-   the decomposition of atomic orbitals into their irreducible representations
+   The decomposition of atomic orbitals into their irreducible representations.
 atom_to_imp : {par_2}
-   [optional] a mapping between equivalent atom sites.
+   [optional] A mapping between equivalent atom sites.
 
 Returns
 -------
 {ret_0}
-   embedding
+   Embedding object.
 )DOC",
               std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::string> &>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<std::vector<long>, 2> &>(),
@@ -557,11 +565,12 @@ Returns
               std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
 static const auto doc_d_17 =
    fun_17.doc(R"DOC(
-Make an embedding from the local space
+Make an embedding from the local space.
 
-This function creates an embedding object from the local space, which is typically used in ModEST for embedding calculations.
-The default behavior is to use the equivalences between different atoms when constructing the embedding and to use the irrep decomposition of the atomic orbitals.
-Instead of the irrep decomposition, one can use the atomic decomposition.
+This function creates an embedding object from the local space, which is typically used in ModEST for
+embedding calculations. The default behavior is to use the equivalences between different atoms when constructing
+the embedding and to use the irrep decomposition of the atomic orbitals. Instead of the irrep decomposition, one
+can use the atomic decomposition.
 
 Parameters
 ----------
@@ -575,7 +584,7 @@ use_atom_decomp : {par_2}
 Returns
 -------
 {ret_0}
-   An embedding
+   Embedding object.
 )DOC",
               std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::local_space &>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", "),
@@ -585,21 +594,23 @@ static const auto doc_d_18 =
    fun_18.doc(R"DOC(
 Make an embedding for clusters of atoms.
 
-This function creates an embedding object from the one-body elements on grid (obe) and a partition of the atoms into clusters.
-The clusters are defined by the atom_partition, which is a vector of vectors, where each inner vector contains the indices of the atoms in the cluster.
-The resulting one-body elements on grid (new_obe) will have the atoms permuted according to the atom_partition.
+This function creates an embedding object from the one-body elements on grid (obe) and a partition of the
+atoms into clusters. The clusters are defined by the `atom_partition`, which is a vector of vectors, where each
+inner vector contains the indices of the atoms in the cluster.
+The resulting one-body elements on grid will have the atoms permuted according to the `atom_partition`.
 
 Parameters
 ----------
 obe : {par_0}
-   one-body elements on grid (obe) to permute.
+   One-body elements on grid (obe) to permute.
 atom_partition : {par_1}
-   new partition of the atoms into clusters, where each inner vector contains the indices of the atoms in the cluster.
+   New partition of the atoms into clusters, where each inner vector contains the indices of the
+   atoms in the cluster.
 
 Returns
 -------
 {ret_0}
-   a new one-body elements on grid (new_obe) and the corresponding embedding object.
+   A new one-body elements on grid and the corresponding embedding object.
 )DOC",
               std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_on_grid>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::vector<long>> &>()}, ", ")},
@@ -622,17 +633,21 @@ static struct PyModuleDef module_def = {PyModuleDef_HEAD_INIT,
                                         "embedding", /* name of module */
                                         R"RAWDOC(The embedding abstraction in ModEST. 
 
-The **embedding** object is the central controller of the DMFT problem: it defines how the correlated subspace (:math:`\mathcal{C}`) 
-is partitioned into impurities and handles the bookkeeping needed to map back and forth between the lattice and the impurities.
+The **embedding** object is the central controller of the DMFT problem: it defines how the correlated subspace 
+(:math:`\mathcal{C}`) is partitioned into impurities and handles the bookkeeping needed to map back and forth between 
+the lattice and the impurities.
 
 Typical use cases covered by embedding:
 
-- **Equivalent atoms**: use the same impurity model (i.e. same :math:`n_{\mathrm{imp}}`) for different blocks :math:`\alpha`.
-- **Magnetic order**: just reverse the spin for some atoms, :math:`\tau(\sigma) = 1-\sigma`
-- **Splitting impurity models** : Depending on the block structure of the problem, the corresponding impurity model connected to 
-  atom :math:`a` can be split. Different impurity solvers can then be used for each of these split impurity models. The self-energies 
-  from both models map back to the a single atom :math:`a`. Or a trivial solver is used to obtain zero self-energy (drop).
-- **cluster DMFT**: re-group a subset of atoms :math:`a` into a larger super atom which will be treated as a cluster DMFT problem.
+- **Equivalent atoms**: Use the same impurity model (i.e. same :math:`n_{\mathrm{imp}}`) for different blocks 
+  :math:`\alpha`.
+- **Magnetic order**: Just reverse the spin for some atoms, :math:`\tau(\sigma) = 1-\sigma`.
+- **Splitting impurity models** : Depending on the block structure of the problem, the corresponding impurity model 
+  connected to atom :math:`a` can be split. Different impurity solvers can then be used for each of these split impurity 
+  models. The self-energies from both models map back to the a single atom :math:`a`. Or a trivial solver is used to 
+  obtain zero self-energy (drop).
+- **cluster DMFT**: Re-group a subset of atoms :math:`a` into a larger super atom which will be treated as a cluster 
+  DMFT problem.
 
 The embedding object provides:
 

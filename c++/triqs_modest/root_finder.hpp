@@ -159,20 +159,20 @@ namespace triqs {
   //------------------------------------------------------
 
   /**
-  * @brief  Root finder f(x) = 0.
-  * 
-  * @param method root finding method (dichtomy, bisection)
-  * @param f  f(x) (double -> double)
-  * @param x_init initial value for x
-  * @param y_value  target value for y
-  * @param precision precision for algorihtm 
-  * @param delta_x increment of x
-  * @param max_loops max number of iterations for method
-  * @param x_name name of x variable
-  * @param y_name name of y variable f(x)
-  * @param verbosity logging of root finder
-  * @return x, f(x) where f(x) = y_value
-  */
+   * @brief Root finder \f$ f(x) = 0 \f$.
+   * 
+   * @param method Root finding method (`dichtomy` or `bisection`).
+   * @param f \f$ f(x) : \mathbb{R} \to \mathbb{R} \f$.
+   * @param x_init Initial value for \f$ x \f$.
+   * @param y_value Target value for \f$ y \f$.
+   * @param precision Precision for algorithm. 
+   * @param delta_x Increment of \f$ x \f$.
+   * @param max_loops Max number of iterations.
+   * @param x_name Name of \f$ x \f$ variable.
+   * @param y_name Name of \f$ y = f(x) \f$ variable.
+   * @param verbosity Turn on/off logging.
+   * @return \f$ x, f(x) \f$ where \f$ f(x) = y \f$.
+   */
   inline std::pair<double, double> root_finder(std::string method, std::function<double(double)> f, double x_init, double y_value, double precision,
                                                double delta_x, long max_loops = 1000, std::string x_name = "", std::string y_name = "",
                                                bool verbosity = false) {

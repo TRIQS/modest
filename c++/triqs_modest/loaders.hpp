@@ -17,10 +17,10 @@ namespace triqs::modest {
 
   /**
    * @ingroup one_body_elements
-   * @brief Create a one-body elements object with orthonormalized projectors.
+   * @brief Create a one-body elements with orthonormalized projectors.
    *
    * Using the data from the "dft_input" group, the band dispersion, local space, downfolding projector, and optional 
-   * IBZ symmetry ops are prepared to create a one-body elements object. This object is intended to be used in DMFT 
+   * IBZ symmetry ops are prepared to create a one-body elements. This object is intended to be used in DMFT 
    * calculations.
    *
    * Our strategy is to decompose the \f${\cal C}\f$ space using the suitable basis for embedding. Each block of 
@@ -60,47 +60,51 @@ namespace triqs::modest {
   std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold = 1.e-5,
                                                                                     bool diagonalize_hloc = false);
   // bool verbosity        = true);
+
   /**
- * @ingroup one_body_elements
- * @brief Create a one-body elements object with the Θ projectors.
- *
- * @details Using the data from the "dft_parproj_input" group, the local_space, downfolding_projectors,
- * and optional ibz_symmetry_ops are prepared to create a one-body elements object.  This object is
- * intended to be used for post-processing the atom- and orbitally-resolved k-summed spectral functions.
- *
- * @param filename Hdf5 file from DFTtools converter with dft_parproj_input group.
- * @param obe One-body elements that was used in the DMFT calculation.
- * @return One-body elements using the Θ projectors.
- */
+   * @ingroup one_body_elements
+   * @brief Create a one-body elements with the \f$ \Theta \f$ projectors.
+   *
+   * @details Using the data from the "dft_parproj_input" group, the local space, downfolding projectors,
+   * and optional IBZ symmetry ops are prepared to create a one-body elements. This object is
+   * intended to be used for post-processing the atom- and orbitally-resolved k-summed spectral functions.
+   *
+   * @param filename Hdf5 file from DFTtools converter with "dft_parproj_input" group.
+   * @param obe One-body elements that was used in the DMFT calculation.
+   * @return One-body elements using the \f$ \Theta \f$ projectors.
+   */
   one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe);
+
   /**
- * @ingroup one_body_elements
- * @brief Create a one-body elements object along specific k-grid.
- *
- * @details Using the data from the "dft_bands_input" group, the band_disperion and downfolding_projector
- * are prepared to create one-body elements object. This object is intended to be used for post-processing
- * the momentum-resolved spectral function.
- *
- * @param filename  Hdf5 file from the dft_tools converter.
- * @param obe One-body elements that was ued in the DMFT calculation.
- * @return One-body elements along high-symmetry k-path.
- */
+   * @ingroup one_body_elements
+   * @brief Create a one-body elements along specific k-path.
+   *
+   * @details Using the data from the "dft_bands_input" group, the band disperion and downfolding projector
+   * are prepared to create one-body elements. This object is intended to be used for post-processing
+   * the momentum-resolved spectral function.
+   *
+   * @param filename Hdf5 file from the DFTtools converter.
+   * @param obe One-body elements that was ued in the DMFT calculation.
+   * @return One-body elements along high-symmetry k-path.
+   */
   one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe);
 
   /** @} */ // Fixed grid factories
 
   /**
-  * @brief Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure.
-  *
-  * @details Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
-  * Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
-  *
-  * @param Hloc0 the R = 0 part of the Hamiltonian as a vector of [n_atoms, n_sigma]
-  * @param atomic_shells the list of atomic shells used to index Hloc
-  * @param block_threshold the threshold of accuracy at which a symmetry is considered found
-  * @param diagonalize_hloc whether or not to diagonalize hloc
-  * @return decomposition, U_rotation describing the block structure of GF based on Hloc
-  */
+   * @brief Find symmetries of the \f$ R = 0 \f$ component of a Hamiltonian to determine a GF block structure.
+   *
+   * @details Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the 
+   * local Hamiltonian (\f$ H_0 = \sum_k P(k) H_{\nu\nu'} P^\dagger(k) \f$), which represents the block structure of the 
+   * TRIQS Gf.
+   *
+   * @param Hloc0 The \f$ R = 0 \f$ part of the Hamiltonian as a vector of [n_atoms, n_sigma].
+   * @param atomic_shells The list of atomic shells used to index \f$ H_{\text{loc}} \f$.
+   * @param block_threshold The threshold of accuracy at which a symmetry is considered found.
+   * @param diagonalize_hloc Whether or not to diagonalize \f$ H_{\text{loc}} \f$.
+   * @return Decomposition, \f$ U_{\text{rotation}} \f$ describing the block structure of GF based on 
+   * \f$ H_{\text{loc}} \f$.
+   */
   std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<dcomplex>, 2>>
   discover_symmetries(nda::array<nda::matrix<dcomplex>, 2> const &Hloc0, std::vector<atomic_orbs> const &atomic_shells, double block_threshold,
                       bool diagonalize_hloc);

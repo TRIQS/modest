@@ -44,15 +44,16 @@ namespace triqs::modest {
 
   /**
    * @ingroup deg
-   * @brief Find the generate blocks of a BlockGf by analyzing G(τ=0) or G(iω₀) using the union-find algorithm.
+   * @brief Find the generate blocks of a block GF by analyzing \f$ G(\tau=0) \f$ or \f$ G(i\omega_0) \f$ using the 
+   * union-find algorithm.
    * 
-   * @details We use the union-find algorithm to group the blocks of the BlockGf (matrices) into equivalence
+   * @details We use the union-find algorithm to group the blocks of the block GF (matrices) into equivalence
    * classes based on approximate numerical equality. If two matrices are approximately equal, their blocks are united
    * into the same set. The final result is a partitioning of the blocks (matrices) into degenerate groups.
    *
-   * @param Gimp Block Green's function
-   * @param threshold tolerance for equivalence of blocks
-   * @return A list of equivalent blocks
+   * @param Gimp Block Green's function.
+   * @param threshold Tolerance for equivalent of blocks.
+   * @return A list of equivalent blocks.
    */
   inline std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<imfreq, matrix_valued> const &Gimp, double threshold = 1.e-5) {
     auto find_degenerate = [&](auto const &G) {
@@ -86,8 +87,8 @@ namespace triqs::modest {
    * 
    * @details Average the degenerate blocks and replace the degenerate ones with their average.
    *
-   * @param Gin Block Green's function
-   * @param degenerate_blocks a list of the degenerate blocks.
+   * @param Gin Block Green's function.
+   * @param degenerate_blocks A list of the degenerate blocks.
    * @return The symmetrized Green's function.
    */
   inline block_gf<imfreq, matrix_valued> symmetrize_gf(block_gf<imfreq, matrix_valued> const &Gin, std::vector<std::vector<long>> degenerate_blocks) {

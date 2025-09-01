@@ -4,17 +4,21 @@ package_name = "triqs_modest"
 # The documentation string of the module. 
 documentation = '''The embedding abstraction in ModEST. 
 
-The **embedding** object is the central controller of the DMFT problem: it defines how the correlated subspace (:math:`\mathcal{C}`) 
-is partitioned into impurities and handles the bookkeeping needed to map back and forth between the lattice and the impurities.
+The **embedding** object is the central controller of the DMFT problem: it defines how the correlated subspace 
+(:math:`\mathcal{C}`) is partitioned into impurities and handles the bookkeeping needed to map back and forth between 
+the lattice and the impurities.
 
 Typical use cases covered by embedding:
 
-- **Equivalent atoms**: use the same impurity model (i.e. same :math:`n_{\mathrm{imp}}`) for different blocks :math:`\alpha`.
-- **Magnetic order**: just reverse the spin for some atoms, :math:`\tau(\sigma) = 1-\sigma`
-- **Splitting impurity models** : Depending on the block structure of the problem, the corresponding impurity model connected to 
-  atom :math:`a` can be split. Different impurity solvers can then be used for each of these split impurity models. The self-energies 
-  from both models map back to the a single atom :math:`a`. Or a trivial solver is used to obtain zero self-energy (drop).
-- **cluster DMFT**: re-group a subset of atoms :math:`a` into a larger super atom which will be treated as a cluster DMFT problem.
+- **Equivalent atoms**: Use the same impurity model (i.e. same :math:`n_{\mathrm{imp}}`) for different blocks 
+  :math:`\alpha`.
+- **Magnetic order**: Just reverse the spin for some atoms, :math:`\tau(\sigma) = 1-\sigma`.
+- **Splitting impurity models** : Depending on the block structure of the problem, the corresponding impurity model 
+  connected to atom :math:`a` can be split. Different impurity solvers can then be used for each of these split impurity 
+  models. The self-energies from both models map back to the a single atom :math:`a`. Or a trivial solver is used to 
+  obtain zero self-energy (drop).
+- **cluster DMFT**: Re-group a subset of atoms :math:`a` into a larger super atom which will be treated as a cluster 
+  DMFT problem.
 
 The embedding object provides:
 

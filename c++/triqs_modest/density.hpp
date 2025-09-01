@@ -81,13 +81,13 @@ namespace triqs::modest {
   /**
    * @ingroup mu
    * @brief Compute the density of the lattice Green's function with a self-energy using Woodbury.
-   * 
-   * @tparam Mesh The mesh type
-   * @param obe The one-body elements.
-   * @param mu The chemical potential.
-   * @param Sigma_dynamic The dynamic part of the embedded self-energy.
-   * @param Sigma_static The static part of the embedded self-energy.
-   * @return The electron density of the lattice Gren's function
+   *
+   * @tparam Mesh The mesh type.
+   * @param obe One-body elements.
+   * @param mu Chemical potential.
+   * @param Sigma_dynamic Dynamic part of the embedded self-energy.
+   * @param Sigma_static Static part of the embedded self-energy.
+   * @return Electron density of the lattice Green's function.
    */
   template <typename Mesh>
   double density(one_body_elements_on_grid const &obe, double mu,
@@ -131,15 +131,15 @@ namespace triqs::modest {
   }
 
   // ------------------------------------------------------------------------------------
-  ///Compute number of particles n = ∑f(β(e(k)-μ))
+  /// Compute number of particles \f$ n = \sum f(\beta(\varepsilon(k) - μ)) \f$.
   double density_nk(one_body_elements_on_grid const &obe, double mu, double beta);
 
   // ------------------------------------------------------------------------------------
   /** @cond DOXYGEN_SKIP_THIS */
   /**
    * @brief  Compute the density of the lattice Green's function with a self-energy.
-   * 
-   * @tparam Mesh The mesh type 
+   *
+   * @tparam Mesh The mesh type
    * @param obe one-body elements
    * @param mu chemical potential
    * @param Sigma_dynamic dynamic part of the embedded self-energy.
@@ -185,17 +185,17 @@ namespace triqs::modest {
   /** @endcond */
 
   /**
- * @ingroup mu
- * @brief Find the chemical potenital from the local Green's function given a target density.
- * 
- * @param target_density The total electron density.
- * @param obe The one-body elements.
- * @param beta The inverse temperature (units 1/eV).
- * @param method The root finding method to use (default = dichotomy).
- * @param precision The precision to end search (default = 1e-5).
- * @param verbosity Printing of the root finder's progress (default = true).
- * @return chemical potential corresponding to target density
- */
+   * @ingroup mu
+   * @brief Find the chemical potenital from the local Green's function given a target density.
+   *
+   * @param target_density Total electron density.
+   * @param obe One-body elements.
+   * @param beta Inverse temperature (units 1/eV).
+   * @param method Root finding method to use (default = `dichotomy`).
+   * @param precision Precision to end search (default = 1e-5).
+   * @param verbosity Printing of the root finder's progress (default = true).
+   * @return Chemical potential corresponding to target density.
+   */
   inline double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe, double beta,
                                         std::string method = "dichotomy", double precision = 1.e-5, bool verbosity = true) {
     std::function<double(double)> f = [&obe, beta](double x) { return density_nk(obe, x, beta); };
@@ -203,19 +203,19 @@ namespace triqs::modest {
   }
 
   /**
- * @ingroup mu
- * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
- * 
- * @tparam Mesh The mesh type
- * @param target_density The total electron density.
- * @param obe The one-body elements.
- * @param Sigma_dynamic The dynamic part of the embedded self-energy.
- * @param Sigma_static The static part of the embedded self-energy.
- * @param method The root finding method to use (default = dichotomy).
- * @param precision The precision to end search (default = 1e-5).
- * @param verbosity Printing of the root finder's progress (default = true).
- * @return chemical potential corresponding to target density
- */
+   * @ingroup mu
+   * @brief Find the chemical potenital from the local Green's function and self-energy given a target density.
+   *
+   * @tparam Mesh The mesh type.
+   * @param target_density Total electron density.
+   * @param obe One-body elements.
+   * @param Sigma_dynamic Dynamic part of the embedded self-energy.
+   * @param Sigma_static Static part of the embedded self-energy.
+   * @param method Root finding method to use (default = `dichotomy`).
+   * @param precision Precision to end search (default = 1e-5).
+   * @param verbosity Printing of the root finder's progress (default = true).
+   * @return Chemical potential corresponding to target density.
+   */
   template <typename Mesh>
   double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
                                  block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static,

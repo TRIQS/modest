@@ -14,12 +14,12 @@ namespace triqs::modest {
   namespace fs = std::filesystem;
 
   /**
- * @ingroup checkpoint
- * @brief A checkpoint manager for logging data after each DMFT iteration
- * 
- * @tparam InitialData the initial data of the calculatoin (one_body_elements, embedding)
- * @tparam IterationData the data after each DMFT iteration
- */
+   * @ingroup checkpoint
+   * @brief A checkpoint manager for logging data after each DMFT iteration
+   *
+   * @tparam InitialData the initial data of the calculatoin (one_body_elements, embedding)
+   * @tparam IterationData the data after each DMFT iteration
+   */
   template <typename InitialData, typename IterationData> class checkpoint {
 
     fs::path _dirname;
@@ -53,7 +53,7 @@ namespace triqs::modest {
     }
 
     /**
-     * @brief Create a new checkpoint from initial_data. 
+     * @brief Create a new checkpoint from initial_data.
      * @param dirname Name of the directory containing the checkpoint files. Must not exist.
      * @param initial_data Initial data to store in the checkpoint.
      */
@@ -68,8 +68,10 @@ namespace triqs::modest {
       // FIXME : Writout some metadata
     }
 
+    /// Directory name containing the checkpoint files.
     [[nodiscard]] std::string dirname() const { return _dirname.string(); }
 
+    /// Initial data.
     [[nodiscard]] InitialData initial_data() const { return read<InitialData>(path_initial_data); }
 
     void append(IterationData const &x) {
@@ -90,11 +92,12 @@ namespace triqs::modest {
   //          Checkpoint data structures for DMFT loop
   // ===========================================================================
 
+  /// Initial data used for checkpointing.
   struct initial_data {
-    /// One body elements
+    /// One-body elements.
     one_body_elements_on_grid obe;
 
-    /// Embedding
+    /// Embedding object.
     embedding embed;
 
     /// Impurity model
@@ -121,24 +124,25 @@ namespace triqs::modest {
   using block_gf_imtime_t = block_gf<imtime, matrix_valued>;
   using block_mat_t       = std::vector<nda::matrix<dcomplex>>;
 
+  /// Iteration data used for checkpointing.
   struct iteration_data {
 
-    /// Chemical potential
+    /// Chemical potential.
     double mu;
 
-    /// Impurities self-energies
+    /// Impurities self-energies.
     std::vector<block_gf_imfreq_t> Sigma_imp_list;
 
-    /// Sigma Hartree
+    /// Sigma Hartree.
     block_mat_t Sigma_hartree_list;
 
-    /// Impurities Green's functions
+    /// Impurities Green's functions.
     std::vector<block_gf_imfreq_t> Gimp_freq_list;
 
-    /// Impurities Green's functions
+    /// Impurities Green's functions.
     std::vector<block_gf_imtime_t> Gimp_time_list;
 
-    /// Impurities self-energies
+    /// Impurities self-energies.
     std::vector<block_gf_imfreq_t> Sigma_dc_list;
   };
 
@@ -170,9 +174,7 @@ namespace triqs::modest {
 
   // Template specialization for the checkpoint class
   // For c2py
-  /** @c2py 
-     name = DMFTCheckpoint
-   */
+  /// A checkpoint manager for logging data after each DMFT iteration.
   template class checkpoint<initial_data, iteration_data>;
 
 } // namespace triqs::modest

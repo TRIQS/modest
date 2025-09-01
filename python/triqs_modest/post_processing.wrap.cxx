@@ -67,7 +67,7 @@ PyMethodDef c2py::tp_methods<triqs::modest::spectral_function_kw>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_0 = R"DOC(A[σ](k,w))DOC";
+constexpr auto doc_member_0 = R"DOC(:math:`A^\sigma(k,\omega)`.)DOC";
 static PyObject *prop_get_dict_0(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_kw> *)self)->_c);
   c2py::pydict dic;
@@ -84,7 +84,8 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_kw>[] = {
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <>
-const std::string c2py::tp_doc<triqs::modest::spectral_function_kw> = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::modest::spectral_function_kw>;
+const std::string c2py::tp_doc<triqs::modest::spectral_function_kw> =
+   R"DOC(Store data of spectral functions.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::spectral_function_kw>;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::spectral_function_w> = "triqs_modest.post_processing.SpectralFunctionW";
 
 static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs) {
@@ -130,8 +131,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::spectral_function_w>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_1 = R"DOC(A[σ](w))DOC";
-constexpr auto doc_member_2 = R"DOC(A[a,σ](m,m',w))DOC";
+constexpr auto doc_member_1 = R"DOC(:math:`A^\sigma(\omega)`.)DOC";
+constexpr auto doc_member_2 = R"DOC(:math:`A^{\sigma}_{mm'}(\omega)`.)DOC";
 static PyObject *prop_get_dict_1(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_w> *)self)->_c);
   c2py::pydict dic;
@@ -149,7 +150,9 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_w>[] = {
    {"__dict__", (getter)prop_get_dict_1, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> const std::string c2py::tp_doc<triqs::modest::spectral_function_w> = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::modest::spectral_function_w>;
+template <>
+const std::string c2py::tp_doc<triqs::modest::spectral_function_w> =
+   R"DOC(Store data of spectral functions.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::spectral_function_w>;
 
 // ==================== module functions ====================
 
@@ -174,20 +177,20 @@ Compute the atom- and orbital-resolved spectral function (interacting density of
 Parameters
 ----------
 obe_theta : {par_0}
-   one-body elements on grid created from one_body_elements_with_theta_projectors (see obe factories).
+   One-body elements on grid created from one_body_elements_with_theta_projectors.
 Proj : {par_1}
-   downfolding_projector defined in the correlated space using to upfold the DMFT self-energies.
+   Downfolding projector defined in the correlated space using to upfold the DMFT self-energies.
 mu : {par_2}
-   chemical potential
+   Chemical potential.
 Sigma_w : {par_3}
-   self-energy in real-frequencies
+   Self-energy in real-frequencies.
 broadening : {par_4}
-   spectral broadening
+   Spectral broadening.
 
 Returns
 -------
 {ret_0}
-   spectral_function_w
+   Atom- and orbital-resolved spectral function.
 )DOC",
    std::vector<std::string>{
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),
@@ -199,23 +202,23 @@ Returns
    std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::spectral_function_w>()}});
 static const auto doc_d_1 = fun_1.doc(
    R"DOC(
-Compute momentum-resolved spectral function A(k, ω) along high-symmetry path.
+Compute momentum-resolved spectral function :math:`A^\sigma(k, \omega)` along high-symmetry path.
 
 Parameters
 ----------
 obe : {par_0}
-   one-body elements on grid created from one_body_elements_on_high_symmetry_path (see obe factories)
+   One-body elements on grid created from one_body_elements_on_high_symmetry_path.
 mu : {par_1}
-   chemical potential
+   Chemical potential.
 Sigma_w : {par_2}
-   self-energy in real-frequencies
+   Self-energy in real-frequencies.
 broadening : {par_3}
-   spectral broadening
+   Spectral broadening.
 
 Returns
 -------
 {ret_0}
-   spectral_function_kw
+   Momentum-resolved spectral function.
 )DOC",
    std::vector<std::string>{
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),

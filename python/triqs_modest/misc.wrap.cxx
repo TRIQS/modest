@@ -86,10 +86,10 @@ PyMethodDef c2py::tp_methods<triqs::modest::atomic_orbs>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_0 = R"DOC()DOC";
-constexpr auto doc_member_1 = R"DOC()DOC";
-constexpr auto doc_member_2 = R"DOC()DOC";
-constexpr auto doc_member_3 = R"DOC()DOC";
+constexpr auto doc_member_0 = R"DOC(Dimension of the orbital space.)DOC";
+constexpr auto doc_member_1 = R"DOC(Angular quantum number.)DOC";
+constexpr auto doc_member_2 = R"DOC(Equivalent atoms will have the same sort index (sort).)DOC";
+constexpr auto doc_member_3 = R"DOC(Index of the atom in the dft code if any, or :math:`-1`.)DOC";
 static PyObject *prop_get_dict_0(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::atomic_orbs> *)self)->_c);
   c2py::pydict dic;
@@ -113,7 +113,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::atomic_orbs>[] = {
 
 template <>
 const std::string c2py::tp_doc<triqs::modest::atomic_orbs> =
-   R"DOC(Info on an atomic shell)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::atomic_orbs>;
+   R"DOC(Info on an atomic shell.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::atomic_orbs>;
 template <> inline constexpr auto c2py::tp_name<triqs::lattice::superlattice> = "triqs_modest.misc.Superlattice";
 static auto init_0 =
    c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::lattice::superlattice, nda::array<long, 2>, nda::array<long, 2>>("sl_units", "cluster_pts")};
@@ -353,45 +353,48 @@ static auto const fun_11 = c2py::dispatcher_f_kw_t{c2py::cfun(
 
 static const auto doc_d_3 = fun_3.doc(
    R"DOC(
-Compute Hloc = H(R=0) given n_sigma tight_binding Hamiltonians
+Compute :math:`H_{\text{loc}} = H(R=0)` given :math:`n_\sigma` tight binding Hamiltonians.
 
 Parameters
 ----------
 H_sigma : {par_0}
-   a list of TB Hamiltonians of length n_sigma
+   A list of TB Hamiltonians of length :math:`n_\sigma`.
 atomic_shells : {par_1}
-   a list of atomic shells corresponding to the orbitals contained in the TB Hamiltonian
+   A list of atomic shells corresponding to the orbitals contained in the TB Hamiltonians.
 
 Returns
 -------
 {ret_0}
-   Hloc, formated with dimensions [alphsa,sigma] each containing (n_orbitals_atom, n_orbitals_atom)
+   :math:`H_{\text{loc}}`, formatted with dimensions :math:`[\alpha,\sigma]` each containing (n_orbitals_atom, 
+   n_orbitals_atom).
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<triqs::tb_hamiltonian> &>()}, ", "),
                             c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<triqs::modest::atomic_orbs> &>()}, ", ")},
    std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()}});
 static const auto doc_d_4 = fun_4.doc(
    R"DOC(
-Find symmetries of the R = 0 component of a Hamiltonian to determine a GF block structure.
+Find symmetries of the :math:`R = 0` component of a Hamiltonian to determine a GF block structure.
 
-Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the local
-Hamiltonian (H0 = ∑k P(k) Hνν' P†(k) ), which represents the block structure of the TRIQS Gf.
+Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the 
+local Hamiltonian (:math:`H_0 = \sum_k P(k) H_{\nu\nu'} P^\dagger(k)`), which represents the block structure of the 
+TRIQS Gf.
 
 Parameters
 ----------
 Hloc0 : {par_0}
-   the R = 0 part of the Hamiltonian as a vector of [n_atoms, n_sigma]
+   The :math:`R = 0` part of the Hamiltonian as a vector of [n_atoms, n_sigma].
 atomic_shells : {par_1}
-   the list of atomic shells used to index Hloc
+   The list of atomic shells used to index :math:`H_{\text{loc}}`.
 block_threshold : {par_2}
-   the threshold of accuracy at which a symmetry is considered found
+   The threshold of accuracy at which a symmetry is considered found.
 diagonalize_hloc : {par_3}
-   whether or not to diagonalize hloc
+   Whether or not to diagonalize :math:`H_{\text{loc}}`.
 
 Returns
 -------
 {ret_0}
-   decomposition, U_rotation describing the block structure of GF based on Hloc
+   Decomposition, :math:`U_{\text{rotation}}` describing the block structure of GF based on 
+   :math:`H_{\text{loc}}`.
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
                             c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<triqs::modest::atomic_orbs> &>()}, ", "),
@@ -401,23 +404,23 @@ Returns
       std::vector<std::string>{c2py::python_typename<std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<triqs::dcomplex>, 2>>>()}});
 static const auto doc_d_5 = fun_5.doc(
    R"DOC(
-compute double counting correction for a dc_type (method) from the density matrix of a Green's function.
+Compute double counting correction for a DC type (method) from the density matrix of a Green's function.
 
 Parameters
 ----------
 density_matrix : {par_0}
-   the density matrix [orbital, spin] indices
+   Density matrix [orbital, spin] indices.
 U_int : {par_1}
-   Coulomb interaction parameter
+   Coulomb interaction parameter.
 J_hund : {par_2}
-   Hund's coupling interaction parameter
+   Hund's coupling interaction parameter.
 method : {par_3}
-   dc_formula (sFLL, cFLL, sAMF, cAMF, cHeld)
+   DC formula (`sFLL`, `cFLL`, `sAMF`, `cAMF`, `cHeld`).
 
 Returns
 -------
 {ret_0}
-   A pair of Σ_DC and E_DC
+   A pair of :math:`\Sigma_{DC}` and :math:`E_{DC}`.
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
                             c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
@@ -433,12 +436,12 @@ Parameters
 sl : {par_0}
    The superlattice object containing its lattice vectors and locations of cluster points.
 obe : {par_1}
-   A one_body_elements object containing the tb_hamiltonian.
+   A one-body elements containing the TB Hamiltonian.
 
 Returns
 -------
 {ret_0}
-   one_body_elements object based on the superlattice tight binding Hamiltonian.
+   One-body elements based on the superlattice tight binding Hamiltonian.
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::lattice::superlattice &>()}, ", "),
                             c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}, ", ")},
@@ -448,35 +451,35 @@ static const auto doc_d_8 = fun_8.doc(R"DOC()DOC", std::vector<std::string>{}, s
 static const auto doc_d_9 = fun_9.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_10 =
    fun_10.doc(R"DOC(
-Root finder f(x) = 0.
+Root finder :math:`f(x) = 0`.
 
 Parameters
 ----------
 method : {par_0}
-   root finding method (dichtomy, bisection)
+   Root finding method (`dichtomy` or `bisection`).
 f : {par_1}
-   f(x) (double -> double)
+   :math:`f(x) : \mathbb{R} \to \mathbb{R}`.
 x_init : {par_2}
-   initial value for x
+   Initial value for :math:`x`.
 y_value : {par_3}
-   target value for y
+   Target value for :math:`y`.
 precision : {par_4}
-   precision for algorihtm
+   Precision for algorithm.
 delta_x : {par_5}
-   increment of x
+   Increment of :math:`x`.
 max_loops : {par_6}
-   max number of iterations for method
+   Max number of iterations.
 x_name : {par_7}
-   name of x variable
+   Name of :math:`x` variable.
 y_name : {par_8}
-   name of y variable f(x)
+   Name of :math:`y = f(x)` variable.
 verbosity : {par_9}
-   logging of root finder
+   Turn on/off logging.
 
 Returns
 -------
 {ret_0}
-   x, f(x) where f(x) = y_value
+   :math:`x, f(x)` where :math:`f(x) = y`.
 )DOC",
               std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<std::function<double(double)>>()}, ", "),
@@ -489,7 +492,16 @@ Returns
                                        c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
               std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::pair<double, double>>()}});
-static const auto doc_d_11 = fun_11.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_11 = fun_11.doc(R"DOC(
+Map a spin index to a data index.
+
+The mapping depends on the spin kind:
+
+* `Polarized`: :math:`\sigma \to \sigma` (an object can have different values for different :math:`\sigma`).
+* `NonPolarized`: :math:`\sigma \to 0` (an object is the same for both :math:`\sigma`, so only one copy is stored).
+* `NonCollinear`: :math:`\sigma \to 0` (:math:`\sigma` is always 0).
+)DOC",
+                                        std::vector<std::string>{}, std::vector<std::string>{});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

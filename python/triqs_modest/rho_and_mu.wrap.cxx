@@ -82,23 +82,20 @@ static const auto doc_d_0 = fun_0.doc(
 Parameters
 ----------
 obe : {par_0}
-   The one-body elements.
+   One-body elements.
 mu : {par_1}
-   The chemical potential.
+   Chemical potential.
 Sigma_dynamic : {par_2}
-   The dynamic part of the embedded self-energy.
+   Dynamic part of the embedded self-energy.
 Sigma_static : {par_3}
-   The static part of the embedded self-energy.
+   Static part of the embedded self-energy.
 opt : {par_4}
-   Container for options related integration of the BZ
+   Container for options related to the integration of the BZ.
 
 Returns
 -------
-[1] : {ret_0}
-   The electron density of the lattice Gren's function
-
-[2] : {ret_1}
-   density
+{ret_0}
+   Electron density of the lattice Green's function.
 )DOC",
    std::vector<std::string>{
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
@@ -109,9 +106,9 @@ Returns
                  ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::lattice::bz_int_options &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<double>(), c2py::python_typename<double>()}});
+   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<double>()}});
 static const auto doc_d_1 = fun_1.doc(R"DOC(
-Compute number of particles n = ∑f(β(e(k)-μ))
+Compute number of particles :math:`n = \sum f(\beta(\varepsilon(k) - μ))`.
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_2 = fun_2.doc(
@@ -127,37 +124,36 @@ static const auto doc_d_2 = fun_2.doc(
 Parameters
 ----------
 target_density : {par_0}
-   The total electron density.
+   Total electron density.
 obe : {par_1}
-   The one-body elements.
+   One-body elements.
 beta : {par_2}
-   The inverse temperature (units 1/eV).
+   Inverse temperature (units 1/eV).
 method : {par_3}
-   The root finding method to use (default = dichotomy).
+   Root finding method to use (default = `dichotomy`).
 precision : {par_4}
-   The precision to end search (default = 1e-5).
+   Precision to end search (default = 1e-5).
 verbosity : {par_5}
    Printing of the root finder's progress (default = true).
 Sigma_dynamic : {par_6}
-   The dynamic part of the embedded self-energy.
+   Dynamic part of the embedded self-energy.
 Sigma_static : {par_7}
-   The static part of the embedded self-energy.
+   Static part of the embedded self-energy.
 opt : {par_8}
-   Container for options related integration of the BZ
+   Container for options related to integration of the BZ.
 mesh : {par_9}
-   The mesh on which Gloc will be computed
+   Mesh on which local GF will be computed.
 
 Returns
 -------
-[1, 2] : {ret_0}
-   chemical potential corresponding to target density
-
-[3, 4] : {ret_1}
-   Chemical potential
+{ret_0}
+   Chemical potential corresponding to target density.
 )DOC",
    std::vector<std::string>{
       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),
+      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
+                                          c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
+                 ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
@@ -167,7 +163,7 @@ Returns
       c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::lattice::bz_int_options &>()}, ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::mesh::imfreq &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<double>(), c2py::python_typename<double>()}});
+   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<double>()}});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

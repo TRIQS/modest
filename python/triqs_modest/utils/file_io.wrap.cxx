@@ -73,8 +73,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::initial_data>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_0 = R"DOC(One body elements)DOC";
-constexpr auto doc_member_1 = R"DOC(Embedding)DOC";
+constexpr auto doc_member_0 = R"DOC(One-body elements.)DOC";
+constexpr auto doc_member_1 = R"DOC(Embedding object.)DOC";
 static PyObject *prop_get_dict_0(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::initial_data> *)self)->_c);
   c2py::pydict dic;
@@ -92,7 +92,9 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::initial_data>[] = {
    {"__dict__", (getter)prop_get_dict_0, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> const std::string c2py::tp_doc<triqs::modest::initial_data>        = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::modest::initial_data>;
+template <>
+const std::string c2py::tp_doc<triqs::modest::initial_data> =
+   R"DOC(Initial data used for checkpointing.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::initial_data>;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::iteration_data> = "triqs_modest.utils.file_io.IterationData";
 
 static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs) {
@@ -153,12 +155,12 @@ PyMethodDef c2py::tp_methods<triqs::modest::iteration_data>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_2 = R"DOC(Chemical potential)DOC";
-constexpr auto doc_member_3 = R"DOC(Impurities self-energies)DOC";
-constexpr auto doc_member_4 = R"DOC(Sigma Hartree)DOC";
-constexpr auto doc_member_5 = R"DOC(Impurities Green's functions)DOC";
-constexpr auto doc_member_6 = R"DOC(Impurities Green's functions)DOC";
-constexpr auto doc_member_7 = R"DOC(Impurities self-energies)DOC";
+constexpr auto doc_member_2 = R"DOC(Chemical potential.)DOC";
+constexpr auto doc_member_3 = R"DOC(Impurities self-energies.)DOC";
+constexpr auto doc_member_4 = R"DOC(Sigma Hartree.)DOC";
+constexpr auto doc_member_5 = R"DOC(Impurities Green's functions.)DOC";
+constexpr auto doc_member_6 = R"DOC(Impurities Green's functions.)DOC";
+constexpr auto doc_member_7 = R"DOC(Impurities self-energies.)DOC";
 static PyObject *prop_get_dict_1(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::iteration_data> *)self)->_c);
   c2py::pydict dic;
@@ -184,7 +186,9 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::iteration_data>[] = {
    {"__dict__", (getter)prop_get_dict_1, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> const std::string c2py::tp_doc<triqs::modest::iteration_data> = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::modest::iteration_data>;
+template <>
+const std::string c2py::tp_doc<triqs::modest::iteration_data> =
+   R"DOC(Iteration data used for checkpointing.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::iteration_data>;
 template <>
 inline constexpr auto c2py::tp_name<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>> =
    "triqs_modest.utils.file_io.DMFTCheckpoint";
@@ -231,8 +235,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::checkpoint<triqs::modest::initial_da
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-static constexpr auto prop_doc_0 = R"DOC()DOC";
-static constexpr auto prop_doc_1 = R"DOC()DOC";
+static constexpr auto prop_doc_0 = R"DOC(Directory name containing the checkpoint files.)DOC";
+static constexpr auto prop_doc_1 = R"DOC(Initial data.)DOC";
 
 // ----- Method table ----
 
@@ -259,7 +263,7 @@ PyMappingMethods c2py::tp_as_mapping<triqs::modest::checkpoint<triqs::modest::in
 
 template <>
 const std::string c2py::tp_doc<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>> =
-   R"DOC(name = DMFTCheckpoint)DOC" + std::string{"\n\n----------\n\n"}
+   R"DOC(A checkpoint manager for logging data after each DMFT iteration.)DOC" + std::string{"\n\n----------\n\n"}
    + c2py::tp_ctor_doc<triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>>;
 
 // ==================== module functions ====================

@@ -12,9 +12,15 @@
 
 namespace triqs::modest {
 
-  // In NonPolarized case, σ logically has 2 values, but
-  // the data are the same, so we store only on.
-  // this method maps σ to its index for the data arrays
+  /**
+   * @brief Map a spin index to a data index.
+   * 
+   * @details The mapping depends on the spin kind:
+   * 
+   * * `Polarized`: \f$ \sigma \to \sigma \f$ (an object can have different values for different \f$ \sigma \f$).
+   * * `NonPolarized`: \f$ \sigma \to 0 \f$ (an object is the same for both \f$ \sigma \f$, so only one copy is stored).
+   * * `NonCollinear`: \f$ \sigma \to 0 \f$ (\f$ \sigma \f$ is always 0).
+   */
   [[nodiscard]] inline long sigma_to_data_idx(spin_kind_e spin_kind, long sigma) { return (spin_kind == spin_kind_e::Polarized) ? sigma : 0; };
 
   /**
@@ -29,10 +35,10 @@ namespace triqs::modest {
    * Brillouin zone, and the spin kind used in the DFT calculation.
    */
   struct band_dispersion {
-    spin_kind_e spin_kind;             ///< Spin kind of the one-body data
-    nda::array<dcomplex, 4> H_k;       ///< H_k [k_idx, σ', nu, nu']
-    nda::array<long, 2> n_bands_per_k; ///< n_bands_per_k [k_idx, σ'] = # of nu
-    nda::array<double, 1> k_weights;   ///< k_weights[k_idx]
+    spin_kind_e spin_kind;             ///< Spin kind of the one-body data.
+    nda::array<dcomplex, 4> H_k;       ///< Hamiltonian \f$ H^{\sigma}_{\nu\nu'}(\mathbf{k}) \f$.
+    nda::array<long, 2> n_bands_per_k; ///< Number of bands for each k-point and \f$ \sigma \f$.
+    nda::array<double, 1> k_weights;   ///< Weight in the BZ for each k-point.
     bool matrix_valued;                ///< Is the dispersion matrix-valued?
 
     // public:
@@ -46,23 +52,30 @@ namespace triqs::modest {
     //   // TODO add some checks on the data ?
     // }
 
-    /// H^σ(k)_ν, returned as a MATRIX in (ν, ν)
+    /**
+     * @brief Get \f$ H^{\sigma}_{\nu\nu'}(\mathbf{k}) \f$ for a given \f$ \mathbf{k} \f$ and \f$ \sigma \f$.
+     * 
+     * @param sigma Spin index \f$ \sigma \f$.
+     * @param k_idx Index of the k-point in the grid.
+     * @return Matrix view of \f$ H^{\sigma}_{\nu\nu'}(\mathbf{k}) \f$ in \f$ (\nu, \nu') \f$ for a given 
+     * \f$ \mathbf{k} \f$ and \f$ \sigma \f$.
+     */
     [[nodiscard]] nda::matrix_const_view<dcomplex> H(long sigma, long k_idx) const {
       auto sigma_p = sigma_to_data_idx(spin_kind, sigma);
       auto R_nu    = nda::range(n_bands_per_k(k_idx, sigma_p));
       return H_k(k_idx, sigma_p, R_nu, R_nu);
     }
 
-    /// Number of bands #ν
+    /// Number of bands for a given k-point and spin \f$ \sigma \f$.
     [[nodiscard]] long N_nu(long sigma, long k_idx) const { return n_bands_per_k(k_idx, sigma_to_data_idx(spin_kind, sigma)); }
 
-    /// Number of k points in the grid
+    /// Number of k-points in the grid.
     [[nodiscard]] long n_k() const { return H_k.extent(0); }
 
     // /// Weight of k point (typically from DFT code).
     // [[nodiscard]] double k_weights(long k_idx) const { return _k_weights(k_idx); }
 
-    /// printing
+    /// Print information about a band_dispersion object.
     friend std::ostream &operator<<(std::ostream &out, band_dispersion const &bd);
   };
 
@@ -96,9 +109,9 @@ namespace triqs::modest {
    *   \f$ \sum_{ \nu} P^{\sigma}_{m\nu}(\mathbf{k}) P^{\dagger\sigma}_{\nu m'}(\mathbf{k}) = \delta_{mm'} \f$.
    */
   struct downfolding_projector {
-    spin_kind_e spin_kind;
-    nda::array<dcomplex, 4> P_k;       ///< Pk[alpha][k_idx, σ', m_alpha, nu]
-    nda::array<long, 2> n_bands_per_k; ///< n_bands_per_k [k_idx, σ'] = # of nu
+    spin_kind_e spin_kind;             ///< Spin kind of the one-body data.
+    nda::array<dcomplex, 4> P_k;       ///< Projector \f$ P_{m\nu}^{\sigma}(\mathbf{k}) \f$.
+    nda::array<long, 2> n_bands_per_k; ///< Number of bands for each k-point and \f$ \sigma \f$.
 
     // public:
     // /// Constructor
@@ -107,27 +120,37 @@ namespace triqs::modest {
 
     // ----------------- accessors --------------------
     // FIXME : SWAP k and sigma in data
-    /// P^σ(k)_mν, returned as a matrix in (m ν)
+
+    /**
+     * @brief Get \f$ P_{m\nu}^{\sigma}(\mathbf{k}) \f$ for a given \f$ \mathbf{k} \f$ and \f$ \sigma \f$.
+     * 
+     * @param sigma Spin index \f$ \sigma \f$.
+     * @param k_idx Index of the k-point in the grid.
+     * @return Matrix view of \f$ P_{m\nu}^{\sigma}(\mathbf{k}) \f$ in \f$ (m, \nu) \f$ for the given \f$ \mathbf{k} \f$ 
+     * and \f$ \sigma \f$.
+     */
     [[nodiscard]] nda::matrix_const_view<dcomplex> P(long sigma, long k_idx) const {
       auto sigma_p = sigma_to_data_idx(spin_kind, sigma);
       auto R_nu    = nda::range(n_bands_per_k(k_idx, sigma_p));
       return P_k(k_idx, sigma_p, r_all, R_nu);
     }
-    /// Rotates the local basis of the downfolding projector
+
+    /// Rotates the local basis of the downfolding projector.
     downfolding_projector rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U) const;
-    /// printing
+
+    /// Print information about a downfolding_projector object.
     friend std::ostream &operator<<(std::ostream &out, downfolding_projector const &proj);
   };
 
   // ------------------------------------------------------------
   /**
- * @ingroup one_body_elements
- * @brief A one-body elements struct where all of the underlying data exists on a fixed momentum grid.
- */
+   * @ingroup one_body_elements
+   * @brief A one-body elements struct where all of the underlying data exists on a fixed momentum grid.
+   */
   struct one_body_elements_on_grid {
-    band_dispersion H;
-    local_space C_space;
-    downfolding_projector P;
+    band_dispersion H;                                             ///< Band dispersion.
+    local_space C_space;                                           ///< Local \f$ \mathcal{C} \f$ space.
+    downfolding_projector P;                                       ///< Downfolding projector \f$ P \f$.
     C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; ///< IBZ symmetrizer after a k-sum
   };
 
@@ -149,8 +172,8 @@ namespace triqs::modest {
    * @ingroup hybridization
    * @brief Compute the atomic (impurity) levels from an obe.
    *
-   * @param obe One-body elements
-   * @return Impurity levels stored in the format [n_atoms, n_sigma]
+   * @param obe One-body elements.
+   * @return Impurity levels stored in the format [n_atoms, n_sigma].
    */
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_on_grid const &obe);
   // -------------------------------------------------------------

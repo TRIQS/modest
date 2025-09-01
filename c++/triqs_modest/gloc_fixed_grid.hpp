@@ -80,7 +80,7 @@ namespace triqs::modest {
 
   /**
    * @ingroup gloc
-   * @brief Compute local Green's function on Mesh(MxM).
+   * @brief Compute local Green's function on a \f$ M \times M \f$ mesh.
    * 
    * @details When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes 
    * (e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, \f$H(\mathbf{k})\f$ 
@@ -94,12 +94,14 @@ namespace triqs::modest {
    * For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (\f$N_{\nu}\f$) 
    * using the Woodbury formula which allows us to perform the matrix inversion in the smaller orbital basis \f$N_{M}\f$. 
    * 
-   * @tparam Mesh The mesh type (triqs::mesh::{dlr_imfreq,imfreq})
-   * @param obe one_body_elements_on_grid
-   * @param mu chemical potential
-   * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view, Sigma_dynamic[alpha, sigma].
-   * @param Sigma_static The static part of the embedded self-energy in the embedded view, Sigma_static[alpha,sigma]
-   * @return gloc[0, sigma], the local Green's function in the full C space.
+   * @tparam Mesh The mesh type (triqs::mesh::{dlr_imfreq,imfreq}).
+   * @param obe One-body elements on a fixed grid.
+   * @param mu Chemical potential \f$ \mu \f$.
+   * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view, 
+   * \f$ \Sigma_{\text{dynamic}}[\alpha, \sigma] \f$.
+   * @param Sigma_static The static part of the embedded self-energy in the embedded view, 
+   * \f$ \Sigma_{\text{static}}[\alpha,\sigma] \f$.
+   * @return \f$ G_{\mathrm{loc}}^{\sigma} \f$, the local Green's function in the full \f$ \mathcal{C} \f$ space.
    */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
@@ -146,15 +148,15 @@ namespace triqs::modest {
 
   /**
    * @ingroup gloc
-   * @brief  Compute the local Green's function without a self-energy.
+   * @brief Compute the local Green's function without a self-energy.
    * 
-   * @details See gloc for more details.
+   * @details See other overloads (gloc) for more details.
    * 
-   * @tparam Mesh The mesh type
-   * @param mesh mesh triqs::meshes::{imfreq, dlr_imfreq}
-   * @param obe one-body elements
-   * @param mu chemical potential
-   * @return The local Green's function.
+   * @tparam Mesh The mesh type.
+   * @param mesh (DLR) imaginary frequency mesh.
+   * @param obe One-body elements on a fixed grid.
+   * @param mu Chemical potential \f$ \mu \f$.
+   * @return \f$ G_{\mathrm{loc}}^{\sigma} \f$, the local Green's function.
    */
   template <typename Mesh> block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements_on_grid const &obe, double mu) {
     auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
@@ -168,12 +170,12 @@ namespace triqs::modest {
    * @ingroup hybridization
    * @brief Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
    * 
-   * @tparam Mesh The mesh type
+   * @tparam Mesh The mesh type.
    * @param epsilon_levels The effective impurity levels.
    * @param Gloc The local Green's function of the impurity.
    * @param Sigma_dynamic The frequency dependent part of the impurity self-energy.
    * @param Sigma_static The static term of the impurity self-energy.
-   * @return block_gf<Mesh, matrix_valued> 
+   * @return Hybridization function \f$ \Delta \f$.
    */
   template <typename Mesh>
   block_gf<Mesh, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc,
@@ -195,10 +197,10 @@ namespace triqs::modest {
    * @ingroup hybridization
    * @brief Compute the hybridization function from the effective impurity levels and the local Green's function.
    * 
-   * @tparam Mesh The mesh type
+   * @tparam Mesh The mesh type.
    * @param epsilon_levels The effective impurity levels.
    * @param Gloc The local Green's function of the impurity.
-   * @return block_gf<Mesh, matrix_valued> 
+   * @return Hybridization function \f$ \Delta \f$.
    */
   template <typename Mesh>
   block_gf<Mesh, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc) {

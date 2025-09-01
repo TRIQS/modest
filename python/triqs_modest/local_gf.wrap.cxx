@@ -55,7 +55,7 @@ static auto const fun_0 = c2py::dispatcher_f_kw_t{
 
 static const auto doc_d_0 = fun_0.doc(
    R"DOC(
-[1, 2] Compute local Green's function on Mesh(MxM).
+[1, 2] Compute local Green's function on a :math:`M \times M` mesh.
 
 When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes 
 (e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, :math:`H(\mathbf{k})` 
@@ -75,41 +75,40 @@ using the Woodbury formula which allows us to perform the matrix inversion in th
 
 [3, 4, 5, 6] Compute the local Green's function without a self-energy.
 
-See gloc for more details.
+See other overloads (gloc) for more details.
 
 ------
 
 Parameters
 ----------
 obe : {par_0}
-   one_body_elements_on_grid
+   One-body elements on a fixed grid.
 mu : {par_1}
-   chemical potential
+   Chemical potential :math:`\mu`.
 Sigma_dynamic : {par_2}
-   The dynamic part of the embedded self-energy in the embedded view, Sigma_dynamic[alpha, sigma].
+   The dynamic part of the embedded self-energy in the embedded view, 
+   :math:`\Sigma_{\text{dynamic}}[\alpha, \sigma]`.
 Sigma_static : {par_3}
-   The static part of the embedded self-energy in the embedded view, Sigma_static[alpha,sigma]
+   The static part of the embedded self-energy in the embedded view, 
+   :math:`\Sigma_{\text{static}}[\alpha,\sigma]`.
 mesh : {par_4}
-   mesh triqs::meshes::{imfreq, dlr_imfreq}
+   (DLR) imaginary frequency mesh.
 opt : {par_5}
-   Container for options related integration of the BZ
+   Container for options related to integration of the BZ.
 
 Returns
 -------
 [1] : {ret_0}
-   gloc[0, sigma], the local Green's function in the full C space.
+   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function in the full :math:`\mathcal{C}` space.
 
 [2] : {ret_1}
-   gloc[0, sigma], the local Green's function in the full C space.
+   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function in the full :math:`\mathcal{C}` space.
 
-[3] : {ret_2}
-   The local Green's function.
+[3, 5, 6] : {ret_2}
+   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
 
 [4] : {ret_3}
-   The local Green's function.
-
-[5, 6] : {ret_4}
-   gloc[alpha][sigma], the local Green's function
+   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
 )DOC",
    std::vector<std::string>{
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),
@@ -126,8 +125,7 @@ Returns
       std::vector<std::string>{c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
                                c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
                                c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
-                               c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
-                               c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>()}});
+                               c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>()}});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

@@ -40,23 +40,24 @@ static auto const fun_1 = c2py::dispatcher_f_kw_t{
 
 static const auto doc_d_0 = fun_0.doc(
    R"DOC(
-Find the generate blocks of a BlockGf by analyzing G(τ=0) or G(iω₀) using the union-find algorithm.
+Find the generate blocks of a block GF by analyzing :math:`G(\tau=0)` or :math:`G(i\omega_0)` using the 
+union-find algorithm.
 
-We use the union-find algorithm to group the blocks of the BlockGf (matrices) into equivalence
+We use the union-find algorithm to group the blocks of the block GF (matrices) into equivalence
 classes based on approximate numerical equality. If two matrices are approximately equal, their blocks are united
 into the same set. The final result is a partitioning of the blocks (matrices) into degenerate groups.
 
 Parameters
 ----------
 Gimp : {par_0}
-   Block Green's function
+   Block Green's function.
 threshold : {par_1}
-   tolerance for equivalence of blocks
+   Tolerance for equivalent of blocks.
 
 Returns
 -------
 {ret_0}
-   A list of equivalent blocks
+   A list of equivalent blocks.
 )DOC",
    std::vector<std::string>{
       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()},
@@ -72,9 +73,9 @@ Average the degenerate blocks and replace the degenerate ones with their average
 Parameters
 ----------
 Gin : {par_0}
-   Block Green's function
+   Block Green's function.
 degenerate_blocks : {par_1}
-   a list of the degenerate blocks.
+   A list of the degenerate blocks.
 
 Returns
 -------

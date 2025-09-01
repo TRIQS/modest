@@ -35,39 +35,41 @@ namespace triqs::modest {
   //   return result;
   // }
 
+  /// Store data of spectral functions.
   struct spectral_function_kw {
-    nda::array<double, 3> data; ///< A[σ](k,w)
+    nda::array<double, 3> data; ///< \f$ A^\sigma(k,\omega) \f$.
   };
 
   /**
- * @ingroup post
- * @brief Compute momentum-resolved spectral function A(k, ω) along high-symmetry path.
- * 
- * @param obe  one-body elements on grid created from one_body_elements_on_high_symmetry_path (see obe factories)
- * @param mu   chemical potential
- * @param Sigma_w  self-energy in real-frequencies
- * @param broadening spectral broadening
- * @return spectral_function_kw 
- */
+   * @ingroup post
+   * @brief Compute momentum-resolved spectral function \f$ A^\sigma(k, \omega) \f$ along high-symmetry path.
+   * 
+   * @param obe One-body elements on grid created from one_body_elements_on_high_symmetry_path.
+   * @param mu Chemical potential.
+   * @param Sigma_w Self-energy in real-frequencies.
+   * @param broadening Spectral broadening.
+   * @return Momentum-resolved spectral function.
+   */
   spectral_function_kw spectral_function_on_high_symmetry_path(one_body_elements_on_grid const &obe, double mu,
                                                                block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
 
+  /// Store data of spectral functions.
   struct spectral_function_w {
-    nda::array<double, 2> total;     ///< A[σ](w)
-    nda::array<double, 4> per_theta; ///< A[a,σ](m,m',w)
+    nda::array<double, 2> total;     ///< \f$ A^\sigma(\omega) \f$.
+    nda::array<double, 4> per_theta; ///< \f$ A^{\sigma}_{mm'}(\omega) \f$.
   };
 
   /**
- * @ingroup post
- * @brief  Compute the atom- and orbital-resolved spectral function (interacting density of states).
- * 
- * @param obe_theta one-body elements on grid created from one_body_elements_with_theta_projectors (see obe factories).
- * @param Proj downfolding_projector defined in the correlated space using to upfold the DMFT self-energies.
- * @param mu chemical potential
- * @param Sigma_w self-energy in real-frequencies
- * @param broadening spectral broadening
- * @return spectral_function_w 
- */
+   * @ingroup post
+   * @brief Compute the atom- and orbital-resolved spectral function (interacting density of states).
+   * 
+   * @param obe_theta One-body elements on grid created from one_body_elements_with_theta_projectors.
+   * @param Proj Downfolding projector defined in the correlated space using to upfold the DMFT self-energies.
+   * @param mu Chemical potential.
+   * @param Sigma_w Self-energy in real-frequencies.
+   * @param broadening Spectral broadening.
+   * @return Atom- and orbital-resolved spectral function.
+   */
   spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe_theta, downfolding_projector const &Proj, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
 
