@@ -123,7 +123,7 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   // density calculation for one spin channel
   double n = density(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
   // calculation does not give exactly 1 for density because of inaccurate int paramters
-  EXPECT_NEAR(n, 0.99802109742386458, 1e-4);
+  EXPECT_NEAR(n, 0.99999579030866403, 1e-4);
 
   // check mu finding
   double mu_calc = find_chemical_potential(n, obe_tb, Sigma_block2, Sigma_static, opt);

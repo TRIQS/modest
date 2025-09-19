@@ -281,11 +281,21 @@ namespace triqs::modest {
 
     // read symmetry ops
     //FIXME: auto symm_ops = (long(g_dft["symm_op"]) == 0) ? ibz_symmetry_ops{} : read_ibz(root, atomic_shells, Rmats);
-    auto symm_ops        = (long(g_dft["symm_op"]) == 0) ? std::optional<ibz_symmetry_ops>{} :
-                                                           std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::Correlated));
-    auto H_k_is_diagonal = nda::is_diagonal(nda::matrix<dcomplex>{H_k(1, 0, r_all, r_all)});
-    auto eps_k           = band_dispersion{
-                 .spin_kind = spin_kind, .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = k_weights, .matrix_valued = !H_k_is_diagonal};
+    auto symm_ops = (long(g_dft["symm_op"]) == 0) ? std::optional<ibz_symmetry_ops>{} :
+                                                    std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::Correlated));
+
+    auto n_k             = H_k.extent(0);
+    auto H_k_is_diagonal = true;
+    for (auto ik : range(n_k)) {
+      if (!nda::is_diagonal(nda::matrix<dcomplex>{H_k(ik, 0, r_all, r_all)})) {
+        H_k_is_diagonal = false;
+        break;
+      }
+    }
+
+    // auto H_k_is_diagonal = nda::is_diagonal(nda::matrix<dcomplex>{H_k(1, 0, r_all, r_all)});
+    auto eps_k = band_dispersion{
+       .spin_kind = spin_kind, .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = k_weights, .matrix_valued = !H_k_is_diagonal};
     auto proj = downfolding_projector{.spin_kind = spin_kind, .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
 
     // build a first version without symmetries

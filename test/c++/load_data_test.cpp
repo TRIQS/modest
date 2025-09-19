@@ -8,6 +8,10 @@ auto test_load(std::string filename) {
   std::cout << "Loading ref_data from data in HDF5 " << filename << std::endl;
   auto [density, data] = one_body_elements_from_dft_converter(filename);
   std::cout << data << std::endl;
+  auto root          = h5::proxy{filename, 'r'};
+  auto dft_code      = as<std::string>(root["dft_input"]["dft_code"]);
+  auto matrix_valued = (dft_code == "w90") ? true : false;
+  ASSERT_EQ(data.H.matrix_valued, matrix_valued);
 };
 
 auto test_load_data_with_symm_ops(std::string filename) {
