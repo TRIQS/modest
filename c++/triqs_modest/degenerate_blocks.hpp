@@ -4,43 +4,11 @@
 // See LICENSE in the root of this distribution for details.
 
 #pragma once
-#include "triqs_modest/utils/defs.hpp"
+#include "utils/defs.hpp"
 
 using namespace triqs::gfs;
 
 namespace triqs::modest {
-
-  namespace detail {
-
-    /// Union-Find: Data structure that efficiently tracks a collection of disjoint sets.
-    struct union_find {
-      std::vector<long> parent;
-
-      union_find(long n) { parent = range(n) | tl::to<std::vector<long>>(); };
-
-      /// returns the representative of the set containing x
-      long find(long x) {
-        if (parent[x] != x) { parent[x] = find(parent[x]); }
-        return parent[x];
-      }
-
-      /// merges the set containing x and y
-      void unite(long x, long y) {
-        long px = find(x);
-        long py = find(y);
-        if (px != py) parent[px] = py;
-      }
-    };
-
-  } // namespace detail
-
-  // HL: TODO the dft_tools analyse_degenerate_blocks (or analyse_deg_shells) did the following steps:
-  // 1. Make G(tau) hermitian
-  // 2. diagonalize G(tau = 0)
-  // 3. Compare eigenvalues.
-  // 4. if eigenvalues are the same to epsilon
-  // 5. Rotate all blocks using the eigenvectors which constitute a unitary transformation.
-  // Do we agree with this algorithm and want the same?
 
   /**
    * @ingroup deg
@@ -51,57 +19,90 @@ namespace triqs::modest {
    * classes based on approximate numerical equality. If two matrices are approximately equal, their blocks are united
    * into the same set. The final result is a partitioning of the blocks (matrices) into degenerate groups.
    *
+   * @tparam Mesh  The mesh type.
    * @param Gimp Block Green's function.
    * @param threshold Tolerance for equivalent of blocks.
    * @return A list of equivalent blocks.
    */
-  inline std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<imfreq, matrix_valued> const &Gimp, double threshold = 1.e-5) {
-    auto find_degenerate = [&](auto const &G) {
-      auto are_matrices_equal = [threshold](auto const &A, auto const &B) {
-        if (A.shape() != B.shape()) return false;
-        return nda::all(nda::map([threshold](auto x) { return x < threshold; })(abs(A - B)));
-      };
-      // convert G to list of matrices at Mesh = 0
-      auto midpt = static_cast<long>(G[0].mesh().size() / 2);
-      auto mats  = G | stdv::transform([midpt](auto const &g) { return nda::matrix<dcomplex>{g(midpt)}; }) | tl::to<std::vector>();
+  template <typename Mesh>
+  std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<Mesh, matrix_valued> const &Gimp, double threshold = 1.e-5) {
 
-      auto uf = detail::union_find(mats.size());
+    auto n_mesh   = Gimp[0].mesh().size();
+    auto n_blocks = Gimp.size();
 
-      std::map<long, std::vector<long>> groups_map;
-      for (long i = 0; i < mats.size(); ++i) {
-        for (long j = i + 1; j < mats.size(); ++j) {
-          if (are_matrices_equal(mats[i], mats[j])) uf.unite(i, j);
+    std::vector<std::vector<long>> groups;
+    std::vector<bool> used(n_blocks, false);
+
+    auto are_matrices_equal = [threshold, n_mesh](auto const &A, auto const &B) {
+      if (A.target_shape() != B.target_shape()) return false;
+      long n0 = A.target_shape()[0];
+      for (auto mesh_idx : range(n_mesh)) {
+        auto const &Am = A(mesh_idx);
+        auto const &Bm = B(mesh_idx);
+        for (size_t i = 0; i < n0; ++i) {
+          for (size_t j = i + 1; j < n0; ++j) {
+            if (std::abs(Am(i, j) - Bm(i, j)) > threshold) return false;
+          }
         }
-        groups_map[uf.find(i)].emplace_back(i);
       }
-
-      return groups_map | stdv::values | stdv::filter([](auto const &g) { return g.size() > 1; }) | tl::to<std::vector>();
+      return true;
     };
-    return find_degenerate(Gimp) | stdv::transform([](auto &x) { return x | stdv::transform([](auto &y) { return y; }) | tl::to<std::vector>(); })
-       | tl::to<std::vector>();
+
+    for (auto i = 0; i < n_blocks; ++i) {
+      if (!used[i]) {
+        std::vector<long> current_group = {i};
+        used[i]                         = true;
+        for (auto j = i + 1; j < n_blocks; ++j) {
+          if (!used[j] && are_matrices_equal(Gimp[i], Gimp[j])) {
+            current_group.push_back(j);
+            used[j] = true;
+          }
+        }
+        groups.push_back(std::move(current_group));
+      }
+    }
+    return groups;
   }
 
   /**
+   * @brief 
    * @ingroup deg
    * @brief Symmetrize the blocks of a Green's function given a list of it's degenerate blocks.
-   * 
-   * @details Average the degenerate blocks and replace the degenerate ones with their average.
    *
-   * @param Gin Block Green's function.
-   * @param degenerate_blocks A list of the degenerate blocks.
+   * @details Average the degenerate blocks and replace the degenerate ones with their average.
+   * 
+   * @tparam Mesh  The mesh type.
+   * @param g Block Green's function.
+   * @param deg_bls A list of the degenerate blocks.
    * @return The symmetrized Green's function.
-   */
-  inline block_gf<imfreq, matrix_valued> symmetrize_gf(block_gf<imfreq, matrix_valued> const &Gin, std::vector<std::vector<long>> degenerate_blocks) {
-    auto Gsymm = Gin;
-    auto mesh  = Gsymm[0].mesh();
-    for (auto degenerate : degenerate_blocks) {
-      auto n_deg = degenerate.size();
-      auto dim   = Gin[degenerate[0]].target_shape()[0];
-      auto gtmp  = gf{mesh, {dim, dim}};
-      for (auto deg_bl : degenerate) { gtmp += Gin[deg_bl] / n_deg; }
-      for (auto deg_bl : degenerate) { Gsymm[deg_bl] = gtmp; }
+  */
+  template <typename Mesh>
+  block_gf<Mesh, matrix_valued> symmetrize_gf(block_gf<Mesh, matrix_valued> const &g, std::vector<std::vector<long>> deg_bls) {
+    auto gsymm       = g;
+    auto const &mesh = gsymm[0].mesh();
+
+    for (auto const &deg_bl : deg_bls) {
+      auto n_deg = deg_bl.size();
+      auto dim   = g[deg_bl[0]].target_shape()[0];
+
+      auto gtmp = gf{mesh, {dim, dim}};
+      for (auto bl : deg_bl) { gtmp += g[bl]; }
+
+      gtmp /= n_deg;
+
+      for (auto bl : deg_bl) { gsymm[bl] = gtmp; }
     }
-    return Gsymm;
+
+    return gsymm;
   }
 
+  template std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<dlr_imfreq, matrix_valued> const &G, double threshold);
+  template std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<dlr_imtime, matrix_valued> const &G, double threshold);
+  template std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<imfreq, matrix_valued> const &G, double threshold);
+  template std::vector<std::vector<long>> analyze_degenerate_blocks(block_gf<imtime, matrix_valued> const &G, double threshold);
+
+  template block_gf<imfreq, matrix_valued> symmetrize_gf(block_gf<imfreq, matrix_valued> const &g, std::vector<std::vector<long>> deg_bls);
+  template block_gf<imtime, matrix_valued> symmetrize_gf(block_gf<imtime, matrix_valued> const &g, std::vector<std::vector<long>> deg_bls);
+  template block_gf<dlr_imfreq, matrix_valued> symmetrize_gf(block_gf<dlr_imfreq, matrix_valued> const &g, std::vector<std::vector<long>> deg_bls);
+  template block_gf<dlr_imtime, matrix_valued> symmetrize_gf(block_gf<dlr_imtime, matrix_valued> const &g, std::vector<std::vector<long>> deg_bls);
 } // namespace triqs::modest
