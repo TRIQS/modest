@@ -152,4 +152,25 @@ namespace triqs::modest {
     return {.C_space = local_space{obe.C_space.spin_kind(), std::move(new_atomic_shells), new_dec, {}, {}}, .H = std::move(new_H)};
   }
 
+  // -----------------------------------------------------------------------
+
+  one_body_elements_tb rotate(one_body_elements_tb const &obe, nda::matrix<dcomplex> const &U) {
+
+    auto rotate = [](tb_hamiltonian const &H, nda::matrix<dcomplex> const &U) {
+      if (U.extent(0) != H.n_orbitals()) {
+        throw std::runtime_error(
+           "Cannot rotate a tb_hamiltonian with a unitary matrix that has a different number of rows than the number of orbitals in the Hamiltonian.");
+      }
+
+      auto const &Rs = H.get_R_list();
+      std::vector<nda::array<dcomplex, 2>> rotated_hoppings;
+      for (auto const &tR : H.hoppings()) { rotated_hoppings.emplace_back(U * nda::matrix<dcomplex>(tR) * dagger(U)); }
+      return tb_hamiltonian{Rs, std::move(rotated_hoppings)};
+    };
+
+    auto new_H = obe.H | stdv::transform([&](auto x) { return rotate(x, U); }) | tl::to<std::vector>();
+
+    return {.C_space = obe.C_space, .H = std::move(new_H)};
+  }
+
 } // namespace triqs::modest

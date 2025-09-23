@@ -97,6 +97,17 @@ namespace triqs::modest {
    */
   one_body_elements_tb fold(superlattice const &sl, one_body_elements_tb const &obe);
 
+  /**
+ * @brief Rotate a tight-binding Hamiltonian by a unitary matrix \f$ U \f$.
+ *
+ * @details The rotation is performed as \f$ H' = U H U^\dagger \f$.
+ *
+ * @param obe One-body elements containing the TB Hamiltonian.
+ * @param U Unitary matrix used for the rotation.
+ * @return One-body elements containing the rotated TB Hamiltonian.
+ */
+  one_body_elements_tb rotate(one_body_elements_tb const &obe, nda::matrix<dcomplex> const &U);
+
   //  -----------------------------------------------------------------------
 
   /** @name Local Green's function using a TB Hamiltonian
