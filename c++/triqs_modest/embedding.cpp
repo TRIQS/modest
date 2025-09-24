@@ -302,8 +302,11 @@ namespace triqs::modest {
     return split(imp_idx, [&](long idx) { return stdr::find(block_list, idx) != block_list.end(); });
   }
 
-  // ----------------------------------------------------------------------
+  // ----------------------- Embedding and Extracting --------------------------
 
+  // T = Block Matrix
+
+  // ----------------------------------------------------------------------
   block2_matrix_t embedding::embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
     auto Sigma_static_embed = nda::array<nda::matrix<dcomplex>, 2>(n_alpha(), n_sigma());
     for (auto &&[alpha, sigma] : psi.indices()) {
@@ -318,7 +321,6 @@ namespace triqs::modest {
   }
 
   // ----------------------------------------------------------------------
-
   std::vector<block_matrix_t> embedding::extract(block2_matrix_t const &matrix_C) const {
 
     auto imp_gf_stru_list = imp_block_shape();
@@ -342,8 +344,10 @@ namespace triqs::modest {
     return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }
 
+  // T = Tensors
+
   // ----------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 4>> embedding::extract_tensor(nda::array<dcomplex, 4> const &U_tensor) const {
+  std::vector<nda::array<dcomplex, 4>> embedding::extract_ijkl(nda::array<dcomplex, 4> const &U_tensor) const {
 
     auto imp_gf_stru_list = imp_block_shape();
 
@@ -360,7 +364,7 @@ namespace triqs::modest {
   }
 
   // --------------------------------------------------------------------------------------------
-  nda::array<dcomplex, 4> embedding::embed_tensor(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const {
+  nda::array<dcomplex, 4> embedding::embed_ijkl(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const {
     auto Utensor_E = std::vector<nda::array<dcomplex, 4>>(n_alpha());
 
     for (auto alpha : range(n_alpha())) {
@@ -378,9 +382,10 @@ namespace triqs::modest {
     for (auto &&[index, sli] : enumerated_sub_slices(sigma_embed_decomp)) { U_tensor_C(sli, sli, sli, sli) = Utensor_E[index]; }
     return U_tensor_C;
   }
-  // --------------------------------------------------------------------------------------------
 
-  std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract_1p(nda::array<dcomplex, 4> const &g_loc) const {
+  // T = Block Green's functions
+  // --------------------------------------------------------------------------------------------
+  std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract_wij(nda::array<dcomplex, 4> const &g_loc) const {
 
     auto imp_gf_stru_list = imp_block_shape();
     auto n_w              = g_loc.extent(0);
@@ -402,9 +407,9 @@ namespace triqs::modest {
 
     return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
   }
-  // --------------------------------------------------------------------------------------------
 
-  std::vector<nda::array<dcomplex, 3>> embedding::embed_1p(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const {
+  // --------------------------------------------------------------------------------------------
+  std::vector<nda::array<dcomplex, 3>> embedding::embed_wij(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const {
 
     auto Sigma_embed = nda::array<nda::array<dcomplex, 3>, 2>(n_alpha(), n_sigma());
     auto n_w         = Sigma_imp_vec[0][0].extent(0);
@@ -421,17 +426,18 @@ namespace triqs::modest {
 
     auto dim_C = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
     auto Sigma_C =
-       range(n_sigma()) | stdv::transform([&](auto const &sig) { return nda::array<dcomplex, 3>(n_w, dim_C, dim_C); }) | tl::to<std::vector>();
+       range(n_sigma()) | stdv::transform([n_w, dim_C](auto) { return nda::array<dcomplex, 3>(n_w, dim_C, dim_C); }) | tl::to<std::vector>();
+
     for (auto sigma : range(n_sigma())) {
       for (auto &&[index, sli] : enumerated_sub_slices(sigma_embed_decomp)) { Sigma_C[sigma](r_all, sli, sli) = Sigma_embed(index, sigma); }
     }
+
     return Sigma_C;
   }
 
   // --------------------------------------------------------------------------------------------
-
   //FIXME : protect this function as it will only work with a Pi_embed_decomp
-  std::vector<nda::array<dcomplex, 5>> embedding::extract_2p(nda::array<dcomplex, 5> const &pi_loc) const {
+  std::vector<nda::array<dcomplex, 5>> embedding::extract_wijkl(nda::array<dcomplex, 5> const &pi_loc) const {
 
     auto Pi_E = std::vector<nda::array<dcomplex, 5>>{};
     for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { Pi_E.emplace_back(pi_loc(r_all, r_alpha, r_alpha, r_alpha, r_alpha)); }
@@ -447,7 +453,7 @@ namespace triqs::modest {
   // --------------------------------------------------------------------------------------------
 
   //FIXME : protect this function as it will only work with a Pi_embed_decomp
-  nda::array<dcomplex, 5> embedding::embed_2p(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const {
+  nda::array<dcomplex, 5> embedding::embed_wijkl(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const {
 
     auto n_w = pi_imp_vec[0].extent(0);
 
@@ -466,7 +472,42 @@ namespace triqs::modest {
     auto dim_C = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
     auto Pi_C  = nda::array<dcomplex, 5>(n_w, dim_C, dim_C, dim_C, dim_C);
     for (auto &&[alpha, sli] : enumerated_sub_slices(sigma_embed_decomp)) { Pi_C(r_all, sli, sli, sli, sli) = Pi_embed[alpha]; }
+
     return Pi_C;
+  }
+
+  //-------------------------------------------------------------------------
+  std::vector<nda::array<dcomplex, 3>> rotate_embedded_self_energy(std::vector<nda::array<dcomplex, 3>> const &Sigma_embed_dynamic_loc,
+                                                                   nda::matrix<dcomplex> const &U) {
+    auto n_sigma                     = Sigma_embed_dynamic_loc.size();
+    auto n_w                         = Sigma_embed_dynamic_loc[0].extent(0);
+    auto Sigma_embed_dynamic_rotated = range(Sigma_embed_dynamic_loc.size())
+       | stdv::transform([&](auto) { return nda::zeros<dcomplex>(Sigma_embed_dynamic_loc[0].shape()); }) | tl::to<std::vector>();
+    for (auto const &sigma : range(n_sigma))
+      for (auto const &w : range(n_w))
+        Sigma_embed_dynamic_rotated[sigma](w, r_all, r_all) = U * nda::matrix<dcomplex>{Sigma_embed_dynamic_loc[sigma](w, r_all, r_all)} * dagger(U);
+    return Sigma_embed_dynamic_rotated;
+  }
+
+  //-------------------------------------------------------------------------
+  std::vector<nda::array<dcomplex, 3>> rotate_embedded_self_energy(std::vector<nda::array<dcomplex, 3>> const &Sigma_embed_dynamic_loc,
+                                                                   one_body_elements_on_grid const &obe) {
+    auto const &U = obe.C_space.rotation_from_dft_to_local_basis()(r_all, 0) | tl::to<std::vector<nda::matrix<dcomplex>>>();
+    return rotate_embedded_self_energy(Sigma_embed_dynamic_loc, nda::block_diag(U));
+  }
+
+  //-------------------------------------------------------------------------
+  std::vector<nda::matrix<dcomplex>> rotate_embedded_self_energy(std::vector<nda::matrix<dcomplex>> const &Sigma_embed_static_loc,
+                                                                 nda::matrix<dcomplex> const &U) {
+    return range(Sigma_embed_static_loc.size()) | stdv::transform([&](auto sigma) { return U * Sigma_embed_static_loc[sigma] * dagger(U); })
+       | tl::to<std::vector>();
+  }
+
+  //-------------------------------------------------------------------------
+  std::vector<nda::matrix<dcomplex>> rotate_embedded_self_energy(std::vector<nda::matrix<dcomplex>> const &Sigma_embed_static_loc,
+                                                                 one_body_elements_on_grid const &obe) {
+    auto const &U = obe.C_space.rotation_from_dft_to_local_basis()(r_all, 0) | tl::to<std::vector<nda::matrix<dcomplex>>>();
+    return rotate_embedded_self_energy(Sigma_embed_static_loc, nda::block_diag(U));
   }
 
 } // namespace triqs::modest

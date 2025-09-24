@@ -65,7 +65,6 @@ namespace triqs::modest {
   }
 
   /**
-   * @brief 
    * @ingroup deg
    * @brief Symmetrize the blocks of a Green's function given a list of it's degenerate blocks.
    *

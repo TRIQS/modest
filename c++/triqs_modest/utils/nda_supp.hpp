@@ -36,4 +36,17 @@ namespace nda {
         if (abs(M(i, j)) > 1.e-14) return false;
     return true;
   }
+
+  template <typename T> nda::array<T, 2> block_diag(std::vector<nda::matrix<T>> const &matrices) {
+    auto n = stdr::fold_left(matrices | stdv::transform([](auto const &m) { return m.extent(0); }) | tl::to<std::vector>(), 0, std::plus<>());
+    auto U = nda::zeros<T>(n, n);
+    auto i = 0;
+    for (auto const &M : matrices) {
+      auto s                                        = M.extent(0);
+      U(nda::range(i, i + s), nda::range(i, i + s)) = M;
+      i += s;
+    }
+    return U;
+  }
+
 } // namespace nda
