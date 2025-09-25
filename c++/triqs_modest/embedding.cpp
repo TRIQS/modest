@@ -320,6 +320,20 @@ namespace triqs::modest {
     return Sigma_static_embed;
   }
 
+  // TODO: helper functions to scatter and gather to avoid code duplication:
+  // A common pattern is to scatter/ gather from/to a large matrix to/from smaller matrices
+  block_matrix_t embedding::embed_ij(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
+    auto Sigma_static_embed = this->embed(Sigma_imp_static_vec);
+    auto dim_C              = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
+    block_matrix_t Sigma_static_embed_ij;
+    for (auto const &sigma : range(n_sigma())) {
+      auto mat = nda::zeros<dcomplex>(dim_C, dim_C);
+      for (auto &&[alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { mat(r_alpha, r_alpha) = Sigma_static_embed(alpha, sigma); }
+      Sigma_static_embed_ij.push_back(mat);
+    }
+    return Sigma_static_embed_ij;
+  }
+
   // ----------------------------------------------------------------------
   std::vector<block_matrix_t> embedding::extract(block2_matrix_t const &matrix_C) const {
 

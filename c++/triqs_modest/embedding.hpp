@@ -301,6 +301,8 @@ namespace triqs::modest {
     /// Embed block matrices (TRIQS/ModEST).
     block2_matrix_t embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
 
+    block_matrix_t embed_ij(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
+
     //--------------------- Extract ---------------------------------------
 
     /**
