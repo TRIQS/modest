@@ -227,8 +227,14 @@ namespace triqs::modest {
   /** @cond DOXYGEN_SKIP_THIS */
   template double density(one_body_elements_on_grid const &obe, double mu, block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
                           nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
+  template double density(one_body_elements_on_grid const &obe, double mu, block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
+                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
   template double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
                                           block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
+                                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, std::string method = "dichotomy",
+                                          double precision = 1.e-5, bool verbosity = true);
+  template double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
+                                          block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
                                           nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, std::string method = "dichotomy",
                                           double precision = 1.e-5, bool verbosity = true);
   /** @endcond */
