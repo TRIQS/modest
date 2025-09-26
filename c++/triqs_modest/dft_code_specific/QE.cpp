@@ -8,33 +8,33 @@
 
 namespace triqs::modest::dft_code {
 
-  nda::matrix<dcomplex> get_spherical_to_dft_rotation_VASP(long l) {
+  nda::matrix<dcomplex> get_spherical_to_dft_rotation_QE(long l) {
     if (l == 0) throw std::runtime_error("No l=0 implementation");
 
     auto sqrt2 = std::numbers::sqrt2;
     auto I     = dcomplex(0, 1.0);
     auto size  = 2 * l + 1;
+    auto Ylm   = nda::zeros<dcomplex>(size, size);
 
-    auto Ylm = nda::zeros<dcomplex>(size, size);
-    // l = 1 : "x", "y", "z"
+    // l = 1: "z", "x" , "y"
     if (l == 1) {
-      Ylm(0, 0) = 1.0 / sqrt2;
-      Ylm(1, 0) = I / sqrt2;
-      Ylm(2, 1) = 1.0;
-      Ylm(0, 2) = -1.0 / sqrt2;
-      Ylm(1, 2) = I / sqrt2;
-    }
-    // l = 2 : "xy", "yz", "z^2", "xz", "x^2-y^2"
-    else if (l == 2) {
-      Ylm(0, 2) = 1.0;
       Ylm(1, 0) = 1.0 / sqrt2;
-      Ylm(2, 0) = -1.0 / sqrt2;
-      Ylm(3, 1) = 1.0 / sqrt2;
-      Ylm(4, 1) = 1.0 / sqrt2;
-      Ylm(1, 4) = 1.0 / sqrt2;
-      Ylm(2, 4) = 1.0 / sqrt2;
+      Ylm(2, 0) = I / sqrt2;
+      Ylm(0, 1) = 1.0;
+      Ylm(1, 2) = -1.0 / sqrt2;
+      Ylm(2, 2) = I / sqrt2;
+    }
+    // l = 2: "z^2", "xz", "yz", "x^2-y^2", "xy"
+    else if (l == 2) {
+      Ylm(0, 0) = I / sqrt2;
+      Ylm(1, 1) = I / sqrt2;
+      Ylm(2, 2) = 1.0;
+      Ylm(3, 1) = 1 / sqrt2;
+      Ylm(4, 1) = 1 / sqrt2;
+      Ylm(0, 4) = -I / sqrt2;
+      Ylm(1, 3) = I / sqrt2;
       Ylm(3, 3) = -1.0 / sqrt2;
-      Ylm(4, 3) = 1.0 / sqrt2;
+      Ylm(4, 4) = 1.0 / sqrt2;
     }
     // l = 3: "x(x^2-3y^2)","z(x^2-y^2)","xz^2","z^3","yz^2","xyz","y(3x^2-y^2)"
     else if (l == 3) {

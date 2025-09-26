@@ -23,20 +23,18 @@ namespace triqs::modest {
     // Various functions implemented in C++ files
     nda::matrix<dcomplex> get_spherical_to_dft_rotation_Wien2k(long l);
     nda::matrix<dcomplex> get_spherical_to_dft_rotation_VASP(long l);
-    // nda::matrix<dcomplex> get_spherical_to_dft_rotation_QuantumEspresso();
-    // nda::matrix<dcomplex> get_spherical_to_dft_rotation_Elk();
-    // nda::matrix<dcomplex> get_spherical_to_dft_rotation_W90();
+    nda::matrix<dcomplex> get_spherical_to_dft_rotation_QE(long l);
 
-    //
     inline nda::matrix<dcomplex> get_spherical_to_dft_rotation(DFTCode code, long l) {
       switch (code) {
+
         case DFTCode::Wien2k: return get_spherical_to_dft_rotation_Wien2k(l);
+
         case DFTCode::VASP: return get_spherical_to_dft_rotation_VASP(l);
-        case DFTCode::W90: return get_spherical_to_dft_rotation_VASP(l); // FIXME
-        case DFTCode::Hk:
-          return get_spherical_to_dft_rotation_VASP(l); // FIXME
-        // case DFTCode::Elk: return get_spherical_to_dft_rotation_Elk();
-        // case DFTCode::QuantumEspresso: return get_spherical_to_dft_rotation_W90();
+
+        case DFTCode::W90:
+        case DFTCode::QuantumEspresso: return get_spherical_to_dft_rotation_QE(l);
+
         default: throw std::invalid_argument("Unknown DFTCode");
       }
     }
