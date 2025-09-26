@@ -37,7 +37,8 @@ namespace triqs::modest {
 
   /// Store data of spectral functions.
   struct spectral_function_kw {
-    nda::array<double, 3> data; ///< \f$ A^\sigma(k,\omega) \f$.
+    nda::array<double, 3> data;      ///< \f$ A^\sigma(k,\omega) \f$.
+    nda::array<double, 5> proj_data; ///< \f$ A^\sigma(k,\omega) \f$.
   };
 
   /**
