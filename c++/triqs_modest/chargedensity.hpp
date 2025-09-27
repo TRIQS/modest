@@ -7,7 +7,7 @@
 
 namespace triqs::modest {
 
-/**
+  /**
  * @brief Compute the charge density correction from DMFT
  *
  * Compute the charge density correction in the band basis \f$ N_{\nu\nu'}(\mathbf{k}) \f$ from the lattice Green's function.
@@ -37,10 +37,13 @@ namespace triqs::modest {
     // calculator for lattice Green's function at given k and σ
     auto glatt_at_k = detail::lattice_gf_at_k(obe, mu, Sigma_dynamic, Sigma_static);
 
-    // loop over k and σ 
+    // loop over k and σ
     // TODO: parallelize over k and gather
     for (auto k_idx : range(n_k)) {
-      for (auto const &sigma : range(n_sigma)) { N_nu_nup_k(k_idx, sigma, r_all, r_all) = density(glatt_at_k(k_idx, sigma)); }
+      for (auto const &sigma : range(n_sigma)) {
+        auto r_window                                = nda::range(0, obe.H.N_nu(sigma, k_idx));
+        N_nu_nup_k(k_idx, sigma, r_window, r_window) = density(glatt_at_k(k_idx, sigma));
+      }
     }
 
     return N_nu_nup_k;

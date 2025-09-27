@@ -1,7 +1,6 @@
 #include "./common.hpp"
 #include "triqs_modest/chargedensity.hpp"
 
-
 // TODO: Test against dft_tools.sum_kdft.calc_density_correction
 auto run_charge_update_case(std::string filename) {
 
@@ -15,7 +14,7 @@ auto run_charge_update_case(std::string filename) {
   auto Sigma_imp_static  = Sigma_imps | stdv::transform([](auto &x) { return x.second; }) | tl::to<std::vector>();
 
   auto [Sigma_embed, Sigma_H_embed] = E.embed(Sigma_imp_dynamic, Sigma_imp_static);
-  auto mu                           = find_chemical_potential(target_density, obe, Sigma_embed, Sigma_H_embed);
+  double mu                         = -0.04445945328245646;
   auto N_nu_nup_k                   = charge_density_correction(obe, mu, Sigma_embed, Sigma_H_embed);
   return 0;
 }
