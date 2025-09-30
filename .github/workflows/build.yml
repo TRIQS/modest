@@ -57,8 +57,8 @@ jobs:
         ccache
         cmake
         ninja-build
-        clang
-        clang-tools
+        clang-19
+        clang-tools-19
         g++
         gfortran
         hdf5-tools
@@ -122,6 +122,7 @@ jobs:
 
     - name: Build & Install clair
       env:
+        CXX: clang++
         CXXFLAGS: ""
       run: |
         git clone https://github.com/flatironinstitute/clair --branch doc
