@@ -25,8 +25,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:  [ubuntu-24.04, macos-15]
-        cxx: [g++, clang++]
+        include:
+          - {os: ubuntu-24.04, cxx: g++,         clang_cxx: clang++-19}
+          - {os: ubuntu-24.04, cxx: clang++-19,  clang_cxx: clang++-19}
+          - {os: macos-15,     cxx: g++-15,      clang_cxx: clang++}
+          - {os: macos-15,     cxx: clang++,     clang_cxx: clang++}
 
     runs-on: ${{ matrix.os }}
 
@@ -39,14 +42,6 @@ jobs:
         key: ccache-${{ matrix.os }}-${{ matrix.cxx }}-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: |
           ccache-${{ matrix.os }}-${{ matrix.cxx }}-
-
-    - name: Set cxx variables
-      run: |
-        if [[ ${{ matrix.os }} == 'macos-15' && ${{ matrix.cxx }} == 'g++' ]]; then
-          echo "CXX=g++-15" >> $GITHUB_ENV
-        else
-          echo "CXX=${{ matrix.cxx }}" >> $GITHUB_ENV
-        fi
 
     - name: Install ubuntu dependencies
       if: ${{ contains(matrix.os, 'ubuntu') }}
@@ -108,13 +103,14 @@ jobs:
         echo "LDFLAGS=-L$(brew --prefix llvm)/lib/c++ -L/opt/homebrew/opt/llvm/lib/unwind -lunwind" >> $GITHUB_ENV
 
     - name: Add clang CXXFLAGS
-      if: ${{ matrix.cxx == 'clang++' }}
+      if: ${{ contains(matrix.cxx, 'clang') }}
       run: |
         echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
     - name: Build & Install TRIQS
       env:
-        TRIQS_BRANCH: modest_updates # ${{ github.event_name == 'pull_request' && github.base_ref || github.ref_name }}
+        CXX: ${{ matrix.cxx }}
+        TRIQS_BRANCH: modest_updates # ${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
       run: |
         git clone https://github.com/TRIQS/triqs --branch "$TRIQS_BRANCH"
         cmake -S triqs -B triqs/build -G Ninja -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
@@ -122,7 +118,7 @@ jobs:
 
     - name: Build & Install clair
       env:
-        CXX: clang++
+        CXX: ${{ matrix.clang_cxx }}
         CXXFLAGS: ""
       run: |
         git clone https://github.com/flatironinstitute/clair --branch doc
@@ -130,6 +126,8 @@ jobs:
         cmake --build clair/build --target install --verbose
 
     - name: Build triqs_modest
+      env:
+        CXX: ${{ matrix.cxx }}
       run: |
         source $HOME/install/share/triqs/triqsvars.sh
         cmake -S . -B build -G Ninja
