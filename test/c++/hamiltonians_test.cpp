@@ -3,7 +3,8 @@
 #include "./common.hpp"
 #include "triqs_modest/hamiltonians.hpp"
 #include "triqs_modest/utils/h5_proxy.hpp"
-#include "triqs_modest/dft_code_specific.hpp"
+#include "triqs_modest/dft_tools/utils.hpp"
+#include "triqs_modest/dft_tools/spherical_rotation.hpp"
 
 TEST(hamiltonian_tests, imp_model_kanamori) { // NOLINT
   auto spin_names = std::vector<std::string>{"up", "down"};
@@ -60,7 +61,7 @@ TEST(hamiltonian_tests, wien2k_umatrix_slater_construction) {
   auto ls     = std::vector<long>{1, 2};
   for (auto l : ls) {
     auto Umat_ref = as<nda::array<dcomplex, 4>>(root[std::to_string(l)]["wien2k"]);
-    auto T        = dft_code::get_spherical_to_dft_rotation_Wien2k(l);
+    auto T        = dft_tools::wien2k::get_spherical_to_dft_rotation(l);
     auto Umat     = U_matrix_in_local_basis(l, T, U_int, J_hund);
     EXPECT_ARRAY_NEAR(Umat, Umat_ref, 1e-14);
   }

@@ -4,7 +4,8 @@
 // See LICENSE in the root of this distribution for details.
 
 #include "loaders.hpp"
-#include "dft_code_specific.hpp"
+#include "dft_tools/utils.hpp"
+#include "dft_tools/spherical_rotation.hpp"
 #include "utils/nda_supp.hpp"
 #include "utils/h5_proxy.hpp"
 #include "utils/to_vector.hpp"
@@ -190,9 +191,9 @@ namespace triqs::modest {
   // Prepare the spherical Ylm to DFT orbital basis rotations. (internal)
   nda::array<nda::matrix<dcomplex>, 1> read_spherical_to_dft_basis(std::string dft, std::vector<atomic_orbs> const &atomic_shells) {
     //TODO: finish this!
-    auto code = dft_code::dft_code_to_enum(dft);
+    auto code = dft_tools::dft_code_to_enum(dft);
     auto Ylms = nda::array<nda::matrix<dcomplex>, 1>(atomic_shells.size());
-    for (auto const &[iatom, atom] : enumerate(atomic_shells)) { Ylms(iatom) = dft_code::get_spherical_to_dft_rotation(code, atom.l); }
+    for (auto const &[iatom, atom] : enumerate(atomic_shells)) { Ylms(iatom) = dft_tools::get_spherical_to_dft_rotation(code, atom.l); }
     return Ylms;
   }
 

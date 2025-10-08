@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See LICENSE in the root of this distribution for details.
 
-#include "../dft_code_specific.hpp"
+#include "../spherical_rotation.hpp"
 #include <stdexcept>
 
-namespace triqs::modest::dft_code {
+namespace triqs::modest::dft_tools::wien2k {
 
-  nda::matrix<dcomplex> get_spherical_to_dft_rotation_Wien2k(long l) {
+  nda::matrix<dcomplex> get_spherical_to_dft_rotation(long l) {
     if (l == 0) throw std::runtime_error("No l=0 implementation");
 
     auto sqrt2 = std::numbers::sqrt2;
@@ -53,4 +53,4 @@ namespace triqs::modest::dft_code {
     }
     return Ylm;
   }
-} // namespace triqs::modest::dft_code
+} // namespace triqs::modest::dft_tools::wien2k
