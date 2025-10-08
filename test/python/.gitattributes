@@ -1,0 +1,2 @@
+# Git LFS tracking for large Wannier90 test files
+dft_tools/wannier90/** filter=lfs diff=lfs merge=lfs -text

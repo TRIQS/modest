@@ -4,6 +4,9 @@ foreach(file ${all_h5_ref_files})
   configure_file(${file} ${file} COPYONLY)
 endforeach()
 
+# Add DFT tools converter tests
+add_subdirectory(dft_tools)
+
 # List of all tests
 set(all_tests "")
 
