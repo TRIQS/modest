@@ -44,6 +44,7 @@ static int synth_constructor_0(PyObject *self, PyObject *args, PyObject *kwargs)
   }
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_kw> *)self)->_c);
   de("data", self_c.data, false);
+  de("proj_data", self_c.proj_data, false);
   return de.check();
 }
 
@@ -57,8 +58,12 @@ Parameters
 ----------
 data : {par_0}
 
+proj_data : {par_1}
+
 )DOC",
-                      "par", std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::array<double, 3>>()}});
+                      "par",
+                      std::vector<std::string>{
+                         std::vector<std::string>{c2py::python_typename<nda::array<double, 3>>(), c2py::python_typename<nda::array<double, 5>>()}});
 
 // ----- Method table ----
 template <>
@@ -68,10 +73,12 @@ PyMethodDef c2py::tp_methods<triqs::modest::spectral_function_kw>[] = {
 };
 
 constexpr auto doc_member_0 = R"DOC(:math:`A^\sigma(k,\omega)`.)DOC";
+constexpr auto doc_member_1 = R"DOC(:math:`A^\sigma(k,\omega)`.)DOC";
 static PyObject *prop_get_dict_0(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_kw> *)self)->_c);
   c2py::pydict dic;
-  dic["data"] = self_c.data;
+  dic["data"]      = self_c.data;
+  dic["proj_data"] = self_c.proj_data;
   return dic.new_ref();
 }
 
@@ -80,6 +87,7 @@ static PyObject *prop_get_dict_0(PyObject *self, void *) {
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_kw>[] = {
    c2py::getsetdef_from_member<&triqs::modest::spectral_function_kw::data, triqs::modest::spectral_function_kw>("data", doc_member_0),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_kw::proj_data, triqs::modest::spectral_function_kw>("proj_data", doc_member_1),
    {"__dict__", (getter)prop_get_dict_0, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -131,8 +139,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::spectral_function_w>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_1 = R"DOC(:math:`A^\sigma(\omega)`.)DOC";
-constexpr auto doc_member_2 = R"DOC(:math:`A^{\sigma}_{mm'}(\omega)`.)DOC";
+constexpr auto doc_member_2 = R"DOC(:math:`A^\sigma(\omega)`.)DOC";
+constexpr auto doc_member_3 = R"DOC(:math:`A^{\sigma}_{mm'}(\omega)`.)DOC";
 static PyObject *prop_get_dict_1(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::spectral_function_w> *)self)->_c);
   c2py::pydict dic;
@@ -145,8 +153,8 @@ static PyObject *prop_get_dict_1(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::spectral_function_w>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::total, triqs::modest::spectral_function_w>("total", doc_member_1),
-   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::per_theta, triqs::modest::spectral_function_w>("per_theta", doc_member_2),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::total, triqs::modest::spectral_function_w>("total", doc_member_2),
+   c2py::getsetdef_from_member<&triqs::modest::spectral_function_w::per_theta, triqs::modest::spectral_function_w>("per_theta", doc_member_3),
    {"__dict__", (getter)prop_get_dict_1, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 

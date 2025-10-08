@@ -106,25 +106,31 @@ static auto const fun_2 = c2py::dispatcher_f_kw_t{
                     const std::vector<triqs::block_matrix_t> &Sigma_imp_static_vec) { return self.embed(Sigma_imp_static_vec); },
                  "self", "Sigma_imp_static_vec")};
 
-// embed_1p
+// embed_ij
 static auto const fun_3 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self,
-                    const std::vector<std::vector<nda::array<triqs::dcomplex, 3>>> &Sigma_imp_vec) { return self.embed_1p(Sigma_imp_vec); },
-                 "self", "Sigma_imp_vec")};
+                    const std::vector<triqs::block_matrix_t> &Sigma_imp_static_vec) { return self.embed_ij(Sigma_imp_static_vec); },
+                 "self", "Sigma_imp_static_vec")};
 
-// embed_2p
-static auto const fun_4 = c2py::dispatcher_f_kw_t{c2py::cmethod(
-   [](triqs::modest::embedding const &self, const std::vector<nda::array<triqs::dcomplex, 5>> &pi_imp_vec) { return self.embed_2p(pi_imp_vec); },
-   "self", "pi_imp_vec")};
-
-// embed_tensor
-static auto const fun_5 = c2py::dispatcher_f_kw_t{
+// embed_ijkl
+static auto const fun_4 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self,
-                    const std::vector<nda::array<triqs::dcomplex, 4>> &U_tensor_vec) { return self.embed_tensor(U_tensor_vec); },
+                    const std::vector<nda::array<triqs::dcomplex, 4>> &U_tensor_vec) { return self.embed_ijkl(U_tensor_vec); },
                  "self", "U_tensor_vec")};
 
+// embed_wij
+static auto const fun_5 = c2py::dispatcher_f_kw_t{
+   c2py::cmethod([](triqs::modest::embedding const &self,
+                    const std::vector<std::vector<nda::array<triqs::dcomplex, 3>>> &Sigma_imp_vec) { return self.embed_wij(Sigma_imp_vec); },
+                 "self", "Sigma_imp_vec")};
+
+// embed_wijkl
+static auto const fun_6 = c2py::dispatcher_f_kw_t{c2py::cmethod(
+   [](triqs::modest::embedding const &self, const std::vector<nda::array<triqs::dcomplex, 5>> &pi_imp_vec) { return self.embed_wijkl(pi_imp_vec); },
+   "self", "pi_imp_vec")};
+
 // extract
-static auto const fun_6 = c2py::dispatcher_f_kw_t{
+static auto const fun_7 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self,
                     const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &g_loc) { return self.extract(g_loc); },
                  "self", "g_loc"),
@@ -137,30 +143,30 @@ static auto const fun_6 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self, const triqs::block2_matrix_t &matrix_C) { return self.extract(matrix_C); }, "self",
                  "matrix_C")};
 
-// extract_1p
-static auto const fun_7 = c2py::dispatcher_f_kw_t{c2py::cmethod(
-   [](triqs::modest::embedding const &self, const nda::array<triqs::dcomplex, 4> &g_loc) { return self.extract_1p(g_loc); }, "self", "g_loc")};
-
-// extract_2p
-static auto const fun_8 = c2py::dispatcher_f_kw_t{c2py::cmethod(
-   [](triqs::modest::embedding const &self, const nda::array<triqs::dcomplex, 5> &Pi_loc) { return self.extract_2p(Pi_loc); }, "self", "Pi_loc")};
-
-// extract_tensor
-static auto const fun_9 = c2py::dispatcher_f_kw_t{
-   c2py::cmethod([](triqs::modest::embedding const &self, const nda::array<triqs::dcomplex, 4> &U_tensor) { return self.extract_tensor(U_tensor); },
+// extract_ijkl
+static auto const fun_8 = c2py::dispatcher_f_kw_t{
+   c2py::cmethod([](triqs::modest::embedding const &self, const nda::array<triqs::dcomplex, 4> &U_tensor) { return self.extract_ijkl(U_tensor); },
                  "self", "U_tensor")};
 
+// extract_wij
+static auto const fun_9 = c2py::dispatcher_f_kw_t{c2py::cmethod(
+   [](triqs::modest::embedding const &self, const nda::array<triqs::dcomplex, 4> &g_loc) { return self.extract_wij(g_loc); }, "self", "g_loc")};
+
+// extract_wijkl
+static auto const fun_10 = c2py::dispatcher_f_kw_t{c2py::cmethod(
+   [](triqs::modest::embedding const &self, const nda::array<triqs::dcomplex, 5> &Pi_loc) { return self.extract_wijkl(Pi_loc); }, "self", "Pi_loc")};
+
 // flip_spin
-static auto const fun_10 = c2py::dispatcher_f_kw_t{
+static auto const fun_11 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self, long alpha) { return self.flip_spin(alpha); }, "self", "alpha"),
    c2py::cmethod([](triqs::modest::embedding const &self, std::vector<long> alphas) { return self.flip_spin(alphas); }, "self", "alphas")};
 
 // imp_decomposition
-static auto const fun_11 = c2py::dispatcher_f_kw_t{
+static auto const fun_12 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self, long imp_idx) { return self.imp_decomposition(imp_idx); }, "self", "imp_idx")};
 
 // make_zero_imp_self_energies
-static auto const fun_12 = c2py::dispatcher_f_kw_t{
+static auto const fun_13 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding &self, const triqs::mesh::imfreq &mesh) { return self.make_zero_imp_self_energies(mesh); }, "self",
                  "mesh"),
    c2py::cmethod([](triqs::modest::embedding &self, const triqs::mesh::refreq &mesh) { return self.make_zero_imp_self_energies(mesh); }, "self",
@@ -169,17 +175,17 @@ static auto const fun_12 = c2py::dispatcher_f_kw_t{
                  "mesh")};
 
 // n_gamma
-static auto const fun_13 = c2py::dispatcher_f_kw_t{
+static auto const fun_14 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self, long imp_idx) { return self.n_gamma(imp_idx); }, "self", "imp_idx")};
 
 // replace
-static auto const fun_14 =
+static auto const fun_15 =
    c2py::dispatcher_f_kw_t{c2py::cmethod([](triqs::modest::embedding const &self, long imp_idx_to_remove,
                                             long imp_idx_to_replace_with) { return self.replace(imp_idx_to_remove, imp_idx_to_replace_with); },
                                          "self", "imp_idx_to_remove", "imp_idx_to_replace_with")};
 
 // split
-static auto const fun_15 = c2py::dispatcher_f_kw_t{
+static auto const fun_16 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self, long imp_idx, std::function<bool(long)> p) { return self.split(imp_idx, p); }, "self",
                  "imp_idx", "p"),
    c2py::cmethod(
@@ -271,19 +277,20 @@ Returns
       c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>(),
       c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>(),
       c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>()}});
-static const auto doc_d_3 = fun_3.doc(R"DOC(
-Embed single-particle quantities (CoQui).
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_3 = fun_3.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
 static const auto doc_d_4 = fun_4.doc(R"DOC(
-Embed two-particle quantities (CoQui).
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_5 = fun_5.doc(R"DOC(
 Embed tensors (CoQui).
 )DOC",
                                       std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_6 = fun_6.doc(
+static const auto doc_d_5 = fun_5.doc(R"DOC(
+Embed single-particle quantities (CoQui).
+)DOC",
+                                      std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_6 = fun_6.doc(R"DOC(
+Embed two-particle quantities (CoQui).
+)DOC",
+                                      std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_7 = fun_7.doc(
    R"DOC(
 [1, 2, 3] Extract single-particle quantities (TRIQS/ModEST).
 
@@ -318,20 +325,20 @@ Returns
       std::vector<std::string>{c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>>(),
                                c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>>(),
                                c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>()}});
-static const auto doc_d_7 = fun_7.doc(R"DOC(
-Extract single-particle quantities (CoQui).
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_8 = fun_8.doc(R"DOC(
-Extract two-particle quantities (CoQui).
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_9 = fun_9.doc(R"DOC(
+static const auto doc_d_8  = fun_8.doc(R"DOC(
 Extract tensors (CoQui).
 )DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_10 =
-   fun_10.doc(R"DOC(
+                                       std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_9  = fun_9.doc(R"DOC(
+Extract single-particle quantities (CoQui).
+)DOC",
+                                       std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_10 = fun_10.doc(R"DOC(
+Extract two-particle quantities (CoQui).
+)DOC",
+                                        std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_11 =
+   fun_11.doc(R"DOC(
 [1] Flip the spins (:math:`\sigma`) for block :math:`\alpha`.
 
 For block :math:`\alpha` transforms :math:`(\sigma,\sigma') \to (\tau, \tau')` to
@@ -361,19 +368,19 @@ Returns
               std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<long>>()}, ", ")},
               std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
-static const auto doc_d_11 = fun_11.doc(R"DOC(
+static const auto doc_d_12 = fun_12.doc(R"DOC(
 The impurity decomposition.
 )DOC",
                                         std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_12 = fun_12.doc(R"DOC(
+static const auto doc_d_13 = fun_13.doc(R"DOC(
 Zero initialize impurity self-energies.
 )DOC",
                                         std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_13 = fun_13.doc(R"DOC(
+static const auto doc_d_14 = fun_14.doc(R"DOC(
 Number of blocks in :math:`\gamma` for the :math:`\Sigma_{\text{imp}}` [imp_idx].
 )DOC",
                                         std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_14 = fun_14.doc(R"DOC(
+static const auto doc_d_15 = fun_15.doc(R"DOC(
 Replaces one impurity in the embedding table :math:`\psi`.
 
 Replaces the impurity solver corresponding to `imp_idx_to_remove` with the impurity solver at
@@ -394,8 +401,8 @@ Returns
                                         std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
                                                                  c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
                                         std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
-static const auto doc_d_15 =
-   fun_15.doc(R"DOC(
+static const auto doc_d_16 =
+   fun_16.doc(R"DOC(
 [1] Split impurity `imp_idx`.
 
 Predicate p (long block_idx) -> 0 or 1.
@@ -431,19 +438,20 @@ PyMethodDef c2py::tp_methods<triqs::modest::embedding>[] = {
    {"description", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
    {"drop", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
    {"embed", (PyCFunction)c2py::pyfkw<fun_2>, METH_VARARGS | METH_KEYWORDS, doc_d_2.c_str()},
-   {"embed_1p", (PyCFunction)c2py::pyfkw<fun_3>, METH_VARARGS | METH_KEYWORDS, doc_d_3.c_str()},
-   {"embed_2p", (PyCFunction)c2py::pyfkw<fun_4>, METH_VARARGS | METH_KEYWORDS, doc_d_4.c_str()},
-   {"embed_tensor", (PyCFunction)c2py::pyfkw<fun_5>, METH_VARARGS | METH_KEYWORDS, doc_d_5.c_str()},
-   {"extract", (PyCFunction)c2py::pyfkw<fun_6>, METH_VARARGS | METH_KEYWORDS, doc_d_6.c_str()},
-   {"extract_1p", (PyCFunction)c2py::pyfkw<fun_7>, METH_VARARGS | METH_KEYWORDS, doc_d_7.c_str()},
-   {"extract_2p", (PyCFunction)c2py::pyfkw<fun_8>, METH_VARARGS | METH_KEYWORDS, doc_d_8.c_str()},
-   {"extract_tensor", (PyCFunction)c2py::pyfkw<fun_9>, METH_VARARGS | METH_KEYWORDS, doc_d_9.c_str()},
-   {"flip_spin", (PyCFunction)c2py::pyfkw<fun_10>, METH_VARARGS | METH_KEYWORDS, doc_d_10.c_str()},
-   {"imp_decomposition", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
-   {"make_zero_imp_self_energies", (PyCFunction)c2py::pyfkw<fun_12>, METH_VARARGS | METH_KEYWORDS, doc_d_12.c_str()},
-   {"n_gamma", (PyCFunction)c2py::pyfkw<fun_13>, METH_VARARGS | METH_KEYWORDS, doc_d_13.c_str()},
-   {"replace", (PyCFunction)c2py::pyfkw<fun_14>, METH_VARARGS | METH_KEYWORDS, doc_d_14.c_str()},
-   {"split", (PyCFunction)c2py::pyfkw<fun_15>, METH_VARARGS | METH_KEYWORDS, doc_d_15.c_str()},
+   {"embed_ij", (PyCFunction)c2py::pyfkw<fun_3>, METH_VARARGS | METH_KEYWORDS, doc_d_3.c_str()},
+   {"embed_ijkl", (PyCFunction)c2py::pyfkw<fun_4>, METH_VARARGS | METH_KEYWORDS, doc_d_4.c_str()},
+   {"embed_wij", (PyCFunction)c2py::pyfkw<fun_5>, METH_VARARGS | METH_KEYWORDS, doc_d_5.c_str()},
+   {"embed_wijkl", (PyCFunction)c2py::pyfkw<fun_6>, METH_VARARGS | METH_KEYWORDS, doc_d_6.c_str()},
+   {"extract", (PyCFunction)c2py::pyfkw<fun_7>, METH_VARARGS | METH_KEYWORDS, doc_d_7.c_str()},
+   {"extract_ijkl", (PyCFunction)c2py::pyfkw<fun_8>, METH_VARARGS | METH_KEYWORDS, doc_d_8.c_str()},
+   {"extract_wij", (PyCFunction)c2py::pyfkw<fun_9>, METH_VARARGS | METH_KEYWORDS, doc_d_9.c_str()},
+   {"extract_wijkl", (PyCFunction)c2py::pyfkw<fun_10>, METH_VARARGS | METH_KEYWORDS, doc_d_10.c_str()},
+   {"flip_spin", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
+   {"imp_decomposition", (PyCFunction)c2py::pyfkw<fun_12>, METH_VARARGS | METH_KEYWORDS, doc_d_12.c_str()},
+   {"make_zero_imp_self_energies", (PyCFunction)c2py::pyfkw<fun_13>, METH_VARARGS | METH_KEYWORDS, doc_d_13.c_str()},
+   {"n_gamma", (PyCFunction)c2py::pyfkw<fun_14>, METH_VARARGS | METH_KEYWORDS, doc_d_14.c_str()},
+   {"replace", (PyCFunction)c2py::pyfkw<fun_15>, METH_VARARGS | METH_KEYWORDS, doc_d_15.c_str()},
+   {"split", (PyCFunction)c2py::pyfkw<fun_16>, METH_VARARGS | METH_KEYWORDS, doc_d_16.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -518,7 +526,7 @@ const std::string c2py::tp_doc<triqs::modest::embedding::imp_block_t> =
 // ==================== module functions ====================
 
 // embedding_builder
-static auto const fun_16 = c2py::dispatcher_f_kw_t{
+static auto const fun_17 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::vector<std::string> &spin_names, const nda::array<std::vector<long>, 2> &block_decomposition,
                  const std::vector<long> &atom_to_imp) { return triqs::modest::embedding_builder(spin_names, block_decomposition, atom_to_imp); },
               "spin_names", "block_decomposition", "atom_to_imp"),
@@ -527,19 +535,19 @@ static auto const fun_16 = c2py::dispatcher_f_kw_t{
               "spin_names", "block_decomposition", "atom_to_imp")};
 
 // make_embedding
-static auto const fun_17 = c2py::dispatcher_f_kw_t{
+static auto const fun_18 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::local_space &C_space, bool use_atom_equivalences,
                  bool use_atom_decomp) { return triqs::modest::make_embedding(C_space, use_atom_equivalences, use_atom_decomp); },
               "C_space", "use_atom_equivalences"_a = true, "use_atom_decomp"_a = false)};
 
 // make_embedding_with_clusters
-static auto const fun_18 = c2py::dispatcher_f_kw_t{
+static auto const fun_19 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](triqs::modest::one_body_elements_on_grid obe,
                  const std::vector<std::vector<long>> &atom_partition) { return triqs::modest::make_embedding_with_clusters(obe, atom_partition); },
               "obe", "atom_partition")};
 
-static const auto doc_d_16 =
-   fun_16.doc(R"DOC(
+static const auto doc_d_17 =
+   fun_17.doc(R"DOC(
 Construct the embedding class from the local space, a description of the block decomposition, and an
 equivalence mapping between atom sites.
 
@@ -563,8 +571,8 @@ Returns
                                                   ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", ")},
               std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
-static const auto doc_d_17 =
-   fun_17.doc(R"DOC(
+static const auto doc_d_18 =
+   fun_18.doc(R"DOC(
 Make an embedding from the local space.
 
 This function creates an embedding object from the local space, which is typically used in ModEST for
@@ -590,8 +598,8 @@ Returns
                                        c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
               std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
-static const auto doc_d_18 =
-   fun_18.doc(R"DOC(
+static const auto doc_d_19 =
+   fun_19.doc(R"DOC(
 Make an embedding for clusters of atoms.
 
 This function creates an embedding object from the one-body elements on grid (obe) and a partition of the
@@ -619,9 +627,9 @@ Returns
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"embedding_builder", (PyCFunction)c2py::pyfkw<fun_16>, METH_VARARGS | METH_KEYWORDS, doc_d_16.c_str()},
-   {"make_embedding", (PyCFunction)c2py::pyfkw<fun_17>, METH_VARARGS | METH_KEYWORDS, doc_d_17.c_str()},
-   {"make_embedding_with_clusters", (PyCFunction)c2py::pyfkw<fun_18>, METH_VARARGS | METH_KEYWORDS, doc_d_18.c_str()},
+   {"embedding_builder", (PyCFunction)c2py::pyfkw<fun_17>, METH_VARARGS | METH_KEYWORDS, doc_d_17.c_str()},
+   {"make_embedding", (PyCFunction)c2py::pyfkw<fun_18>, METH_VARARGS | METH_KEYWORDS, doc_d_18.c_str()},
+   {"make_embedding_with_clusters", (PyCFunction)c2py::pyfkw<fun_19>, METH_VARARGS | METH_KEYWORDS, doc_d_19.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 

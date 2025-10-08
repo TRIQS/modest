@@ -28,15 +28,33 @@ using c2py::operator""_a;
 
 // analyze_degenerate_blocks
 static auto const fun_0 =
-   c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gimp,
+   c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gimp,
+                                         double threshold) { return triqs::modest::analyze_degenerate_blocks(Gimp, threshold); },
+                                      "Gimp", "threshold"_a = 1.e-5),
+                           c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued> &Gimp,
+                                         double threshold) { return triqs::modest::analyze_degenerate_blocks(Gimp, threshold); },
+                                      "Gimp", "threshold"_a = 1.e-5),
+                           c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gimp,
+                                         double threshold) { return triqs::modest::analyze_degenerate_blocks(Gimp, threshold); },
+                                      "Gimp", "threshold"_a = 1.e-5),
+                           c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imtime, triqs::gfs::matrix_valued> &Gimp,
                                          double threshold) { return triqs::modest::analyze_degenerate_blocks(Gimp, threshold); },
                                       "Gimp", "threshold"_a = 1.e-5)};
 
 // symmetrize_gf
-static auto const fun_1 = c2py::dispatcher_f_kw_t{
-   c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gin,
-                 std::vector<std::vector<long>> degenerate_blocks) { return triqs::modest::symmetrize_gf(Gin, degenerate_blocks); },
-              "Gin", "degenerate_blocks")};
+static auto const fun_1 =
+   c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &g,
+                                         std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize_gf(g, deg_bls); },
+                                      "g", "deg_bls"),
+                           c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imtime, triqs::gfs::matrix_valued> &g,
+                                         std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize_gf(g, deg_bls); },
+                                      "g", "deg_bls"),
+                           c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &g,
+                                         std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize_gf(g, deg_bls); },
+                                      "g", "deg_bls"),
+                           c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued> &g,
+                                         std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize_gf(g, deg_bls); },
+                                      "g", "deg_bls")};
 
 static const auto doc_d_0 = fun_0.doc(
    R"DOC(
@@ -60,7 +78,10 @@ Returns
    A list of equivalent blocks.
 )DOC",
    std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()},
+      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imtime, triqs::gfs::matrix_valued> &>()},
                  ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", ")},
    std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::vector<std::vector<long>>>()}});
@@ -72,21 +93,37 @@ Average the degenerate blocks and replace the degenerate ones with their average
 
 Parameters
 ----------
-Gin : {par_0}
+g : {par_0}
    Block Green's function.
-degenerate_blocks : {par_1}
+deg_bls : {par_1}
    A list of the degenerate blocks.
 
 Returns
 -------
-{ret_0}
+[1] : {ret_0}
+   The symmetrized Green's function.
+
+[2] : {ret_1}
+   The symmetrized Green's function.
+
+[3] : {ret_2}
+   The symmetrized Green's function.
+
+[4] : {ret_3}
    The symmetrized Green's function.
 )DOC",
    std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()},
+      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imtime, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued> &>()},
                  ", "),
       c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<std::vector<long>>>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>()}});
+   std::vector<std::string>{
+      std::vector<std::string>{c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
+                               c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imtime, triqs::gfs::matrix_valued>>(),
+                               c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
+                               c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued>>()}});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

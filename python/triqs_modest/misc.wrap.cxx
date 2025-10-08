@@ -347,8 +347,50 @@ static auto const fun_10 = c2py::dispatcher_f_kw_t{c2py::cfun(
       bool verbosity) { return triqs::root_finder(method, f, x_init, y_value, precision, delta_x, max_loops, x_name, y_name, verbosity); },
    "method", "f", "x_init", "y_value", "precision", "delta_x", "max_loops"_a = 1000, "x_name"_a = "", "y_name"_a = "", "verbosity"_a = false)};
 
-// sigma_to_data_idx
+// rotate
 static auto const fun_11 = c2py::dispatcher_f_kw_t{c2py::cfun(
+   [](const triqs::modest::one_body_elements_tb &obe, const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate(obe, U); }, "obe", "U")};
+
+// rotate_embedded_self_energy
+static auto const fun_12 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_embed_dynamic_loc,
+                 const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, U); },
+              "Sigma_embed_dynamic_loc", "U"),
+   c2py::cfun([](const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma_embed_dynamic_loc,
+                 const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, U); },
+              "Sigma_embed_dynamic_loc", "U"),
+   c2py::cfun([](const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_embed_dynamic_loc,
+                 const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, U); },
+              "Sigma_embed_dynamic_loc", "U"),
+   c2py::cfun(
+      [](const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_embed_dynamic_loc,
+         const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, obe); },
+      "Sigma_embed_dynamic_loc", "obe"),
+   c2py::cfun(
+      [](const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma_embed_dynamic_loc,
+         const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, obe); },
+      "Sigma_embed_dynamic_loc", "obe"),
+   c2py::cfun(
+      [](const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_embed_dynamic_loc,
+         const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, obe); },
+      "Sigma_embed_dynamic_loc", "obe"),
+   c2py::cfun([](const std::vector<nda::array<triqs::dcomplex, 3>> &Sigma_embed_dynamic_loc,
+                 const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, U); },
+              "Sigma_embed_dynamic_loc", "U"),
+   c2py::cfun(
+      [](const std::vector<nda::array<triqs::dcomplex, 3>> &Sigma_embed_dynamic_loc,
+         const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, obe); },
+      "Sigma_embed_dynamic_loc", "obe"),
+   c2py::cfun([](const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_embed_static_loc,
+                 const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_static_loc, U); },
+              "Sigma_embed_static_loc", "U"),
+   c2py::cfun(
+      [](const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_embed_static_loc,
+         const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_static_loc, obe); },
+      "Sigma_embed_static_loc", "obe")};
+
+// sigma_to_data_idx
+static auto const fun_13 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](triqs::modest::spin_kind_e spin_kind, long sigma) { return triqs::modest::sigma_to_data_idx(spin_kind, sigma); }, "spin_kind", "sigma")};
 
 static const auto doc_d_3 = fun_3.doc(
@@ -492,7 +534,84 @@ Returns
                                        c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
                                        c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
               std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::pair<double, double>>()}});
-static const auto doc_d_11 = fun_11.doc(R"DOC(
+static const auto doc_d_11 = fun_11.doc(
+   R"DOC(
+Rotate a tight-binding Hamiltonian by a unitary matrix :math:`U`.
+
+The rotation is performed as :math:`H' = U H U^\dagger`.
+
+Parameters
+----------
+obe : {par_0}
+   One-body elements containing the TB Hamiltonian.
+U : {par_1}
+   Unitary matrix used for the rotation.
+
+Returns
+-------
+{ret_0}
+   One-body elements containing the rotated TB Hamiltonian.
+)DOC",
+   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}, ", "),
+                            c2py::join(std::vector<std::string>{c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()}, ", ")},
+   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_tb>()}});
+static const auto doc_d_12 = fun_12.doc(
+   R"DOC(
+[1, 2, 3, 4, 5, 6, 7, 8] Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
+
+The rotation is independent of frequency and is performe as UΣ(ω)U†.
+
+------
+
+[9, 10] Rotate the static part of the embedded self-energy from the local (solver) basis to the orbital basis.
+
+The rotation is independent of frequency and is performe as UΣ(ω)U†.
+
+------
+
+Parameters
+----------
+Sigma_embed_dynamic_loc : {par_0}
+   The dynamic part of the embedded self-energy in the local (solver) basis.
+U : {par_1}
+   The rotation matrix from the local (solver) basis to the orbital basis.
+obe : {par_2}
+   The one-body elements on grid containing the rotation matrices.
+Sigma_embed_static_loc : {par_3}
+   The static part of the embedded self-energy in the local (solver) basis.
+
+Returns
+-------
+[1, 4] : {ret_0}
+   The dynamic part of the embedded self-energy in the orbital basis.
+
+[2, 5] : {ret_1}
+   The dynamic part of the embedded self-energy in the orbital basis.
+
+[3, 6] : {ret_2}
+   The dynamic part of the embedded self-energy in the orbital basis.
+
+[7, 8] : {ret_3}
+   The dynamic part of the embedded self-energy in the orbital basis.
+
+[9, 10] : {ret_4}
+   The static part of the embedded self-energy in the orbital basis.
+)DOC",
+   std::vector<std::string>{
+      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>(),
+                                          c2py::python_typename<const std::vector<nda::array<triqs::dcomplex, 3>> &>()},
+                 ", "),
+      c2py::join(std::vector<std::string>{c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()}, ", "),
+      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),
+      c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()}, ", ")},
+   std::vector<std::string>{std::vector<std::string>{
+      c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>>(),
+      c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>>(),
+      c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>(),
+      c2py::python_typename<std::vector<nda::array<triqs::dcomplex, 3>>>(), c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>()}});
+static const auto doc_d_13 = fun_13.doc(R"DOC(
 Map a spin index to a data index.
 
 The mapping depends on the spin kind:
@@ -513,7 +632,9 @@ static PyMethodDef module_methods[] = {
    {"h5_write", (PyCFunction)c2py::pyfkw<fun_8>, METH_VARARGS | METH_KEYWORDS, doc_d_8.c_str()},
    {"permute_local_space", (PyCFunction)c2py::pyfkw<fun_9>, METH_VARARGS | METH_KEYWORDS, doc_d_9.c_str()},
    {"root_finder", (PyCFunction)c2py::pyfkw<fun_10>, METH_VARARGS | METH_KEYWORDS, doc_d_10.c_str()},
-   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
+   {"rotate", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
+   {"rotate_embedded_self_energy", (PyCFunction)c2py::pyfkw<fun_12>, METH_VARARGS | METH_KEYWORDS, doc_d_12.c_str()},
+   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_13>, METH_VARARGS | METH_KEYWORDS, doc_d_13.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
