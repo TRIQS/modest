@@ -1,60 +1,51 @@
 import os
-from h5 import *
-from triqs.utility.comparison_tests import *
-from triqs.utility.h5diff import h5diff
+import numpy as np
+from h5 import HDFArchive
+from triqs.utility import h5diff
 import triqs.utility.mpi as mpi
 
 from triqs_modest.dft_tools.elk import Converter
-from triqs_dft_tools.sumk_dft_tools import *
-#get current working directory path
+
+# Get current working directory path
 cwd = format(os.getcwd())
-#location of test directory
+# Location of test directory
 testdir = cwd+'/elk_spectralcontours_convert'
-#change to test directory
+# Change to test directory
 os.chdir(testdir)
 
-#default k-mesh
+# Test 1: Default k-mesh
 converter = Converter(filename='SrVO3', repacking=True)
 converter.hdf_file = 'elk_spectralcontours_convert.out.h5'
 converter.convert_dft_input()
 converter.convert_contours_input()
 
-omin = -1.0
-omax = 1.0
-oN = 3
-mesh = MeshReFreq(omin,omax,oN)
-SK = SumkDFTTools(hdf_file='elk_spectralcontours_convert.out.h5', use_dft_blocks=True)
-fs_elk = SK.spectral_contours(broadening=0.01, mesh=mesh, with_Sigma=False, with_dc=False, FS=True, proj_type='wann', save_to_file=False)
-omega_elk = SK.spectral_contours(broadening=0.01, mesh=mesh, with_Sigma=False, with_dc=False, FS=False, proj_type='wann', save_to_file=False)
-omega_range_elk = SK.spectral_contours(broadening=0.01, mesh=mesh, plot_range=(-0.5,2), with_Sigma=False, with_dc=False, FS=False, proj_type='wann', save_to_file=False)
-
-#user specified k-mesh - has to be same as used in elk.in
+# Test 2: User-specified k-mesh - has to be same as used in elk.in
 converter_user = Converter(filename='SrVO3', repacking=True)
 converter_user.hdf_file = 'elk_spectralcontours_convert.out.h5'
-ngrid=np.array([10,10,1],np.int_)
-kgrid=np.array([[0.0,0.0,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]],np.float64)
-converter_user.convert_contours_input(kgrid=kgrid,ngrid=ngrid)
-SK2 = SumkDFTTools(hdf_file='elk_spectralcontours_convert.out.h5', use_dft_blocks=True)
-fs_elk_user = SK2.spectral_contours(broadening=0.01, mesh=mesh, with_Sigma=False, with_dc=False, FS=True, proj_type='wann', save_to_file=False)
+ngrid = np.array([10,10,1], np.int_)
+kgrid = np.array([[0.0,0.0,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]], np.float64)
+converter_user.convert_contours_input(kgrid=kgrid, ngrid=ngrid)
 
+# Compare only converter output (not SumkDFT-computed results)
 if mpi.is_master_node():
+    with HDFArchive('elk_spectralcontours_convert.out.h5', 'r') as out, \
+         HDFArchive('elk_spectralcontours_convert.ref.h5', 'r') as ref:
 
-    #with HDFArchive('elk_spectralcontours_convert.ref.h5', 'a') as ar:
-    #    ar['fs_elk'] = fs_elk
-    #    ar['fs_elk_user'] = fs_elk_user
-    #    ar['omega_elk'] = omega_elk
-    #    ar['omega_range_elk'] = omega_range_elk
-    #    ar['mesh'] = [omin,omax,oN]
-    with HDFArchive('elk_spectralcontours_convert.out.h5', 'a') as ar:
-        ar['fs_elk'] = fs_elk
-        ar['fs_elk_user'] = fs_elk_user
-        ar['omega_elk'] = omega_elk
-        ar['omega_range_elk'] = omega_range_elk
-        ar['mesh'] = [omin,omax,oN]
+        converter_groups = ['dft_input', 'dft_contours_input', 'dft_misc_input', 'dft_symmcorr_input']
 
+        for group in converter_groups:
+            if group in out and group in ref:
+                h5diff.compare(group, out[group], ref[group], 0, 1e-6)
+            elif group in out or group in ref:
+                h5diff.failures.append(f'Group {group} missing in one file')
 
-if mpi.is_master_node():
-    h5diff('elk_spectralcontours_convert.out.h5','elk_spectralcontours_convert.ref.h5')
+        if h5diff.failures:
+            print('-'*50)
+            print('-'*20 + '  FAILED  ' + '-'*20)
+            print('-'*50)
+            for failure in h5diff.failures:
+                print(failure)
+            raise RuntimeError('FAILED')
 
-#return to cwd
+# Return to cwd
 os.chdir(cwd)

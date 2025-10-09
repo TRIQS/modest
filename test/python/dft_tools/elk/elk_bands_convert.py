@@ -1,43 +1,44 @@
 import os
-from h5 import *
-from triqs.utility.comparison_tests import *
-from triqs.utility.h5diff import h5diff
+from h5 import HDFArchive
+from triqs.utility import h5diff
 import triqs.utility.mpi as mpi
 
 from triqs_modest.dft_tools.elk import Converter
-from triqs_dft_tools.sumk_dft_tools import *
-#get current working directory path
+
+# Get current working directory path
 cwd = format(os.getcwd())
-#location of test directory
+# Location of test directory
 testdir = cwd+'/elk_bands_convert'
-#change to test directory
+# Change to test directory
 os.chdir(testdir)
 
-Converter = Converter(filename='SrVO3', repacking=True)
-Converter.hdf_file = 'elk_bands_convert.out.h5'
-Converter.convert_dft_input()
-Converter.convert_bands_input()
+# Run converter
+converter = Converter(filename='SrVO3', repacking=True)
+converter.hdf_file = 'elk_bands_convert.out.h5'
+converter.convert_dft_input()
+converter.convert_bands_input()
 
-omin = -1.0
-omax = 1.0
-oN = 3
-mesh = MeshReFreq(omin,omax,oN)
-SK = SumkDFTTools(hdf_file='elk_bands_convert.out.h5', use_dft_blocks=True)
-spag_wann = SK.spaghettis(broadening=0.01, mesh=mesh, with_Sigma=False, with_dc=False, proj_type='wann', save_to_file=False)
-
-
+# Compare only converter output (not SumkDFT-computed results)
 if mpi.is_master_node():
+    # Compare dft_input, dft_bands_input, dft_misc_input, dft_symmcorr_input
+    with HDFArchive('elk_bands_convert.out.h5', 'r') as out, \
+         HDFArchive('elk_bands_convert.ref.h5', 'r') as ref:
 
-    #with HDFArchive('elk_bands_convert.ref.h5', 'a') as ar:
-    #    ar['spag_wann'] = spag_wann
-    #    ar['mesh'] = [omin,omax,oN]
-    with HDFArchive('elk_bands_convert.out.h5', 'a') as ar:
-        ar['spag_wann'] = spag_wann
-        ar['mesh'] = [omin,omax,oN]
+        converter_groups = ['dft_input', 'dft_bands_input', 'dft_misc_input', 'dft_symmcorr_input']
 
+        for group in converter_groups:
+            if group in out and group in ref:
+                h5diff.compare(group, out[group], ref[group], 0, 1e-6)
+            elif group in out or group in ref:
+                h5diff.failures.append(f'Group {group} missing in one file')
 
-if mpi.is_master_node():
-    h5diff('elk_bands_convert.out.h5','elk_bands_convert.ref.h5')
+        if h5diff.failures:
+            print('-'*50)
+            print('-'*20 + '  FAILED  ' + '-'*20)
+            print('-'*50)
+            for failure in h5diff.failures:
+                print(failure)
+            raise RuntimeError('FAILED')
 
-#return to cwd
+# Return to cwd
 os.chdir(cwd)
