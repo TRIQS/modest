@@ -44,7 +44,7 @@ namespace triqs::modest {
   /**
    * @ingroup post
    * @brief Compute momentum-resolved spectral function \f$ A^\sigma(k, \omega) \f$ along high-symmetry path.
-   * 
+   *
    * @param obe One-body elements on grid created from one_body_elements_on_high_symmetry_path.
    * @param mu Chemical potential.
    * @param Sigma_w Self-energy in real-frequencies.
@@ -63,7 +63,7 @@ namespace triqs::modest {
   /**
    * @ingroup post
    * @brief Compute the atom- and orbital-resolved spectral function (interacting density of states).
-   * 
+   *
    * @param obe_theta One-body elements on grid created from one_body_elements_with_theta_projectors.
    * @param Proj Downfolding projector defined in the correlated space using to upfold the DMFT self-energies.
    * @param mu Chemical potential.

@@ -13,7 +13,7 @@ namespace triqs {
   /**
  * @ingroup root
  * @brief find upper and lower bounds of f(x)
- * 
+ *
  * @param f function of f(x)
  * @param x_init initial guess x
  * @param y_value target value y = f(x)
@@ -55,7 +55,7 @@ namespace triqs {
   /**
  * @ingroup root
  * @brief dichotomy algorithm
- * 
+ *
  * @param f function f(x)
  * @param x_low lower bound on x
  * @param x_high upper bound on x
@@ -112,7 +112,7 @@ namespace triqs {
   /**
  * @ingroup root
  * @brief bisection algorithm
- * 
+ *
  * @param f function f(x)
  * @param x_low lower bound on f(x)
  * @param x_high upper bound on f(x)
@@ -160,12 +160,12 @@ namespace triqs {
 
   /**
    * @brief Root finder \f$ f(x) = 0 \f$.
-   * 
+   *
    * @param method Root finding method (`dichtomy` or `bisection`).
    * @param f \f$ f(x) : \mathbb{R} \to \mathbb{R} \f$.
    * @param x_init Initial value for \f$ x \f$.
    * @param y_value Target value for \f$ y \f$.
-   * @param precision Precision for algorithm. 
+   * @param precision Precision for algorithm.
    * @param delta_x Increment of \f$ x \f$.
    * @param max_loops Max number of iterations.
    * @param x_name Name of \f$ x \f$ variable.

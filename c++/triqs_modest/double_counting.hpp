@@ -15,7 +15,7 @@ namespace triqs::modest {
   /**
    * @ingroup double_counting
    * @brief Double counting formulas.
-   * 
+   *
    * @param method Double counting formula to use.
    * @param N_tot Total density.
    * @param N_sigma Total density per spin.
@@ -28,7 +28,7 @@ namespace triqs::modest {
                                         double const J);
   /**
    * @brief Compute double counting correction for a DC type (method) from the density matrix of a Green's function.
-   * 
+   *
    * @param density_matrix Density matrix [orbital, spin] indices.
    * @param U_int Coulomb interaction parameter.
    * @param J_hund Hund's coupling interaction parameter.
@@ -41,9 +41,9 @@ namespace triqs::modest {
   /**
    * @ingroup double_counting
    * @brief Double counting "solver".
-   * 
-   * @details It implements the double counting correction for DFT+DMFT, which is a phenomenlogical introduced double 
-   * counting the interactions already taken into account at the mean-field level within DFT. This class implements 
+   *
+   * @details It implements the double counting correction for DFT+DMFT, which is a phenomenlogical introduced double
+   * counting the interactions already taken into account at the mean-field level within DFT. This class implements
    * several double counting formulas (all of which are functions of the density) relevant for different scenarios.
    */
   class dc_solver {
@@ -60,7 +60,7 @@ namespace triqs::modest {
 
     /**
     * @brief Get the density matrix from gf object
-    * 
+    *
     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to evaluate the double counting formula.
     * @return Density matrix of Green's function in block_matrix format.
     */
@@ -69,7 +69,7 @@ namespace triqs::modest {
     public:
     /**
      * @brief Construct a double counting "solver".
-     * 
+     *
      * @param n_sigma Dimension of the \f$ \sigma \f$ index.
      * @param method Double counting formula (method) to call (options: `cFLL`, `sFLL`, `cAMF`, `sAMF`, `cHeld`).
      * @param U_int Hubbard \f$ U \f$ to use in the DC formula.
@@ -79,8 +79,8 @@ namespace triqs::modest {
 
     /**
      * @brief Compute the double-counting self-energy.
-     * 
-     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to 
+     *
+     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to
      * evaluate the double counting formula.
      * @return Double counting self-energy term.
      */
@@ -88,8 +88,8 @@ namespace triqs::modest {
 
     /**
      * @brief Compute the double counting correction to the energy.
-     * 
-     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to 
+     *
+     * @param gimp The impurity Green's function which is used to calculate the orbital-resolved density matrices to
      * evaluate the double counting formula.
      * @return Double counting energy term.
      */

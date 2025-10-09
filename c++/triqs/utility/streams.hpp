@@ -72,17 +72,17 @@ namespace triqs {
   /**
    * @class indented_ostream
    * @brief A custom output stream that automatically indents each new line by a specified number of spaces.
-   * 
-   * This class is useful for formatting output with consistent indentation. It wraps around an existing 
+   *
+   * This class is useful for formatting output with consistent indentation. It wraps around an existing
    * `std::ostream` and ensures that every new line starts with a specified number of spaces.
-   * 
+   *
    * Example usage:
    * @code
    *   auto out = triqs::indented_ostream{std::cout, 3}; // Indent all lines with 3 spaces
    *   out << "Hello, world!" << std::endl;
    *   out << "Indented text." << std::endl;
    * @endcode
-   * 
+   *
    * @note This class inherits from `std::ostream` and uses a custom stream buffer to handle indentation.
    */
   class indented_ostream : public std::ostream {
@@ -109,7 +109,7 @@ namespace triqs {
     public:
     /**
      * @brief Constructor
-     * 
+     *
      * @param os The underlying std::ostream to write into.
      * @param indent The number of spaces to use for indentation.
      */

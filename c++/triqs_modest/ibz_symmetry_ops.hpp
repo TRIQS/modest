@@ -21,20 +21,20 @@ namespace triqs::modest {
 
   /**
    * @ingroup one_body_elements
-   * @brief Irreducible Brillouin Zone (IBZ) symmetry operations to symmetrize observables over the entire Brillouin 
+   * @brief Irreducible Brillouin Zone (IBZ) symmetry operations to symmetrize observables over the entire Brillouin
    * zone.
-   * 
-   * @details The IBZ symmetry operations are optional and specific to DFT codes that work in the IBZ instead of the 
+   *
+   * @details The IBZ symmetry operations are optional and specific to DFT codes that work in the IBZ instead of the
    * full BZ. Currently, this is only used when DFT data is converted from Wien2k.
-   * 
-   * For computational efficiency, we can perform the one-body calculation on the irreducible Brillouin zone (IBZ). 
-   * However, in order to obtain observable quantities like the local Green's function, one needs to _symmetrize_ the 
+   *
+   * For computational efficiency, we can perform the one-body calculation on the irreducible Brillouin zone (IBZ).
+   * However, in order to obtain observable quantities like the local Green's function, one needs to _symmetrize_ the
    * obversable summed on only the IBZ. For any observable \f$\mathcal{O}\f$, the unsymmetrized quantity is
    * \f[
    *   [\mathcal{O}^{\sigma}_{mm'}]_{\mathrm{unsymm}} = \sum_{\mathbf{k}\in\mathrm{IBZ}}\sum_{\nu\nu'}P_{m,\nu}^{\sigma}
    *   (\mathbf{k})O_{\nu\nu'}^{\sigma}(\mathbf{k})[P_{m'\nu'}^{\sigma}(\mathbf{k})]^{\dagger}.
    * \f]
-   * To symmetrize, we must by apply all operations symmetry operations \f$\mathcal{S}\f$ of the crystallographic space 
+   * To symmetrize, we must by apply all operations symmetry operations \f$\mathcal{S}\f$ of the crystallographic space
    * group \f$\mathcal{G}\f$:
    * \f[
    *   [\mathcal{O}^{\sigma}_{(am_{a}), (a'm_{a}')}]_{\mathrm{symm}}^{\mathcal{G}} = \sum_{\mathcal{S}\in\mathcal{G}}
@@ -106,10 +106,10 @@ namespace triqs::modest {
   };
 
   /**
- * @brief Change basis 
- * 
- * @param U Rotations by block in atomic decomposition 
- * @param x ibz_symmetry_ops to rotate 
+ * @brief Change basis
+ *
+ * @param U Rotations by block in atomic decomposition
+ * @param x ibz_symmetry_ops to rotate
  * @return A new symmetrizer operating in the rotated basis U^† U
  */
   inline ibz_symmetry_ops rotate_local_basis(nda::array<nda::matrix<dcomplex>, 2> const &U, ibz_symmetry_ops const &x) {

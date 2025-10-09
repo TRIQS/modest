@@ -103,8 +103,8 @@ namespace nda {
 
   /**
  * @brief Format the matrix mat as a table, with row/col_labels.
- * 
- * @param out output stream 
+ *
+ * @param out output stream
  * @param mat The matrix
  * @param row_labels Range of string: name of the rows
  * @param col_labels Range of string: name of the cols

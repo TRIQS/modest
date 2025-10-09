@@ -42,7 +42,7 @@ def generate_reference_data(filename : str, n_iw=30):
     dens_mat = [gf.density() for gf in Gloc_dft2]
     dc_types = ['sFLL', 'cHeld','sAMF']
     dc_terms= {}
-    for dc in dc_types: 
+    for dc in dc_types:
         for ineq in range(sum_k.n_inequiv_shells):
             sum_k.calc_dc(dens_mat[ineq], orb=ineq,  U_interact=2.0, J_hund=1.0, use_dc_formula=dc, transform=False)
         dc_terms[dc] =  {'dc_imp' : flatten(sum_k.dc_imp), 'E_dc' : deepcopy(sum_k.dc_energ) }

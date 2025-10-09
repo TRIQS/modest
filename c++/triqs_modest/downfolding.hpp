@@ -14,9 +14,9 @@ namespace triqs::modest {
 
   /**
    * @brief Map a spin index to a data index.
-   * 
+   *
    * @details The mapping depends on the spin kind:
-   * 
+   *
    * * `Polarized`: \f$ \sigma \to \sigma \f$ (an object can have different values for different \f$ \sigma \f$).
    * * `NonPolarized`: \f$ \sigma \to 0 \f$ (an object is the same for both \f$ \sigma \f$, so only one copy is stored).
    * * `NonCollinear`: \f$ \sigma \to 0 \f$ (\f$ \sigma \f$ is always 0).
@@ -27,11 +27,11 @@ namespace triqs::modest {
    * @ingroup one_body_elements
    * @brief The one-body dispersion as a function of momentum.
    *
-   * @details The band dispersion typically corresponds to the solution of a (Kohn-Sham) Hamiltonian which has been 
-   * diagonalized in momentum space and formulated in a basis of Bloch states \f$ | \phi_{\nu\mathbf{k}} \rangle \f$ with 
+   * @details The band dispersion typically corresponds to the solution of a (Kohn-Sham) Hamiltonian which has been
+   * diagonalized in momentum space and formulated in a basis of Bloch states \f$ | \phi_{\nu\mathbf{k}} \rangle \f$ with
    * corresponding eigenvalues (\f$\varepsilon_{\nu\mathbf{k}}^{\sigma}\f$).
    *
-   * A band dispersion object contains the DFT band structure \f$\varepsilon_{\nu\mathbf{k}}^{\sigma}\f$, weights in the 
+   * A band dispersion object contains the DFT band structure \f$\varepsilon_{\nu\mathbf{k}}^{\sigma}\f$, weights in the
    * Brillouin zone, and the spin kind used in the DFT calculation.
    */
   struct band_dispersion {
@@ -54,10 +54,10 @@ namespace triqs::modest {
 
     /**
      * @brief Get \f$ H^{\sigma}_{\nu\nu'}(\mathbf{k}) \f$ for a given \f$ \mathbf{k} \f$ and \f$ \sigma \f$.
-     * 
+     *
      * @param sigma Spin index \f$ \sigma \f$.
      * @param k_idx Index of the k-point in the grid.
-     * @return Matrix view of \f$ H^{\sigma}_{\nu\nu'}(\mathbf{k}) \f$ in \f$ (\nu, \nu') \f$ for a given 
+     * @return Matrix view of \f$ H^{\sigma}_{\nu\nu'}(\mathbf{k}) \f$ in \f$ (\nu, \nu') \f$ for a given
      * \f$ \mathbf{k} \f$ and \f$ \sigma \f$.
      */
     [[nodiscard]] nda::matrix_const_view<dcomplex> H(long sigma, long k_idx) const {
@@ -83,7 +83,7 @@ namespace triqs::modest {
    * @ingroup one_body_elements
    * @brief The projector that downfolds the energy bands onto a set of localized atomic-like orbitals.
    *
-   * A downfolding projector contains the projector, the kind of spin used in the projection, and the number of bands 
+   * A downfolding projector contains the projector, the kind of spin used in the projection, and the number of bands
    * per k-point for cases when a band goes outside of the projection window.
    *
    * The projectors \f$P_{m\nu}^{\sigma}(\mathbf{k})\f$ connect the Bloch space \f${\cal B}\f$ to \f${\cal C}\f$. The
@@ -92,8 +92,8 @@ namespace triqs::modest {
    *   P_{(a,m_{a})\nu}^{\sigma}(\mathbf{k})\equiv e^{-i \mathbf{k} R_a}
    *   \langle \chi_{m_{a}}^{R_a \sigma} | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle,
    * \f]
-   * where \f$ | \chi_{m_{a}}^{R_a \sigma} \rangle \f$ is a Wannier function localized at atom \f$ a \f$ with index 
-   * \f$m_a\f$ at position \f$R_a\f$ and \f$ | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle \f$ is the Kohn-Sham wavefunction. 
+   * where \f$ | \chi_{m_{a}}^{R_a \sigma} \rangle \f$ is a Wannier function localized at atom \f$ a \f$ with index
+   * \f$m_a\f$ at position \f$R_a\f$ and \f$ | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle \f$ is the Kohn-Sham wavefunction.
    * The relation between the Wannier and  Bloch function is therefore
    * \f[
    *   | \chi_{m_{a}}^{R_a \sigma} \rangle = \sum_{\mathbf{k} \nu} e^{-i \mathbf{k} R_a} \bigl(P^\sigma_{(a,m_{a})\nu}
@@ -104,7 +104,7 @@ namespace triqs::modest {
    *
    * * Basis change in \f$\cal C\f$ space: They are given by a unitary matrix \f$U\f$, the projector transforms as
    *   \f$ P^{'\sigma}_{m\nu}(\mathbf{k}) = U^{\dagger}_{m, m'} P^{\sigma}_{m'\nu}(\mathbf{k}).\f$
-   * * Partial unitarity property: In general \f$P\f$ is not unitary as \f$N_\nu^{\mathbf{k}} > M\f$. However, if the 
+   * * Partial unitarity property: In general \f$P\f$ is not unitary as \f$N_\nu^{\mathbf{k}} > M\f$. However, if the
    *   Wannier functions are reorthonormalized with respect to the truncated band basis, we have
    *   \f$ \sum_{ \nu} P^{\sigma}_{m\nu}(\mathbf{k}) P^{\dagger\sigma}_{\nu m'}(\mathbf{k}) = \delta_{mm'} \f$.
    */
@@ -123,10 +123,10 @@ namespace triqs::modest {
 
     /**
      * @brief Get \f$ P_{m\nu}^{\sigma}(\mathbf{k}) \f$ for a given \f$ \mathbf{k} \f$ and \f$ \sigma \f$.
-     * 
+     *
      * @param sigma Spin index \f$ \sigma \f$.
      * @param k_idx Index of the k-point in the grid.
-     * @return Matrix view of \f$ P_{m\nu}^{\sigma}(\mathbf{k}) \f$ in \f$ (m, \nu) \f$ for the given \f$ \mathbf{k} \f$ 
+     * @return Matrix view of \f$ P_{m\nu}^{\sigma}(\mathbf{k}) \f$ in \f$ (m, \nu) \f$ for the given \f$ \mathbf{k} \f$
      * and \f$ \sigma \f$.
      */
     [[nodiscard]] nda::matrix_const_view<dcomplex> P(long sigma, long k_idx) const {

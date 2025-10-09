@@ -11,9 +11,9 @@
 
 namespace nda {
   /**
-   * @brief Find a block structure of a Matrix 
-   * 
-   * @param m A matrix (typically abs(some_matrix)). 
+   * @brief Find a block structure of a Matrix
+   *
+   * @param m A matrix (typically abs(some_matrix)).
    * @param threshold Any value below this threshold is considered as 0
    * @return List of the groups of rows/cols which would make the matrix block diagonal
    */

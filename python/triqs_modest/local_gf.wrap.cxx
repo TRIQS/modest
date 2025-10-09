@@ -57,10 +57,10 @@ static const auto doc_d_0 = fun_0.doc(
    R"DOC(
 [1, 2] Compute local Green's function on a :math:`M \times M` mesh.
 
-When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes 
-(e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, :math:`H(\mathbf{k})` 
-is diagonal in the band basis and reduces to :math:`\varepsilon_{\nu}^{\sigma}(\mathbf{k})`. The local Green's 
-function becomes: 
+When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes
+(e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, :math:`H(\mathbf{k})`
+is diagonal in the band basis and reduces to :math:`\varepsilon_{\nu}^{\sigma}(\mathbf{k})`. The local Green's
+function becomes:
 
 .. math::
 
@@ -68,7 +68,7 @@ function becomes:
    \varepsilon_{\nu}^{\sigma}(\mathbf{k}))\delta_{\nu\nu'} - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}
    P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger}.
 
-For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (:math:`N_{\nu}`) 
+For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (:math:`N_{\nu}`)
 using the Woodbury formula which allows us to perform the matrix inversion in the smaller orbital basis :math:`N_{M}`.
 
 ------
@@ -86,10 +86,10 @@ obe : {par_0}
 mu : {par_1}
    Chemical potential :math:`\mu`.
 Sigma_dynamic : {par_2}
-   The dynamic part of the embedded self-energy in the embedded view, 
+   The dynamic part of the embedded self-energy in the embedded view,
    :math:`\Sigma_{\text{dynamic}}[\alpha, \sigma]`.
 Sigma_static : {par_3}
-   The static part of the embedded self-energy in the embedded view, 
+   The static part of the embedded self-energy in the embedded view,
    :math:`\Sigma_{\text{static}}[\alpha,\sigma]`.
 mesh : {par_4}
    (DLR) imaginary frequency mesh.

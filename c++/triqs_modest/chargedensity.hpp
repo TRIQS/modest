@@ -11,7 +11,7 @@ namespace triqs::modest {
  * @brief Compute the charge density correction from DMFT
  *
  * Compute the charge density correction in the band basis \f$ N_{\nu\nu'}(\mathbf{k}) \f$ from the lattice Green's function.
- * 
+ *
  * @tparam Mesh The mesh type
  * @param obe The one-body elements on the grid
  * @param mu The chemical potential

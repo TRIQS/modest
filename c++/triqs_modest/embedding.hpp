@@ -450,7 +450,7 @@ namespace triqs::modest {
    *
    * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
    *
-   * @tparam Mesh The type of mesh 
+   * @tparam Mesh The type of mesh
    * @param Sigma_embed_dynamic_loc The dynamic part of the embedded self-energy in the local (solver) basis.
    * @param U The rotation matrix from the local (solver) basis to the orbital basis.
    * @return The dynamic part of the embedded self-energy in the orbital basis.
@@ -480,8 +480,8 @@ namespace triqs::modest {
    * @brief Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
    *
    * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   * 
-   * @tparam Mesh The type of mesh 
+   *
+   * @tparam Mesh The type of mesh
    * @param Sigma_embed_dynamic_loc The dynamic part of the embedded self-energy in the local (solver) basis.
    * @param obe The one-body elements on grid containing the rotation matrices.
    * @return The dynamic part of the embedded self-energy in the orbital basis.
@@ -498,7 +498,7 @@ namespace triqs::modest {
    * @brief Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
    *
    * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   * 
+   *
    * @param Sigma_embed_dynamic_loc The dynamic part of the embedded self-energy in the local (solver) basis.
    * @param U The rotation matrix from the local (solver) basis to the orbital basis.
    * @return The dynamic part of the embedded self-energy in the orbital basis.
@@ -511,7 +511,7 @@ namespace triqs::modest {
    * @brief Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
    *
    * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   * 
+   *
    * @param Sigma_embed_dynamic_loc The dynamic part of the embedded self-energy in the local (solver) basis.
    * @param obe The one-body elements on grid containing the rotation matrices.
    * @return The dynamic part of the embedded self-energy in the orbital basis.
@@ -521,10 +521,10 @@ namespace triqs::modest {
 
   //-------------------------------------------------------------------------
   /**
-   * @brief Rotate the static part of the embedded self-energy from the local (solver) basis to the orbital basis. 
+   * @brief Rotate the static part of the embedded self-energy from the local (solver) basis to the orbital basis.
    *
    * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   * 
+   *
    * @param Sigma_embed_static_loc The static part of the embedded self-energy in the local (solver) basis.
    * @param U The rotation matrix from the local (solver) basis to the orbital basis.
    * @return The static part of the embedded self-energy in the orbital basis.
@@ -537,7 +537,7 @@ namespace triqs::modest {
  * @brief Rotate the static part of the embedded self-energy from the local (solver) basis to the orbital basis.
  *
  * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
- * 
+ *
  * @param Sigma_embed_static_loc The static part of the embedded self-energy in the local (solver) basis.
  * @param obe The one-body elements on grid containing the rotation matrices.
  * @return The static part of the embedded self-energy in the orbital basis.

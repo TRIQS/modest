@@ -58,7 +58,7 @@ static auto const fun_1 =
 
 static const auto doc_d_0 = fun_0.doc(
    R"DOC(
-Find the generate blocks of a block GF by analyzing :math:`G(\tau=0)` or :math:`G(i\omega_0)` using the 
+Find the generate blocks of a block GF by analyzing :math:`G(\tau=0)` or :math:`G(i\omega_0)` using the
 union-find algorithm.
 
 We use the union-find algorithm to group the blocks of the block GF (matrices) into equivalence

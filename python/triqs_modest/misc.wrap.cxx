@@ -407,7 +407,7 @@ atomic_shells : {par_1}
 Returns
 -------
 {ret_0}
-   :math:`H_{\text{loc}}`, formatted with dimensions :math:`[\alpha,\sigma]` each containing (n_orbitals_atom, 
+   :math:`H_{\text{loc}}`, formatted with dimensions :math:`[\alpha,\sigma]` each containing (n_orbitals_atom,
    n_orbitals_atom).
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<triqs::tb_hamiltonian> &>()}, ", "),
@@ -417,8 +417,8 @@ static const auto doc_d_4 = fun_4.doc(
    R"DOC(
 Find symmetries of the :math:`R = 0` component of a Hamiltonian to determine a GF block structure.
 
-Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the 
-local Hamiltonian (:math:`H_0 = \sum_k P(k) H_{\nu\nu'} P^\dagger(k)`), which represents the block structure of the 
+Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the
+local Hamiltonian (:math:`H_0 = \sum_k P(k) H_{\nu\nu'} P^\dagger(k)`), which represents the block structure of the
 TRIQS Gf.
 
 Parameters
@@ -435,7 +435,7 @@ diagonalize_hloc : {par_3}
 Returns
 -------
 {ret_0}
-   Decomposition, :math:`U_{\text{rotation}}` describing the block structure of GF based on 
+   Decomposition, :math:`U_{\text{rotation}}` describing the block structure of GF based on
    :math:`H_{\text{loc}}`.
 )DOC",
    std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),

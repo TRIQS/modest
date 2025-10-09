@@ -12,9 +12,9 @@ namespace triqs::modest {
 
   /**
    * @ingroup deg
-   * @brief Find the generate blocks of a block GF by analyzing \f$ G(\tau=0) \f$ or \f$ G(i\omega_0) \f$ using the 
+   * @brief Find the generate blocks of a block GF by analyzing \f$ G(\tau=0) \f$ or \f$ G(i\omega_0) \f$ using the
    * union-find algorithm.
-   * 
+   *
    * @details We use the union-find algorithm to group the blocks of the block GF (matrices) into equivalence
    * classes based on approximate numerical equality. If two matrices are approximately equal, their blocks are united
    * into the same set. The final result is a partitioning of the blocks (matrices) into degenerate groups.
@@ -69,7 +69,7 @@ namespace triqs::modest {
    * @brief Symmetrize the blocks of a Green's function given a list of it's degenerate blocks.
    *
    * @details Average the degenerate blocks and replace the degenerate ones with their average.
-   * 
+   *
    * @tparam Mesh  The mesh type.
    * @param g Block Green's function.
    * @param deg_bls A list of the degenerate blocks.

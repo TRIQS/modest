@@ -34,28 +34,28 @@ namespace triqs::modest {
   /**
    * @ingroup one_body_elements
    * @brief Describe the atomic orbitals within downfolded \f$\mathcal{C}\f$ space.
-   *  
-   * @details The local space \f$ \mathcal{C} \f$ defines the correlated subspace which defines impurities to be solved 
+   *
+   * @details The local space \f$ \mathcal{C} \f$ defines the correlated subspace which defines impurities to be solved
    * within DMFT.
    *
    * The DFT + DMFT equations involve three different spaces, following (mostly) the notations of [S. Beck et al. 2022]:
-   * 
-   * * The (reduced) Bloch space \f${\cal B}\f$ contains bands of dispersion \f$\varepsilon_{\nu}^{\sigma}(\mathbf{k})\f$, 
-   *   in some window of energy. Here, \f$\nu\f$ is the band index (\f$0 \leq \nu < N_\nu^{\mathbf{k}}\f$) and 
-   *   \f$\mathbf{k}\f$ is a point in the Brillouin zone. We define 
+   *
+   * * The (reduced) Bloch space \f${\cal B}\f$ contains bands of dispersion \f$\varepsilon_{\nu}^{\sigma}(\mathbf{k})\f$,
+   *   in some window of energy. Here, \f$\nu\f$ is the band index (\f$0 \leq \nu < N_\nu^{\mathbf{k}}\f$) and
+   *   \f$\mathbf{k}\f$ is a point in the Brillouin zone. We define
    *   \f$N_\nu \equiv \mathrm{max}_{\mathbf{k}} N_\nu^{\mathbf{k}}\f$.
-   * * The Wannier space \f${\cal W}\f$ is spanned from Wannier functions constructed from \f${\cal B}\f$. 
-   * * The correlated space \f${\cal C} \subseteq {\cal W}\f$ containing \f$M\f$ Wannier orbitals, is a subspace of the 
-   *   Wannier space, in which the self-energy is approximated by the embedding. \f${\cal C}\f$ is spanned by Wannier 
-   *   functions at several atoms/sites with index \f$a\f$ at position \f$R_a\f$ and orbital/Wannier index \f$m_{a}\f$. 
-   *   \f${\cal C}\f$ is indexed by a composite index \f$m = (a, m_{a})\f$, with \f$0\leq m \leq M-1\f$ and 
-   *   \f$M=\sum_{a}\mathrm{max}(m_{a}\f$). We will write the main equations with the composite \f$m\f$ index, as the 
+   * * The Wannier space \f${\cal W}\f$ is spanned from Wannier functions constructed from \f${\cal B}\f$.
+   * * The correlated space \f${\cal C} \subseteq {\cal W}\f$ containing \f$M\f$ Wannier orbitals, is a subspace of the
+   *   Wannier space, in which the self-energy is approximated by the embedding. \f${\cal C}\f$ is spanned by Wannier
+   *   functions at several atoms/sites with index \f$a\f$ at position \f$R_a\f$ and orbital/Wannier index \f$m_{a}\f$.
+   *   \f${\cal C}\f$ is indexed by a composite index \f$m = (a, m_{a})\f$, with \f$0\leq m \leq M-1\f$ and
+   *   \f$M=\sum_{a}\mathrm{max}(m_{a}\f$). We will write the main equations with the composite \f$m\f$ index, as the
    *   \f$m = (a, m_{a})\f$ decomposition of \f$m\f$ is not, in general, appropriate for embeddings.
-   * 
+   *
    * The \f$\sigma\f$ index is a general block diagonal index. In simple cases, it is the spin index, but not always.
-   * 
+   *
    * * In "spin (non-)polarized" computations, \f$\sigma\f$ is the spin index.
-   * * In spin-orbit or Nambu computations, the spin index is merged with \f$m\f$ and \f$\nu\f$, so \f$\sigma =0\f$ 
+   * * In spin-orbit or Nambu computations, the spin index is merged with \f$m\f$ and \f$\nu\f$, so \f$\sigma =0\f$
    *   (i.e. one value of the index, equivalent to no index at all).
    */
   class local_space {
@@ -88,7 +88,7 @@ namespace triqs::modest {
     public:
     /**
      * @brief Construct a new local space object.
-     * 
+     *
      * @param spin_kind Kind of \f$ \sigma \f$ index.
      * @param atomic_shells List of all atomic orbitals.
      * @param irreps_decomp_per_atom List of all blocks spanning \f$ \mathcal{C} \f$ space -> atoms_block_decomposition.
@@ -162,7 +162,7 @@ namespace triqs::modest {
     ///@{
     /**
      * @brief Views a 2-dim block GF according to the atomic decomposition.
-     * 
+     *
      * @tparam Mesh The Green's function meesh
      * @param G_C A 2-dim block GF spanning the entire \f$ \mathcal{C} \f$ space [0, sigma](M, M).
      * @return A 2-dim block GF in the atomic decomposition view [atom, sigma][m_orb, m_orb].
@@ -179,7 +179,7 @@ namespace triqs::modest {
     }
 
     /**
-     * @brief Creates an atomic view of block matrices by extracting specific slices based on the atomic decomposition 
+     * @brief Creates an atomic view of block matrices by extracting specific slices based on the atomic decomposition
      * of the current object.
      *
      * @param matrix_C The input block matrices object from which the atomic view is created.

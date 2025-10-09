@@ -70,7 +70,7 @@ Compute the double counting correction to the energy.
 Parameters
 ----------
 gimp : {par_0}
-   The impurity Green's function which is used to calculate the orbital-resolved density matrices to 
+   The impurity Green's function which is used to calculate the orbital-resolved density matrices to
    evaluate the double counting formula.
 
 Returns
@@ -88,7 +88,7 @@ Compute the double-counting self-energy.
 Parameters
 ----------
 gimp : {par_0}
-   The impurity Green's function which is used to calculate the orbital-resolved density matrices to 
+   The impurity Green's function which is used to calculate the orbital-resolved density matrices to
    evaluate the double counting formula.
 
 Returns
@@ -118,8 +118,8 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::dc_solver>[] = {
 template <>
 const std::string c2py::tp_doc<triqs::modest::dc_solver> = R"DOC(Double counting "solver".
 
-It implements the double counting correction for DFT+DMFT, which is a phenomenlogical introduced double 
-counting the interactions already taken into account at the mean-field level within DFT. This class implements 
+It implements the double counting correction for DFT+DMFT, which is a phenomenlogical introduced double
+counting the interactions already taken into account at the mean-field level within DFT. This class implements
 several double counting formulas (all of which are functions of the density) relevant for different scenarios.)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::dc_solver>;
 

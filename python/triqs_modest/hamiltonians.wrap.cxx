@@ -59,7 +59,7 @@ We typically construct the four-index Coulomb tensor in the basis of spherical h
 
    U_{m_{1}m_{2}m_{3}m_{4}}^{\mathrm{spherical}} = \sum_{k=0}^{2l} F_{k} \alpha (l, k, m_{1}, m_{2}, m_{3}, m_{4}),
 
-where :math:`F_{k}` are radial Slater integrals and :math:`\alpha(l, k, m_{1}, m_{2}, m_{3}, m_{4})` denote angular 
+where :math:`F_{k}` are radial Slater integrals and :math:`\alpha(l, k, m_{1}, m_{2}, m_{3}, m_{4})` denote angular
 Racah-Wigner numbers for a spherically symmetric interaction tensor.
 
 Parameters

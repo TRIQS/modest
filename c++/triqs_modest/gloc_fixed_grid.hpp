@@ -17,79 +17,81 @@ namespace triqs::modest {
 #pragma omp declare reduction(block2_gf_sum : block2_gf<dlr_imfreq, matrix_valued> : omp_out += omp_in)                                              \
    initializer(omp_priv = make_block2_gf(omp_orig(0, 0).mesh(), get_struct(omp_orig)))
 
-namespace detail {
+  namespace detail {
 
-  template <typename Mesh>
-  constexpr auto upfold_self_energy_at_freq(one_body_elements_on_grid const &obe, downfolding_projector const &Proj,
-                                           block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                                           nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, long w_idx, long k_idx, long sigma_idx) {
+    template <typename Mesh>
+    constexpr auto upfold_self_energy_at_freq(one_body_elements_on_grid const &obe, downfolding_projector const &Proj,
+                                              block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
+                                              nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, long w_idx, long k_idx, long sigma_idx) {
       auto N_nu = obe.H.N_nu(sigma_idx, k_idx);
       auto out  = nda::zeros<dcomplex>(N_nu, N_nu);
       for (auto &&[alpha, R] : enumerated_sub_slices(get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>())) {
         auto P = Proj.P(sigma_idx, k_idx)(R, r_all);
-        out(r_all, r_all) += dagger(P) * nda::matrix<dcomplex>{Sigma_dynamic(alpha, sigma_idx).data()(w_idx, r_all, r_all) + Sigma_static(alpha, sigma_idx)} * P;
+        out(r_all, r_all) +=
+           dagger(P) * nda::matrix<dcomplex>{Sigma_dynamic(alpha, sigma_idx).data()(w_idx, r_all, r_all) + Sigma_static(alpha, sigma_idx)} * P;
       }
       return out;
-  }
+    }
 
-  // --------------------------------------------------------------------
-  template <typename Mesh>
-  constexpr auto local_gf_at_k(one_body_elements_on_grid const &obe, double const &mu, downfolding_projector const &Proj, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>,2> const &Sigma_static){
-    return [&](auto const &k_idx, auto const &sigma_idx){
-    auto const n_M         = obe.C_space.dim();
-    auto const &mesh = Sigma_dynamic(0, 0).mesh();
-      auto out = gf{mesh, {n_M, n_M}};
-      auto P = obe.P.P(sigma_idx, k_idx);
-      for (auto &&[n, w] : enumerate(mesh)){
-        auto PSP = upfold_self_energy_at_freq(obe, Proj, Sigma_dynamic, Sigma_static, n, k_idx, sigma_idx);
-        out.data()(n, r_all, r_all) = P * inverse(w + mu - obe.H.H(sigma_idx, k_idx) - PSP) * dagger(P);
-      }
-      return out;
-    };
-  }
+    // --------------------------------------------------------------------
+    template <typename Mesh>
+    constexpr auto local_gf_at_k(one_body_elements_on_grid const &obe, double const &mu, downfolding_projector const &Proj,
+                                 block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
+      return [&](auto const &k_idx, auto const &sigma_idx) {
+        auto const n_M   = obe.C_space.dim();
+        auto const &mesh = Sigma_dynamic(0, 0).mesh();
+        auto out         = gf{mesh, {n_M, n_M}};
+        auto P           = obe.P.P(sigma_idx, k_idx);
+        for (auto &&[n, w] : enumerate(mesh)) {
+          auto PSP                    = upfold_self_energy_at_freq(obe, Proj, Sigma_dynamic, Sigma_static, n, k_idx, sigma_idx);
+          out.data()(n, r_all, r_all) = P * inverse(w + mu - obe.H.H(sigma_idx, k_idx) - PSP) * dagger(P);
+        }
+        return out;
+      };
+    }
 
-  template <typename Mesh>
-  constexpr auto lattice_gf_at_k(one_body_elements_on_grid const &obe, double const &mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>,2> const &Sigma_static){
-    return [&](auto const &k_idx, auto const &sigma_idx){
-    auto const &mesh = Sigma_dynamic(0, 0).mesh();
-      auto N_nu  = obe.H.N_nu(sigma_idx, k_idx);
-      auto Glatt = gf{mesh, {N_nu, N_nu}};
-      for (auto &&[n, w] : enumerate(mesh)){
-        auto PSP = upfold_self_energy_at_freq(obe, obe.P, Sigma_dynamic, Sigma_static, n, k_idx, sigma_idx);
-        Glatt.data()(n, r_all, r_all) = inverse(w + mu - obe.H.H(sigma_idx, k_idx) - PSP);
-      }
-      return Glatt;
-    };
-  }
-}
-
+    template <typename Mesh>
+    constexpr auto lattice_gf_at_k(one_body_elements_on_grid const &obe, double const &mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
+                                   nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
+      return [&](auto const &k_idx, auto const &sigma_idx) {
+        auto const &mesh = Sigma_dynamic(0, 0).mesh();
+        auto N_nu        = obe.H.N_nu(sigma_idx, k_idx);
+        auto Glatt       = gf{mesh, {N_nu, N_nu}};
+        for (auto &&[n, w] : enumerate(mesh)) {
+          auto PSP                      = upfold_self_energy_at_freq(obe, obe.P, Sigma_dynamic, Sigma_static, n, k_idx, sigma_idx);
+          Glatt.data()(n, r_all, r_all) = inverse(w + mu - obe.H.H(sigma_idx, k_idx) - PSP);
+        }
+        return Glatt;
+      };
+    }
+  } // namespace detail
 
   /** @cond DOXYGEN_SKIP_THIS */
   /**
   * @brief [INTERNAL] compute G𝓒 local Green's function on Mesh(MxM) for cases where H(k) is not diagonal.
-  * 
+  *
   * @tparam Mesh The mesh type (triqs::mesh::{dlr_imfreq,imfreq})
   * @param obe one_body_elements_on_grid
   * @param mu chemical potential
   * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view.
   * @param Sigma_static The static part of the embedded self-energy in the embedded view.
-  * @return block2_gf<Mesh, matrix_valued> 
+  * @return block2_gf<Mesh, matrix_valued>
    */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc_for_matrix_valued_dispersion_impl(one_body_elements_on_grid const &obe, double mu,
                                                                         block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                                                         nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
 
-    auto n_sigma     = obe.C_space.n_sigma();
-    auto n_kpts      = long(obe.H.n_k());
+    auto n_sigma = obe.C_space.n_sigma();
+    auto n_kpts  = long(obe.H.n_k());
 
-    auto gloc_k = detail::local_gf_at_k(obe, mu, obe.P, Sigma_dynamic, Sigma_static);
-    auto gloc_result       = make_block2_gf(Sigma_dynamic(0,0).mesh(), obe.C_space.Gc_block_shape());
+    auto gloc_k      = detail::local_gf_at_k(obe, mu, obe.P, Sigma_dynamic, Sigma_static);
+    auto gloc_result = make_block2_gf(Sigma_dynamic(0, 0).mesh(), obe.C_space.Gc_block_shape());
 
     mpi::communicator comm = {};
 #pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none) shared(comm, gloc_k, n_kpts, n_sigma, obe, r_all)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
-      for (auto sigma : range(n_sigma)) { 
+      for (auto sigma : range(n_sigma)) {
         auto P = obe.P.P(sigma, k_idx);
         gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data();
       }
@@ -111,25 +113,25 @@ namespace detail {
   /**
    * @ingroup gloc
    * @brief Compute local Green's function on a \f$ M \times M \f$ mesh.
-   * 
-   * @details When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes 
-   * (e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, \f$H(\mathbf{k})\f$ 
-   * is diagonal in the band basis and reduces to \f$\varepsilon_{\nu}^{\sigma}(\mathbf{k})\f$. The local Green's 
-   * function becomes: 
+   *
+   * @details When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes
+   * (e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, \f$H(\mathbf{k})\f$
+   * is diagonal in the band basis and reduces to \f$\varepsilon_{\nu}^{\sigma}(\mathbf{k})\f$. The local Green's
+   * function becomes:
    * \f[
-   *   [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big [ (\omega + \mu - 
+   *   [ G_{\mathrm{loc}}^{\sigma} ]_{m m'} = \sum_{\mathbf{k}} P_{m\nu}^{\sigma}(\mathbf{k}) \Big [ (\omega + \mu -
    *   \varepsilon_{\nu}^{\sigma}(\mathbf{k}))\delta_{\nu\nu'} - [P_{m\nu}^{\sigma}]^{\dagger}\Sigma_{\mathrm{embed}}
    *   P_{m'\nu'}^{\sigma}(\mathbf{k}) \Big ]^{-1} [P_{m'\nu'}^{\sigma}]^{\dagger}.
    * \f]
-   * For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (\f$N_{\nu}\f$) 
-   * using the Woodbury formula which allows us to perform the matrix inversion in the smaller orbital basis \f$N_{M}\f$. 
-   * 
+   * For performance reasons, we can avoid performing the matrix inverstion in the larger band basis (\f$N_{\nu}\f$)
+   * using the Woodbury formula which allows us to perform the matrix inversion in the smaller orbital basis \f$N_{M}\f$.
+   *
    * @tparam Mesh The mesh type (triqs::mesh::{dlr_imfreq,imfreq}).
    * @param obe One-body elements on a fixed grid.
    * @param mu Chemical potential \f$ \mu \f$.
-   * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view, 
+   * @param Sigma_dynamic The dynamic part of the embedded self-energy in the embedded view,
    * \f$ \Sigma_{\text{dynamic}}[\alpha, \sigma] \f$.
-   * @param Sigma_static The static part of the embedded self-energy in the embedded view, 
+   * @param Sigma_static The static part of the embedded self-energy in the embedded view,
    * \f$ \Sigma_{\text{static}}[\alpha,\sigma] \f$.
    * @return \f$ G_{\mathrm{loc}}^{\sigma} \f$, the local Green's function in the full \f$ \mathcal{C} \f$ space.
    */
@@ -179,9 +181,9 @@ namespace detail {
   /**
    * @ingroup gloc
    * @brief Compute the local Green's function without a self-energy.
-   * 
+   *
    * @details See other overloads (gloc) for more details.
-   * 
+   *
    * @tparam Mesh The mesh type.
    * @param mesh (DLR) imaginary frequency mesh.
    * @param obe One-body elements on a fixed grid.
@@ -199,7 +201,7 @@ namespace detail {
   /**
    * @ingroup hybridization
    * @brief Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
-   * 
+   *
    * @tparam Mesh The mesh type.
    * @param epsilon_levels The effective impurity levels.
    * @param Gloc The local Green's function of the impurity.
@@ -226,7 +228,7 @@ namespace detail {
   /**
    * @ingroup hybridization
    * @brief Compute the hybridization function from the effective impurity levels and the local Green's function.
-   * 
+   *
    * @tparam Mesh The mesh type.
    * @param epsilon_levels The effective impurity levels.
    * @param Gloc The local Green's function of the impurity.

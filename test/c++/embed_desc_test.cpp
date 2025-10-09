@@ -149,7 +149,7 @@ TEST(embed_desc_tests, api) {
   // clang-format off
   psi(0, 0) = block_t{0, 0, 0};    psi(0, 1) = block_t{0, 0, 1};
   psi(1, 0) = block_t{0, 1, 0};    psi(1, 1) = block_t{0, 1, 1};
-  psi(2, 0) = block_t{0, 2, 0};    psi(2, 1) = block_t{0, 2, 1}; 
+  psi(2, 0) = block_t{0, 2, 0};    psi(2, 1) = block_t{0, 2, 1};
   psi(3, 0) = block_t{1, 0, 0};    psi(3, 1) = block_t{1, 0, 1};
   psi(4, 0) = block_t{1, 1, 0};    psi(4, 1) = block_t{1, 1, 1};
   psi(5, 0) = block_t{1, 0, 0};    psi(5, 1) = block_t{1, 0, 1};
@@ -207,7 +207,7 @@ TEST(embed_desc_tests, api) {
   // clang-format off
   psi4(0, 0) = block_t{2, 0, 0};    psi4(0, 1) = block_t{2, 0, 1};
   psi4(1, 0) = block_t{1, 0, 0};    psi4(1, 1) = block_t{1, 0, 1};
-  psi4(2, 0) = block_t{0, 0, 0};    psi4(2, 1) = block_t{0, 0, 1}; 
+  psi4(2, 0) = block_t{0, 0, 0};    psi4(2, 1) = block_t{0, 0, 1};
   psi4(3, 0) = block_t{3, 0, 0};    psi4(3, 1) = block_t{3, 0, 1};
   psi4(4, 0) = block_t{3, 1, 0};    psi4(4, 1) = block_t{3, 1, 1};
   psi4(5, 0) = block_t{3, 0, 0};    psi4(5, 1) = block_t{3, 0, 1};
@@ -239,7 +239,7 @@ TEST(embed_desc_tests, api2) {
   // clang-format off
   psi(0, 0) = block_t{0, 0, 0};  psi(0, 1) = block_t{0, 0, 1};
   psi(1, 0) = block_t{0, 1, 0};  psi(1, 1) = block_t{0, 1, 1};
-  psi(2, 0) = block_t{-1, 0, 0}; psi(2, 1) = block_t{-1, 0, 0}; 
+  psi(2, 0) = block_t{-1, 0, 0}; psi(2, 1) = block_t{-1, 0, 0};
   psi(3, 0) = block_t{1, 0, 0};  psi(3, 1) = block_t{1, 0, 1};
   psi(4, 0) = block_t{-1, 0, 0}; psi(4, 1) = block_t{-1, 0, 0};
   psi(5, 0) = block_t{1, 0, 0};  psi(5, 1) = block_t{1, 0, 1};

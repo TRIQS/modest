@@ -11,9 +11,9 @@ using itertools::range;
 
 namespace triqs {
   /**
-   * @brief 
-   * 
-   * @param sub_div List of block dimensions as longs (vector, range, generator) 
+   * @brief
+   *
+   * @param sub_div List of block dimensions as longs (vector, range, generator)
    * @return Generator of (block dim, corresponding range in the matrix)
    */
   inline generator<std::pair<long, nda::range>> enumerated_sub_slices(auto sub_div) {
