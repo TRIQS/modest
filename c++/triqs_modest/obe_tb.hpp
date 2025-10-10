@@ -4,7 +4,7 @@
 // See LICENSE in the root of this distribution for details.
 
 #pragma once
-#include <triqs/lattice/tb_hamiltonian.hpp>
+#include <triqs/tight_binding/tb_hamiltonian.hpp>
 #include <stdexcept>
 #include <triqs/mesh/imfreq.hpp>
 #include "loaders.hpp"
@@ -14,11 +14,13 @@
 #include <nda/nda.hpp>
 #include <triqs/gfs/functions/density.hpp>
 #include "./root_finder.hpp"
-#include "triqs/lattice/superlattice.hpp"
+#include "triqs/tight_binding/superlattice.hpp"
 
 namespace triqs::modest {
 
-  using triqs::lattice::superlattice;
+  using namespace triqs::tb;
+  using namespace triqs::lattice;
+
   /**
    * @ingroup one_body_elements
    * @brief A one-body elements using a tight-binding Hamiltonian.
@@ -154,7 +156,7 @@ namespace triqs::modest {
         }
       }
       // Call the TRIQS version of this function
-      gloc_result(0, sigma) = gloc(obe.H[sigma], mu, Sigma_full_space, opt);
+      gloc_result(0, sigma) = triqs::lattice::gloc(obe.H[sigma], mu, Sigma_full_space, opt);
     }
     return gloc_result;
   }

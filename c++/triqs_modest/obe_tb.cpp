@@ -9,7 +9,7 @@
 #include <triqs/utility/exceptions.hpp>
 #include <type_traits>
 #include "./local_space.hpp"
-#include <triqs/lattice/wannier_loader.hpp>
+#include <triqs/tight_binding/wannier_loader.hpp>
 #include "downfolding.hpp"
 #include <stdexcept>
 #include "./obe_tb.hpp"
@@ -137,7 +137,7 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  one_body_elements_tb fold(lattice::superlattice const &sl, one_body_elements_tb const &obe) {
+  one_body_elements_tb fold(tb::superlattice const &sl, one_body_elements_tb const &obe) {
     auto new_H = obe.H | stdv::transform([&](auto x) { return fold(sl, x); }) | tl::to<std::vector>();
     auto sh    = obe.C_space.atomic_shells();
     decltype(sh) new_atomic_shells;
