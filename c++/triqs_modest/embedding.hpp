@@ -5,6 +5,7 @@
 
 #pragma once
 #include "./downfolding.hpp"
+#include "loaders.hpp"
 #include "utils/defs.hpp"
 #include "utils/gf_supp.hpp"
 #include "utils/nda_supp.hpp"
@@ -215,6 +216,20 @@ namespace triqs::modest {
     embedding split(long imp_idx, std::vector<long> const &block_list) const;
 
     embedding split(long imp_idx, std::initializer_list<const char *> x) = delete;
+
+    /**
+  * @brief Split the block (gamma) of an impurity (imp_idx) into multiple blocks with dimensions given by `new_dims`.
+  *
+  * @details This method splits a specific block (gamma) of an impurity (imp_idx) into multiple blocks with dimensions
+  * specified by `new_dims`. The sum of `new_dims` must equal the original dimension of the block. For example, if the
+  * original block has a dimension of 5, it could be split into blocks of dimensions 2 (eg) and 3 (t2g).
+  *
+  * @param imp_idx The index of the impurity to split.
+  * @param gamma The block index of the impurity to split.
+  * @param new_dims The new dimensions of the split blocks. The sum of `new_dims` must equal the original dimension of the block.
+  * @return New embedding with the impurity structure and \f$ \psi \f$ mapping.
+  */
+    embedding split_block(long imp_idx, long gamma, std::vector<long> const &new_dims) const;
 
     ///@}
 
@@ -442,6 +457,13 @@ namespace triqs::modest {
     auto E       = make_embedding(new_obe.C_space, false);
     return {new_obe, E};
   }
+
+  inline std::pair<downfolding_projector, embedding> make_embedding_from_h5(std::string const &filename) {
+    auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
+    auto E                     = make_embedding(obe.C_space, false, true);
+    return {obe.P, E};
+  }
+
   /** @} Embedding factories functions */
 
   //-------------------------------------------------------------------------
@@ -461,8 +483,8 @@ namespace triqs::modest {
     auto const &mesh             = Sigma_embed_dynamic_loc(0, 0).mesh();
     auto const &embedding_decomp = get_struct(Sigma_embed_dynamic_loc).dims(r_all, 0) | tl::to<std::vector>();
     auto n_sigma                 = Sigma_embed_dynamic_loc.size2();
-    auto Sigma_embed_dynamic_rot =
-       range(n_sigma) | stdv::transform([&](auto) { return gf<Mesh, matrix_valued>{mesh, {U.extent(0), U.extent(0)}}; }) | tl::to<std::vector>();
+    auto Sigma_embed_dynamic_rot = range(n_sigma)
+       | stdv::transform([&U, &mesh](auto) { return gf<Mesh, matrix_valued>{mesh, {U.extent(0), U.extent(0)}}; }) | tl::to<std::vector>();
 
     for (auto s : range(n_sigma))
       for (auto &&[n, w] : enumerate(mesh)) {

@@ -100,6 +100,19 @@ TEST(embed_desc_tests, cluster) { // NOLINT
   auto [obe_cluster, E]      = make_embedding_with_clusters(obe, partition);
 }
 
+TEST(embed_desc_tests, split_block) { // NOLINT
+  auto E1_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}, {3}, {3}, {3}}, std::vector<long>{0, 1, 2, 3});
+  auto E0     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{5}, {3}, {3}, {3}}, std::vector<long>{0, 1, 2, 3});
+  auto E1     = E0.split_block(0, 0, std::vector<long>{3, 2});
+  EXPECT_EQ(E1, E1_ref);
+
+  auto E2_ref =
+     embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, std::vector<long>{0, 1, 1, 1});
+
+  auto E3 = E0.split_block(0, 0, {3, 2}).replace(3, 1).replace(2, 1).split_block(1, 0, std::vector<long>{1, 1, 1});
+  EXPECT_EQ(E3, E2_ref);
+}
+
 #if LFS
 TEST(embed_desc_tests, sio_wien2k_soc) { // NOLINT
   auto filename = "ref_data_lfs/sriro3-wien2k-soc.ref.h5";

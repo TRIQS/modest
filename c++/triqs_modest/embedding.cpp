@@ -302,6 +302,78 @@ namespace triqs::modest {
     return split(imp_idx, [&](long idx) { return stdr::find(block_list, idx) != block_list.end(); });
   }
 
+  embedding embedding::split_block(long imp_idx, long gamma, std::vector<long> const &new_dims) const {
+    // Validation:
+    // Impurity index
+    if (imp_idx < 0 or imp_idx >= n_impurities())
+      throw std::runtime_error(fmt::format("Invalid impurity index {} (must be 0 <= imp_idx < {})", imp_idx, n_impurities()));
+    // Gamma index for impurity
+    if (gamma < 0 or gamma >= n_gamma(imp_idx))
+      throw std::runtime_error(fmt::format("Invalid gamma {} for impurity {} (must be 0 <= gamma < {})", gamma, imp_idx, n_gamma(imp_idx)));
+    // Dimensionality check
+    auto old_dim = imp_decomps[imp_idx][gamma];
+    if (stdr::fold_left(new_dims, 0, std::plus<>()) != old_dim)
+      throw std::runtime_error(fmt::format("New dimensions sum {} != old dimension {}", stdr::fold_left(new_dims, 0, std::plus<>()), old_dim));
+
+    // Update impurity decomposition
+    auto new_imp_decomps = imp_decomps;
+    new_imp_decomps[imp_idx].erase(begin(new_imp_decomps[imp_idx]) + gamma);
+    new_imp_decomps[imp_idx].insert(begin(new_imp_decomps[imp_idx]) + gamma, begin(new_dims), end(new_dims));
+
+    // Find all (alpha, sigma) pairs that map to (imp_idx, gamma, *) and update sigma_embed_decomposition
+    std::set<long> alphas_to_split;
+    auto const &alpha_list = reverse_psi[imp_idx](gamma, 0);
+    for (auto const &[alpha, sigma] : alpha_list) { alphas_to_split.insert(alpha); }
+
+    if (alphas_to_split.empty())
+      throw std::runtime_error(fmt::format("No embedding block maps to impurity {}, gamma {}. Cannot update!", imp_idx, gamma));
+
+    std::vector<long> sorted_alphas(alphas_to_split.begin(), alphas_to_split.end());
+    stdr::sort(sorted_alphas, std::greater<>());
+
+    auto new_sigma_embed_decomp = sigma_embed_decomp;
+    long n_new_blocks           = long(new_dims.size());
+    for (auto alpha : sorted_alphas) {
+      new_sigma_embed_decomp.erase(begin(new_sigma_embed_decomp) + alpha);
+      new_sigma_embed_decomp.insert(begin(new_sigma_embed_decomp) + alpha, begin(new_dims), end(new_dims));
+    }
+
+    // Build new psi mapping
+    long n_new_alphas = long(new_sigma_embed_decomp.size());
+    auto new_psi      = nda::array<imp_block_t, 2>(n_new_alphas, n_sigma());
+
+    long new_alpha_idx = 0;
+    for (long old_alpha = 0; old_alpha < n_alpha(); ++old_alpha) {
+      auto old_map = psi(old_alpha, 0); // check first sigma as reference
+
+      // Check if this alpha maps to the block we're splitting
+      bool is_split_alpha = (old_map.imp_idx == imp_idx && old_map.gamma == gamma);
+
+      if (is_split_alpha) {
+        // insert n_new_blocks number of new alphas
+        for (long split_idx = 0; split_idx < n_new_blocks; ++split_idx) {
+          for (auto sigma : range(n_sigma())) {
+            auto m                        = psi(old_alpha, sigma);
+            new_psi(new_alpha_idx, sigma) = {m.imp_idx, gamma + split_idx, m.tau};
+          }
+          new_alpha_idx++;
+        }
+      } else {
+        // copy with potential gamma adjustment
+        for (auto sigma : range(n_sigma())) {
+          auto m = psi(old_alpha, sigma);
+          if (m.imp_idx == imp_idx && m.gamma > gamma) {
+            new_psi(new_alpha_idx, sigma) = {m.imp_idx, m.gamma + n_new_blocks - 1, m.tau};
+          } else {
+            new_psi(new_alpha_idx, sigma) = m;
+          }
+        }
+        new_alpha_idx++;
+      }
+    }
+    return {std::move(new_sigma_embed_decomp), std::move(new_imp_decomps), std::move(new_psi), this->_sigma_names};
+  }
+
   // ----------------------- Embedding and Extracting --------------------------
 
   // T = Block Matrix
