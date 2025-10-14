@@ -230,6 +230,16 @@ namespace triqs::modest {
     return res;
   }
 
+  //------------------------------------------------------------------
+
+  embedding embedding::make_spinless() const {
+    if (n_sigma() != 2) throw std::runtime_error(fmt::format("Can not make spinless when {} != 2", n_sigma()));
+    auto new_psi         = nda::array<imp_block_t, 2>(n_alpha(), 1);
+    auto new_sigma_names = std::vector<std::string>{"ud"};
+    new_psi(r_all, 0)    = this->psi(r_all, 0);
+    return {this->sigma_embed_decomp, this->imp_decomps, std::move(new_psi), new_sigma_names};
+  }
+
   //-----------------------------------------------------------------
 
   embedding embedding::drop(long imp_idx) const {

@@ -121,6 +121,13 @@ TEST(embed_desc_tests, embed_from_h5) { // NOLINT
   EXPECT_EQ(E, E_ref);
 }
 
+TEST(embed_desc_tests, spinless) {
+  auto E_ref = embedding_builder({"ud"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
+  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
+  auto E1    = E.make_spinless();
+  EXPECT_EQ(E1, E_ref);
+}
+
 #if LFS
 TEST(embed_desc_tests, sio_wien2k_soc) { // NOLINT
   auto filename = "ref_data_lfs/sriro3-wien2k-soc.ref.h5";

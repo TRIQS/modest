@@ -198,6 +198,17 @@ namespace triqs::modest {
     embedding flip_spin(std::vector<long> alphas) const;
 
     /**
+  * @brief Convert the embedding to a spinless embedding.
+  *
+  * @details This method converts a spinful embedding (with two spin channels, e.g., "up" and "down") into a spinless colloquially referred to as "ud".
+  * This caseful is usefuly when working with sytems with spin-orbit coupling or working with spin-averaged quantities, like the
+  * density-density susceptibility.
+  * 
+  * @return embedding 
+  */
+    embedding make_spinless() const;
+
+    /**
      * @brief Split impurity `imp_idx`.
      * @details Predicate p (long block_idx) -> 0 or 1.
      */
