@@ -113,6 +113,14 @@ TEST(embed_desc_tests, split_block) { // NOLINT
   EXPECT_EQ(E3, E2_ref);
 }
 
+TEST(embed_desc_tests, embed_from_h5) { // NOLINT
+  auto filename              = "ref_data/svo-wien2k.ref.h5";
+  auto [P, E]                = make_embedding_from_h5(filename);
+  auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
+  auto E_ref                 = make_embedding(obe.C_space, false, true);
+  EXPECT_EQ(E, E_ref);
+}
+
 #if LFS
 TEST(embed_desc_tests, sio_wien2k_soc) { // NOLINT
   auto filename = "ref_data_lfs/sriro3-wien2k-soc.ref.h5";

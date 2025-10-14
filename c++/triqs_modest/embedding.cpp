@@ -90,7 +90,7 @@ namespace triqs::modest {
     if (use_atom_decomp) {
       auto atom_decomp = C_space.atomic_decomposition() | tl::to<std::vector>();
       for (auto &&[iatom, atom] : enumerate(atom_decomp)) {
-        for (auto sigma : range(C_space.n_sigma())) { decomp(atom, sigma).emplace_back(atom); }
+        for (auto sigma : range(C_space.n_sigma())) { decomp(iatom, sigma).emplace_back(atom); }
       }
     } else {
       decomp = C_space.atoms_block_decomposition();
@@ -104,7 +104,7 @@ namespace triqs::modest {
     if (use_atom_decomp) {
       auto atom_decomp = C_space.atomic_decomposition() | tl::to<std::vector>();
       for (auto &&[iatom, atom] : enumerate(atom_decomp)) {
-        for (auto sigma : range(C_space.n_sigma())) { decomp(atom, sigma).emplace_back(atom); }
+        for (auto sigma : range(C_space.n_sigma())) { decomp(iatom, sigma).emplace_back(atom); }
       }
     } else {
       decomp = C_space.atoms_block_decomposition();
