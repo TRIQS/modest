@@ -88,7 +88,7 @@ namespace triqs::modest {
 
     nda::array<std::vector<long>, 2> decomp(C_space.n_atoms(), C_space.n_sigma());
     if (use_atom_decomp) {
-      auto atom_decomp = C_space.atomic_decomposition();
+      auto atom_decomp = C_space.atomic_decomposition() | tl::to<std::vector>();
       for (auto &&[iatom, atom] : enumerate(atom_decomp)) {
         for (auto sigma : range(C_space.n_sigma())) { decomp(atom, sigma).emplace_back(atom); }
       }
@@ -102,7 +102,7 @@ namespace triqs::modest {
   embedding make_embedding_with_no_equivalences(local_space const &C_space, bool use_atom_decomp) {
     nda::array<std::vector<long>, 2> decomp(C_space.n_atoms(), C_space.n_sigma());
     if (use_atom_decomp) {
-      auto atom_decomp = C_space.atomic_decomposition();
+      auto atom_decomp = C_space.atomic_decomposition() | tl::to<std::vector>();
       for (auto &&[iatom, atom] : enumerate(atom_decomp)) {
         for (auto sigma : range(C_space.n_sigma())) { decomp(atom, sigma).emplace_back(atom); }
       }
