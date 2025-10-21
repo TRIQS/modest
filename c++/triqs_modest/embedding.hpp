@@ -477,118 +477,12 @@ namespace triqs::modest {
 
   /** @} Embedding factories functions */
 
-  //-------------------------------------------------------------------------
-  /**
-   * @brief Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
-   *
-   * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   *
-   * @tparam Mesh The type of mesh
-   * @param Sigma_embed_dynamic_loc The dynamic part of the embedded self-energy in the local (solver) basis.
-   * @param U The rotation matrix from the local (solver) basis to the orbital basis.
-   * @return The dynamic part of the embedded self-energy in the orbital basis.
-   */
-  template <typename Mesh>
-  std::vector<gf<Mesh, matrix_valued>> rotate_embedded_self_energy(block2_gf<Mesh, matrix_valued> const &Sigma_embed_dynamic_loc,
-                                                                   nda::matrix<dcomplex> const &U) {
-    auto const &mesh             = Sigma_embed_dynamic_loc(0, 0).mesh();
-    auto const &embedding_decomp = get_struct(Sigma_embed_dynamic_loc).dims(r_all, 0) | tl::to<std::vector>();
-    auto n_sigma                 = Sigma_embed_dynamic_loc.size2();
-    auto Sigma_embed_dynamic_rot = range(n_sigma)
-       | stdv::transform([&U, &mesh](auto) { return gf<Mesh, matrix_valued>{mesh, {U.extent(0), U.extent(0)}}; }) | tl::to<std::vector>();
-
-    for (auto s : range(n_sigma))
-      for (auto &&[n, w] : enumerate(mesh)) {
-        for (auto &&[alpha, R] : enumerated_sub_slices(embedding_decomp)) {
-          auto P = U(r_all, R);
-          Sigma_embed_dynamic_rot[s].data()(n, r_all, r_all) +=
-             P * nda::matrix<dcomplex>{Sigma_embed_dynamic_loc(alpha, s).data()(n, r_all, r_all)} * dagger(P);
-        }
-      }
-    return Sigma_embed_dynamic_rot;
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * @brief Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
-   *
-   * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   *
-   * @tparam Mesh The type of mesh
-   * @param Sigma_embed_dynamic_loc The dynamic part of the embedded self-energy in the local (solver) basis.
-   * @param obe The one-body elements on grid containing the rotation matrices.
-   * @return The dynamic part of the embedded self-energy in the orbital basis.
-   */
-  template <typename Mesh>
-  std::vector<gf<Mesh, matrix_valued>> rotate_embedded_self_energy(block2_gf<Mesh, matrix_valued> const &Sigma_embed_dynamic_loc,
-                                                                   one_body_elements_on_grid const &obe) {
-    auto const &U = obe.C_space.rotation_from_dft_to_local_basis()(r_all, 0) | tl::to<std::vector<nda::matrix<dcomplex>>>();
-    return rotate_embedded_self_energy(Sigma_embed_dynamic_loc, nda::block_diag(U));
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * @brief Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
-   *
-   * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   *
-   * @param Sigma_embed_dynamic_loc The dynamic part of the embedded self-energy in the local (solver) basis.
-   * @param U The rotation matrix from the local (solver) basis to the orbital basis.
-   * @return The dynamic part of the embedded self-energy in the orbital basis.
-   */
-  std::vector<nda::array<dcomplex, 3>> rotate_embedded_self_energy(std::vector<nda::array<dcomplex, 3>> const &Sigma_embed_dynamic_loc,
-                                                                   nda::matrix<dcomplex> const &U);
-
-  //-------------------------------------------------------------------------
-  /**
-   * @brief Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
-   *
-   * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   *
-   * @param Sigma_embed_dynamic_loc The dynamic part of the embedded self-energy in the local (solver) basis.
-   * @param obe The one-body elements on grid containing the rotation matrices.
-   * @return The dynamic part of the embedded self-energy in the orbital basis.
-   */
-  std::vector<nda::array<dcomplex, 3>> rotate_embedded_self_energy(std::vector<nda::array<dcomplex, 3>> const &Sigma_embed_dynamic_loc,
-                                                                   one_body_elements_on_grid const &obe);
-
-  //-------------------------------------------------------------------------
-  /**
-   * @brief Rotate the static part of the embedded self-energy from the local (solver) basis to the orbital basis.
-   *
-   * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
-   *
-   * @param Sigma_embed_static_loc The static part of the embedded self-energy in the local (solver) basis.
-   * @param U The rotation matrix from the local (solver) basis to the orbital basis.
-   * @return The static part of the embedded self-energy in the orbital basis.
-   */
-  std::vector<nda::matrix<dcomplex>> rotate_embedded_self_energy(std::vector<nda::matrix<dcomplex>> const &Sigma_embed_static_loc,
-                                                                 nda::matrix<dcomplex> const &U);
-
-  //-------------------------------------------------------------------------
-  /**
- * @brief Rotate the static part of the embedded self-energy from the local (solver) basis to the orbital basis.
- *
- * @details The rotation is independent of frequency and is performe as UΣ(ω)U†.
- *
- * @param Sigma_embed_static_loc The static part of the embedded self-energy in the local (solver) basis.
- * @param obe The one-body elements on grid containing the rotation matrices.
- * @return The static part of the embedded self-energy in the orbital basis.
- */
-  std::vector<nda::matrix<dcomplex>> rotate_embedded_self_energy(std::vector<nda::matrix<dcomplex>> const &Sigma_embed_static_loc,
-                                                                 one_body_elements_on_grid const &obe);
-
-  // ------------------------------------------------------------------------------
-
 #define INSTANTIATE(Mesh)                                                                                                                            \
   template block2_gf<Mesh, matrix_valued> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &) const;                                \
   template std::pair<block2_gf<Mesh, matrix_valued>, block2_matrix_t> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &,           \
                                                                                        std::vector<block_matrix_t> const &) const;                   \
   template std::vector<block_gf<Mesh, matrix_valued>> embedding::extract(block2_gf<Mesh, matrix_valued> const &) const;                              \
-  template std::vector<std::pair<block_gf<Mesh, matrix_valued>, block_matrix_t>> embedding::make_zero_imp_self_energies(Mesh const &);               \
-  template std::vector<gf<Mesh, matrix_valued>> rotate_embedded_self_energy(block2_gf<Mesh, matrix_valued> const &, nda::matrix<dcomplex> const &);  \
-  template std::vector<gf<Mesh, matrix_valued>> rotate_embedded_self_energy(block2_gf<Mesh, matrix_valued> const &,                                  \
-                                                                            one_body_elements_on_grid const &);
+  template std::vector<std::pair<block_gf<Mesh, matrix_valued>, block_matrix_t>> embedding::make_zero_imp_self_energies(Mesh const &);
   INSTANTIATE(imfreq);
   INSTANTIATE(refreq);
   INSTANTIATE(dlr_imfreq);

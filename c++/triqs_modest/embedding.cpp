@@ -572,38 +572,4 @@ namespace triqs::modest {
     return Pi_C;
   }
 
-  //-------------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 3>> rotate_embedded_self_energy(std::vector<nda::array<dcomplex, 3>> const &Sigma_embed_dynamic_loc,
-                                                                   nda::matrix<dcomplex> const &U) {
-    auto n_sigma                     = Sigma_embed_dynamic_loc.size();
-    auto n_w                         = Sigma_embed_dynamic_loc[0].extent(0);
-    auto Sigma_embed_dynamic_rotated = range(Sigma_embed_dynamic_loc.size())
-       | stdv::transform([&](auto) { return nda::zeros<dcomplex>(Sigma_embed_dynamic_loc[0].shape()); }) | tl::to<std::vector>();
-    for (auto const &sigma : range(n_sigma))
-      for (auto const &w : range(n_w))
-        Sigma_embed_dynamic_rotated[sigma](w, r_all, r_all) = U * nda::matrix<dcomplex>{Sigma_embed_dynamic_loc[sigma](w, r_all, r_all)} * dagger(U);
-    return Sigma_embed_dynamic_rotated;
-  }
-
-  //-------------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 3>> rotate_embedded_self_energy(std::vector<nda::array<dcomplex, 3>> const &Sigma_embed_dynamic_loc,
-                                                                   one_body_elements_on_grid const &obe) {
-    auto const &U = obe.C_space.rotation_from_dft_to_local_basis()(r_all, 0) | tl::to<std::vector<nda::matrix<dcomplex>>>();
-    return rotate_embedded_self_energy(Sigma_embed_dynamic_loc, nda::block_diag(U));
-  }
-
-  //-------------------------------------------------------------------------
-  std::vector<nda::matrix<dcomplex>> rotate_embedded_self_energy(std::vector<nda::matrix<dcomplex>> const &Sigma_embed_static_loc,
-                                                                 nda::matrix<dcomplex> const &U) {
-    return range(Sigma_embed_static_loc.size()) | stdv::transform([&](auto sigma) { return U * Sigma_embed_static_loc[sigma] * dagger(U); })
-       | tl::to<std::vector>();
-  }
-
-  //-------------------------------------------------------------------------
-  std::vector<nda::matrix<dcomplex>> rotate_embedded_self_energy(std::vector<nda::matrix<dcomplex>> const &Sigma_embed_static_loc,
-                                                                 one_body_elements_on_grid const &obe) {
-    auto const &U = obe.C_space.rotation_from_dft_to_local_basis()(r_all, 0) | tl::to<std::vector<nda::matrix<dcomplex>>>();
-    return rotate_embedded_self_energy(Sigma_embed_static_loc, nda::block_diag(U));
-  }
-
 } // namespace triqs::modest
