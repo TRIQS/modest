@@ -26,15 +26,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-24.04, cxx: g++,         clang_cxx: clang++-19}
-          - {os: ubuntu-24.04, cxx: clang++-19,  clang_cxx: clang++-19}
-          - {os: macos-15,     cxx: g++-15,      clang_cxx: clang++}
-          - {os: macos-15,     cxx: clang++,     clang_cxx: clang++}
+          - {os: ubuntu-24.04, cxx: g++,         clang_cxx: clang++-19, lfs: false}
+          - {os: ubuntu-24.04, cxx: clang++-19,  clang_cxx: clang++-19, lfs: true}
+          - {os: macos-15,     cxx: clang++,     clang_cxx: clang++,    lfs: false}
 
     runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        lfs: ${{ matrix.lfs }}
 
     - uses: actions/cache/restore@v4
       with:
@@ -64,6 +65,7 @@ jobs:
         clang-tools-19
         g++
         gfortran
+        git-lfs
         hdf5-tools
         libboost-dev
         llvm-19-dev
@@ -135,7 +137,7 @@ jobs:
     - name: Build triqs_modest
       run: |
         source $HOME/install/share/triqs/triqsvars.sh
-        cmake -S . -B build -G Ninja
+        cmake -S . -B build -G Ninja ${{ matrix.lfs && '-DEnable_LFS_Tests=ON' || '' }}
         cmake --build build --verbose
 
     - name: Test triqs_modest
