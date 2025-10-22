@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     llvm-19-dev \
     libclang-19-dev \
     libomp-19-dev \
+    git-lfs \
     libzstd-dev \
     doxygen
 
