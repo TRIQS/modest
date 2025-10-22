@@ -12,9 +12,6 @@ endforeach()
 # List of all tests
 file(GLOB_RECURSE all_tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
-# Some tests can optionally be run with large file storage (LFS) input files.
-option(Enable_LFS_Tests "Enable Large File Storage Tests" OFF)
-
 foreach(test ${all_tests})
 
   get_filename_component(test_name ${test} NAME_WE)
