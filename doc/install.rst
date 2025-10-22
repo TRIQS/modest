@@ -75,3 +75,37 @@ The compilation of ``modest`` can be configured using CMake-options::
 +-----------------------------------------------------------------+-----------------------------------------------+
 | Build the documentation                                         | -DBuild_Documentation=ON                      |
 +-----------------------------------------------------------------+-----------------------------------------------+
+| Enable tests requiring Git LFS data files (~68MB)               | -DEnable_LFS_Tests=ON                         |
++-----------------------------------------------------------------+-----------------------------------------------+
+
+Git LFS Tests (Optional)
+-------------------------
+
+Some tests require large data files (~68MB) stored with Git Large File Storage (LFS). These include:
+
+* C++ tests using reference data in ``test/c++/ref_data_lfs/``
+* Wannier90 converter tests in ``test/python/dft_tools/wannier90/``
+
+These tests are **disabled by default**. To enable them:
+
+#. Install Git LFS (one-time setup)::
+
+     # On Ubuntu/Debian
+     $ sudo apt install git-lfs
+
+     # On macOS
+     $ brew install git-lfs
+
+     # Or download from https://git-lfs.github.com/
+
+#. Initialize Git LFS and pull test data::
+
+     $ cd modest.src
+     $ git lfs install
+     $ git lfs pull
+
+#. Enable LFS tests in CMake configuration::
+
+     $ cmake ../modest.src -DEnable_LFS_Tests=ON
+
+.. note:: If you enable ``-DEnable_LFS_Tests=ON`` without completing steps 1-2, CMake will fail with clear instructions on what's missing.
