@@ -43,6 +43,14 @@ jobs:
         restore-keys: |
           ccache-${{ matrix.os }}-${{ matrix.cxx }}-
 
+    - name: Set cxx variables
+      run: |
+        if [[ ${{ matrix.os }} == 'macos-15' && ${{ matrix.cxx }} == 'g++' ]]; then
+          echo "CXX=g++-15" >> $GITHUB_ENV
+        else
+          echo "CXX=${{ matrix.cxx }}" >> $GITHUB_ENV
+        fi
+
     - name: Install ubuntu dependencies
       if: ${{ contains(matrix.os, 'ubuntu') }}
       run: >
@@ -94,7 +102,7 @@ jobs:
       if: ${{ contains(matrix.os, 'macos') }}
       run: |
         brew update
-        brew install ccache ninja gcc llvm libomp boost fftw hdf5 open-mpi openblas
+        brew install ccache gcc llvm libomp boost fftw hdf5 open-mpi openblas
         pip install mako numpy scipy mpi4py
         pip install -r requirements.txt
         echo "PATH=$(brew --prefix llvm)/bin:$(brew --prefix gcc)/bin:$PATH" >> $GITHUB_ENV
@@ -103,13 +111,12 @@ jobs:
         echo "LDFLAGS=-L$(brew --prefix llvm)/lib/c++ -L/opt/homebrew/opt/llvm/lib/unwind -lunwind" >> $GITHUB_ENV
 
     - name: Add clang CXXFLAGS
-      if: ${{ contains(matrix.cxx, 'clang') }}
+      if: ${{ matrix.cxx == 'clang++' }}
       run: |
         echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
     - name: Build & Install TRIQS
       env:
-        CXX: ${{ matrix.cxx }}
         TRIQS_BRANCH: modest_updates # ${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
       run: |
         git clone https://github.com/TRIQS/triqs --branch "$TRIQS_BRANCH"
@@ -126,8 +133,6 @@ jobs:
         cmake --build clair/build --target install --verbose
 
     - name: Build triqs_modest
-      env:
-        CXX: ${{ matrix.cxx }}
       run: |
         source $HOME/install/share/triqs/triqsvars.sh
         cmake -S . -B build -G Ninja
