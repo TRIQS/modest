@@ -12,7 +12,7 @@
 #include "triqs_modest/checkpoint.hpp"
 #include "triqs_modest/degenerate_blocks.hpp"
 #include "triqs_modest/obe_tb.hpp"
-#include "triqs/tight_binding/superlattice.hpp"
+#include "triqs/tb/superlattice.hpp"
 
 #include "embedding.wrap.hxx"
 #include "obe.wrap.hxx"

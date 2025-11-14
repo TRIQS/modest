@@ -4,7 +4,7 @@
 // See LICENSE in the root of this distribution for details.
 
 #pragma once
-#include <triqs/tight_binding/tb_hamiltonian.hpp>
+#include <triqs/tb/tb_hamiltonian.hpp>
 #include <stdexcept>
 #include <triqs/mesh/imfreq.hpp>
 #include "loaders.hpp"
@@ -14,7 +14,7 @@
 #include <nda/nda.hpp>
 #include <triqs/gfs/functions/density.hpp>
 #include "./root_finder.hpp"
-#include "triqs/tight_binding/superlattice.hpp"
+#include "triqs/tb/superlattice.hpp"
 
 namespace triqs::modest {
 

@@ -560,7 +560,7 @@ H : {par_1}
 )DOC",
                       "par",
                       std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::local_space>(),
-                                                                        c2py::python_typename<std::vector<triqs::tb_hamiltonian>>()}});
+                                                                        c2py::python_typename<std::vector<triqs::tb::tb_hamiltonian>>()}});
 
 // ----- Method table ----
 template <>

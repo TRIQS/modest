@@ -9,7 +9,7 @@
 #include <triqs/utility/exceptions.hpp>
 #include <type_traits>
 #include "./local_space.hpp"
-#include <triqs/tight_binding/wannier_loader.hpp>
+#include <triqs/tb/wannier_loader.hpp>
 #include "downfolding.hpp"
 #include <stdexcept>
 #include "./obe_tb.hpp"
