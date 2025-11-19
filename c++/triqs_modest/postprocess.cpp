@@ -24,11 +24,12 @@ namespace triqs::modest {
     constexpr auto lattice_gf_at_k(auto const &mesh, one_body_elements_on_grid const &obe, downfolding_projector const &Proj, double mu,
                                    auto const &Sigma_w, dcomplex broadening) {
       return [&, mu, broadening](auto &k_idx, auto &sigma) {
+        using nda::linalg::inv;
         if constexpr (Trace) {
           auto out = gf{mesh};
           for (auto &&[n, w] : enumerate(mesh)) {
             auto PSP      = upfold_self_energy_at_freq(obe, Proj, Sigma_w, n, k_idx, sigma);
-            out.data()(n) = trace(inverse(w + broadening + mu - obe.H.H(sigma, k_idx) - PSP));
+            out.data()(n) = trace(inv(w + broadening + mu - obe.H.H(sigma, k_idx) - PSP));
           }
           return out;
         } else {
@@ -36,7 +37,7 @@ namespace triqs::modest {
           auto out  = gf{mesh, {N_nu, N_nu}};
           for (auto &&[n, w] : enumerate(mesh)) {
             auto PSP                    = upfold_self_energy_at_freq(obe, Proj, Sigma_w, n, k_idx, sigma);
-            out.data()(n, r_all, r_all) = inverse(w + broadening + mu - obe.H.H(sigma, k_idx) - PSP);
+            out.data()(n, r_all, r_all) = inv(w + broadening + mu - obe.H.H(sigma, k_idx) - PSP);
           }
           return out;
         }
@@ -46,12 +47,13 @@ namespace triqs::modest {
     constexpr auto local_gf_at_k(auto const &mesh, one_body_elements_on_grid const &obe, downfolding_projector const &Proj, double mu,
                                  auto const &Sigma_w, dcomplex broadening) {
       return [&, mu, broadening](auto &k_idx, auto &sigma) {
+        using nda::linalg::inv;
         auto n_M = obe.C_space.dim();
         auto out = gf{mesh, {n_M, n_M}};
         auto P   = obe.P.P(sigma, k_idx);
         for (auto &&[n, w] : enumerate(mesh)) {
           auto PSP                    = upfold_self_energy_at_freq(obe, Proj, Sigma_w, n, k_idx, sigma);
-          out.data()(n, r_all, r_all) = P * inverse(w + broadening + mu - obe.H.H(sigma, k_idx) - PSP) * dagger(P);
+          out.data()(n, r_all, r_all) = P * inv(w + broadening + mu - obe.H.H(sigma, k_idx) - PSP) * dagger(P);
         }
         return out;
       };
