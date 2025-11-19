@@ -53,8 +53,8 @@ static auto const fun_0 = c2py::dispatcher_f_kw_t{
                  const triqs::lattice::bz_int_options &opt) { return triqs::modest::gloc(mesh, obe, mu, opt); },
               "mesh", "obe", "mu", "opt")};
 
-static const auto doc_d_0 = fun_0.doc(
-   R"DOC(
+static const auto doc_d_0 =
+   fun_0.doc(R"DOC(
 [1, 2] Compute local Green's function on a :math:`M \times M` mesh.
 
 When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes
@@ -110,22 +110,17 @@ Returns
 [4] : {ret_3}
    :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
 )DOC",
-   std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-                                          c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
-      c2py::join(
-         std::vector<std::string>{c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()},
-         ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::lattice::bz_int_options &>()}, ", ")},
-   std::vector<std::string>{
-      std::vector<std::string>{c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
-                               c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
-                               c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
-                               c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>()}});
+             {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+              {c2py::python_typename<double>()},
+              {c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+               c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
+              {c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()},
+              {c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()},
+              {c2py::python_typename<const triqs::lattice::bz_int_options &>()}},
+             {c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
+              c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
+              c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
+              c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

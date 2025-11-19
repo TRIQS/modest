@@ -110,21 +110,16 @@ Returns
 {ret_0}
    Electron density of the lattice Green's function.
 )DOC",
-   std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
-                                          c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-                                          c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::lattice::bz_int_options &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<double>()}});
+   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(), c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
+    {c2py::python_typename<double>()},
+    {c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
+    {c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()},
+    {c2py::python_typename<const triqs::lattice::bz_int_options &>()}},
+   {c2py::python_typename<double>()});
 static const auto doc_d_1 = fun_1.doc(R"DOC(
 Compute number of particles :math:`n = \sum f(\beta(\varepsilon(k) - μ))`.
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_2 = fun_2.doc(
    R"DOC(
 [1] Find the chemical potenital from the local Green's function given a target density.
@@ -163,22 +158,18 @@ Returns
 {ret_0}
    Chemical potential corresponding to target density.
 )DOC",
-   std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
-                                          c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-                                          c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::lattice::bz_int_options &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::mesh::imfreq &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<double>()}});
+   {{c2py::python_typename<double>()},
+    {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(), c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
+    {c2py::python_typename<double>()},
+    {c2py::python_typename<std::string>()},
+    {c2py::python_typename<double>()},
+    {c2py::python_typename<bool>()},
+    {c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
+    {c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()},
+    {c2py::python_typename<const triqs::lattice::bz_int_options &>()},
+    {c2py::python_typename<const triqs::mesh::imfreq &>()}},
+   {c2py::python_typename<double>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

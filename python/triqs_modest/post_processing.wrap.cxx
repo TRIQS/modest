@@ -61,9 +61,7 @@ data : {par_0}
 proj_data : {par_1}
 
 )DOC",
-                      "par",
-                      std::vector<std::string>{
-                         std::vector<std::string>{c2py::python_typename<nda::array<double, 3>>(), c2py::python_typename<nda::array<double, 5>>()}});
+                      "par", {c2py::python_typename<nda::array<double, 3>>(), c2py::python_typename<nda::array<double, 5>>()});
 
 // ----- Method table ----
 template <>
@@ -128,9 +126,7 @@ total : {par_0}
 per_theta : {par_1}
 
 )DOC",
-                      "par",
-                      std::vector<std::string>{
-                         std::vector<std::string>{c2py::python_typename<nda::array<double, 2>>(), c2py::python_typename<nda::array<double, 4>>()}});
+                      "par", {c2py::python_typename<nda::array<double, 2>>(), c2py::python_typename<nda::array<double, 4>>()});
 
 // ----- Method table ----
 template <>
@@ -178,8 +174,7 @@ static auto const fun_1 = c2py::dispatcher_f_kw_t{
                  double broadening) { return triqs::modest::spectral_function_on_high_symmetry_path(obe, mu, Sigma_w, broadening); },
               "obe", "mu", "Sigma_w", "broadening"_a = 0.01)};
 
-static const auto doc_d_0 = fun_0.doc(
-   R"DOC(
+static const auto doc_d_0 = fun_0.doc(R"DOC(
 Compute the atom- and orbital-resolved spectral function (interacting density of states).
 
 Parameters
@@ -200,16 +195,13 @@ Returns
 {ret_0}
    Atom- and orbital-resolved spectral function.
 )DOC",
-   std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::downfolding_projector &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::spectral_function_w>()}});
-static const auto doc_d_1 = fun_1.doc(
-   R"DOC(
+                                      {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+                                       {c2py::python_typename<const triqs::modest::downfolding_projector &>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &>()},
+                                       {c2py::python_typename<double>()}},
+                                      {c2py::python_typename<triqs::modest::spectral_function_w>()});
+static const auto doc_d_1 = fun_1.doc(R"DOC(
 Compute momentum-resolved spectral function :math:`A^\sigma(k, \omega)` along high-symmetry path.
 
 Parameters
@@ -228,13 +220,11 @@ Returns
 {ret_0}
    Momentum-resolved spectral function.
 )DOC",
-   std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::spectral_function_kw>()}});
+                                      {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &>()},
+                                       {c2py::python_typename<double>()}},
+                                      {c2py::python_typename<triqs::modest::spectral_function_kw>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

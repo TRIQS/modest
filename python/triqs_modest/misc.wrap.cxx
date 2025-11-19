@@ -76,8 +76,7 @@ dft_idx : {par_3}, default=0
 
 )DOC",
                       "par",
-                      std::vector<std::string>{std::vector<std::string>{c2py::python_typename<long>(), c2py::python_typename<long>(),
-                                                                        c2py::python_typename<long>(), c2py::python_typename<long>()}});
+                      {c2py::python_typename<long>(), c2py::python_typename<long>(), c2py::python_typename<long>(), c2py::python_typename<long>()});
 
 // ----- Method table ----
 template <>
@@ -117,9 +116,8 @@ const std::string c2py::tp_doc<triqs::modest::atomic_orbs> =
 template <> inline constexpr auto c2py::tp_name<triqs::tb::superlattice> = "triqs_modest.misc.Superlattice";
 static auto init_0 =
    c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::tb::superlattice, nda::array<long, 2>, nda::array<long, 2>>("sl_units", "cluster_pts")};
-template <> constexpr initproc c2py::tp_init<triqs::tb::superlattice> = c2py::pyfkw_constructor<init_0>;
-template <>
-const std::string c2py::tp_ctor_doc<triqs::tb::superlattice> = init_0.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
+template <> constexpr initproc c2py::tp_init<triqs::tb::superlattice>    = c2py::pyfkw_constructor<init_0>;
+template <> const std::string c2py::tp_ctor_doc<triqs::tb::superlattice> = init_0.doc(R"DOC()DOC");
 
 // ----- Method table ----
 template <>
@@ -144,9 +142,8 @@ template <> const std::string c2py::tp_doc<triqs::tb::superlattice>        = R"D
 template <> inline constexpr auto c2py::tp_name<triqs::tb::tb_hamiltonian> = "triqs_modest.misc.TbHamiltonian";
 static auto init_1                                                         = c2py::dispatcher_c_kw_t{
    c2py::c_constructor<triqs::tb::tb_hamiltonian, std::vector<std::array<long, 3>>, std::vector<nda::array<nda::dcomplex, 2>>>("Rs", "hoppings")};
-template <> constexpr initproc c2py::tp_init<triqs::tb::tb_hamiltonian> = c2py::pyfkw_constructor<init_1>;
-template <>
-const std::string c2py::tp_ctor_doc<triqs::tb::tb_hamiltonian> = init_1.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
+template <> constexpr initproc c2py::tp_init<triqs::tb::tb_hamiltonian>    = c2py::pyfkw_constructor<init_1>;
+template <> const std::string c2py::tp_ctor_doc<triqs::tb::tb_hamiltonian> = init_1.doc(R"DOC()DOC");
 // __call__
 static auto const fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::tb::tb_hamiltonian const &self, nda::array_const_view<double, 2> k_list) { return self.operator()(k_list); }, "self",
@@ -171,11 +168,11 @@ static auto const fun_3 = c2py::dispatcher_f_kw_t{
 static auto const fun_4 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](h5::group g, std::string subgroup_name) { return triqs::tb::tb_hamiltonian::h5_read_construct(g, subgroup_name); }, "g", "subgroup_name")};
 
-static const auto doc_d_0 = fun_0.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_1 = fun_1.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_2 = fun_2.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_3 = fun_3.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_4 = fun_4.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_0 = fun_0.doc(R"DOC()DOC");
+static const auto doc_d_1 = fun_1.doc(R"DOC()DOC");
+static const auto doc_d_2 = fun_2.doc(R"DOC()DOC");
+static const auto doc_d_3 = fun_3.doc(R"DOC()DOC");
+static const auto doc_d_4 = fun_4.doc(R"DOC()DOC");
 
 // ----- Method table ----
 template <>
@@ -254,9 +251,8 @@ verbose : {par_6}, default=false
 
 )DOC",
    "par",
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<double>(), c2py::python_typename<std::array<long, 3>>(),
-                                                     c2py::python_typename<std::array<long, 3>>(), c2py::python_typename<std::array<long, 3>>(),
-                                                     c2py::python_typename<bool>(), c2py::python_typename<bool>(), c2py::python_typename<bool>()}});
+   {c2py::python_typename<double>(), c2py::python_typename<std::array<long, 3>>(), c2py::python_typename<std::array<long, 3>>(),
+    c2py::python_typename<std::array<long, 3>>(), c2py::python_typename<bool>(), c2py::python_typename<bool>(), c2py::python_typename<bool>()});
 
 // ----- Method table ----
 template <>
@@ -420,8 +416,7 @@ static auto const fun_15 = c2py::dispatcher_f_kw_t{
 static auto const fun_16 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](triqs::modest::spin_kind_e spin_kind, long sigma) { return triqs::modest::sigma_to_data_idx(spin_kind, sigma); }, "spin_kind", "sigma")};
 
-static const auto doc_d_5 = fun_5.doc(
-   R"DOC(
+static const auto doc_d_5 = fun_5.doc(R"DOC(
 Compute :math:`H_{\text{loc}} = H(R=0)` given :math:`n_\sigma` tight binding Hamiltonians.
 
 Parameters
@@ -437,11 +432,11 @@ Returns
    :math:`H_{\text{loc}}`, formatted with dimensions :math:`[\alpha,\sigma]` each containing (n_orbitals_atom,
    n_orbitals_atom).
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<triqs::tb::tb_hamiltonian> &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<triqs::modest::atomic_orbs> &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()}});
-static const auto doc_d_6 = fun_6.doc(
-   R"DOC(
+                                      {{c2py::python_typename<const std::vector<triqs::tb::tb_hamiltonian> &>()},
+                                       {c2py::python_typename<const std::vector<triqs::modest::atomic_orbs> &>()}},
+                                      {c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()});
+static const auto doc_d_6 =
+   fun_6.doc(R"DOC(
 Find symmetries of the :math:`R = 0` component of a Hamiltonian to determine a GF block structure.
 
 Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the
@@ -465,14 +460,12 @@ Returns
    Decomposition, :math:`U_{\text{rotation}}` describing the block structure of GF based on
    :math:`H_{\text{loc}}`.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<triqs::modest::atomic_orbs> &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
-   std::vector<std::string>{
-      std::vector<std::string>{c2py::python_typename<std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<triqs::dcomplex>, 2>>>()}});
-static const auto doc_d_7 = fun_7.doc(
-   R"DOC(
+             {{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()},
+              {c2py::python_typename<const std::vector<triqs::modest::atomic_orbs> &>()},
+              {c2py::python_typename<double>()},
+              {c2py::python_typename<bool>()}},
+             {c2py::python_typename<std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<triqs::dcomplex>, 2>>>()});
+static const auto doc_d_7 = fun_7.doc(R"DOC(
 Compute double counting correction for a DC type (method) from the density matrix of a Green's function.
 
 Parameters
@@ -491,13 +484,13 @@ Returns
 {ret_0}
    A pair of :math:`\Sigma_{DC}` and :math:`E_{DC}`.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const std::string>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::pair<nda::array<nda::matrix<double>, 2>, nda::matrix<double>>>()}});
-static const auto doc_d_8 = fun_8.doc(
-   R"DOC(
+                                      {{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<const std::string>()}},
+                                      {c2py::python_typename<std::pair<nda::array<nda::matrix<double>, 2>, nda::matrix<double>>>()});
+static const auto doc_d_8 =
+   fun_8.doc(R"DOC(
 Convert a tight binding Hamiltonian to its superlattice equivalent.
 
 Parameters
@@ -512,15 +505,13 @@ Returns
 {ret_0}
    One-body elements based on the superlattice tight binding Hamiltonian.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::tb::superlattice &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_tb>()}});
-static const auto doc_d_9  = fun_9.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_10 = fun_10.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_11 = fun_11.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_12 = fun_12.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_13 =
-   fun_13.doc(R"DOC(
+             {{c2py::python_typename<const triqs::tb::superlattice &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}},
+             {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
+static const auto doc_d_9  = fun_9.doc(R"DOC()DOC");
+static const auto doc_d_10 = fun_10.doc(R"DOC()DOC");
+static const auto doc_d_11 = fun_11.doc(R"DOC()DOC");
+static const auto doc_d_12 = fun_12.doc(R"DOC()DOC");
+static const auto doc_d_13 = fun_13.doc(R"DOC(
 Root finder :math:`f(x) = 0`.
 
 Parameters
@@ -551,17 +542,17 @@ Returns
 {ret_0}
    :math:`x, f(x)` where :math:`f(x) = y`.
 )DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<std::function<double(double)>>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
-              std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::pair<double, double>>()}});
+                                        {{c2py::python_typename<std::string>()},
+                                         {c2py::python_typename<std::function<double(double)>>()},
+                                         {c2py::python_typename<double>()},
+                                         {c2py::python_typename<double>()},
+                                         {c2py::python_typename<double>()},
+                                         {c2py::python_typename<double>()},
+                                         {c2py::python_typename<long>()},
+                                         {c2py::python_typename<std::string>()},
+                                         {c2py::python_typename<std::string>()},
+                                         {c2py::python_typename<bool>()}},
+                                        {c2py::python_typename<std::pair<double, double>>()});
 static const auto doc_d_14 = fun_14.doc(
    R"DOC(
 Rotate a tight-binding Hamiltonian by a unitary matrix :math:`U`.
@@ -580,11 +571,9 @@ Returns
 {ret_0}
    One-body elements containing the rotated TB Hamiltonian.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_tb>()}});
-static const auto doc_d_15 = fun_15.doc(
-   R"DOC(
+   {{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}, {c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()}},
+   {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
+static const auto doc_d_15 = fun_15.doc(R"DOC(
 [1, 2, 3, 4, 5, 6, 7, 8] Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
 
 The rotation is independent of frequency and is performe as UΣ(ω)U†.
@@ -625,20 +614,18 @@ Returns
 [9, 10] : {ret_4}
    The static part of the embedded self-energy in the orbital basis.
 )DOC",
-   std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+                                        {{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
                                           c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &>(),
                                           c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>(),
                                           c2py::python_typename<const std::vector<nda::array<triqs::dcomplex, 3>> &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{
-      c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>>(),
-      c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>>(),
-      c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>(),
-      c2py::python_typename<std::vector<nda::array<triqs::dcomplex, 3>>>(), c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>()}});
+                                         {c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()},
+                                         {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+                                         {c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()}},
+                                        {c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>>(),
+                                         c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>>(),
+                                         c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>(),
+                                         c2py::python_typename<std::vector<nda::array<triqs::dcomplex, 3>>>(),
+                                         c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>()});
 static const auto doc_d_16 = fun_16.doc(R"DOC(
 Map a spin index to a data index.
 
@@ -647,8 +634,7 @@ The mapping depends on the spin kind:
 * `Polarized`: :math:`\sigma \to \sigma` (an object can have different values for different :math:`\sigma`).
 * `NonPolarized`: :math:`\sigma \to 0` (an object is the same for both :math:`\sigma`, so only one copy is stored).
 * `NonCollinear`: :math:`\sigma \to 0` (:math:`\sigma` is always 0).
-)DOC",
-                                        std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

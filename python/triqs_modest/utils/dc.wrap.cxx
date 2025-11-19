@@ -31,8 +31,8 @@ static auto init_0 =
    c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::dc_solver, long, std::string, double, double>("n_sigma", "method", "U_int", "J_hund")};
 template <> constexpr initproc c2py::tp_init<triqs::modest::dc_solver> = c2py::pyfkw_constructor<init_0>;
 template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::dc_solver> =
-   init_0.doc(R"DOC(
+const std::string c2py::tp_ctor_doc<triqs::modest::dc_solver> = init_0.doc(
+   R"DOC(
 Construct a double counting "solver".
 
 Parameters
@@ -46,11 +46,7 @@ U_int : {par_2}
 J_hund : {par_3}
    Hund's coupling :math:`J` to use in the DC formula.
 )DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", ")},
-              std::vector<std::string>{});
+   {{c2py::python_typename<long>()}, {c2py::python_typename<std::string>()}, {c2py::python_typename<double>()}, {c2py::python_typename<double>()}});
 // dc_energy
 static auto const fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::dc_solver &self,
@@ -63,8 +59,7 @@ static auto const fun_1 = c2py::dispatcher_f_kw_t{
                     const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) { return self.dc_self_energy(gimp); },
                  "self", "gimp")};
 
-static const auto doc_d_0 = fun_0.doc(
-   R"DOC(
+static const auto doc_d_0 = fun_0.doc(R"DOC(
 Compute the double counting correction to the energy.
 
 Parameters
@@ -78,11 +73,9 @@ Returns
 {ret_0}
    Double counting energy term.
 )DOC",
-   std::vector<std::string>{c2py::join(
-      std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::matrix<double>>()}});
-static const auto doc_d_1 = fun_1.doc(
-   R"DOC(
+                                      {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}},
+                                      {c2py::python_typename<nda::matrix<double>>()});
+static const auto doc_d_1 = fun_1.doc(R"DOC(
 Compute the double-counting self-energy.
 
 Parameters
@@ -96,9 +89,8 @@ Returns
 {ret_0}
    Double counting self-energy term.
 )DOC",
-   std::vector<std::string>{c2py::join(
-      std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>()}});
+                                      {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}},
+                                      {c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>()});
 
 // ----- Method table ----
 template <>
@@ -153,13 +145,13 @@ Returns
 {ret_0}
    :math:`\Sigma_{DC}` and :math:`E_{DC}`.
 )DOC",
-                                      std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::string>()}, ", "),
-                                                               c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                                               c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                                               c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                                               c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                                               c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", ")},
-                                      std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::pair<double, double>>()}});
+                                      {{c2py::python_typename<const std::string>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<long>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<double>()}},
+                                      {c2py::python_typename<std::pair<double, double>>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

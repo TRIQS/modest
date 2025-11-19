@@ -62,9 +62,7 @@ obe : {par_0}
 embed : {par_1}
 
 )DOC",
-                      "par",
-                      std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_on_grid>(),
-                                                                        c2py::python_typename<triqs::modest::embedding>()}});
+                      "par", {c2py::python_typename<triqs::modest::one_body_elements_on_grid>(), c2py::python_typename<triqs::modest::embedding>()});
 
 // ----- Method table ----
 template <>
@@ -123,8 +121,8 @@ static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs)
 template <> constexpr initproc c2py::tp_init<triqs::modest::iteration_data> = synth_constructor_1;
 
 template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::iteration_data> =
-   c2py::replace_tags(R"DOC(Synthesized constructor with the following keyword arguments:
+const std::string c2py::tp_ctor_doc<triqs::modest::iteration_data> = c2py::replace_tags(
+   R"DOC(Synthesized constructor with the following keyword arguments:
 
 Parameters
 ----------
@@ -141,12 +139,10 @@ Gimp_time_list : {par_4}
 Sigma_dc_list : {par_5}
 
 )DOC",
-                      "par",
-                      std::vector<std::string>{std::vector<std::string>{
-                         c2py::python_typename<double>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>(),
-                         c2py::python_typename<triqs::modest::block_mat_t>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>(),
-                         c2py::python_typename<std::vector<triqs::modest::block_gf_imtime_t>>(),
-                         c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>()}});
+   "par",
+   {c2py::python_typename<double>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>(),
+    c2py::python_typename<triqs::modest::block_mat_t>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>(),
+    c2py::python_typename<std::vector<triqs::modest::block_gf_imtime_t>>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>()});
 
 // ----- Method table ----
 template <>
@@ -217,16 +213,14 @@ dirname : {par_0}
 initial_data : {par_1}
    Initial data to store in the checkpoint.
 )DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<std::string>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::initial_data &>()}, ", ")},
-              std::vector<std::string>{});
+              {{c2py::python_typename<std::string>()}, {c2py::python_typename<const triqs::modest::initial_data &>()}});
 // append
 static auto const fun_0 =
    c2py::dispatcher_f_kw_t{c2py::cmethod([](triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data> &self,
                                             const triqs::modest::iteration_data &x) { return self.append(x); },
                                          "self", "x")};
 
-static const auto doc_d_0 = fun_0.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
+static const auto doc_d_0 = fun_0.doc(R"DOC()DOC");
 
 // ----- Method table ----
 template <>
