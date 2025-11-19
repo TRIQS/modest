@@ -76,12 +76,9 @@ Returns
 {ret_0}
    Coulomb tensor.
 )DOC",
-                                      std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                                               c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                                               c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", ")},
-                                      std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::array<double, 4>>()}});
-static const auto doc_d_1 =
-   fun_1.doc(R"DOC(
+                                      {{c2py::python_typename<long>()}, {c2py::python_typename<double>()}, {c2py::python_typename<double>()}},
+                                      {c2py::python_typename<nda::array<double, 4>>()});
+static const auto doc_d_1 = fun_1.doc(R"DOC(
 Construct a density-density interaction Hamiltonian.
 
 Create a density-density Hamiltonian
@@ -109,14 +106,13 @@ Returns
 {ret_0}
    Many-body operator representing the Hamiltonian.
 )DOC",
-             std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::string> &>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", ")},
-             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::operators::many_body_operator>()}});
-static const auto doc_d_2 =
-   fun_2.doc(R"DOC(
+                                      {{c2py::python_typename<const std::vector<std::string> &>()},
+                                       {c2py::python_typename<const std::vector<long> &>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<double>()}},
+                                      {c2py::python_typename<triqs::operators::many_body_operator>()});
+static const auto doc_d_2 = fun_2.doc(R"DOC(
 Construct a Hubbard-Kanamori Hamiltonian.
 
 Create a Hubbard-Kanamori Hamiltonian using the density-density, spin-flip, and pair-hopping interactions,
@@ -149,16 +145,15 @@ Returns
 {ret_0}
    Many-body operator representing the Hamiltonian.
 )DOC",
-             std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::string> &>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
-             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::operators::many_body_operator>()}});
-static const auto doc_d_3 = fun_3.doc(
-   R"DOC(
+                                      {{c2py::python_typename<const std::vector<std::string> &>()},
+                                       {c2py::python_typename<const std::vector<long> &>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<bool>()},
+                                       {c2py::python_typename<bool>()}},
+                                      {c2py::python_typename<triqs::operators::many_body_operator>()});
+static const auto doc_d_3 = fun_3.doc(R"DOC(
 Construct a Slater Hamiltonian.
 
 Create a Slater Hamiltonian using fully rotationally-invariant four-index interactions:
@@ -183,13 +178,12 @@ spherical_to_dft : {par_4}
 dft_to_local : {par_5}
    Rotation matrices from DFT basis to the local impurity basis.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::string> &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const std::optional<nda::matrix<triqs::dcomplex>> &>()}, ", ")},
-   std::vector<std::string>{});
+                                      {{c2py::python_typename<const std::vector<std::string> &>()},
+                                       {c2py::python_typename<const std::vector<long> &>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()},
+                                       {c2py::python_typename<const std::optional<nda::matrix<triqs::dcomplex>> &>()}});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

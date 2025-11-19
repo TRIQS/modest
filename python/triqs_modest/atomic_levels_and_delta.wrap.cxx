@@ -61,8 +61,7 @@ static auto const fun_1 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::impurity_levels(obe); }, "obe"),
                            c2py::cfun([](const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::impurity_levels(obe); }, "obe")};
 
-static const auto doc_d_0 = fun_0.doc(
-   R"DOC(
+static const auto doc_d_0 = fun_0.doc(R"DOC(
 [1, 2] Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
 
 ------
@@ -90,20 +89,15 @@ Returns
 [2, 4] : {ret_1}
    Hybridization function :math:`\Delta`.
 )DOC",
-   std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()}, ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-                                          c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-                                          c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-                 ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()}, ", ")},
-   std::vector<std::string>{
-      std::vector<std::string>{c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
-                               c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>()}});
-static const auto doc_d_1 =
-   fun_1.doc(R"DOC(
+                                      {{c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()},
+                                       {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+                                        c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
+                                       {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+                                        c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
+                                       {c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()}},
+                                      {c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
+                                       c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>()});
+static const auto doc_d_1 = fun_1.doc(R"DOC(
 Compute the atomic (impurity) levels from an obe.
 
 Parameters
@@ -116,10 +110,9 @@ Returns
 {ret_0}
    Impurity levels stored in the format [n_atoms, n_sigma].
 )DOC",
-             std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
-                                                                          c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
-                                                 ", ")},
-             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()}});
+                                      {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
+                                        c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}},
+                                      {c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

@@ -34,8 +34,8 @@ static auto init_0 = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::
                                              c2py::c_constructor<triqs::modest::embedding>()};
 template <> constexpr initproc c2py::tp_init<triqs::modest::embedding> = c2py::pyfkw_constructor<init_0>;
 template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::embedding> = init_0.doc(
-   R"DOC(
+const std::string c2py::tp_ctor_doc<triqs::modest::embedding> =
+   init_0.doc(R"DOC(
 [1] Construct an embedding object.
 
 ------
@@ -57,11 +57,10 @@ psi : {par_2}
 sigma_names : {par_3}
    Names for the values of the :math:`\sigma` index (e.g., "up", "down").
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<long>>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<std::vector<long>>>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<nda::array<triqs::modest::embedding::imp_block_t, 2>>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<std::string>>()}, ", ")},
-   std::vector<std::string>{});
+              {{c2py::python_typename<std::vector<long>>()},
+               {c2py::python_typename<std::vector<std::vector<long>>>()},
+               {c2py::python_typename<nda::array<triqs::modest::embedding::imp_block_t, 2>>()},
+               {c2py::python_typename<std::vector<std::string>>()}});
 // description
 static auto const fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::embedding const &self, bool verbosity) { return self.description(verbosity); }, "self", "verbosity"_a = false)};
@@ -194,8 +193,7 @@ static auto const fun_16 = c2py::dispatcher_f_kw_t{
 
 static const auto doc_d_0 = fun_0.doc(R"DOC(
 Summarize the embedding object.
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_1 = fun_1.doc(R"DOC(
 Remove an impurity from the embedding table :math:`\psi`.
 
@@ -212,10 +210,9 @@ Returns
 {ret_0}
    New embedding with the updated :math:`\psi` map.
 )DOC",
-                                      std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
-                                      std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
-static const auto doc_d_2 = fun_2.doc(
-   R"DOC(
+                                      {{c2py::python_typename<long>()}}, {c2py::python_typename<triqs::modest::embedding>()});
+static const auto doc_d_2 =
+   fun_2.doc(R"DOC(
 [1, 2, 3] Embed single-particle quantities (TRIQS/ModEST).
 
 Embed impurity solver self-energies into an embedded self-energy.
@@ -262,36 +259,28 @@ Returns
 [6] : {ret_5}
    The self-energy in the :math:`\mathcal{C}` space as a pair (dynamic, static).
 )DOC",
-   std::vector<std::string>{
-      c2py::join(
-         std::vector<std::string>{
-            c2py::python_typename<const std::vector<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>> &>(),
-            c2py::python_typename<const std::vector<triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>> &>(),
-            c2py::python_typename<const std::vector<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>> &>()},
-         ", "),
-      c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<triqs::block_matrix_t> &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{
-      c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
-      c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>(),
-      c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
-      c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>(),
-      c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>(),
-      c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>()}});
-static const auto doc_d_3 = fun_3.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
+             {{c2py::python_typename<const std::vector<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>> &>(),
+               c2py::python_typename<const std::vector<triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>> &>(),
+               c2py::python_typename<const std::vector<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>> &>()},
+              {c2py::python_typename<const std::vector<triqs::block_matrix_t> &>()}},
+             {c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
+              c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>(),
+              c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
+              c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>(),
+              c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>(),
+              c2py::python_typename<std::pair<triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>, triqs::block2_matrix_t>>()});
+static const auto doc_d_3 = fun_3.doc(R"DOC()DOC");
 static const auto doc_d_4 = fun_4.doc(R"DOC(
 Embed tensors (CoQui).
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_5 = fun_5.doc(R"DOC(
 Embed single-particle quantities (CoQui).
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_6 = fun_6.doc(R"DOC(
 Embed two-particle quantities (CoQui).
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_7 = fun_7.doc(
-   R"DOC(
+)DOC");
+static const auto doc_d_7 =
+   fun_7.doc(R"DOC(
 [1, 2, 3] Extract single-particle quantities (TRIQS/ModEST).
 
 ------
@@ -316,27 +305,21 @@ Returns
 [3] : {ret_2}
    Local impurity Green's function.
 )DOC",
-   std::vector<std::string>{
-      c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-                                          c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &>(),
-                                          c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-                 ", ")},
-   std::vector<std::string>{
-      std::vector<std::string>{c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>>(),
-                               c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>>(),
-                               c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>()}});
+             {{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+               c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &>(),
+               c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()}},
+             {c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>>(),
+              c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>>(),
+              c2py::python_typename<std::vector<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>()});
 static const auto doc_d_8  = fun_8.doc(R"DOC(
 Extract tensors (CoQui).
-)DOC",
-                                       std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_9  = fun_9.doc(R"DOC(
 Extract single-particle quantities (CoQui).
-)DOC",
-                                       std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_10 = fun_10.doc(R"DOC(
 Extract two-particle quantities (CoQui).
-)DOC",
-                                        std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_11 =
    fun_11.doc(R"DOC(
 [1] Flip the spins (:math:`\sigma`) for block :math:`\alpha`.
@@ -365,22 +348,18 @@ Returns
 {ret_0}
    New embedding with the updated :math:`\psi` map.
 )DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<long>>()}, ", ")},
-              std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
+              {{c2py::python_typename<long>()}, {c2py::python_typename<std::vector<long>>()}}, {c2py::python_typename<triqs::modest::embedding>()});
 static const auto doc_d_12 = fun_12.doc(R"DOC(
 The impurity decomposition.
-)DOC",
-                                        std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_13 = fun_13.doc(R"DOC(
 Zero initialize impurity self-energies.
-)DOC",
-                                        std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 static const auto doc_d_14 = fun_14.doc(R"DOC(
 Number of blocks in :math:`\gamma` for the :math:`\Sigma_{\text{imp}}` [imp_idx].
-)DOC",
-                                        std::vector<std::string>{}, std::vector<std::string>{});
-static const auto doc_d_15 = fun_15.doc(R"DOC(
+)DOC");
+static const auto doc_d_15 =
+   fun_15.doc(R"DOC(
 Replaces one impurity in the embedding table :math:`\psi`.
 
 Replaces the impurity solver corresponding to `imp_idx_to_remove` with the impurity solver at
@@ -398,11 +377,8 @@ Returns
 {ret_0}
    A new embedding with the updated :math:`\psi` map.
 )DOC",
-                                        std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                                                 c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
-                                        std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
-static const auto doc_d_16 =
-   fun_16.doc(R"DOC(
+              {{c2py::python_typename<long>()}, {c2py::python_typename<long>()}}, {c2py::python_typename<triqs::modest::embedding>()});
+static const auto doc_d_16 = fun_16.doc(R"DOC(
 [1] Split impurity `imp_idx`.
 
 Predicate p (long block_idx) -> 0 or 1.
@@ -428,9 +404,8 @@ Returns
 {ret_0}
    New embedding with the updated :math:`\psi` map.
 )DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", ")},
-              std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
+                                        {{c2py::python_typename<long>()}, {c2py::python_typename<const std::vector<long> &>()}},
+                                        {c2py::python_typename<triqs::modest::embedding>()});
 
 // ----- Method table ----
 template <>
@@ -493,10 +468,8 @@ lattice self-energy and the local Green's function.)DOC"
 template <> inline constexpr auto c2py::tp_name<triqs::modest::embedding::imp_block_t> = "triqs_modest.embedding.ImpBlockT";
 static auto init_1 = c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::embedding::imp_block_t>(),
                                              c2py::c_constructor<triqs::modest::embedding::imp_block_t, long, long, long>("n_imp", "gamma", "tau")};
-template <> constexpr initproc c2py::tp_init<triqs::modest::embedding::imp_block_t> = c2py::pyfkw_constructor<init_1>;
-template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::embedding::imp_block_t> =
-   init_1.doc(R"DOC()DOC", std::vector<std::string>{}, std::vector<std::string>{});
+template <> constexpr initproc c2py::tp_init<triqs::modest::embedding::imp_block_t>    = c2py::pyfkw_constructor<init_1>;
+template <> const std::string c2py::tp_ctor_doc<triqs::modest::embedding::imp_block_t> = init_1.doc(R"DOC()DOC");
 
 // ----- Method table ----
 template <>
@@ -565,12 +538,10 @@ Returns
 {ret_0}
    Embedding object.
 )DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::string> &>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<std::vector<long>, 2> &>(),
-                                                                           c2py::python_typename<const std::vector<std::vector<long>> &>()},
-                                                  ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<long> &>()}, ", ")},
-              std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
+              {{c2py::python_typename<const std::vector<std::string> &>()},
+               {c2py::python_typename<const nda::array<std::vector<long>, 2> &>(), c2py::python_typename<const std::vector<std::vector<long>> &>()},
+               {c2py::python_typename<const std::vector<long> &>()}},
+              {c2py::python_typename<triqs::modest::embedding>()});
 static const auto doc_d_18 =
    fun_18.doc(R"DOC(
 Make an embedding from the local space.
@@ -594,12 +565,10 @@ Returns
 {ret_0}
    Embedding object.
 )DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::local_space &>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
-              std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::embedding>()}});
-static const auto doc_d_19 =
-   fun_19.doc(R"DOC(
+              {{c2py::python_typename<const triqs::modest::local_space &>()}, {c2py::python_typename<bool>()}, {c2py::python_typename<bool>()}},
+              {c2py::python_typename<triqs::modest::embedding>()});
+static const auto doc_d_19 = fun_19.doc(
+   R"DOC(
 Make an embedding for clusters of atoms.
 
 This function creates an embedding object from the one-body elements on grid (obe) and a partition of the
@@ -620,10 +589,8 @@ Returns
 {ret_0}
    A new one-body elements on grid and the corresponding embedding object.
 )DOC",
-              std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_on_grid>()}, ", "),
-                                       c2py::join(std::vector<std::string>{c2py::python_typename<const std::vector<std::vector<long>> &>()}, ", ")},
-              std::vector<std::string>{
-                 std::vector<std::string>{c2py::python_typename<std::pair<triqs::modest::one_body_elements_on_grid, triqs::modest::embedding>>()}});
+   {{c2py::python_typename<triqs::modest::one_body_elements_on_grid>()}, {c2py::python_typename<const std::vector<std::vector<long>> &>()}},
+   {c2py::python_typename<std::pair<triqs::modest::one_body_elements_on_grid, triqs::modest::embedding>>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

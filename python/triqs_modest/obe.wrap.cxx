@@ -44,8 +44,8 @@ static auto init_0                                                          = c2
    c2py::c_constructor<triqs::modest::local_space>()};
 template <> constexpr initproc c2py::tp_init<triqs::modest::local_space> = c2py::pyfkw_constructor<init_0>;
 template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::local_space> = init_0.doc(
-   R"DOC(
+const std::string c2py::tp_ctor_doc<triqs::modest::local_space> =
+   init_0.doc(R"DOC(
 Construct a new local space object.
 
 Parameters
@@ -61,12 +61,11 @@ rotation_from_dft_to_local_basis : {par_3}
 rotation_from_spherical_to_dft_basis : {par_4}
    Rotation matrices from spherical to DFT basis.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<triqs::modest::spin_kind_e>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<triqs::modest::atomic_orbs>>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<nda::array<std::vector<long>, 2>>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 1>>()}, ", ")},
-   std::vector<std::string>{});
+              {{c2py::python_typename<triqs::modest::spin_kind_e>()},
+               {c2py::python_typename<std::vector<triqs::modest::atomic_orbs>>()},
+               {c2py::python_typename<nda::array<std::vector<long>, 2>>()},
+               {c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()},
+               {c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 1>>()}});
 // atomic_view
 static auto const fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::local_space &self, const triqs::gfs::block2_gf<triqs::mesh::imfreq> &G_C) { return self.atomic_view(G_C); },
@@ -105,14 +104,12 @@ Returns
 [2] : {ret_1}
    2-dim array containing the new block matrices in the atomic view.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq> &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq>>(),
-                                                     c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()}});
+   {{c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq> &>()},
+    {c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}},
+   {c2py::python_typename<triqs::gfs::block2_gf<triqs::mesh::imfreq>>(), c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()});
 static const auto doc_d_1 = fun_1.doc(R"DOC(
 Given the index of an atomic shell, return the index of the first atomic shell of its equivalence class.
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 
 // ----- Method table ----
 template <>
@@ -209,8 +206,8 @@ static int synth_constructor_0(PyObject *self, PyObject *args, PyObject *kwargs)
 template <> constexpr initproc c2py::tp_init<triqs::modest::band_dispersion> = synth_constructor_0;
 
 template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::band_dispersion> = c2py::replace_tags(
-   R"DOC(Synthesized constructor with the following keyword arguments:
+const std::string c2py::tp_ctor_doc<triqs::modest::band_dispersion> =
+   c2py::replace_tags(R"DOC(Synthesized constructor with the following keyword arguments:
 
 Parameters
 ----------
@@ -225,10 +222,9 @@ k_weights : {par_3}
 matrix_valued : {par_4}
 
 )DOC",
-   "par",
-   std::vector<std::string>{std::vector<std::string>{
-      c2py::python_typename<triqs::modest::spin_kind_e>(), c2py::python_typename<nda::array<triqs::dcomplex, 4>>(),
-      c2py::python_typename<nda::array<long, 2>>(), c2py::python_typename<nda::array<double, 1>>(), c2py::python_typename<bool>()}});
+                      "par",
+                      {c2py::python_typename<triqs::modest::spin_kind_e>(), c2py::python_typename<nda::array<triqs::dcomplex, 4>>(),
+                       c2py::python_typename<nda::array<long, 2>>(), c2py::python_typename<nda::array<double, 1>>(), c2py::python_typename<bool>()});
 // H
 static auto const fun_2 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::modest::band_dispersion const &self, long sigma, long k_idx) { return self.H(sigma, k_idx); }, "self", "sigma", "k_idx")};
@@ -254,13 +250,10 @@ Returns
    Matrix view of :math:`H^{\sigma}_{\nu\nu'}(\mathbf{k})` in :math:`(\nu, \nu')` for a given
    :math:`\mathbf{k}` and :math:`\sigma`.
 )DOC",
-             std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
-             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::matrix_const_view<triqs::dcomplex>>()}});
+             {{c2py::python_typename<long>()}, {c2py::python_typename<long>()}}, {c2py::python_typename<nda::matrix_const_view<triqs::dcomplex>>()});
 static const auto doc_d_3 = fun_3.doc(R"DOC(
 Number of bands for a given k-point and spin :math:`\sigma`.
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 
 // ----- Method table ----
 template <>
@@ -348,9 +341,8 @@ n_bands_per_k : {par_2}
 
 )DOC",
                       "par",
-                      std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::spin_kind_e>(),
-                                                                        c2py::python_typename<nda::array<triqs::dcomplex, 4>>(),
-                                                                        c2py::python_typename<nda::array<long, 2>>()}});
+                      {c2py::python_typename<triqs::modest::spin_kind_e>(), c2py::python_typename<nda::array<triqs::dcomplex, 4>>(),
+                       c2py::python_typename<nda::array<long, 2>>()});
 // P
 static auto const fun_4 = c2py::dispatcher_f_kw_t{c2py::cmethod(
    [](triqs::modest::downfolding_projector const &self, long sigma, long k_idx) { return self.P(sigma, k_idx); }, "self", "sigma", "k_idx")};
@@ -377,13 +369,10 @@ Returns
    Matrix view of :math:`P_{m\nu}^{\sigma}(\mathbf{k})` in :math:`(m, \nu)` for the given :math:`\mathbf{k}`
    and :math:`\sigma`.
 )DOC",
-             std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<long>()}, ", ")},
-             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<nda::matrix_const_view<triqs::dcomplex>>()}});
+             {{c2py::python_typename<long>()}, {c2py::python_typename<long>()}}, {c2py::python_typename<nda::matrix_const_view<triqs::dcomplex>>()});
 static const auto doc_d_5 = fun_5.doc(R"DOC(
 Rotates the local basis of the downfolding projector.
-)DOC",
-                                      std::vector<std::string>{}, std::vector<std::string>{});
+)DOC");
 
 // ----- Method table ----
 template <>
@@ -487,9 +476,8 @@ P : {par_2}
 
 )DOC",
                       "par",
-                      std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::band_dispersion>(),
-                                                                        c2py::python_typename<triqs::modest::local_space>(),
-                                                                        c2py::python_typename<triqs::modest::downfolding_projector>()}});
+                      {c2py::python_typename<triqs::modest::band_dispersion>(), c2py::python_typename<triqs::modest::local_space>(),
+                       c2py::python_typename<triqs::modest::downfolding_projector>()});
 
 // ----- Method table ----
 template <>
@@ -558,9 +546,7 @@ C_space : {par_0}
 H : {par_1}
 
 )DOC",
-                      "par",
-                      std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::local_space>(),
-                                                                        c2py::python_typename<std::vector<triqs::tb::tb_hamiltonian>>()}});
+                      "par", {c2py::python_typename<triqs::modest::local_space>(), c2py::python_typename<std::vector<triqs::tb::tb_hamiltonian>>()});
 
 // ----- Method table ----
 template <>
@@ -628,8 +614,8 @@ static auto const fun_9 = c2py::dispatcher_f_kw_t{c2py::cfun(
    },
    "filename", "obe")};
 
-static const auto doc_d_6 = fun_6.doc(
-   R"DOC(
+static const auto doc_d_6 =
+   fun_6.doc(R"DOC(
 Create a one-body elements with orthonormalized projectors.
 
 Using the data from the "dft_input" group, the band dispersion, local space, downfolding projector, and optional
@@ -682,12 +668,9 @@ Returns
 {ret_0}
    The total electron density and a one-body elements.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::string &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<double>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<bool>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<std::pair<double, triqs::modest::one_body_elements_on_grid>>()}});
-static const auto doc_d_7 =
-   fun_7.doc(R"DOC(
+             {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<double>()}, {c2py::python_typename<bool>()}},
+             {c2py::python_typename<std::pair<double, triqs::modest::one_body_elements_on_grid>>()});
+static const auto doc_d_7 = fun_7.doc(R"DOC(
 [1] Construct a one-body elements TB object from Wannier90 in the case of a single spin index.
 
 ------
@@ -717,14 +700,14 @@ Returns
 {ret_0}
    One-body elements containing the Wannier90 tight binding Hamiltonian.
 )DOC",
-             std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::string &>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<triqs::modest::spin_kind_e>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<std::vector<triqs::modest::atomic_orbs>>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<const std::string &>()}, ", "),
-                                      c2py::join(std::vector<std::string>{c2py::python_typename<const std::string &>()}, ", ")},
-             std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_tb>()}});
-static const auto doc_d_8 = fun_8.doc(
-   R"DOC(
+                                      {{c2py::python_typename<const std::string &>()},
+                                       {c2py::python_typename<triqs::modest::spin_kind_e>()},
+                                       {c2py::python_typename<std::vector<triqs::modest::atomic_orbs>>()},
+                                       {c2py::python_typename<const std::string &>()},
+                                       {c2py::python_typename<const std::string &>()}},
+                                      {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
+static const auto doc_d_8 =
+   fun_8.doc(R"DOC(
 Create a one-body elements along specific k-path.
 
 Using the data from the "dft_bands_input" group, the band disperion and downfolding projector
@@ -743,11 +726,10 @@ Returns
 {ret_0}
    One-body elements along high-symmetry k-path.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::string &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_on_grid>()}});
-static const auto doc_d_9 = fun_9.doc(
-   R"DOC(
+             {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}},
+             {c2py::python_typename<triqs::modest::one_body_elements_on_grid>()});
+static const auto doc_d_9 =
+   fun_9.doc(R"DOC(
 Create a one-body elements with the :math:`\Theta` projectors.
 
 Using the data from the "dft_parproj_input" group, the local space, downfolding projectors,
@@ -766,9 +748,8 @@ Returns
 {ret_0}
    One-body elements using the :math:`\Theta` projectors.
 )DOC",
-   std::vector<std::string>{c2py::join(std::vector<std::string>{c2py::python_typename<const std::string &>()}, ", "),
-                            c2py::join(std::vector<std::string>{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}, ", ")},
-   std::vector<std::string>{std::vector<std::string>{c2py::python_typename<triqs::modest::one_body_elements_on_grid>()}});
+             {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}},
+             {c2py::python_typename<triqs::modest::one_body_elements_on_grid>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
