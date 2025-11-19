@@ -17,7 +17,7 @@ namespace triqs::modest {
     for (auto k_idx : mpi::chunk(nda::range(obe.H.n_k()), comm)) {
       for (auto sigma : nda::range(obe.C_space.n_sigma())) {
         double KS_term_acc = 0;
-        auto eps           = nda::linalg::eigenvalues(nda::matrix<dcomplex>{obe.H.H(sigma, k_idx)});
+        auto eps           = nda::linalg::eigvalsh(nda::matrix<dcomplex>{obe.H.H(sigma, k_idx)});
         for (auto nu : range(obe.H.N_nu(sigma, k_idx))) { KS_term_acc += Fermi(beta * (eps(nu) - mu)); }
         KS_term += obe.H.k_weights(k_idx) * KS_term_acc;
       }

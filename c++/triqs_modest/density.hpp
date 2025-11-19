@@ -167,9 +167,10 @@ namespace triqs::modest {
     };
 
     auto Glatt = [&](auto &k_idx, auto &sigma) {
+      using nda::linalg::inv;
       auto out = gf{mesh};
       for (auto &&[n, w] : enumerate(mesh)) {
-        out.data()(n) = trace(inverse(w + mu - obe.H.H(sigma, k_idx) - PSP(n, k_idx, sigma)) - inverse(w + mu - obe.H.H(sigma, k_idx)));
+        out.data()(n) = trace(inv(w + mu - obe.H.H(sigma, k_idx) - PSP(n, k_idx, sigma)) - inv(w + mu - obe.H.H(sigma, k_idx)));
       }
       return out;
     };

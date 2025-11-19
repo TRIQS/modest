@@ -38,13 +38,14 @@ namespace triqs::modest {
     constexpr auto local_gf_at_k(one_body_elements_on_grid const &obe, double const &mu, downfolding_projector const &Proj,
                                  block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
       return [&](auto const &k_idx, auto const &sigma_idx) {
+        using nda::linalg::inv;
         auto const n_M   = obe.C_space.dim();
         auto const &mesh = Sigma_dynamic(0, 0).mesh();
         auto out         = gf{mesh, {n_M, n_M}};
         auto P           = obe.P.P(sigma_idx, k_idx);
         for (auto &&[n, w] : enumerate(mesh)) {
           auto PSP                    = upfold_self_energy_at_freq(obe, Proj, Sigma_dynamic, Sigma_static, n, k_idx, sigma_idx);
-          out.data()(n, r_all, r_all) = P * inverse(w + mu - obe.H.H(sigma_idx, k_idx) - PSP) * dagger(P);
+          out.data()(n, r_all, r_all) = P * inv(w + mu - obe.H.H(sigma_idx, k_idx) - PSP) * dagger(P);
         }
         return out;
       };
@@ -54,12 +55,13 @@ namespace triqs::modest {
     constexpr auto lattice_gf_at_k(one_body_elements_on_grid const &obe, double const &mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                    nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
       return [&](auto const &k_idx, auto const &sigma_idx) {
+        using nda::linalg::inv;
         auto const &mesh = Sigma_dynamic(0, 0).mesh();
         auto N_nu        = obe.H.N_nu(sigma_idx, k_idx);
         auto Glatt       = gf{mesh, {N_nu, N_nu}};
         for (auto &&[n, w] : enumerate(mesh)) {
           auto PSP                      = upfold_self_energy_at_freq(obe, obe.P, Sigma_dynamic, Sigma_static, n, k_idx, sigma_idx);
-          Glatt.data()(n, r_all, r_all) = inverse(w + mu - obe.H.H(sigma_idx, k_idx) - PSP);
+          Glatt.data()(n, r_all, r_all) = inv(w + mu - obe.H.H(sigma_idx, k_idx) - PSP);
         }
         return Glatt;
       };

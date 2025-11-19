@@ -70,7 +70,7 @@ namespace triqs::modest {
           auto U_diag = nda::matrix<dcomplex>(shell.dim, shell.dim);
           for (auto &&[idx, r_idx] : enumerated_sub_slices(decomposition(atom, sigma))) {
             auto hperm           = dagger(U_rotation(atom, sigma)) * Hloc0(atom, sigma) * U_rotation(atom, sigma);
-            U_diag(r_idx, r_idx) = std::get<1>(nda::linalg::eigenelements(hperm(r_idx, r_idx)));
+            U_diag(r_idx, r_idx) = std::get<1>(nda::linalg::eigh(hperm(r_idx, r_idx)));
           }
           U_rotation(atom, sigma) *= U_diag;
         }
