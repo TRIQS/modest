@@ -48,12 +48,6 @@ namespace triqs::gfs {
     return {gf_s.names, std::move(g)};
   }
 
-  template <typename Mesh> gf_struct_t get_struct(block_gf<Mesh> const &g) {
-    gf_struct_t result;
-    for (auto [name, size] : zip(g.block_names(), g.block_sizes())) result.emplace_back(name, size);
-    return result;
-  }
-
   //
   template <typename Mesh> gf_struct2_t get_struct(block2_gf<Mesh, matrix_valued> const &g) {
     auto res = nda::zeros<long>(g.size1(), g.size2());

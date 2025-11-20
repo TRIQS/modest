@@ -215,7 +215,7 @@ namespace triqs::modest {
   block_gf<Mesh, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc,
                                               block_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                               std::vector<nda::matrix<dcomplex>> const &Sigma_static) {
-    auto gf_struct = get_struct(Gloc);
+    auto gf_struct = Gloc.gf_struct();
     auto mesh      = Gloc[0].mesh();
     auto Delta     = block_gf{mesh, gf_struct};
     auto n_blocks  = gf_struct.size();
@@ -238,9 +238,9 @@ namespace triqs::modest {
    */
   template <typename Mesh>
   block_gf<Mesh, matrix_valued> hybridization(std::vector<nda::matrix<dcomplex>> const &epsilon_levels, block_gf<Mesh, matrix_valued> const &Gloc) {
-    auto Sigma_static = get_struct(Gloc) | stdv::transform([](auto &x) { return nda::zeros<dcomplex>(x.second, x.second); })
+    auto Sigma_static = Gloc.gf_struct() | stdv::transform([](auto &x) { return nda::zeros<dcomplex>(x.second, x.second); })
        | tl::to<std::vector<nda::matrix<dcomplex>>>();
-    auto Sigma_dynamic = block_gf{Gloc[0].mesh(), get_struct(Gloc)};
+    auto Sigma_dynamic = block_gf{Gloc[0].mesh(), Gloc.gf_struct()};
     return hybridization(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
   }
 
