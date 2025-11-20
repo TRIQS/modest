@@ -16,7 +16,6 @@
 #include "triqs_modest/utils/enumerate_slice.hpp"
 #include "triqs_modest/utils/gf_supp.hpp"
 #include "triqs_modest/double_counting.hpp"
-#include "triqs_modest/root_finder.hpp"
 
 #include <itertools/enumerate.hpp>
 #include <triqs/test_tools/gfs.hpp>

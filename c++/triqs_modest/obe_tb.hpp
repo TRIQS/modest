@@ -13,7 +13,7 @@
 #include "triqs_modest/utils/gf_supp.hpp"
 #include <nda/nda.hpp>
 #include <triqs/gfs/functions/density.hpp>
-#include "./root_finder.hpp"
+#include <triqs/utility/root_finder.hpp>
 #include "triqs/tb/superlattice.hpp"
 
 namespace triqs::modest {
@@ -236,7 +236,7 @@ namespace triqs::modest {
     std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static, &opt](double x) {
       return density(obe, x, Sigma_dynamic, Sigma_static, opt);
     };
-    return std::get<0>(triqs::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+    return std::get<0>(triqs::utility::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
   }
 
   /**
