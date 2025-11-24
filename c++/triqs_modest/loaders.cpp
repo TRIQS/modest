@@ -259,9 +259,8 @@ namespace triqs::modest {
     auto total_density = as<double>(g_dft["density_required"]);
 
     //TODO: FIXME! hdf5 read to strict on long
-    auto charge_below = (as<std::string>(g_dft["dft_code"]) != "w90" && as<std::string>(g_dft["dft_code"]) != "hk") ?
-       as<double>(g_dft["charge_below"]) :
-       as<long>(g_dft["charge_below"]);
+    //auto charge_below = (as<std::string>(g_dft["dft_code"]) != "w90" && as<std::string>(g_dft["dft_code"]) != "hk") ?
+    auto charge_below = (as<std::string>(g_dft["dft_code"]) != "w90") ? as<double>(g_dft["charge_below"]) : as<long>(g_dft["charge_below"]);
     total_density -= charge_below;
 
     // set up spin_type

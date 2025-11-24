@@ -37,6 +37,7 @@ namespace triqs::modest::dft_tools {
       case DFTCode::VASP: return vasp::get_spherical_to_dft_rotation(l);
       case DFTCode::W90:
       case DFTCode::QuantumEspresso: return qe::get_spherical_to_dft_rotation(l);
+      case DFTCode::Hk: return nda::eye<dcomplex>(2 * l + 1);
       default: throw std::invalid_argument("Unknown DFTCode");
     }
   }
