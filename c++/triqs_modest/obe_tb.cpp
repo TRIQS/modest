@@ -36,6 +36,15 @@ namespace triqs::modest {
     return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   };
 
+  one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR,
+                                                    spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
+    if (spin_kind != spin_kind_e::NonPolarized) {
+      throw std::runtime_error("Tight-binding model can only be used for non-spin-polarized calculations.\n");
+    }
+    std::vector<tb_hamiltonian> tb_H = {tb_hamiltonian(Rs, HR), tb_hamiltonian(Rs, HR)};
+    return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
+  }
+
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
                                                         spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
     if (spin_kind != spin_kind_e::Polarized) {

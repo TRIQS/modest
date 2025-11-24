@@ -32,6 +32,9 @@ namespace triqs::modest {
     //C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
   };
 
+  one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR,
+                                                    spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells);
+
   /** @name OBE factories using a TB Hamiltonian
  *  Factory functions to create one_body_elements_on_tb
  *  @{
