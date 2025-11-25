@@ -128,7 +128,7 @@ jobs:
         CXX: ${{ matrix.clang_cxx }}
         CXXFLAGS: ""
       run: |
-        git clone https://github.com/flatironinstitute/clair --branch doc
+        git clone https://github.com/flatironinstitute/clair --branch unstable
         cmake -S clair -B clair/build -G Ninja -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
         cmake --build clair/build --target install --verbose
 

@@ -2,7 +2,7 @@ include(get_cpm.cmake)
 
 # -- c2py --
 if(PythonSupport OR (NOT IS_SUBPROJECT AND Build_Documentation))
-  CPMAddPackage("gh:flatironinstitute/c2py#doc")
+  CPMAddPackage("gh:flatironinstitute/c2py#unstable")
 endif()
 
 # -- GTest --
