@@ -336,6 +336,12 @@ static auto const fun_9 = c2py::dispatcher_f_kw_t{
               "H_k", "mu", "Sigma", "opt"),
    c2py::cfun([](const triqs::tb::tb_hamiltonian &H_k, double mu, const triqs::gfs::gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma,
                  const triqs::lattice::bz_int_options &opt) { return triqs::lattice::gloc(H_k, mu, Sigma, opt); },
+              "H_k", "mu", "Sigma", "opt"),
+   c2py::cfun([](const triqs::tb::tb_hamiltonian &H_k, double mu, const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma,
+                 const triqs::lattice::bz_int_options &opt) { return triqs::lattice::gloc(H_k, mu, Sigma, opt); },
+              "H_k", "mu", "Sigma", "opt"),
+   c2py::cfun([](const triqs::tb::tb_hamiltonian &H_k, double mu, const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma,
+                 const triqs::lattice::bz_int_options &opt) { return triqs::lattice::gloc(H_k, mu, Sigma, opt); },
               "H_k", "mu", "Sigma", "opt")};
 
 // h5_read
@@ -363,19 +369,12 @@ static auto const fun_12 = c2py::dispatcher_f_kw_t{
                  const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::permute_local_space(atom_partition, x); },
               "atom_partition", "x")};
 
-// root_finder
-static auto const fun_13 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](std::string method, std::function<double(double)> f, double x_init, double y_value, double precision, double delta_x, long max_loops,
-      std::string x_name, std::string y_name,
-      bool verbosity) { return triqs::root_finder(method, f, x_init, y_value, precision, delta_x, max_loops, x_name, y_name, verbosity); },
-   "method", "f", "x_init", "y_value", "precision", "delta_x", "max_loops"_a = 1000, "x_name"_a = "", "y_name"_a = "", "verbosity"_a = false)};
-
 // rotate
-static auto const fun_14 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_13 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const triqs::modest::one_body_elements_tb &obe, const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate(obe, U); }, "obe", "U")};
 
 // rotate_embedded_self_energy
-static auto const fun_15 = c2py::dispatcher_f_kw_t{
+static auto const fun_14 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_embed_dynamic_loc,
                  const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, U); },
               "Sigma_embed_dynamic_loc", "U"),
@@ -413,7 +412,7 @@ static auto const fun_15 = c2py::dispatcher_f_kw_t{
       "Sigma_embed_static_loc", "obe")};
 
 // sigma_to_data_idx
-static auto const fun_16 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_15 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](triqs::modest::spin_kind_e spin_kind, long sigma) { return triqs::modest::sigma_to_data_idx(spin_kind, sigma); }, "spin_kind", "sigma")};
 
 static const auto doc_d_5 = fun_5.doc(R"DOC(
@@ -511,49 +510,7 @@ static const auto doc_d_9  = fun_9.doc(R"DOC()DOC");
 static const auto doc_d_10 = fun_10.doc(R"DOC()DOC");
 static const auto doc_d_11 = fun_11.doc(R"DOC()DOC");
 static const auto doc_d_12 = fun_12.doc(R"DOC()DOC");
-static const auto doc_d_13 = fun_13.doc(R"DOC(
-Root finder :math:`f(x) = 0`.
-
-Parameters
-----------
-method : {par_0}
-   Root finding method (`dichtomy` or `bisection`).
-f : {par_1}
-   :math:`f(x) : \mathbb{R} \to \mathbb{R}`.
-x_init : {par_2}
-   Initial value for :math:`x`.
-y_value : {par_3}
-   Target value for :math:`y`.
-precision : {par_4}
-   Precision for algorithm.
-delta_x : {par_5}
-   Increment of :math:`x`.
-max_loops : {par_6}
-   Max number of iterations.
-x_name : {par_7}
-   Name of :math:`x` variable.
-y_name : {par_8}
-   Name of :math:`y = f(x)` variable.
-verbosity : {par_9}
-   Turn on/off logging.
-
-Returns
--------
-{ret_0}
-   :math:`x, f(x)` where :math:`f(x) = y`.
-)DOC",
-                                        {{c2py::python_typename<std::string>()},
-                                         {c2py::python_typename<std::function<double(double)>>()},
-                                         {c2py::python_typename<double>()},
-                                         {c2py::python_typename<double>()},
-                                         {c2py::python_typename<double>()},
-                                         {c2py::python_typename<double>()},
-                                         {c2py::python_typename<long>()},
-                                         {c2py::python_typename<std::string>()},
-                                         {c2py::python_typename<std::string>()},
-                                         {c2py::python_typename<bool>()}},
-                                        {c2py::python_typename<std::pair<double, double>>()});
-static const auto doc_d_14 = fun_14.doc(
+static const auto doc_d_13 = fun_13.doc(
    R"DOC(
 Rotate a tight-binding Hamiltonian by a unitary matrix :math:`U`.
 
@@ -573,7 +530,7 @@ Returns
 )DOC",
    {{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}, {c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()}},
    {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
-static const auto doc_d_15 = fun_15.doc(R"DOC(
+static const auto doc_d_14 = fun_14.doc(R"DOC(
 [1, 2, 3, 4, 5, 6, 7, 8] Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
 
 The rotation is independent of frequency and is performe as UΣ(ω)U†.
@@ -626,7 +583,7 @@ Returns
                                          c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>(),
                                          c2py::python_typename<std::vector<nda::array<triqs::dcomplex, 3>>>(),
                                          c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>()});
-static const auto doc_d_16 = fun_16.doc(R"DOC(
+static const auto doc_d_15 = fun_15.doc(R"DOC(
 Map a spin index to a data index.
 
 The mapping depends on the spin kind:
@@ -646,10 +603,9 @@ static PyMethodDef module_methods[] = {
    {"h5_read", (PyCFunction)c2py::pyfkw<fun_10>, METH_VARARGS | METH_KEYWORDS, doc_d_10.c_str()},
    {"h5_write", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
    {"permute_local_space", (PyCFunction)c2py::pyfkw<fun_12>, METH_VARARGS | METH_KEYWORDS, doc_d_12.c_str()},
-   {"root_finder", (PyCFunction)c2py::pyfkw<fun_13>, METH_VARARGS | METH_KEYWORDS, doc_d_13.c_str()},
-   {"rotate", (PyCFunction)c2py::pyfkw<fun_14>, METH_VARARGS | METH_KEYWORDS, doc_d_14.c_str()},
-   {"rotate_embedded_self_energy", (PyCFunction)c2py::pyfkw<fun_15>, METH_VARARGS | METH_KEYWORDS, doc_d_15.c_str()},
-   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_16>, METH_VARARGS | METH_KEYWORDS, doc_d_16.c_str()},
+   {"rotate", (PyCFunction)c2py::pyfkw<fun_13>, METH_VARARGS | METH_KEYWORDS, doc_d_13.c_str()},
+   {"rotate_embedded_self_energy", (PyCFunction)c2py::pyfkw<fun_14>, METH_VARARGS | METH_KEYWORDS, doc_d_14.c_str()},
+   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_15>, METH_VARARGS | METH_KEYWORDS, doc_d_15.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
