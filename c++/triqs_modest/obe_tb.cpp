@@ -108,20 +108,8 @@ namespace triqs::modest {
   }
 
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe) {
-
-    auto n_atoms = obe.C_space.n_atoms();
-    auto n_sigma = obe.C_space.n_sigma();
-    nda::array<nda::matrix<dcomplex>, 2> Hloc_result(n_atoms, n_sigma);
-
-    for (auto sigma : range(n_sigma)) {
-
-      // find the home cell of the TB file to get H0
-      auto iR0 = obe.H[sigma].get_R_idx({0, 0, 0});
-
-      for (auto const &[atom, R_atom] : enumerated_sub_slices(obe.C_space.atomic_decomposition())) {
-        Hloc_result(atom, sigma) = obe.H[sigma].hoppings()[iR0](R_atom, R_atom);
-      }
-    }
+    nda::array<nda::matrix<dcomplex>, 2> Hloc_result(1, obe.C_space.n_sigma());
+    for (auto sigma : range(obe.C_space.n_sigma())) { Hloc_result(0, sigma) = obe.H[sigma].hoppings()[obe.H[sigma].get_R_idx({0, 0, 0})]; }
     return Hloc_result;
   }
 
