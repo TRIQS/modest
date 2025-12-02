@@ -40,7 +40,7 @@ namespace triqs::modest {
         auto const &Am = A(mesh_idx);
         auto const &Bm = B(mesh_idx);
         for (size_t i = 0; i < n0; ++i) {
-          for (size_t j = i + 1; j < n0; ++j) {
+          for (size_t j = 0; j < i + 1; ++j) {
             if (std::abs(Am(i, j) - Bm(i, j)) > threshold) return false;
           }
         }

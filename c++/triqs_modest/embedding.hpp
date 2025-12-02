@@ -383,9 +383,10 @@ namespace triqs::modest {
     nda::array<dcomplex, 4> embed_ijkl(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const;
 
     //--------------------- Extract ---------------------------------------
+    std::vector<block_matrix_t> extract_ij(block_matrix_t const &Sigma_imp_static_vec) const;
 
     /// Extract single-particle quantities (CoQui).
-    std::vector<std::vector<nda::array<dcomplex, 3>>> extract_wij(nda::array<dcomplex, 4> const &g_loc) const;
+    std::vector<std::vector<nda::array<dcomplex, 3>>> extract_wij(std::vector<nda::array<dcomplex, 3>> const &g_loc) const;
 
     /// Extract two-particle quantities (CoQui).
     std::vector<nda::array<dcomplex, 5>> extract_wijkl(nda::array<dcomplex, 5> const &Pi_loc) const;
