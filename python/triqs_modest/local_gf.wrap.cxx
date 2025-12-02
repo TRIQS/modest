@@ -26,8 +26,17 @@ using c2py::operator""_a;
 
 // ==================== module functions ====================
 
+// charge_density_correction
+static auto const fun_0 = c2py::dispatcher_f_kw_t{c2py::cfun(
+   [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
+      const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+      const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) {
+     return triqs::modest::charge_density_correction(obe, mu, Sigma_dynamic, Sigma_static);
+   },
+   "obe", "mu", "Sigma_dynamic", "Sigma_static")};
+
 // gloc
-static auto const fun_0 = c2py::dispatcher_f_kw_t{
+static auto const fun_1 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
          const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
@@ -53,8 +62,34 @@ static auto const fun_0 = c2py::dispatcher_f_kw_t{
                  const triqs::lattice::bz_int_options &opt) { return triqs::modest::gloc(mesh, obe, mu, opt); },
               "mesh", "obe", "mu", "opt")};
 
-static const auto doc_d_0 =
-   fun_0.doc(R"DOC(
+static const auto doc_d_0 = fun_0.doc(R"DOC(
+Compute the charge density correction from DMFT
+
+Compute the charge density correction in the band basis :math:`N_{\nu\nu'}(\mathbf{k})` from the lattice Green's function.
+
+Parameters
+----------
+obe : {par_0}
+   The one-body elements on the grid
+mu : {par_1}
+   The chemical potential
+Sigma_dynamic : {par_2}
+   The dynamic part of the self-energy
+Sigma_static : {par_3}
+   The static part of the self-energy
+
+Returns
+-------
+{ret_0}
+   The charge density correction in the band basis :math:`N_{\nu\nu'}(\mathbf{k})`
+)DOC",
+                                      {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+                                       {c2py::python_typename<double>()},
+                                       {c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()},
+                                       {c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()}},
+                                      {c2py::python_typename<nda::array<triqs::dcomplex, 4>>()});
+static const auto doc_d_1 =
+   fun_1.doc(R"DOC(
 [1, 2] Compute local Green's function on a :math:`M \times M` mesh.
 
 When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes
@@ -124,7 +159,8 @@ Returns
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"gloc", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
+   {"charge_density_correction", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
+   {"gloc", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 

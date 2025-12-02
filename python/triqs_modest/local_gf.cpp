@@ -1,5 +1,6 @@
 #include <c2py/c2py.hpp>
 
+#include "triqs_modest/chargedensity.hpp"
 #include "triqs_modest/gloc_fixed_grid.hpp"
 #include "triqs_modest/obe_tb.hpp"
 

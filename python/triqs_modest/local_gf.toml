@@ -34,7 +34,7 @@ namespaces = "triqs triqs::modest  triqs::lattice"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::gloc"
+match_names = "triqs::modest::(gloc|charge_density_correction)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex

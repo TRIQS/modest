@@ -116,6 +116,8 @@ template <>
 PyMethodDef c2py::tp_methods<triqs::modest::local_space>[] = {
    {"atomic_view", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
    {"first_shell_of_its_equiv_cls", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
+   {"__getstate__", c2py::getstate_tuple<triqs::modest::local_space>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_tuple<triqs::modest::local_space>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -260,6 +262,8 @@ template <>
 PyMethodDef c2py::tp_methods<triqs::modest::band_dispersion>[] = {
    {"H", (PyCFunction)c2py::pyfkw<fun_2>, METH_VARARGS | METH_KEYWORDS, doc_d_2.c_str()},
    {"N_nu", (PyCFunction)c2py::pyfkw<fun_3>, METH_VARARGS | METH_KEYWORDS, doc_d_3.c_str()},
+   {"__getstate__", c2py::getstate_tuple<triqs::modest::band_dispersion>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_tuple<triqs::modest::band_dispersion>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -379,6 +383,8 @@ template <>
 PyMethodDef c2py::tp_methods<triqs::modest::downfolding_projector>[] = {
    {"P", (PyCFunction)c2py::pyfkw<fun_4>, METH_VARARGS | METH_KEYWORDS, doc_d_4.c_str()},
    {"rotate_local_basis", (PyCFunction)c2py::pyfkw<fun_5>, METH_VARARGS | METH_KEYWORDS, doc_d_5.c_str()},
+   {"__getstate__", c2py::getstate_tuple<triqs::modest::downfolding_projector>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_tuple<triqs::modest::downfolding_projector>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -457,14 +463,15 @@ static int synth_constructor_2(PyObject *self, PyObject *args, PyObject *kwargs)
   de("H", self_c.H, false);
   de("C_space", self_c.C_space, false);
   de("P", self_c.P, false);
+  de("ibz_symm_ops", self_c.ibz_symm_ops, true);
   return de.check();
 }
 
 template <> constexpr initproc c2py::tp_init<triqs::modest::one_body_elements_on_grid> = synth_constructor_2;
 
 template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::one_body_elements_on_grid> =
-   c2py::replace_tags(R"DOC(Synthesized constructor with the following keyword arguments:
+const std::string c2py::tp_ctor_doc<triqs::modest::one_body_elements_on_grid> = c2py::replace_tags(
+   R"DOC(Synthesized constructor with the following keyword arguments:
 
 Parameters
 ----------
@@ -474,27 +481,32 @@ C_space : {par_1}
 
 P : {par_2}
 
+ibz_symm_ops : {par_3}, default={}
+
 )DOC",
-                      "par",
-                      {c2py::python_typename<triqs::modest::band_dispersion>(), c2py::python_typename<triqs::modest::local_space>(),
-                       c2py::python_typename<triqs::modest::downfolding_projector>()});
+   "par",
+   {c2py::python_typename<triqs::modest::band_dispersion>(), c2py::python_typename<triqs::modest::local_space>(),
+    c2py::python_typename<triqs::modest::downfolding_projector>(), c2py::python_typename<std::optional<triqs::modest::ibz_symmetry_ops>>()});
 
 // ----- Method table ----
 template <>
 PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements_on_grid>[] = {
-
+   {"__getstate__", c2py::getstate_tuple<triqs::modest::one_body_elements_on_grid>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_tuple<triqs::modest::one_body_elements_on_grid>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
 constexpr auto doc_member_8  = R"DOC(Band dispersion.)DOC";
 constexpr auto doc_member_9  = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
 constexpr auto doc_member_10 = R"DOC(Downfolding projector :math:`P`.)DOC";
+constexpr auto doc_member_11 = R"DOC(IBZ symmetrizer after a k-sum)DOC";
 static PyObject *prop_get_dict_2(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements_on_grid> *)self)->_c);
   c2py::pydict dic;
-  dic["H"]       = self_c.H;
-  dic["C_space"] = self_c.C_space;
-  dic["P"]       = self_c.P;
+  dic["H"]            = self_c.H;
+  dic["C_space"]      = self_c.C_space;
+  dic["P"]            = self_c.P;
+  dic["ibz_symm_ops"] = self_c.ibz_symm_ops;
   return dic.new_ref();
 }
 
@@ -505,6 +517,8 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements_on_grid>[
    c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::H, triqs::modest::one_body_elements_on_grid>("H", doc_member_8),
    c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::C_space, triqs::modest::one_body_elements_on_grid>("C_space", doc_member_9),
    c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::P, triqs::modest::one_body_elements_on_grid>("P", doc_member_10),
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_on_grid::ibz_symm_ops, triqs::modest::one_body_elements_on_grid>("ibz_symm_ops",
+                                                                                                                                  doc_member_11),
    {"__dict__", (getter)prop_get_dict_2, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -555,8 +569,8 @@ PyMethodDef c2py::tp_methods<triqs::modest::one_body_elements_tb>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_11 = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
-constexpr auto doc_member_12 = R"DOC(List of TB Hamiltonians.)DOC";
+constexpr auto doc_member_12 = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
+constexpr auto doc_member_13 = R"DOC(List of TB Hamiltonians.)DOC";
 static PyObject *prop_get_dict_3(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::modest::one_body_elements_tb> *)self)->_c);
   c2py::pydict dic;
@@ -569,8 +583,8 @@ static PyObject *prop_get_dict_3(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::modest::one_body_elements_tb>[] = {
-   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_tb::C_space, triqs::modest::one_body_elements_tb>("C_space", doc_member_11),
-   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_tb::H, triqs::modest::one_body_elements_tb>("H", doc_member_12),
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_tb::C_space, triqs::modest::one_body_elements_tb>("C_space", doc_member_12),
+   c2py::getsetdef_from_member<&triqs::modest::one_body_elements_tb::H, triqs::modest::one_body_elements_tb>("H", doc_member_13),
    {"__dict__", (getter)prop_get_dict_3, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
