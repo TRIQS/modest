@@ -5,6 +5,7 @@
 
 #pragma once
 #include <triqs/gfs.hpp>
+#include <mpi/mpi.hpp>
 #include "./utils/defs.hpp"
 #include "./utils/gf_supp.hpp"
 
@@ -28,6 +29,19 @@ namespace triqs::modest {
     long cls_idx = 0; ///< Equivalent atoms will have the same sort index (sort).
     long dft_idx = 0; ///< Index of the atom in the dft code if any, or \f$ -1 \f$.
     // int n_irrep;     // are the orbitals reducible into irreps (irep) ( seach "irep" in TRIQS/dft_tools; never used in DMFT routines
+    void serialize(auto &ar) const { ar & dim & l & cls_idx & dft_idx; };
+    void deserialize(auto &ar) { ar & dim & l & cls_idx & dft_idx; };
+
+    /// Equality comparison operator.
+    bool operator==(atomic_orbs const &) const = default;
+
+    /// MPI broadcast
+    friend void mpi_broadcast(atomic_orbs &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x.dim, c, root);
+      mpi::broadcast(x.l, c, root);
+      mpi::broadcast(x.cls_idx, c, root);
+      mpi::broadcast(x.dft_idx, c, root);
+    }
   };
 
   // ==========================================================
@@ -85,7 +99,21 @@ namespace triqs::modest {
     friend void h5_read(h5::group g, std::string const &name, local_space &ls);
     friend void h5_write(h5::group g, std::string const &name, local_space const &ls);
 
+    /// MPI broadcast
+    friend void mpi_broadcast(local_space &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x._spin_kind, c, root);
+      mpi::broadcast(x._atomic_shells, c, root);
+      mpi::broadcast(x._irreps_decomp_per_atom, c, root);
+      mpi::broadcast(x._rotation_from_dft_to_local_basis, c, root);
+      mpi::broadcast(x._rotation_from_spherical_to_dft_basis, c, root);
+      mpi::broadcast(x._dim_C, c, root);
+      mpi::broadcast(x._atom_names, c, root);
+    }
+
     public:
+    /// Equality comparison operator.
+    bool operator==(local_space const &) const = default;
+
     /**
      * @brief Construct a new local space object.
      *

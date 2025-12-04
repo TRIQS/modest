@@ -5,6 +5,7 @@
 
 #pragma once
 #include <triqs/tb/tb_hamiltonian.hpp>
+#include <mpi/mpi.hpp>
 #include <stdexcept>
 #include <triqs/mesh/imfreq.hpp>
 #include "loaders.hpp"
@@ -30,6 +31,15 @@ namespace triqs::modest {
     std::vector<tb_hamiltonian> H; ///< List of TB Hamiltonians.
     //downfolding_projector P;
     //C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
+
+    /// Equality comparison operator.
+    bool operator==(one_body_elements_tb const &) const = default;
+
+    /// MPI broadcast
+    friend void mpi_broadcast(one_body_elements_tb &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x.C_space, c, root);
+      mpi::broadcast(x.H, c, root);
+    }
   };
 
   one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR,

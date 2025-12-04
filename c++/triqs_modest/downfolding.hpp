@@ -41,6 +41,18 @@ namespace triqs::modest {
     nda::array<double, 1> k_weights;   ///< Weight in the BZ for each k-point.
     bool matrix_valued;                ///< Is the dispersion matrix-valued?
 
+    /// Equality comparison operator.
+    bool operator==(band_dispersion const &) const = default;
+
+    /// MPI broadcast
+    friend void mpi_broadcast(band_dispersion &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x.spin_kind, c, root);
+      mpi::broadcast(x.H_k, c, root);
+      mpi::broadcast(x.n_bands_per_k, c, root);
+      mpi::broadcast(x.k_weights, c, root);
+      mpi::broadcast(x.matrix_valued, c, root);
+    }
+
     // public:
     // /// Constructor
     // band_dispersion(spin_kind_e spin_kind, nda::array<dcomplex, 4> H_k, nda::array<long, 2> n_bands_per_k,
@@ -113,6 +125,16 @@ namespace triqs::modest {
     nda::array<dcomplex, 4> P_k;       ///< Projector \f$ P_{m\nu}^{\sigma}(\mathbf{k}) \f$.
     nda::array<long, 2> n_bands_per_k; ///< Number of bands for each k-point and \f$ \sigma \f$.
 
+    /// Equality comparison operator.
+    bool operator==(downfolding_projector const &) const = default;
+
+    /// MPI broadcast
+    friend void mpi_broadcast(downfolding_projector &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x.spin_kind, c, root);
+      mpi::broadcast(x.P_k, c, root);
+      mpi::broadcast(x.n_bands_per_k, c, root);
+    }
+
     // public:
     // /// Constructor
     // downfolding_projector(spin_kind_e spin_kind, nda::array<dcomplex, 4> P_k, nda::array<long, 2> n_bands_per_k)
@@ -148,10 +170,21 @@ namespace triqs::modest {
    * @brief A one-body elements struct where all of the underlying data exists on a fixed momentum grid.
    */
   struct one_body_elements_on_grid {
-    band_dispersion H;                                             ///< Band dispersion.
-    local_space C_space;                                           ///< Local \f$ \mathcal{C} \f$ space.
-    downfolding_projector P;                                       ///< Downfolding projector \f$ P \f$.
-    C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; ///< IBZ symmetrizer after a k-sum
+    band_dispersion H;                                 ///< Band dispersion.
+    local_space C_space;                               ///< Local \f$ \mathcal{C} \f$ space.
+    downfolding_projector P;                           ///< Downfolding projector \f$ P \f$.
+    std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; ///< IBZ symmetrizer after a k-sum
+
+    /// Equality comparison operator.
+    bool operator==(one_body_elements_on_grid const &) const = default;
+
+    /// MPI broadcast
+    friend void mpi_broadcast(one_body_elements_on_grid &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x.H, c, root);
+      mpi::broadcast(x.C_space, c, root);
+      mpi::broadcast(x.P, c, root);
+      mpi::broadcast(x.ibz_symm_ops, c, root);
+    }
   };
 
   std::ostream &operator<<(std::ostream &out, one_body_elements_on_grid const &);
