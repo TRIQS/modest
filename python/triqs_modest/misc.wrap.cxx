@@ -15,15 +15,18 @@
 #define C2PY_VERSION_MINOR 1
 
 #include <c2py/c2py.hpp>
+#include <c2py/serialization/h5.hpp>
 
 using c2py::operator""_a;
 
 // ==================== Wrapped classes =====================
 
-template <> constexpr bool c2py::is_wrapped<triqs::modest::atomic_orbs>     = true;
-template <> constexpr bool c2py::is_wrapped<triqs::tb::superlattice>        = true;
-template <> constexpr bool c2py::is_wrapped<triqs::tb::tb_hamiltonian>      = true;
-template <> constexpr bool c2py::is_wrapped<triqs::lattice::bz_int_options> = true;
+template <> constexpr bool c2py::is_wrapped<triqs::modest::atomic_orbs>          = true;
+template <> constexpr bool c2py::is_wrapped<triqs::modest::ibz_symmetry_ops>     = true;
+template <> constexpr bool c2py::is_wrapped<triqs::modest::ibz_symmetry_ops::op> = true;
+template <> constexpr bool c2py::is_wrapped<triqs::tb::superlattice>             = true;
+template <> constexpr bool c2py::is_wrapped<triqs::tb::tb_hamiltonian>           = true;
+template <> constexpr bool c2py::is_wrapped<triqs::lattice::bz_int_options>      = true;
 
 // ==================== enums =====================
 
@@ -81,7 +84,8 @@ dft_idx : {par_3}, default=0
 // ----- Method table ----
 template <>
 PyMethodDef c2py::tp_methods<triqs::modest::atomic_orbs>[] = {
-
+   {"__getstate__", c2py::getstate_tuple<triqs::modest::atomic_orbs>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_tuple<triqs::modest::atomic_orbs>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -113,6 +117,159 @@ constinit PyGetSetDef c2py::tp_getset<triqs::modest::atomic_orbs>[] = {
 template <>
 const std::string c2py::tp_doc<triqs::modest::atomic_orbs> =
    R"DOC(Info on an atomic shell.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::atomic_orbs>;
+template <> inline constexpr auto c2py::tp_name<triqs::modest::ibz_symmetry_ops> = "triqs_modest.misc.IbzSymmetryOps";
+
+static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs) {
+  if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    ("Error in constructing triqs::modest::ibz_symmetry_ops.\nNo positional arguments allowed. Use keywords arguments"));
+    return -1;
+  }
+  c2py::pydict_extractor de{kwargs};
+  try {
+    ((c2py::wrap<triqs::modest::ibz_symmetry_ops> *)self)->_c = new triqs::modest::ibz_symmetry_ops{};
+  } catch (std::exception const &e) {
+    PyErr_SetString(PyExc_RuntimeError, ("Error in constructing triqs::modest::ibz_symmetry_ops from a Python dict.\n   "s + e.what()).c_str());
+    return -1;
+  }
+  auto &self_c = *(((c2py::wrap<triqs::modest::ibz_symmetry_ops> *)self)->_c);
+  de("ops", self_c.ops, false);
+  return de.check();
+}
+
+template <> constexpr initproc c2py::tp_init<triqs::modest::ibz_symmetry_ops> = synth_constructor_1;
+
+template <>
+const std::string c2py::tp_ctor_doc<triqs::modest::ibz_symmetry_ops> =
+   c2py::replace_tags(R"DOC(Synthesized constructor with the following keyword arguments:
+
+Parameters
+----------
+ops : {par_0}
+
+)DOC",
+                      "par", {c2py::python_typename<std::vector<triqs::modest::ibz_symmetry_ops::op>>()});
+
+// ----- Method table ----
+template <>
+PyMethodDef c2py::tp_methods<triqs::modest::ibz_symmetry_ops>[] = {
+
+   {nullptr, nullptr, 0, nullptr} // Sentinel
+};
+
+constexpr auto doc_member_4 = R"DOC()DOC";
+static PyObject *prop_get_dict_1(PyObject *self, void *) {
+  auto &self_c = *(((c2py::wrap<triqs::modest::ibz_symmetry_ops> *)self)->_c);
+  c2py::pydict dic;
+  dic["ops"] = self_c.ops;
+  return dic.new_ref();
+}
+
+// ----- Method table ----
+
+template <>
+constinit PyGetSetDef c2py::tp_getset<triqs::modest::ibz_symmetry_ops>[] = {
+   c2py::getsetdef_from_member<&triqs::modest::ibz_symmetry_ops::ops, triqs::modest::ibz_symmetry_ops>("ops", doc_member_4),
+   {"__dict__", (getter)prop_get_dict_1, nullptr, "", nullptr},
+   {nullptr, nullptr, nullptr, nullptr, nullptr}};
+
+template <>
+const std::string c2py::tp_doc<triqs::modest::ibz_symmetry_ops> =
+   R"DOC(Irreducible Brillouin Zone (IBZ) symmetry operations to symmetrize observables over the entire Brillouin
+zone.
+
+The IBZ symmetry operations are optional and specific to DFT codes that work in the IBZ instead of the
+full BZ. Currently, this is only used when DFT data is converted from Wien2k.
+
+For computational efficiency, we can perform the one-body calculation on the irreducible Brillouin zone (IBZ).
+However, in order to obtain observable quantities like the local Green's function, one needs to _symmetrize_ the
+obversable summed on only the IBZ. For any observable :math:`\mathcal{O}`, the unsymmetrized quantity is
+
+.. math::
+
+   [\mathcal{O}^{\sigma}_{mm'}]_{\mathrm{unsymm}} = \sum_{\mathbf{k}\in\mathrm{IBZ}}\sum_{\nu\nu'}P_{m,\nu}^{\sigma}
+   (\mathbf{k})O_{\nu\nu'}^{\sigma}(\mathbf{k})[P_{m'\nu'}^{\sigma}(\mathbf{k})]^{\dagger}.
+
+To symmetrize, we must by apply all operations symmetry operations :math:`\mathcal{S}` of the crystallographic space
+group :math:`\mathcal{G}`:
+
+.. math::
+
+   [\mathcal{O}^{\sigma}_{(am_{a}), (a'm_{a}')}]_{\mathrm{symm}}^{\mathcal{G}} = \sum_{\mathcal{S}\in\mathcal{G}}
+   \sum_{n_{a}n_{a}'} \mathcal{D}_{m_{a} n_{a}}(\mathcal{S})[(\mathcal{O}^{\mathcal{S}^{-1}a,\mathcal{S}^{-1}
+   \sigma})_{n_{a}n_{a}'}]_{\mathrm{unsymm}}\mathcal{D}(\mathcal{S}^{-1})_{n_{a}'m_{a}'}.)DOC"
+   + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::ibz_symmetry_ops>;
+template <> inline constexpr auto c2py::tp_name<triqs::modest::ibz_symmetry_ops::op> = "triqs_modest.misc.Op";
+
+static int synth_constructor_2(PyObject *self, PyObject *args, PyObject *kwargs) {
+  if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    ("Error in constructing triqs::modest::ibz_symmetry_ops::op.\nNo positional arguments allowed. Use keywords arguments"));
+    return -1;
+  }
+  c2py::pydict_extractor de{kwargs};
+  try {
+    ((c2py::wrap<triqs::modest::ibz_symmetry_ops::op> *)self)->_c = new triqs::modest::ibz_symmetry_ops::op{};
+  } catch (std::exception const &e) {
+    PyErr_SetString(PyExc_RuntimeError, ("Error in constructing triqs::modest::ibz_symmetry_ops::op from a Python dict.\n   "s + e.what()).c_str());
+    return -1;
+  }
+  auto &self_c = *(((c2py::wrap<triqs::modest::ibz_symmetry_ops::op> *)self)->_c);
+  de("mats", self_c.mats, false);
+  de("permutation", self_c.permutation, false);
+  de("time_inv", self_c.time_inv, false);
+  return de.check();
+}
+
+template <> constexpr initproc c2py::tp_init<triqs::modest::ibz_symmetry_ops::op> = synth_constructor_2;
+
+template <>
+const std::string c2py::tp_ctor_doc<triqs::modest::ibz_symmetry_ops::op> = c2py::replace_tags(
+   R"DOC(Synthesized constructor with the following keyword arguments:
+
+Parameters
+----------
+mats : {par_0}
+
+permutation : {par_1}
+
+time_inv : {par_2}
+
+)DOC",
+   "par",
+   {c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>(), c2py::python_typename<std::vector<long>>(), c2py::python_typename<long>()});
+
+// ----- Method table ----
+template <>
+PyMethodDef c2py::tp_methods<triqs::modest::ibz_symmetry_ops::op>[] = {
+
+   {nullptr, nullptr, 0, nullptr} // Sentinel
+};
+
+constexpr auto doc_member_5 = R"DOC()DOC";
+constexpr auto doc_member_6 = R"DOC()DOC";
+constexpr auto doc_member_7 = R"DOC()DOC";
+static PyObject *prop_get_dict_2(PyObject *self, void *) {
+  auto &self_c = *(((c2py::wrap<triqs::modest::ibz_symmetry_ops::op> *)self)->_c);
+  c2py::pydict dic;
+  dic["mats"]        = self_c.mats;
+  dic["permutation"] = self_c.permutation;
+  dic["time_inv"]    = self_c.time_inv;
+  return dic.new_ref();
+}
+
+// ----- Method table ----
+
+template <>
+constinit PyGetSetDef c2py::tp_getset<triqs::modest::ibz_symmetry_ops::op>[] = {
+   c2py::getsetdef_from_member<&triqs::modest::ibz_symmetry_ops::op::mats, triqs::modest::ibz_symmetry_ops::op>("mats", doc_member_5),
+   c2py::getsetdef_from_member<&triqs::modest::ibz_symmetry_ops::op::permutation, triqs::modest::ibz_symmetry_ops::op>("permutation", doc_member_6),
+   c2py::getsetdef_from_member<&triqs::modest::ibz_symmetry_ops::op::time_inv, triqs::modest::ibz_symmetry_ops::op>("time_inv", doc_member_7),
+   {"__dict__", (getter)prop_get_dict_2, nullptr, "", nullptr},
+   {nullptr, nullptr, nullptr, nullptr, nullptr}};
+
+template <>
+const std::string c2py::tp_doc<triqs::modest::ibz_symmetry_ops::op>      = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::modest::ibz_symmetry_ops::op>;
 template <> inline constexpr auto c2py::tp_name<triqs::tb::superlattice> = "triqs_modest.misc.Superlattice";
 static auto init_0 =
    c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::tb::superlattice, nda::array<long, 2>, nda::array<long, 2>>("sl_units", "cluster_pts")};
@@ -141,6 +298,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::tb::superlattice>[] = {
 template <> const std::string c2py::tp_doc<triqs::tb::superlattice>        = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::tb::superlattice>;
 template <> inline constexpr auto c2py::tp_name<triqs::tb::tb_hamiltonian> = "triqs_modest.misc.TbHamiltonian";
 static auto init_1                                                         = c2py::dispatcher_c_kw_t{
+   c2py::c_constructor<triqs::tb::tb_hamiltonian>(),
    c2py::c_constructor<triqs::tb::tb_hamiltonian, std::vector<std::array<long, 3>>, std::vector<nda::array<nda::dcomplex, 2>>>("Rs", "hoppings")};
 template <> constexpr initproc c2py::tp_init<triqs::tb::tb_hamiltonian>    = c2py::pyfkw_constructor<init_1>;
 template <> const std::string c2py::tp_ctor_doc<triqs::tb::tb_hamiltonian> = init_1.doc(R"DOC()DOC");
@@ -164,15 +322,10 @@ static auto const fun_2 = c2py::dispatcher_f_kw_t{
 static auto const fun_3 = c2py::dispatcher_f_kw_t{
    c2py::cmethod([](triqs::tb::tb_hamiltonian const &self, std::array<long, 3> R) { return self.get_R_idx(R); }, "self", "R")};
 
-// h5_read_construct
-static auto const fun_4 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](h5::group g, std::string subgroup_name) { return triqs::tb::tb_hamiltonian::h5_read_construct(g, subgroup_name); }, "g", "subgroup_name")};
-
 static const auto doc_d_0 = fun_0.doc(R"DOC()DOC");
 static const auto doc_d_1 = fun_1.doc(R"DOC()DOC");
 static const auto doc_d_2 = fun_2.doc(R"DOC()DOC");
 static const auto doc_d_3 = fun_3.doc(R"DOC()DOC");
-static const auto doc_d_4 = fun_4.doc(R"DOC()DOC");
 
 // ----- Method table ----
 template <>
@@ -180,7 +333,9 @@ PyMethodDef c2py::tp_methods<triqs::tb::tb_hamiltonian>[] = {
    {"eigenvalues", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
    {"eigenvectors", (PyCFunction)c2py::pyfkw<fun_2>, METH_VARARGS | METH_KEYWORDS, doc_d_2.c_str()},
    {"get_R_idx", (PyCFunction)c2py::pyfkw<fun_3>, METH_VARARGS | METH_KEYWORDS, doc_d_3.c_str()},
-   {"h5_read_construct", (PyCFunction)c2py::pyfkw<fun_4>, METH_VARARGS | METH_KEYWORDS | METH_STATIC, doc_d_4.c_str()},
+   {"__write_hdf5__", c2py::tpxx_write_h5<triqs::tb::tb_hamiltonian>, METH_VARARGS, "  "},
+   {"__getstate__", c2py::getstate_h5<triqs::tb::tb_hamiltonian>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_h5<triqs::tb::tb_hamiltonian>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -203,7 +358,7 @@ constinit PyGetSetDef c2py::tp_getset<triqs::tb::tb_hamiltonian>[] = {
 template <> const std::string c2py::tp_doc<triqs::tb::tb_hamiltonian>           = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::tb::tb_hamiltonian>;
 template <> inline constexpr auto c2py::tp_name<triqs::lattice::bz_int_options> = "triqs_modest.misc.BzIntOptions";
 
-static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs) {
+static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs) {
   if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
     PyErr_SetString(PyExc_RuntimeError,
                     ("Error in constructing triqs::lattice::bz_int_options.\nNo positional arguments allowed. Use keywords arguments"));
@@ -227,7 +382,7 @@ static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs)
   return de.check();
 }
 
-template <> constexpr initproc c2py::tp_init<triqs::lattice::bz_int_options> = synth_constructor_1;
+template <> constexpr initproc c2py::tp_init<triqs::lattice::bz_int_options> = synth_constructor_3;
 
 template <>
 const std::string c2py::tp_ctor_doc<triqs::lattice::bz_int_options> = c2py::replace_tags(
@@ -261,14 +416,14 @@ PyMethodDef c2py::tp_methods<triqs::lattice::bz_int_options>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto doc_member_4  = R"DOC()DOC";
-constexpr auto doc_member_5  = R"DOC()DOC";
-constexpr auto doc_member_6  = R"DOC()DOC";
-constexpr auto doc_member_7  = R"DOC()DOC";
 constexpr auto doc_member_8  = R"DOC()DOC";
 constexpr auto doc_member_9  = R"DOC()DOC";
 constexpr auto doc_member_10 = R"DOC()DOC";
-static PyObject *prop_get_dict_1(PyObject *self, void *) {
+constexpr auto doc_member_11 = R"DOC()DOC";
+constexpr auto doc_member_12 = R"DOC()DOC";
+constexpr auto doc_member_13 = R"DOC()DOC";
+constexpr auto doc_member_14 = R"DOC()DOC";
+static PyObject *prop_get_dict_3(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<triqs::lattice::bz_int_options> *)self)->_c);
   c2py::pydict dic;
   dic["tolerance"]    = self_c.tolerance;
@@ -285,14 +440,14 @@ static PyObject *prop_get_dict_1(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<triqs::lattice::bz_int_options>[] = {
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::tolerance, triqs::lattice::bz_int_options>("tolerance", doc_member_4),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::k_grid, triqs::lattice::bz_int_options>("k_grid", doc_member_5),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::delta_k_grid, triqs::lattice::bz_int_options>("delta_k_grid", doc_member_6),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::k_grid_max, triqs::lattice::bz_int_options>("k_grid_max", doc_member_7),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::run_adaptive, triqs::lattice::bz_int_options>("run_adaptive", doc_member_8),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::run_ptr, triqs::lattice::bz_int_options>("run_ptr", doc_member_9),
-   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::verbose, triqs::lattice::bz_int_options>("verbose", doc_member_10),
-   {"__dict__", (getter)prop_get_dict_1, nullptr, "", nullptr},
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::tolerance, triqs::lattice::bz_int_options>("tolerance", doc_member_8),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::k_grid, triqs::lattice::bz_int_options>("k_grid", doc_member_9),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::delta_k_grid, triqs::lattice::bz_int_options>("delta_k_grid", doc_member_10),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::k_grid_max, triqs::lattice::bz_int_options>("k_grid_max", doc_member_11),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::run_adaptive, triqs::lattice::bz_int_options>("run_adaptive", doc_member_12),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::run_ptr, triqs::lattice::bz_int_options>("run_ptr", doc_member_13),
+   c2py::getsetdef_from_member<&triqs::lattice::bz_int_options::verbose, triqs::lattice::bz_int_options>("verbose", doc_member_14),
+   {"__dict__", (getter)prop_get_dict_3, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> const std::string c2py::tp_doc<triqs::lattice::bz_int_options> = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::lattice::bz_int_options>;
@@ -300,31 +455,31 @@ template <> const std::string c2py::tp_doc<triqs::lattice::bz_int_options> = R"D
 // ==================== module functions ====================
 
 // Hloc
-static auto const fun_5 = c2py::dispatcher_f_kw_t{
+static auto const fun_4 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::vector<triqs::tb::tb_hamiltonian> &H_sigma,
                  const std::vector<triqs::modest::atomic_orbs> &atomic_shells) { return triqs::modest::Hloc(H_sigma, atomic_shells); },
               "H_sigma", "atomic_shells")};
 
 // discover_symmetries
-static auto const fun_6 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_5 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const nda::array<nda::matrix<triqs::dcomplex>, 2> &Hloc0, const std::vector<triqs::modest::atomic_orbs> &atomic_shells, double block_threshold,
       bool diagonalize_hloc) { return triqs::modest::discover_symmetries(Hloc0, atomic_shells, block_threshold, diagonalize_hloc); },
    "Hloc0", "atomic_shells", "block_threshold", "diagonalize_hloc")};
 
 // double_counting
-static auto const fun_7 =
+static auto const fun_6 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const nda::array<nda::matrix<triqs::dcomplex>, 2> &density_matrix, double U_int, double J_hund,
                                          const std::string method) { return triqs::modest::double_counting(density_matrix, U_int, J_hund, method); },
                                       "density_matrix", "U_int", "J_hund", "method")};
 
 // fold
-static auto const fun_8 = c2py::dispatcher_f_kw_t{
+static auto const fun_7 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::tb::superlattice &sl, const triqs::tb::tb_hamiltonian &tb) { return triqs::tb::fold(sl, tb); }, "sl", "tb"),
    c2py::cfun([](const triqs::tb::superlattice &sl, const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::fold(sl, obe); }, "sl",
               "obe")};
 
 // gloc
-static auto const fun_9 = c2py::dispatcher_f_kw_t{
+static auto const fun_8 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::mesh::imfreq &w_mesh, const triqs::tb::tb_hamiltonian &H_k, double mu,
                  const triqs::lattice::bz_int_options &opt) { return triqs::lattice::gloc(w_mesh, H_k, mu, opt); },
               "w_mesh", "H_k", "mu", "opt"),
@@ -345,7 +500,7 @@ static auto const fun_9 = c2py::dispatcher_f_kw_t{
               "H_k", "mu", "Sigma", "opt")};
 
 // h5_read
-static auto const fun_10 = c2py::dispatcher_f_kw_t{
+static auto const fun_9 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](h5::group g, const std::string &name, triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::h5_read(g, name, x); },
               "g", "name", "x"),
    c2py::cfun([](h5::group g, const std::string &name, triqs::modest::initial_data &data) { return triqs::modest::h5_read(g, name, data); }, "g",
@@ -354,7 +509,7 @@ static auto const fun_10 = c2py::dispatcher_f_kw_t{
               "name", "data")};
 
 // h5_write
-static auto const fun_11 = c2py::dispatcher_f_kw_t{
+static auto const fun_10 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](h5::group g, const std::string &name, const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::h5_write(g, name, x); },
       "g", "name", "x"),
@@ -362,6 +517,14 @@ static auto const fun_11 = c2py::dispatcher_f_kw_t{
               "g", "name", "data"),
    c2py::cfun([](h5::group g, const std::string &name, const triqs::modest::iteration_data &data) { return triqs::modest::h5_write(g, name, data); },
               "g", "name", "data")};
+
+// one_body_elements_from_model
+static auto const fun_11 = c2py::dispatcher_f_kw_t{c2py::cfun(
+   [](const std::vector<std::array<long, 3>> &Rs, const std::vector<nda::array<triqs::dcomplex, 2>> &HR, triqs::modest::spin_kind_e spin_kind,
+      std::vector<triqs::modest::atomic_orbs> atomic_shells) {
+     return triqs::modest::one_body_elements_from_model(Rs, HR, spin_kind, atomic_shells);
+   },
+   "Rs", "HR", "spin_kind", "atomic_shells")};
 
 // permute_local_space
 static auto const fun_12 = c2py::dispatcher_f_kw_t{
@@ -415,7 +578,7 @@ static auto const fun_14 = c2py::dispatcher_f_kw_t{
 static auto const fun_15 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](triqs::modest::spin_kind_e spin_kind, long sigma) { return triqs::modest::sigma_to_data_idx(spin_kind, sigma); }, "spin_kind", "sigma")};
 
-static const auto doc_d_5 = fun_5.doc(R"DOC(
+static const auto doc_d_4 = fun_4.doc(R"DOC(
 Compute :math:`H_{\text{loc}} = H(R=0)` given :math:`n_\sigma` tight binding Hamiltonians.
 
 Parameters
@@ -434,8 +597,8 @@ Returns
                                       {{c2py::python_typename<const std::vector<triqs::tb::tb_hamiltonian> &>()},
                                        {c2py::python_typename<const std::vector<triqs::modest::atomic_orbs> &>()}},
                                       {c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()});
-static const auto doc_d_6 =
-   fun_6.doc(R"DOC(
+static const auto doc_d_5 =
+   fun_5.doc(R"DOC(
 Find symmetries of the :math:`R = 0` component of a Hamiltonian to determine a GF block structure.
 
 Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the
@@ -464,7 +627,7 @@ Returns
               {c2py::python_typename<double>()},
               {c2py::python_typename<bool>()}},
              {c2py::python_typename<std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<triqs::dcomplex>, 2>>>()});
-static const auto doc_d_7 = fun_7.doc(R"DOC(
+static const auto doc_d_6 = fun_6.doc(R"DOC(
 Compute double counting correction for a DC type (method) from the density matrix of a Green's function.
 
 Parameters
@@ -488,8 +651,8 @@ Returns
                                        {c2py::python_typename<double>()},
                                        {c2py::python_typename<const std::string>()}},
                                       {c2py::python_typename<std::pair<nda::array<nda::matrix<double>, 2>, nda::matrix<double>>>()});
-static const auto doc_d_8 =
-   fun_8.doc(R"DOC(
+static const auto doc_d_7 =
+   fun_7.doc(R"DOC(
 Convert a tight binding Hamiltonian to its superlattice equivalent.
 
 Parameters
@@ -506,6 +669,7 @@ Returns
 )DOC",
              {{c2py::python_typename<const triqs::tb::superlattice &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}},
              {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
+static const auto doc_d_8  = fun_8.doc(R"DOC()DOC");
 static const auto doc_d_9  = fun_9.doc(R"DOC()DOC");
 static const auto doc_d_10 = fun_10.doc(R"DOC()DOC");
 static const auto doc_d_11 = fun_11.doc(R"DOC()DOC");
@@ -595,13 +759,14 @@ The mapping depends on the spin kind:
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"Hloc", (PyCFunction)c2py::pyfkw<fun_5>, METH_VARARGS | METH_KEYWORDS, doc_d_5.c_str()},
-   {"discover_symmetries", (PyCFunction)c2py::pyfkw<fun_6>, METH_VARARGS | METH_KEYWORDS, doc_d_6.c_str()},
-   {"double_counting", (PyCFunction)c2py::pyfkw<fun_7>, METH_VARARGS | METH_KEYWORDS, doc_d_7.c_str()},
-   {"fold", (PyCFunction)c2py::pyfkw<fun_8>, METH_VARARGS | METH_KEYWORDS, doc_d_8.c_str()},
-   {"gloc", (PyCFunction)c2py::pyfkw<fun_9>, METH_VARARGS | METH_KEYWORDS, doc_d_9.c_str()},
-   {"h5_read", (PyCFunction)c2py::pyfkw<fun_10>, METH_VARARGS | METH_KEYWORDS, doc_d_10.c_str()},
-   {"h5_write", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
+   {"Hloc", (PyCFunction)c2py::pyfkw<fun_4>, METH_VARARGS | METH_KEYWORDS, doc_d_4.c_str()},
+   {"discover_symmetries", (PyCFunction)c2py::pyfkw<fun_5>, METH_VARARGS | METH_KEYWORDS, doc_d_5.c_str()},
+   {"double_counting", (PyCFunction)c2py::pyfkw<fun_6>, METH_VARARGS | METH_KEYWORDS, doc_d_6.c_str()},
+   {"fold", (PyCFunction)c2py::pyfkw<fun_7>, METH_VARARGS | METH_KEYWORDS, doc_d_7.c_str()},
+   {"gloc", (PyCFunction)c2py::pyfkw<fun_8>, METH_VARARGS | METH_KEYWORDS, doc_d_8.c_str()},
+   {"h5_read", (PyCFunction)c2py::pyfkw<fun_9>, METH_VARARGS | METH_KEYWORDS, doc_d_9.c_str()},
+   {"h5_write", (PyCFunction)c2py::pyfkw<fun_10>, METH_VARARGS | METH_KEYWORDS, doc_d_10.c_str()},
+   {"one_body_elements_from_model", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
    {"permute_local_space", (PyCFunction)c2py::pyfkw<fun_12>, METH_VARARGS | METH_KEYWORDS, doc_d_12.c_str()},
    {"rotate", (PyCFunction)c2py::pyfkw<fun_13>, METH_VARARGS | METH_KEYWORDS, doc_d_13.c_str()},
    {"rotate_embedded_self_energy", (PyCFunction)c2py::pyfkw<fun_14>, METH_VARARGS | METH_KEYWORDS, doc_d_14.c_str()},
@@ -638,6 +803,8 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_misc() {
 
   if (PyType_Ready(&c2py::wrap_pytype<c2py::py_range>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<triqs::modest::atomic_orbs>) < 0) return NULL;
+  if (PyType_Ready(&c2py::wrap_pytype<triqs::modest::ibz_symmetry_ops>) < 0) return NULL;
+  if (PyType_Ready(&c2py::wrap_pytype<triqs::modest::ibz_symmetry_ops::op>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<triqs::tb::superlattice>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<triqs::tb::tb_hamiltonian>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<triqs::lattice::bz_int_options>) < 0) return NULL;
@@ -649,9 +816,17 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_misc() {
 
   conv_table[std::type_index(typeid(c2py::py_range)).name()] = &c2py::wrap_pytype<c2py::py_range>;
   c2py::add_type_object_to_main<triqs::modest::atomic_orbs>("AtomicOrbs", m, conv_table);
+  c2py::add_type_object_to_main<triqs::modest::ibz_symmetry_ops>("IbzSymmetryOps", m, conv_table);
+  c2py::add_type_object_to_main<triqs::modest::ibz_symmetry_ops::op>("Op", m, conv_table);
   c2py::add_type_object_to_main<triqs::tb::superlattice>("Superlattice", m, conv_table);
   c2py::add_type_object_to_main<triqs::tb::tb_hamiltonian>("TbHamiltonian", m, conv_table);
   c2py::add_type_object_to_main<triqs::lattice::bz_int_options>("BzIntOptions", m, conv_table);
+
+  c2py::pyref module = c2py::pyref::module("h5.formats");
+  if (not module) return nullptr;
+  c2py::pyref register_class = module.attr("register_class");
+
+  register_h5_type<triqs::tb::tb_hamiltonian>(register_class);
 
   return m;
 }
