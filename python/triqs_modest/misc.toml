@@ -16,7 +16,7 @@ namespaces = "triqs triqs::modest  triqs::lattice triqs::tb"
 #    else keep X.
 
 match_names = "triqs::modest::|triqs::(root_finder)|triqs::tb::(superlattice|tb_hamiltonian|fold)|triqs::lattice::(bz_int_options|gloc)"
-reject_names = "triqs::modest::(ibz_symmetry_ops|rotate_local_basis|hybridization|impurity_levels|embedding|make_embedding|make_embedding_with_clusters|embedding_builder|gloc|band_dispersion|downfolding_projector|local_space|one_body_elements_on_grid|one_body_elements_tb|one_body_elements_from_dft_converter|one_body_elements_with_theta_projectors|one_body_elements_on_high_symmetry_path|one_body_elements_from_wannier90|projected_spectral_function|spectral_function_on_high_symmetry_path|spectral_function_w|spectral_function_kw|density|find_chemical_potential|density_nk|analyze_degenerate_blocks|symmetrize_gf|dc_solver|dc_formulas|checkpoint|initial_data|iteration_data)"
+reject_names = "triqs::modest::(rotate_local_basis|hybridization|impurity_levels|embedding|make_embedding|make_embedding_with_clusters|embedding_builder|gloc|band_dispersion|downfolding_projector|local_space|one_body_elements_on_grid|one_body_elements_tb|one_body_elements_from_dft_converter|one_body_elements_with_theta_projectors|one_body_elements_on_high_symmetry_path|one_body_elements_from_wannier90|projected_spectral_function|spectral_function_on_high_symmetry_path|spectral_function_w|spectral_function_kw|density|find_chemical_potential|density_nk|analyze_degenerate_blocks|symmetrize_gf|dc_solver|dc_formulas|checkpoint|initial_data|iteration_data)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex
