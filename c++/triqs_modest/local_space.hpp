@@ -74,7 +74,7 @@ namespace triqs::modest {
    */
   class local_space {
 
-    spin_kind_e _spin_kind = spin_kind_e::Polarized;
+    spin_kind_e _spin_kind = spin_kind_e::NonPolarized;
 
     // List of all atomic shells spanning the 𝓒 space
     std::vector<atomic_orbs> _atomic_shells;
