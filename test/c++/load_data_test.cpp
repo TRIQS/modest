@@ -68,8 +68,3 @@ TEST(load_data_tests, load_dft_data_with_symm_ops) {
   for (auto &&file : h5_files) test_load_data_with_symm_ops(file);
 }
 #endif
-
-// TEST(load_data_tests, load_dft_from_h5_w90_fixed_grid) { // NOLINT
-//   auto h5_files = {"dft_data/la327-1313-p30-w90-fixedgrid.ref.h5", "dft_data/la327-2222-strain-w90-fixedgrid.ref.h5"};
-//   for (auto &&file : h5_files) test_load(file);
-// }

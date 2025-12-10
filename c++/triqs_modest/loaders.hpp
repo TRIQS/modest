@@ -15,6 +15,13 @@ namespace triqs::modest {
  *  @{
  */
 
+  C2PY_IGNORE std::pair<double, one_body_elements_on_grid> read_obe_from_dft_converter_hdf5(std::string const &filename, double threshold = 1.e-5,
+                                                                                            bool diagonalize_hloc = false);
+
+  C2PY_IGNORE one_body_elements_on_grid read_theta_projectors_for_obe(std::string const &filename, one_body_elements_on_grid const &obe);
+
+  C2PY_IGNORE one_body_elements_on_grid read_data_on_high_symm_path_for_obe(std::string const &filename, one_body_elements_on_grid const &obe);
+
   /**
    * @ingroup one_body_elements
    * @brief Create a one-body elements with orthonormalized projectors.
@@ -59,7 +66,6 @@ namespace triqs::modest {
    */
   std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold = 1.e-5,
                                                                                     bool diagonalize_hloc = false);
-  // bool verbosity        = true);
 
   /**
    * @ingroup one_body_elements

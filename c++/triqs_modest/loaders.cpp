@@ -14,17 +14,6 @@
 namespace triqs::modest {
   // utility to flatten a nested vector (move to utils/ ?)
 
-  // free function for svd (FIXME: nda::linalg::svd) (see TRIQS/nda PR#103)
-  nda::matrix<dcomplex> svd(const nda::matrix<dcomplex> &A) {
-    auto Acopy = nda::matrix<dcomplex, nda::F_layout>{transpose(A)};
-    long m     = Acopy.extent(0);
-    // auto S     = nda::vector<double>(m);
-    auto U                       = nda::matrix<dcomplex, nda::F_layout>(m, m);
-    auto VT                      = nda::matrix<dcomplex, nda::F_layout>(m, m);
-    [[maybe_unused]] auto status = nda::lapack::gesvd(Acopy, nda::vector<double>(m), U, VT);
-    return nda::matrix<dcomplex>{transpose(U * VT)};
-  }
-
   namespace detail {
     // inject an object T from the C space to W space (used in the context of post-processing).
     nda::array<std::vector<long>, 2> inject_to_new_space(nda::array<std::vector<long>, 2> const &T, std::vector<atomic_orbs> const &old_space,
@@ -101,8 +90,15 @@ namespace triqs::modest {
 
       // NB: mat = D(R_{\alpaha})
       // if mat has time inversion symmetry (T), then T*D(R_{\alpha}) = -D(R_{\alpha})
-      return mats
-         | stdv::transform([mats_tinv_and_SO, i = 0](cmat_t const &x) mutable { return (mats_tinv_and_SO[i++] == 1) ? -conj(svd(x)) : svd(x); })
+
+      auto uv_from_svd = [](auto const &M) {
+        auto [U, S, V] = nda::linalg::svd(M);
+        return U * V;
+      };
+
+      return mats | stdv::transform([uv_from_svd, mats_tinv_and_SO, i = 0](cmat_t const &x) mutable {
+               return (mats_tinv_and_SO[i++] == 1) ? -conj(uv_from_svd(x)) : uv_from_svd(x);
+             })
          | tl::to<std::vector<cmat_t>>();
     };
     return (mode == ReadMode::Correlated)  ? read_mats(root["dft_input"], "rot_mat", "rot_mat_time_inv") :
@@ -249,19 +245,16 @@ namespace triqs::modest {
     return symm_ops;
   };
 
-  //-------------------------------------------------------
-  // Prepare one-body elements for a DMFT calculation.
-  std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold,
-                                                                                    bool diagonalize_hloc) {
-    //TODO: add verbosity, currently not used.
+  std::pair<double, one_body_elements_on_grid> read_obe_from_dft_converter_hdf5(std::string const &filename, double threshold,
+                                                                                bool diagonalize_hloc) {
     auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
 
-    auto total_density = as<double>(g_dft["density_required"]);
+    auto target_density = as<double>(g_dft["density_required"]);
 
     //TODO: FIXME! hdf5 read to strict on long
     //auto charge_below = (as<std::string>(g_dft["dft_code"]) != "w90" && as<std::string>(g_dft["dft_code"]) != "hk") ?
     auto charge_below = (as<std::string>(g_dft["dft_code"]) != "w90") ? as<double>(g_dft["charge_below"]) : as<long>(g_dft["charge_below"]);
-    total_density -= charge_below;
+    target_density -= charge_below;
 
     // set up spin_type
     auto spin_kind = read_spin_kind(filename);
@@ -292,8 +285,6 @@ namespace triqs::modest {
         break;
       }
     }
-
-    // auto H_k_is_diagonal = nda::is_diagonal(nda::matrix<dcomplex>{H_k(1, 0, r_all, r_all)});
     auto eps_k = band_dispersion{
        .spin_kind = spin_kind, .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = k_weights, .matrix_valued = !H_k_is_diagonal};
     auto proj = downfolding_projector{.spin_kind = spin_kind, .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
@@ -324,21 +315,36 @@ namespace triqs::modest {
     obe.C_space = local_space{spin_kind, atomic_shells, decomposition, U_rotations,
                               read_spherical_to_dft_basis(as<std::string>(g_dft["dft_code"]), atomic_shells)};
     // rotate to the local basis.
-    auto obe_final = rotate_local_basis(U_rotations, std::move(obe));
     // FIXME: The dft_tools converters do not write the spherical_to_dft rotation for all cases.
     // Solution: hard-code the rotations for each dft_code (read from hdf5) and save in the local space.
     // The only issue is dft_code breaks backward compatibility with older hdf5 files.
     // Therefore the user can either pass at this stage this rotation or in the function that constructs the
     // slate hamiltonian.
-    return {total_density, std::move(obe_final)};
+    auto obe_final = rotate_local_basis(U_rotations, std::move(obe));
+    return {target_density, std::move(obe_final)};
   }
 
   //-------------------------------------------------------
-  // Prepare one-body elements with the Θ projectors.
-  one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe) {
+  // Prepare one-body elements for a DMFT calculation.
+  std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold,
+                                                                                    bool diagonalize_hloc) {
+    mpi::communicator comm = {};
+    int root               = 0;
+    double target_density  = 0;
+    one_body_elements_on_grid obe_final;
+
+    if (comm.rank() == root) { std::tie(target_density, obe_final) = read_obe_from_dft_converter_hdf5(filename, threshold, diagonalize_hloc); }
+
+    mpi::broadcast(target_density, comm, root);
+    mpi::broadcast(obe_final, comm, root);
+
+    return {target_density, std::move(obe_final)};
+  }
+
+  one_body_elements_on_grid read_theta_projectors_for_obe(const std::string &filename, const one_body_elements_on_grid &obe) {
     //check for group and throw error
-    auto root = h5::proxy{filename, 'r'};
-    if (!root.has_group("dft_parproj_input")) {
+    auto h5root = h5::proxy{filename, 'r'};
+    if (!h5root.has_group("dft_parproj_input")) {
       throw std::runtime_error{fmt::format("The hdf5 file {} does not contain the group dft_parproj_input", filename)};
     }
 
@@ -362,16 +368,27 @@ namespace triqs::modest {
     // create a new IBZ symmetrizer that spans all atoms instead of just the correlated atoms
     auto symm_ops = (obe.ibz_symm_ops) ? std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::ThetaProjectors)) :
                                          std::optional<ibz_symmetry_ops>{};
-
     return one_body_elements_on_grid{.H = obe.H, .C_space = W_space, .P = theta_proj, .ibz_symm_ops = symm_ops};
   }
 
   //-------------------------------------------------------
-  // Prepare one-body elements along high-symmetry k-path.
-  one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe) {
+  // Prepare one-body elements with the Θ projectors.
+  one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe) {
+
+    mpi::communicator comm = {};
+    int root               = 0;
+    one_body_elements_on_grid obe_final;
+
+    if (comm.rank() == root) { obe_final = read_theta_projectors_for_obe(filename, obe); }
+
+    mpi::broadcast(obe_final, comm, root);
+    return obe_final;
+  }
+
+  one_body_elements_on_grid read_data_on_high_symm_path_for_obe(const std::string &filename, const one_body_elements_on_grid &obe) {
     // check for group and throw error
-    auto root = h5::proxy{filename, 'r'};
-    if (!root.has_group("dft_bands_input")) {
+    auto h5root = h5::proxy{filename, 'r'};
+    if (!h5root.has_group("dft_bands_input")) {
       throw std::runtime_error{fmt::format("The hdf5 file {} does not contain the group dft_bands_input", filename)};
     }
 
@@ -390,8 +407,21 @@ namespace triqs::modest {
        .spin_kind = obe.C_space.spin_kind(), .H_k = std::move(H_k), .n_bands_per_k = n_bands_per_k, .k_weights = {}, .matrix_valued = false};
     auto proj = downfolding_projector{.spin_kind = obe.C_space.spin_kind(), .P_k = std::move(P_k), .n_bands_per_k = n_bands_per_k};
     auto obe1 = one_body_elements_on_grid{.H = eps_k, .C_space = obe.C_space, .P = proj, .ibz_symm_ops = {}};
-
     // rotate to the local basis that the self-energies will be defined in.
     return rotate_local_basis(obe.C_space.rotation_from_dft_to_local_basis(), std::move(obe1));
+  }
+
+  //-------------------------------------------------------
+  // Prepare one-body elements along high-symmetry k-path.
+  one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe) {
+
+    mpi::communicator comm;
+    int root = 0;
+    one_body_elements_on_grid obe_final;
+
+    if (comm.rank() == root) { obe_final = read_data_on_high_symm_path_for_obe(filename, obe); }
+
+    mpi::broadcast(obe_final, comm, root);
+    return obe_final;
   }
 } // namespace triqs::modest
