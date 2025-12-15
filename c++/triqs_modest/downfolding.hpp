@@ -165,6 +165,19 @@ namespace triqs::modest {
     friend std::ostream &operator<<(std::ostream &out, downfolding_projector const &proj);
   };
 
+  struct downfolding_projector_ext : downfolding_projector {
+    nda::array<long, 3> band_window;
+    nda::array<double, 2> kpts;
+
+    bool operator==(downfolding_projector_ext const &other) const = default;
+
+    friend void mpi_broadcast(downfolding_projector_ext &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(static_cast<downfolding_projector &>(x), c, root);
+      mpi::broadcast(x.band_window, c, root);
+      mpi::broadcast(x.kpts, c, root);
+    }
+  };
+
   // ------------------------------------------------------------
   /**
    * @ingroup one_body_elements
@@ -188,6 +201,27 @@ namespace triqs::modest {
     }
   };
 
+  // ------------------------------------------------------------
+
+  /**
+   * @ingroup one_body_elements
+   * @brief A one-body elements struct for GW (CoQui) calculations.
+   */
+  struct one_body_elements_gw {
+    local_space C_space;
+    downfolding_projector_ext P;
+
+    /// Equality comparison operator.
+    bool operator==(one_body_elements_gw const &) const = default;
+
+    /// MPI broadcast
+    friend void mpi_broadcast(one_body_elements_gw &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x.C_space, c, root);
+      mpi::broadcast(x.P, c, root);
+    }
+  };
+
+  //-------------------------------------------------------------
   std::ostream &operator<<(std::ostream &out, one_body_elements_on_grid const &);
   void h5_read(h5::group g, std::string const &name, one_body_elements_on_grid &x);
   void h5_write(h5::group g, std::string const &name, one_body_elements_on_grid const &x);

@@ -56,6 +56,8 @@ TEST(load_data_tests, obe_parproj) {
   std::cout << obe_dos << std::endl;
 }
 
+TEST(load_data_tests, obe_gw) { auto obe_gw = make_one_body_elements_gw("ref_data/nd112.mlwf.h5"); }
+
 #if LFS
 TEST(load_data_tests, load_dft_from_h5_wien2k_soc_fixed_grid) { // NOLINT
   auto h5_files = {"ref_data_lfs/sriro3-wien2k-soc.ref.h5", "ref_data_lfs/sr2mgoso6-wien2k-soc.ref.h5"};

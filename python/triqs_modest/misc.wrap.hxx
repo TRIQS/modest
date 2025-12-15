@@ -8,6 +8,8 @@ template <> constexpr bool c2py::is_wrapped<triqs::modest::ibz_symmetry_ops>    
 template <> inline constexpr auto c2py::tp_name<triqs::modest::ibz_symmetry_ops>     = "triqs_modest.misc.IbzSymmetryOps";
 template <> constexpr bool c2py::is_wrapped<triqs::modest::ibz_symmetry_ops::op>     = true;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::ibz_symmetry_ops::op> = "triqs_modest.misc.Op";
+template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements_gw>     = true;
+template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements_gw> = "triqs_modest.misc.OneBodyElementsGw";
 template <> constexpr bool c2py::is_wrapped<triqs::tb::superlattice>                 = true;
 template <> inline constexpr auto c2py::tp_name<triqs::tb::superlattice>             = "triqs_modest.misc.Superlattice";
 template <> constexpr bool c2py::is_wrapped<triqs::tb::tb_hamiltonian>               = true;

@@ -95,7 +95,21 @@ namespace triqs::modest {
    */
   one_body_elements_on_grid one_body_elements_on_high_symmetry_path(std::string const &filename, one_body_elements_on_grid const &obe);
 
-  /** @} */ // Fixed grid factories
+  /**
+   * @ingroup one_body_elements
+   * @brief Create a one-body elements for GW calculations with CoQui.
+   *
+   * Using the data from the "dft_input" group, the local space and downfolding projector
+   * are prepared to create a one-body elements. This object is intended to be used in GW
+   * calculations.
+   *
+   * @param filename Hdf5 file from dft_tools converter.
+   * @return One-body elements for GW calculations.
+   */
+  one_body_elements_gw make_one_body_elements_gw(std::string const &filename);
+
+  /** 
+  @} */ // Fixed grid factories
 
   /**
    * @brief Find symmetries of the \f$ R = 0 \f$ component of a Hamiltonian to determine a GF block structure.
