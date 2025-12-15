@@ -10,6 +10,7 @@
 #include "utils/gf_supp.hpp"
 #include "utils/nda_supp.hpp"
 #include "utils/range_supp.hpp"
+#include "utils/embed_supp.hpp"
 #include <fmt/ranges.h>
 
 namespace triqs {
@@ -246,7 +247,21 @@ namespace triqs::modest {
 
     //------------------------------------------------------------------------------------
 
-    /// Zero initialize impurity self-energies.
+    /**
+     * @brief Create zero-initialized impurity self-energies.
+     *
+     * @details Constructs a list of zero-initialized self-energy containers for each impurity,
+     * with both dynamic (frequency-dependent) and static components. The block structure of each
+     * impurity's self-energy is determined by `imp_block_shape()`.
+     *
+     * Each impurity receives a pair consisting of:
+     * - A `block_gf` initialized to zero on the provided mesh (dynamic part).
+     * - A `block_matrix_t` of zero matrices matching the block dimensions (static part).
+     *
+     * @tparam Mesh The mesh type (e.g., `imfreq`, `refreq`, `dlr_imfreq`).
+     * @param mesh The frequency mesh for the dynamic self-energy.
+     * @return List of (dynamic, static) self-energy pairs, one per impurity.
+     */
     template <typename Mesh> std::vector<std::pair<block_gf<Mesh, matrix_valued>, block_matrix_t>> make_zero_imp_self_energies(Mesh const &mesh) {
 
       auto make_block_matrix = [](auto const &gf_struct) {
@@ -267,19 +282,134 @@ namespace triqs::modest {
     }
     //------------------------------------------------------------------------------------
 
-    // ****************************************************
-    //     Embedding Extract/Embed methods
-    // ****************************************************
     /**
      * @name Complex Ops
      * Embedding methods which operate on a given object X where X ∈ (block2gf, block_gf, block_matrix, etc.)
      * @{
      */
 
+    // ****************************************************
+    //     Embedding Extract/Embed methods
+    // ****************************************************
+
+    //--------------------- Extract ---------------------------------------
+
+    /**
+     * @brief Extract impurity data from embedded arrays.
+     *
+     * @details This method performs the inverse of the embed operation: it takes data in the full correlated
+     * space and extracts the individual impurity blocks using the reverse mapping \f$ \psi^{-1} \f$.
+     *
+     * The algorithm proceeds in two steps:
+     * 1. For each \f$ (\alpha, \sigma) \f$ pair, extract the diagonal block from the input array `X`
+     *    using the `sigma_embed_decomp` decomposition.
+     * 2. For each impurity, use the `reverse_psi` mapping to gather the appropriate blocks into
+     *    the impurity's block structure, indexed by \f$ (\gamma, \tau) \f$.
+     *
+     * The template parameter `Rank` determines the dimensionality of the underlying data arrays.
+     * For frequency-dependent quantities (Rank ∈ {3,5}), the first dimension is interpreted as the
+     * frequency index.
+     *
+     * @tparam Rank The rank of the underlying nda arrays (e.g., 2, 4 for static, 3, 5 for frequency-dependent).
+     * @param X Vector of arrays in the embedded space, one per spin channel \f$ \sigma \f$.
+     * @return Nested vector [n_imp][block] of extracted impurity data arrays.
+     */
+    template <int Rank> std::vector<std::vector<nda::array<dcomplex, Rank>>> extract(std::vector<nda::array<dcomplex, Rank>> const &X) const {
+
+      using array_t = nda::array<dcomplex, Rank>;
+
+      // Does this rank have a frequency index?
+      [[maybe_unused]] long n_w = 0;
+      if constexpr (detail::has_frequency<Rank>) { n_w = X[0].extent(0); }
+
+      // Extract from the array X the blocks for each (alpha, sigma)
+      auto embed_blocks = nda::array<array_t, 2>(n_alpha(), n_sigma());
+      for (auto &&[alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
+        for (auto sigma : range(n_sigma())) { embed_blocks(alpha, sigma) = detail::extract_diagonal(X[sigma], r_alpha); }
+      }
+
+      // Lambda to extract one impurity using the reverse_psi map
+      auto imp_gf_stru_list = imp_block_shape();
+      auto extract_one_imp  = [&](long n_imp) -> std::vector<array_t> {
+        std::vector<array_t> blocks_imp;
+        for (auto [bl_name, bl_size] : imp_gf_stru_list[n_imp]) { blocks_imp.push_back(detail::make_zero_array<Rank, dcomplex>(bl_size, n_w)); }
+        auto const &rpsi = reverse_psi[n_imp];
+        for (auto [gamma, tau] : rpsi.indices()) {
+          auto [alpha, sigma]                      = rpsi(gamma, tau)[0];
+          blocks_imp[gamma + n_gamma(n_imp) * tau] = embed_blocks(alpha, sigma);
+        }
+        return blocks_imp;
+      };
+
+      // Apply lambda to each impurity.
+      return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
+    }
+
     //--------------------- Embed -----------------------------------------
 
     /**
-     * @brief Embed single-particle quantities (TRIQS/ModEST).
+     * @brief Embed impurity data into the full correlated space.
+     *
+     * @details This method maps impurity solver data into the embedded representation using the
+     * \f$ \psi \f$ mapping table. Given data from each impurity solver organized by blocks
+     * \f$ (\gamma, \tau) \f$, the method constructs the full embedded arrays indexed by
+     * \f$ (\alpha, \sigma) \f$.
+     *
+     * The algorithm proceeds as follows:
+     * 1. Initialize zero arrays for each \f$ (\alpha, \sigma) \f$ block with dimensions from
+     *    `sigma_embed_decomp`.
+     * 2. For each \f$ (\alpha, \sigma) \f$, look up \f$ \psi(\alpha, \sigma) = (n\_imp, \gamma, \tau) \f$
+     *    and copy the corresponding impurity block data.
+     * 3. Assemble the blocks into full diagonal tensors for each spin channel \f$ \sigma \f$.
+     *
+     * Blocks with `imp_idx == -1` (disconnected from any impurity) remain zero.
+     *
+     * The template parameter `Rank` determines the dimensionality of the data arrays. For
+     * frequency-dependent quantities (Rank ∈ {3,5}), the first dimension is the frequency index.
+     *
+     * @tparam Rank The rank of the underlying nda arrays (e.g., 2 for static, 3 for frequency-dependent).
+     * @param imps_blocks Nested vector [n_imp][block] of impurity data arrays.
+     * @return Vector of embedded arrays, one per spin channel \f$ \sigma \f$.
+     */
+    template <int Rank> std::vector<nda::array<dcomplex, Rank>> embed(std::vector<std::vector<nda::array<dcomplex, Rank>>> const &imps_blocks) const {
+
+      using array_t = nda::array<dcomplex, Rank>;
+
+      // Does this rank have a frequency index?
+      [[maybe_unused]] long n_w = 0;
+      if constexpr (detail::has_frequency<Rank>) { n_w = imps_blocks[0][0].extent(0); }
+
+      // Build the embedded array
+      auto embed_blocks = nda::array<array_t, 2>(n_alpha(), n_sigma());
+      for (auto &&[alpha, sigma] : psi.indices()) {
+        auto bl_size               = sigma_embed_decomp[alpha];
+        embed_blocks(alpha, sigma) = detail::make_zero_array<Rank, dcomplex>(bl_size, n_w);
+      }
+
+      // Use psi map to fill the embedded blocks array
+      for (auto &&[block, m] : zip(embed_blocks, psi)) {
+        if (m.imp_idx == -1) continue;
+        block = imps_blocks[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
+      }
+
+      // Total dimension of the C space
+      auto dim_C = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
+
+      // Build the result from the embedded view and return
+      std::vector<array_t> result;
+      for (auto sigma : range(n_sigma())) {
+        auto full_tensor = detail::make_zero_array<Rank, dcomplex>(dim_C, n_w);
+        for (auto &&[alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
+          detail::embed_diagonal(full_tensor, r_alpha, embed_blocks(alpha, sigma));
+        }
+        result.push_back(std::move(full_tensor));
+      }
+
+      return result;
+    }
+
+    /**
+     * @brief Embed Green's function containers.
      *
      * @details Embed impurity solver self-energies into an embedded self-energy.
      *
@@ -295,18 +425,34 @@ namespace triqs::modest {
         throw std::runtime_error{"[embedding_desc::embed]: meshes of solvers are not all equal"};
 
       auto const &mesh = Sigma_imp_vec[0][0].mesh();
-
-      // build the result
-      auto Sigma_embed = make_block2_gf(mesh, this->sigma_embed_block_shape());
-      for (auto &&[S, m] : zip(Sigma_embed, psi)) {
-        if (m.imp_idx == -1) continue;
-        S() = Sigma_imp_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
-      }
-      return Sigma_embed;
+      auto data        = embed(detail::make_data_view_from_block_gfs(Sigma_imp_vec));
+      return detail::make_block2_gf_from_data_view(data, sigma_embed_block_shape(), mesh);
     }
 
     /**
-     * @brief Embed single-particle quantities (TRIQS/ModEST).
+     * @brief Extract Green's function containers.
+     *
+     * @tparam Mesh The mesh type triqs::mesh::{dlr_imfreq, imfreq}.
+     * @param g_loc Block2Gf of gloc in \f$ M \times M \f$ space.
+     * @return Local impurity Green's function.
+     */
+    template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block2_gf<Mesh, matrix_valued> const &g_loc) const {
+      // Check that the decomposition of g_loc matches either sigma_embed_decomp
+      if (auto decomp = get_struct(g_loc).dims(r_all, 0) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
+        if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
+        return extract(decomposition_view(g_loc, this->sigma_embed_block_shape()));
+      }
+      auto const &mesh      = g_loc(0, 0).mesh();
+      auto data             = extract(detail::gather_blocks_to_data_view(g_loc));
+      auto imp_gf_stru_list = imp_block_shape();
+      return range(n_impurities()) | stdv::transform([data, imp_gf_stru_list, mesh](auto n_imp) {
+               return detail::make_block_gf_from_data_view(data[n_imp], imp_gf_stru_list[n_imp], mesh);
+             })
+         | tl::to<std::vector>();
+    }
+
+    /**
+     * @brief Embed pairs Green's function containers and matrices.
      *
      * @details Embed the impurity self-energy decomposed as a list of dynamic and a list of static parts.
      *
@@ -321,79 +467,32 @@ namespace triqs::modest {
       if (Sigma_imp_vec.size() != Sigma_imp_static_vec.size()) {
         throw std::runtime_error(fmt::format("The lists of self-energies are not equal {} != {}", Sigma_imp_vec.size(), Sigma_imp_static_vec.size()));
       }
-      return {this->embed(Sigma_imp_vec), this->embed(Sigma_imp_static_vec)};
+      return {embed(Sigma_imp_vec), embed(Sigma_imp_static_vec)};
     }
 
-    /// Embed block matrices (TRIQS/ModEST).
+    /**
+     * @brief Embed block matrices into the full correlated space.
+     *
+     * @details Embeds static (frequency-independent) impurity data stored as block matrices
+     * into the \f$ (\alpha, \sigma) \f$-indexed embedded representation. This is the matrix
+     * analogue of the frequency-dependent embed operation.
+     *
+     * @param Sigma_imp_static_vec List of block matrices, one per impurity.
+     * @return Embedded block2 matrix in \f$ \mathcal{C} \f$ space.
+     */
     block2_matrix_t embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
 
-    block_matrix_t embed_ij(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const;
-
-    //--------------------- Extract ---------------------------------------
-
     /**
-     * @brief Extract single-particle quantities (TRIQS/ModEST).
+     * @brief Extract block matrices from the embedded representation.
      *
-     * @tparam Mesh The mesh type triqs::mesh::{dlr_imfreq, imfreq}.
-     * @param g_loc Block2Gf of gloc in \f$ M \times M \f$ space.
-     * @return Local impurity Green's function.
+     * @details Extracts static (frequency-independent) impurity data from the embedded
+     * \f$ (\alpha, \sigma) \f$-indexed representation back into per-impurity block matrices.
+     * This is the inverse of the block matrix embed operation.
+     *
+     * @param matrix_C Embedded block2 matrix in \f$ \mathcal{C} \f$ space.
+     * @return List of block matrices, one per impurity.
      */
-    template <typename Mesh> std::vector<block_gf<Mesh, matrix_valued>> extract(block2_gf<Mesh, matrix_valued> const &g_loc) const {
-
-      if (auto decomp = get_struct(g_loc).dims(r_all, 0) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
-        if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
-        return extract(decomposition_view(g_loc, this->sigma_embed_block_shape()));
-      }
-
-      // FIXME : check all meshes are the same
-      auto imp_gf_stru_list = imp_block_shape();
-      auto extract_one_imp  = [&](long n_imp) {
-        auto gimp        = block_gf{g_loc(0, 0).mesh(), imp_gf_stru_list[n_imp]};
-        auto const &rpsi = reverse_psi[n_imp];
-        for (auto [gamma, tau] : rpsi.indices()) {
-          auto [alpha, sigma]                       = rpsi(gamma, tau)[0];
-          gimp[gamma + n_gamma(n_imp) * tau].data() = g_loc(alpha, sigma).data();
-        }
-        return gimp;
-      };
-      return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-    }
-
-    /// Extract matrices (TRIQS/ModEST).
     std::vector<block_matrix_t> extract(block2_matrix_t const &matrix_C) const;
-
-    ///@}
-
-    /**
-     * @name CoQui Ops
-     * Embedding methods which operate on a given object X where X ∈ (nda::array<dcomplex, 4>, nda::array<dcomplex, 5>, etc.)
-     * These methods are used to extract and embed quantities in the CoQui format.
-     * @{
-     */
-
-    //--------------------- Embed -----------------------------------------
-
-    /// Embed single-particle quantities (CoQui).
-    std::vector<nda::array<dcomplex, 3>> embed_wij(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const;
-
-    /// Embed two-particle quantities (CoQui).
-    nda::array<dcomplex, 5> embed_wijkl(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const;
-
-    /// Embed tensors (CoQui).
-    nda::array<dcomplex, 4> embed_ijkl(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const;
-
-    //--------------------- Extract ---------------------------------------
-    std::vector<block_matrix_t> extract_ij(block_matrix_t const &Sigma_imp_static_vec) const;
-
-    /// Extract single-particle quantities (CoQui).
-    std::vector<std::vector<nda::array<dcomplex, 3>>> extract_wij(std::vector<nda::array<dcomplex, 3>> const &g_loc) const;
-
-    /// Extract two-particle quantities (CoQui).
-    std::vector<nda::array<dcomplex, 5>> extract_wijkl(nda::array<dcomplex, 5> const &Pi_loc) const;
-
-    /// Extract tensors (CoQui).
-    std::vector<nda::array<dcomplex, 4>> extract_ijkl(nda::array<dcomplex, 4> const &U_tensor) const;
-
     ///@}
   };
 
@@ -468,12 +567,6 @@ namespace triqs::modest {
     auto new_obe = permute_local_space(atom_partition, obe);
     auto E       = make_embedding(new_obe.C_space, false);
     return {new_obe, E};
-  }
-
-  inline std::pair<downfolding_projector, embedding> make_embedding_from_h5(std::string const &filename) {
-    auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
-    auto E                     = make_embedding(obe.C_space, false, true);
-    return {obe.P, E};
   }
 
   /** @} Embedding factories functions */

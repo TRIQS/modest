@@ -313,216 +313,24 @@ namespace triqs::modest {
   }
 
   // ----------------------- Embedding and Extracting --------------------------
-
-  // T = Block Matrix
-
-  // ----------------------------------------------------------------------
   block2_matrix_t embedding::embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
-    auto Sigma_static_embed = nda::array<nda::matrix<dcomplex>, 2>(n_alpha(), n_sigma());
-    for (auto &&[alpha, sigma] : psi.indices()) {
-      auto bl_size                     = sigma_embed_decomp[alpha];
-      Sigma_static_embed(alpha, sigma) = nda::zeros<dcomplex>(bl_size, bl_size);
-    }
-    for (auto &&[S, m] : zip(Sigma_static_embed, psi)) {
-      if (m.imp_idx == -1) continue;
-      S = Sigma_imp_static_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
-    }
-    return Sigma_static_embed;
+    return detail::data_array_to_block2_array(this->embed(detail::matrix_to_array(Sigma_imp_static_vec)), sigma_embed_decomp);
   }
-
-  // TODO: helper functions to scatter and gather to avoid code duplication:
-  // A common pattern is to scatter/ gather from/to a large matrix to/from smaller matrices
-  block_matrix_t embedding::embed_ij(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
-    auto Sigma_static_embed = this->embed(Sigma_imp_static_vec);
-    auto dim_C              = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
-    block_matrix_t Sigma_static_embed_ij;
-    for (auto const &sigma : range(n_sigma())) {
-      auto mat = nda::zeros<dcomplex>(dim_C, dim_C);
-      for (auto &&[alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { mat(r_alpha, r_alpha) = Sigma_static_embed(alpha, sigma); }
-      Sigma_static_embed_ij.push_back(mat);
-    }
-    return Sigma_static_embed_ij;
-  }
-
   // ----------------------------------------------------------------------
   std::vector<block_matrix_t> embedding::extract(block2_matrix_t const &matrix_C) const {
-
-    auto imp_gf_stru_list = imp_block_shape();
-
-    auto matrix_E = nda::matrix<nda::matrix<dcomplex>>(n_alpha(), n_sigma());
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
-      for (auto sigma : range(n_sigma())) { matrix_E(alpha, sigma) = matrix_C(0, sigma)(r_alpha, r_alpha); }
-    }
-
-    auto extract_one_imp = [&](long n_imp) {
-      auto matrix_imp = std::vector<nda::matrix<dcomplex>>{};
-      for (auto [bl, bl_size] : imp_gf_stru_list[n_imp]) { matrix_imp.emplace_back(bl_size, bl_size); }
-      auto const &rpsi = reverse_psi[n_imp];
-      for (auto [gamma, tau] : rpsi.indices()) {
-        auto [alpha, sigma]                      = rpsi(gamma, tau)[0];
-        matrix_imp[gamma + n_gamma(n_imp) * tau] = matrix_E(alpha, sigma);
-      }
-      return matrix_imp;
-    };
-
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
+    auto data = range(n_sigma()) | stdv::transform([&](auto sigma) { return nda::array<dcomplex, 2>{matrix_C(0, sigma)}; }) | tl::to<std::vector>();
+    return detail::array_to_matrix(this->extract(data));
   }
-
-  std::vector<block_matrix_t> embedding::extract_ij(block_matrix_t const &Sigma_imp_static_vec) const {
-
-    auto imp_gf_stru_list = imp_block_shape();
-
-    auto matrix_E = nda::matrix<nda::matrix<dcomplex>>(n_alpha(), n_sigma());
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
-      for (auto sigma : range(n_sigma())) { matrix_E(alpha, sigma) = Sigma_imp_static_vec[sigma](r_alpha, r_alpha); }
-    }
-
-    auto extract_one_imp = [&](long n_imp) {
-      auto matrix_imp = std::vector<nda::matrix<dcomplex>>{};
-      for (auto [bl, bl_size] : imp_gf_stru_list[n_imp]) { matrix_imp.emplace_back(bl_size, bl_size); }
-      auto const &rpsi = reverse_psi[n_imp];
-      for (auto [gamma, tau] : rpsi.indices()) {
-        auto [alpha, sigma]                      = rpsi(gamma, tau)[0];
-        matrix_imp[gamma + n_gamma(n_imp) * tau] = matrix_E(alpha, sigma);
-      }
-      return matrix_imp;
-    };
-
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-
-  // T = Tensors
-
   // ----------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 4>> embedding::extract_ijkl(nda::array<dcomplex, 4> const &U_tensor) const {
 
-    auto imp_gf_stru_list = imp_block_shape();
+  template std::vector<std::vector<nda::array<dcomplex, 2>>> embedding::extract(std::vector<nda::array<dcomplex, 2>> const &) const;
+  template std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract(std::vector<nda::array<dcomplex, 3>> const &) const;
+  template std::vector<std::vector<nda::array<dcomplex, 4>>> embedding::extract(std::vector<nda::array<dcomplex, 4>> const &) const;
+  template std::vector<std::vector<nda::array<dcomplex, 5>>> embedding::extract(std::vector<nda::array<dcomplex, 5>> const &) const;
 
-    auto tensor_E = std::vector<nda::array<dcomplex, 4>>(n_alpha());
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { tensor_E[alpha] = U_tensor(r_alpha, r_alpha, r_alpha, r_alpha); }
-
-    auto extract_one_imp = [&](long n_imp) {
-      auto bl_size    = imp_decomposition(n_imp)[0];
-      auto tensor_imp = nda::zeros<dcomplex>(bl_size, bl_size, bl_size, bl_size);
-      auto alpha      = reverse_psi[n_imp](0, 0)[0][0];
-      return tensor_E[alpha];
-    };
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-
-  // --------------------------------------------------------------------------------------------
-  nda::array<dcomplex, 4> embedding::embed_ijkl(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const {
-    auto Utensor_E = std::vector<nda::array<dcomplex, 4>>(n_alpha());
-
-    for (auto alpha : range(n_alpha())) {
-      auto bl_size     = sigma_embed_decomp[alpha];
-      Utensor_E[alpha] = nda::zeros<dcomplex>(bl_size, bl_size, bl_size, bl_size);
-    }
-
-    for (auto &&[U, a] : zip(Utensor_E, range(n_alpha()))) {
-      if (psi(a, 0).imp_idx == -1) continue;
-      U = U_tensor_vec[psi(a, 0).imp_idx];
-    }
-
-    auto dim_C      = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
-    auto U_tensor_C = nda::array<dcomplex, 4>(dim_C, dim_C, dim_C, dim_C);
-    for (auto &&[index, sli] : enumerated_sub_slices(sigma_embed_decomp)) { U_tensor_C(sli, sli, sli, sli) = Utensor_E[index]; }
-    return U_tensor_C;
-  }
-
-  // T = Block Green's functions
-
-  // --------------------------------------------------------------------------------------------
-  std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract_wij(std::vector<nda::array<dcomplex, 3>> const &g_loc) const {
-
-    auto imp_gf_stru_list = imp_block_shape();
-    auto n_w              = g_loc[0].extent(0);
-
-    auto gloc_E = nda::array<nda::array<dcomplex, 3>, 2>(n_alpha(), n_sigma());
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
-      for (auto sigma : range(n_sigma())) { gloc_E(alpha, sigma) = g_loc[sigma](r_all, r_alpha, r_alpha); }
-    }
-
-    auto extract_one_imp = [&](long n_imp) {
-      auto g_imp = std::vector<nda::array<dcomplex, 3>>{};
-      for (auto [bl, bl_size] : imp_gf_stru_list[n_imp]) { g_imp.emplace_back(n_w, bl_size, bl_size); }
-      auto const &rpsi = reverse_psi[n_imp];
-      for (auto [gamma, tau] : rpsi.indices()) {
-        auto [alpha, sigma]                 = rpsi(gamma, tau)[0];
-        g_imp[gamma + n_gamma(n_imp) * tau] = gloc_E(alpha, sigma);
-      }
-      return g_imp;
-    };
-
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-
-  // --------------------------------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 3>> embedding::embed_wij(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const {
-
-    auto Sigma_embed = nda::array<nda::array<dcomplex, 3>, 2>(n_alpha(), n_sigma());
-    auto n_w         = Sigma_imp_vec[0][0].extent(0);
-
-    for (auto &&[alpha, sigma] : psi.indices()) {
-      auto bl_size              = sigma_embed_decomp[alpha];
-      Sigma_embed(alpha, sigma) = nda::zeros<dcomplex>(n_w, bl_size, bl_size);
-    }
-
-    for (auto &&[S, m] : zip(Sigma_embed, psi)) {
-      if (m.imp_idx == -1) continue;
-      S = Sigma_imp_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
-    }
-
-    auto dim_C = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
-    auto Sigma_C =
-       range(n_sigma()) | stdv::transform([n_w, dim_C](auto) { return nda::array<dcomplex, 3>(n_w, dim_C, dim_C); }) | tl::to<std::vector>();
-
-    for (auto sigma : range(n_sigma())) {
-      for (auto &&[index, sli] : enumerated_sub_slices(sigma_embed_decomp)) { Sigma_C[sigma](r_all, sli, sli) = Sigma_embed(index, sigma); }
-    }
-
-    return Sigma_C;
-  }
-
-  // --------------------------------------------------------------------------------------------
-  //FIXME : protect this function as it will only work with a Pi_embed_decomp
-  std::vector<nda::array<dcomplex, 5>> embedding::extract_wijkl(nda::array<dcomplex, 5> const &pi_loc) const {
-
-    auto Pi_E = std::vector<nda::array<dcomplex, 5>>{};
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { Pi_E.emplace_back(pi_loc(r_all, r_alpha, r_alpha, r_alpha, r_alpha)); }
-
-    auto extract_one_imp = [&](long n_imp) {
-      auto const &rpsi    = reverse_psi[n_imp];
-      auto [alpha, sigma] = rpsi(0, 0)[0];
-      return Pi_E[alpha];
-    };
-
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-  // --------------------------------------------------------------------------------------------
-
-  //FIXME : protect this function as it will only work with a Pi_embed_decomp
-  nda::array<dcomplex, 5> embedding::embed_wijkl(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const {
-
-    auto n_w = pi_imp_vec[0].extent(0);
-
-    auto Pi_embed = std::vector<nda::array<dcomplex, 5>>(n_alpha());
-    for (auto alpha : range(n_alpha())) {
-      auto bl_size    = sigma_embed_decomp[alpha];
-      Pi_embed[alpha] = nda::zeros<dcomplex>(n_w, bl_size, bl_size, bl_size, bl_size);
-    }
-
-    for (auto alpha : range(n_alpha())) {
-      auto const &m = psi(alpha, 0);
-      if (m.imp_idx == -1) continue; // check
-      Pi_embed[alpha] = pi_imp_vec[m.imp_idx];
-    }
-
-    auto dim_C = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
-    auto Pi_C  = nda::array<dcomplex, 5>(n_w, dim_C, dim_C, dim_C, dim_C);
-    for (auto &&[alpha, sli] : enumerated_sub_slices(sigma_embed_decomp)) { Pi_C(r_all, sli, sli, sli, sli) = Pi_embed[alpha]; }
-
-    return Pi_C;
-  }
+  template std::vector<nda::array<dcomplex, 2>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 2>>> const &) const;
+  template std::vector<nda::array<dcomplex, 3>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &) const;
+  template std::vector<nda::array<dcomplex, 4>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 4>>> const &) const;
+  template std::vector<nda::array<dcomplex, 5>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 5>>> const &) const;
 
 } // namespace triqs::modest

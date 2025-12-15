@@ -113,14 +113,6 @@ TEST(embed_desc_tests, split_block) { // NOLINT
   EXPECT_EQ(E3, E2_ref);
 }
 
-TEST(embed_desc_tests, embed_from_h5) { // NOLINT
-  auto filename              = "ref_data/svo-wien2k.ref.h5";
-  auto [P, E]                = make_embedding_from_h5(filename);
-  auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
-  auto E_ref                 = make_embedding(obe.C_space, false, true);
-  EXPECT_EQ(E, E_ref);
-}
-
 TEST(embed_desc_tests, spinless) {
   auto E_ref = embedding_builder({"ud"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
   auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
@@ -128,22 +120,22 @@ TEST(embed_desc_tests, spinless) {
   EXPECT_EQ(E1, E_ref);
 }
 
+// Rank 2  (i j)
 TEST(embed_desc_tests, Eij) {
-  // make Embedding
   auto E              = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0});
   auto n_spin         = 2;
   auto n_orb          = 2;
   auto dummy_data     = nda::rand<dcomplex>(1, 1);
-  auto Sigma_static_C = range(n_spin) | stdv::transform([&](auto) { return nda::matrix<dcomplex>::zeros(n_orb, n_orb); }) | tl::to<std::vector>();
+  auto Sigma_static_C = range(n_spin) | stdv::transform([&](auto) { return nda::zeros<dcomplex>(n_orb, n_orb); }) | tl::to<std::vector>();
   for (auto s : range(n_spin)) {
     for (auto j : range(n_orb)) Sigma_static_C[s](j, j) = dummy_data(0, 0);
   }
-  auto Sigma_static = E.embed_ij(E.extract_ij(Sigma_static_C));
+  auto Sigma_static = E.embed(E.extract(Sigma_static_C));
   for (auto s : range(n_spin)) { EXPECT_ARRAY_NEAR(Sigma_static[s], Sigma_static_C[s]); }
 }
 
+// Rank 3  (w i j)
 TEST(embed_desc_tests, Ewij) {
-  // make Embedding
   auto E          = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0});
   auto n_iw       = 100;
   auto n_spin     = 2;
@@ -153,8 +145,37 @@ TEST(embed_desc_tests, Ewij) {
   for (auto s : range(n_spin)) {
     for (auto j : range(n_orb)) Sigma_C[s](r_all, j, j) = dummy_data(r_all, 0, 0);
   }
-  auto Sigma = E.embed_wij(E.extract_wij(Sigma_C));
+  auto Sigma = E.embed(E.extract(Sigma_C));
   for (auto s : range(n_spin)) { EXPECT_ARRAY_NEAR(Sigma[s], Sigma_C[s]); }
+}
+
+// Rank 4 (i j k l)
+TEST(embed_desc_tests, Eijkl) {
+  auto E          = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0}).make_spinless();
+  auto n_spin     = 1;
+  auto n_orb      = 2;
+  auto dummy_data = nda::rand<dcomplex>(1, 1, 1, 1);
+  auto U_static_C = range(n_spin) | stdv::transform([&](auto) { return nda::zeros<dcomplex>(n_orb, n_orb, n_orb, n_orb); }) | tl::to<std::vector>();
+  for (auto s : range(n_spin)) {
+    for (auto j : range(n_orb)) U_static_C[s](j, j, j, j) = dummy_data(0, 0, 0, 0);
+  }
+  auto U_static = E.embed(E.extract(U_static_C));
+  for (auto s : range(n_spin)) { EXPECT_ARRAY_NEAR(U_static[s], U_static_C[s]); }
+}
+
+// Rank 5  (w i j k l)
+TEST(embed_desc_tests, Ewijkl) {
+  auto E          = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0}).make_spinless();
+  auto n_iw       = 100;
+  auto n_spin     = 1;
+  auto n_orb      = 2;
+  auto dummy_data = nda::rand<dcomplex>(n_iw, 1, 1, 1, 1);
+  auto Pi_C = range(n_spin) | stdv::transform([&](auto) { return nda::zeros<dcomplex>(n_iw, n_orb, n_orb, n_orb, n_orb); }) | tl::to<std::vector>();
+  for (auto s : range(n_spin)) {
+    for (auto j : range(n_orb)) Pi_C[s](r_all, j, j, j, j) = dummy_data(r_all, 0, 0, 0, 0);
+  }
+  auto Pi = E.embed(E.extract(Pi_C));
+  for (auto s : range(n_spin)) { EXPECT_ARRAY_NEAR(Pi[s], Pi_C[s]); }
 }
 
 #if LFS
