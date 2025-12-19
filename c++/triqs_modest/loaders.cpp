@@ -440,7 +440,7 @@ namespace triqs::modest {
   }
 
   //-------------------------------------------------------
-  one_body_elements_gw make_one_body_elements_gw(std::string const &filename) {
+  one_body_elements_gw make_one_body_elements_gw(std::string const &filename, double threshold, bool diagonalize_hloc) {
 
     mpi::communicator comm;
     int root = 0;
@@ -448,7 +448,7 @@ namespace triqs::modest {
 
     if (comm.rank() == root) {
 
-      auto [target_density, obe] = read_obe_from_dft_converter_hdf5(filename);
+      auto [target_density, obe] = read_obe_from_dft_converter_hdf5(filename, threshold, diagonalize_hloc);
 
       // read the band window
       auto band_window = read_band_window(filename);

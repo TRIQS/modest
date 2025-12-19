@@ -106,7 +106,7 @@ namespace triqs::modest {
    * @param filename Hdf5 file from dft_tools converter.
    * @return One-body elements for GW calculations.
    */
-  one_body_elements_gw make_one_body_elements_gw(std::string const &filename);
+  one_body_elements_gw make_one_body_elements_gw(std::string const &filename, double threshold = 1e-5, bool diagonalize_hloc = false);
 
   /** 
   @} */ // Fixed grid factories
