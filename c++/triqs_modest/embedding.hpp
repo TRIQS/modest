@@ -571,6 +571,16 @@ namespace triqs::modest {
 
   /** @} Embedding factories functions */
 
+  template std::vector<std::vector<nda::array<dcomplex, 2>>> embedding::extract(std::vector<nda::array<dcomplex, 2>> const &) const;
+  template std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract(std::vector<nda::array<dcomplex, 3>> const &) const;
+  template std::vector<std::vector<nda::array<dcomplex, 4>>> embedding::extract(std::vector<nda::array<dcomplex, 4>> const &) const;
+  template std::vector<std::vector<nda::array<dcomplex, 5>>> embedding::extract(std::vector<nda::array<dcomplex, 5>> const &) const;
+
+  template std::vector<nda::array<dcomplex, 2>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 2>>> const &) const;
+  template std::vector<nda::array<dcomplex, 3>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 3>>> const &) const;
+  template std::vector<nda::array<dcomplex, 4>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 4>>> const &) const;
+  template std::vector<nda::array<dcomplex, 5>> embedding::embed(std::vector<std::vector<nda::array<dcomplex, 5>>> const &) const;
+
 #define INSTANTIATE(Mesh)                                                                                                                            \
   template block2_gf<Mesh, matrix_valued> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &) const;                                \
   template std::pair<block2_gf<Mesh, matrix_valued>, block2_matrix_t> embedding::embed(std::vector<block_gf<Mesh, matrix_valued>> const &,           \
