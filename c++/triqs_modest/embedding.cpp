@@ -316,8 +316,10 @@ namespace triqs::modest {
   block2_matrix_t embedding::embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
     return detail::data_array_to_block2_array(this->embed(detail::matrix_to_array(Sigma_imp_static_vec)), sigma_embed_decomp);
   }
+
   // ----------------------------------------------------------------------
   std::vector<block_matrix_t> embedding::extract(block2_matrix_t const &matrix_C) const {
+    if (matrix_C.extent(0) != 1) return extract(detail::gather_blocks_to_data_view(matrix_C));
     auto data = range(n_sigma()) | stdv::transform([&](auto sigma) { return nda::array<dcomplex, 2>{matrix_C(0, sigma)}; }) | tl::to<std::vector>();
     return detail::array_to_matrix(this->extract(data));
   }

@@ -72,6 +72,18 @@ namespace triqs::modest::detail {
     return data;
   }
 
+  template <typename T> auto gather_blocks_to_data_view(nda::array<nda::matrix<T>, 2> const &M) {
+    auto n_sigma = M.extent(1);
+    auto decomp  = range(M.extent(0)) | stdv::transform([&](auto const &alpha) { return M(alpha, 0).shape()[0]; }) | tl::to<std::vector>();
+    auto dim     = stdr::fold_left(decomp, 0, std::plus<>());
+    nda::array<nda::array<T, 2>, 2> data(1, n_sigma);
+    for (auto sigma : range(n_sigma)) {
+      data(0, sigma) = nda::zeros<T>(dim, dim);
+      for (auto &&[index, sli] : enumerated_sub_slices(decomp)) { data(0, sigma)(sli, sli) = M(index, sigma); }
+    };
+    return data;
+  }
+
   // Make a BlockGf from data
   template <typename Mesh>
   block_gf<Mesh, matrix_valued> make_block_gf_from_data_view(std::vector<nda::array<dcomplex, 3>> const &data_view, gf_struct_t const &gf_struct,
