@@ -45,6 +45,10 @@ namespace triqs::modest {
   one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR,
                                                     spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells);
 
+  one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR_up,
+                                                    std::vector<nda::array<dcomplex, 2>> const &HR_dn, spin_kind_e spin_kind,
+                                                    std::vector<atomic_orbs> atomic_shells);
+
   /** @name OBE factories using a TB Hamiltonian
  *  Factory functions to create one_body_elements_on_tb
  *  @{
@@ -122,6 +126,9 @@ namespace triqs::modest {
  * @return One-body elements containing the rotated TB Hamiltonian.
  */
   one_body_elements_tb rotate(one_body_elements_tb const &obe, nda::matrix<dcomplex> const &U);
+
+  one_body_elements_tb extend_to_spin(one_body_elements_tb const &obe);
+  one_body_elements_tb add_local_term(one_body_elements_tb const &obe, nda::matrix<dcomplex> const &local_term);
 
   //  -----------------------------------------------------------------------
 
@@ -249,7 +256,8 @@ namespace triqs::modest {
     std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static, &opt](double x) {
       return density(obe, x, Sigma_dynamic, Sigma_static, opt);
     };
-    return std::get<0>(triqs::utility::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+    return std::get<0>(
+       triqs::utility::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
   }
 
   /**

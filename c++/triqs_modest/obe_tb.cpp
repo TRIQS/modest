@@ -38,10 +38,15 @@ namespace triqs::modest {
 
   one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR,
                                                     spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
-    if (spin_kind != spin_kind_e::NonPolarized) {
-      throw std::runtime_error("Tight-binding model can only be used for non-spin-polarized calculations.\n");
-    }
-    std::vector<tb_hamiltonian> tb_H = {tb_hamiltonian(Rs, HR), tb_hamiltonian(Rs, HR)};
+    std::vector<tb_hamiltonian> tb_H = {tb_hamiltonian(Rs, HR)};
+    if (spin_kind == spin_kind_e::NonPolarized) { tb_H.emplace_back(Rs, HR); }
+    return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
+  }
+
+  one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR_up,
+                                                    std::vector<nda::array<dcomplex, 2>> const &HR_dn, spin_kind_e spin_kind,
+                                                    std::vector<atomic_orbs> atomic_shells) {
+    std::vector<tb_hamiltonian> tb_H = {tb_hamiltonian(Rs, HR_up), tb_hamiltonian(Rs, HR_dn)};
     return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   }
 
@@ -168,6 +173,58 @@ namespace triqs::modest {
     auto new_H = obe.H | stdv::transform([&](auto x) { return rotate(x, U); }) | tl::to<std::vector>();
 
     return {.C_space = obe.C_space, .H = std::move(new_H)};
+  }
+
+  one_body_elements_tb extend_to_spin(one_body_elements_tb const &obe) {
+
+    if (obe.C_space.spin_kind() != spin_kind_e::NonPolarized) {
+      throw std::runtime_error("Can only extend to spin a non-spin-polarized one_body_elements_tb.");
+    }
+
+    auto const &Rs       = obe.H[0].get_R_list();
+    auto const &hoppings = obe.H[0].hoppings();
+    auto n_orb           = obe.C_space.dim();
+    auto new_orb         = 2 * n_orb;
+
+    auto extend_matrix = [&new_orb, &n_orb](auto const &mat) {
+      auto ext_mat = nda::array<dcomplex, 2>(new_orb, new_orb);
+      for (auto const &i : nda::range(n_orb)) {
+        for (auto const &j : nda::range(n_orb)) {
+          ext_mat(i, j)                 = mat(i, j); // up-up
+          ext_mat(i + n_orb, j + n_orb) = mat(i, j); // down-down
+        }
+      }
+      return ext_mat;
+    };
+
+    auto new_hoppings = hoppings | stdv::transform([&](auto const &tR) { return extend_matrix(tR); }) | tl::to<std::vector>();
+    auto new_tb_H     = std::vector<tb_hamiltonian>{{std::move(Rs), std::move(new_hoppings)}};
+
+    auto const &sh         = obe.C_space.atomic_shells();
+    auto new_atomic_shells = sh
+       | stdv::transform([](auto const &s) { return atomic_orbs{.dim = 2 * s.dim, .l = s.l, .cls_idx = s.cls_idx, .dft_idx = s.dft_idx}; })
+       | tl::to<std::vector>();
+
+    return make_obe_from_tb(std::move(new_tb_H), spin_kind_e::NonColinear, std::move(new_atomic_shells));
+  }
+
+  one_body_elements_tb add_local_term(one_body_elements_tb const &obe, nda::matrix<dcomplex> const &local_term) {
+    if (local_term.extent(0) != obe.C_space.dim()) {
+      throw std::runtime_error("Cannot add a local term with a different dimension than the one_body_elements_tb.");
+    }
+
+    std::vector<tb_hamiltonian> new_tb_H;
+    for (auto H : obe.H) {
+      auto hoppings  = H.hoppings();
+      auto const &Rs = H.get_R_list();
+      hoppings[H.get_R_idx({0, 0, 0})] += local_term;
+      new_tb_H.emplace_back(Rs, hoppings);
+    }
+
+    auto spin_kind = obe.C_space.spin_kind();
+    auto shells    = obe.C_space.atomic_shells();
+
+    return make_obe_from_tb(std::move(new_tb_H), spin_kind, shells);
   }
 
 } // namespace triqs::modest
