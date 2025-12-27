@@ -26,24 +26,20 @@ using c2py::operator""_a;
 
 // ==================== module functions ====================
 
-// U_matrix_in_spherical_basis
-static auto const fun_0 = c2py::dispatcher_f_kw_t{
-   c2py::cfun([](long l, double U_int, double J_hund) { return triqs::U_matrix_in_spherical_basis(l, U_int, J_hund); }, "l", "U_int", "J_hund")};
-
 // make_density_density
-static auto const fun_1 =
+static auto const fun_0 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double U_prime,
                                          double J_hund) { return triqs::make_density_density(tau_names, dim_gamma, U_int, U_prime, J_hund); },
                                       "tau_names", "dim_gamma", "U_int", "U_prime", "J_hund")};
 
 // make_kanamori
-static auto const fun_2 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_1 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double U_prime, double J_hund, bool spin_flip,
       bool pair_hopping) { return triqs::make_kanamori(tau_names, dim_gamma, U_int, U_prime, J_hund, spin_flip, pair_hopping); },
    "tau_names", "dim_gamma", "U_int", "U_prime", "J_hund", "spin_flip"_a = true, "pair_hopping"_a = true)};
 
 // make_slater
-static auto const fun_3 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_2 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double J_hund,
       const nda::matrix<triqs::dcomplex> &spherical_to_dft, const std::optional<nda::matrix<triqs::dcomplex>> &dft_to_local) {
      return triqs::make_slater(tau_names, dim_gamma, U_int, J_hund, spherical_to_dft, dft_to_local);
@@ -51,34 +47,6 @@ static auto const fun_3 = c2py::dispatcher_f_kw_t{c2py::cfun(
    "tau_names", "dim_gamma", "U_int", "J_hund", "spherical_to_dft", "dft_to_local")};
 
 static const auto doc_d_0 = fun_0.doc(R"DOC(
-Construct a four-index Coulomb tensor in the basis of spherical harmonics.
-
-We typically construct the four-index Coulomb tensor in the basis of spherical harmonics,
-
-.. math::
-
-   U_{m_{1}m_{2}m_{3}m_{4}}^{\mathrm{spherical}} = \sum_{k=0}^{2l} F_{k} \alpha (l, k, m_{1}, m_{2}, m_{3}, m_{4}),
-
-where :math:`F_{k}` are radial Slater integrals and :math:`\alpha(l, k, m_{1}, m_{2}, m_{3}, m_{4})` denote angular
-Racah-Wigner numbers for a spherically symmetric interaction tensor.
-
-Parameters
-----------
-l : {par_0}
-   Angular quantum number.
-U_int : {par_1}
-   Screened Hubbard interaction.
-J_hund : {par_2}
-   Hund's coupling.
-
-Returns
--------
-{ret_0}
-   Coulomb tensor.
-)DOC",
-                                      {{c2py::python_typename<long>()}, {c2py::python_typename<double>()}, {c2py::python_typename<double>()}},
-                                      {c2py::python_typename<nda::array<double, 4>>()});
-static const auto doc_d_1 = fun_1.doc(R"DOC(
 Construct a density-density interaction Hamiltonian.
 
 Create a density-density Hamiltonian
@@ -112,7 +80,7 @@ Returns
                                        {c2py::python_typename<double>()},
                                        {c2py::python_typename<double>()}},
                                       {c2py::python_typename<triqs::operators::many_body_operator>()});
-static const auto doc_d_2 = fun_2.doc(R"DOC(
+static const auto doc_d_1 = fun_1.doc(R"DOC(
 Construct a Hubbard-Kanamori Hamiltonian.
 
 Create a Hubbard-Kanamori Hamiltonian using the density-density, spin-flip, and pair-hopping interactions,
@@ -153,7 +121,7 @@ Returns
                                        {c2py::python_typename<bool>()},
                                        {c2py::python_typename<bool>()}},
                                       {c2py::python_typename<triqs::operators::many_body_operator>()});
-static const auto doc_d_3 = fun_3.doc(R"DOC(
+static const auto doc_d_2 = fun_2.doc(R"DOC(
 Construct a Slater Hamiltonian.
 
 Create a Slater Hamiltonian using fully rotationally-invariant four-index interactions:
@@ -187,10 +155,9 @@ dft_to_local : {par_5}
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"U_matrix_in_spherical_basis", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
-   {"make_density_density", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
-   {"make_kanamori", (PyCFunction)c2py::pyfkw<fun_2>, METH_VARARGS | METH_KEYWORDS, doc_d_2.c_str()},
-   {"make_slater", (PyCFunction)c2py::pyfkw<fun_3>, METH_VARARGS | METH_KEYWORDS, doc_d_3.c_str()},
+   {"make_density_density", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
+   {"make_kanamori", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
+   {"make_slater", (PyCFunction)c2py::pyfkw<fun_2>, METH_VARARGS | METH_KEYWORDS, doc_d_2.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 

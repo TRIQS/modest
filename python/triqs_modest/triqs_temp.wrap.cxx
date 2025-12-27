@@ -30,8 +30,8 @@ template <> constexpr bool c2py::is_wrapped<triqs::lattice::bz_int_options> = tr
 
 template <> inline constexpr auto c2py::tp_name<triqs::tb::tb_hamiltonian> = "triqs.triqs_temp.TbHamiltonian";
 static auto init_0                                                         = c2py::dispatcher_c_kw_t{
-   c2py::c_constructor<triqs::tb::tb_hamiltonian>(),
-   c2py::c_constructor<triqs::tb::tb_hamiltonian, std::vector<std::array<long, 3>>, std::vector<nda::array<nda::dcomplex, 2>>>("Rs", "hoppings")};
+   c2py::c_constructor<triqs::tb::tb_hamiltonian, std::vector<std::array<long, 3>>, std::vector<nda::array<nda::dcomplex, 2>>>("Rs", "hoppings"),
+   c2py::c_constructor<triqs::tb::tb_hamiltonian>()};
 template <> constexpr initproc c2py::tp_init<triqs::tb::tb_hamiltonian>    = c2py::pyfkw_constructor<init_0>;
 template <> const std::string c2py::tp_ctor_doc<triqs::tb::tb_hamiltonian> = init_0.doc(R"DOC()DOC");
 // __call__

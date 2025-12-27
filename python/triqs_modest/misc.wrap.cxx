@@ -298,8 +298,8 @@ constinit PyGetSetDef c2py::tp_getset<triqs::tb::superlattice>[] = {
 template <> const std::string c2py::tp_doc<triqs::tb::superlattice>        = R"DOC()DOC" + c2py::tp_ctor_doc<triqs::tb::superlattice>;
 template <> inline constexpr auto c2py::tp_name<triqs::tb::tb_hamiltonian> = "triqs_modest.misc.TbHamiltonian";
 static auto init_1                                                         = c2py::dispatcher_c_kw_t{
-   c2py::c_constructor<triqs::tb::tb_hamiltonian>(),
-   c2py::c_constructor<triqs::tb::tb_hamiltonian, std::vector<std::array<long, 3>>, std::vector<nda::array<nda::dcomplex, 2>>>("Rs", "hoppings")};
+   c2py::c_constructor<triqs::tb::tb_hamiltonian, std::vector<std::array<long, 3>>, std::vector<nda::array<nda::dcomplex, 2>>>("Rs", "hoppings"),
+   c2py::c_constructor<triqs::tb::tb_hamiltonian>()};
 template <> constexpr initproc c2py::tp_init<triqs::tb::tb_hamiltonian>    = c2py::pyfkw_constructor<init_1>;
 template <> const std::string c2py::tp_ctor_doc<triqs::tb::tb_hamiltonian> = init_1.doc(R"DOC()DOC");
 // __call__
@@ -460,26 +460,36 @@ static auto const fun_4 = c2py::dispatcher_f_kw_t{
                  const std::vector<triqs::modest::atomic_orbs> &atomic_shells) { return triqs::modest::Hloc(H_sigma, atomic_shells); },
               "H_sigma", "atomic_shells")};
 
+// add_local_term
+static auto const fun_5 =
+   c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_tb &obe,
+                                         const nda::matrix<triqs::dcomplex> &local_term) { return triqs::modest::add_local_term(obe, local_term); },
+                                      "obe", "local_term")};
+
 // discover_symmetries
-static auto const fun_5 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_6 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const nda::array<nda::matrix<triqs::dcomplex>, 2> &Hloc0, const std::vector<triqs::modest::atomic_orbs> &atomic_shells, double block_threshold,
       bool diagonalize_hloc) { return triqs::modest::discover_symmetries(Hloc0, atomic_shells, block_threshold, diagonalize_hloc); },
    "Hloc0", "atomic_shells", "block_threshold", "diagonalize_hloc")};
 
 // double_counting
-static auto const fun_6 =
+static auto const fun_7 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const nda::array<nda::matrix<triqs::dcomplex>, 2> &density_matrix, double U_int, double J_hund,
                                          const std::string method) { return triqs::modest::double_counting(density_matrix, U_int, J_hund, method); },
                                       "density_matrix", "U_int", "J_hund", "method")};
 
+// extend_to_spin
+static auto const fun_8 =
+   c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::extend_to_spin(obe); }, "obe")};
+
 // fold
-static auto const fun_7 = c2py::dispatcher_f_kw_t{
+static auto const fun_9 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::tb::superlattice &sl, const triqs::tb::tb_hamiltonian &tb) { return triqs::tb::fold(sl, tb); }, "sl", "tb"),
    c2py::cfun([](const triqs::tb::superlattice &sl, const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::fold(sl, obe); }, "sl",
               "obe")};
 
 // gloc
-static auto const fun_8 = c2py::dispatcher_f_kw_t{
+static auto const fun_10 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::mesh::imfreq &w_mesh, const triqs::tb::tb_hamiltonian &H_k, double mu,
                  const triqs::lattice::bz_int_options &opt) { return triqs::lattice::gloc(w_mesh, H_k, mu, opt); },
               "w_mesh", "H_k", "mu", "opt"),
@@ -500,7 +510,7 @@ static auto const fun_8 = c2py::dispatcher_f_kw_t{
               "H_k", "mu", "Sigma", "opt")};
 
 // h5_read
-static auto const fun_9 = c2py::dispatcher_f_kw_t{
+static auto const fun_11 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](h5::group g, const std::string &name, triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::h5_read(g, name, x); },
               "g", "name", "x"),
    c2py::cfun([](h5::group g, const std::string &name, triqs::modest::initial_data &data) { return triqs::modest::h5_read(g, name, data); }, "g",
@@ -509,7 +519,7 @@ static auto const fun_9 = c2py::dispatcher_f_kw_t{
               "name", "data")};
 
 // h5_write
-static auto const fun_10 = c2py::dispatcher_f_kw_t{
+static auto const fun_12 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](h5::group g, const std::string &name, const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::h5_write(g, name, x); },
       "g", "name", "x"),
@@ -519,25 +529,33 @@ static auto const fun_10 = c2py::dispatcher_f_kw_t{
               "g", "name", "data")};
 
 // one_body_elements_from_model
-static auto const fun_11 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](const std::vector<std::array<long, 3>> &Rs, const std::vector<nda::array<triqs::dcomplex, 2>> &HR, triqs::modest::spin_kind_e spin_kind,
-      std::vector<triqs::modest::atomic_orbs> atomic_shells) {
-     return triqs::modest::one_body_elements_from_model(Rs, HR, spin_kind, atomic_shells);
-   },
-   "Rs", "HR", "spin_kind", "atomic_shells")};
+static auto const fun_13 =
+   c2py::dispatcher_f_kw_t{c2py::cfun(
+                              [](const std::vector<std::array<long, 3>> &Rs, const std::vector<nda::array<triqs::dcomplex, 2>> &HR,
+                                 triqs::modest::spin_kind_e spin_kind, std::vector<triqs::modest::atomic_orbs> atomic_shells) {
+                                return triqs::modest::one_body_elements_from_model(Rs, HR, spin_kind, atomic_shells);
+                              },
+                              "Rs", "HR", "spin_kind", "atomic_shells"),
+                           c2py::cfun(
+                              [](const std::vector<std::array<long, 3>> &Rs, const std::vector<nda::array<triqs::dcomplex, 2>> &HR_up,
+                                 const std::vector<nda::array<triqs::dcomplex, 2>> &HR_dn, triqs::modest::spin_kind_e spin_kind,
+                                 std::vector<triqs::modest::atomic_orbs> atomic_shells) {
+                                return triqs::modest::one_body_elements_from_model(Rs, HR_up, HR_dn, spin_kind, atomic_shells);
+                              },
+                              "Rs", "HR_up", "HR_dn", "spin_kind", "atomic_shells")};
 
 // permute_local_space
-static auto const fun_12 = c2py::dispatcher_f_kw_t{
+static auto const fun_14 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::vector<std::vector<long>> &atom_partition,
                  const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::permute_local_space(atom_partition, x); },
               "atom_partition", "x")};
 
 // rotate
-static auto const fun_13 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_15 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const triqs::modest::one_body_elements_tb &obe, const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate(obe, U); }, "obe", "U")};
 
 // rotate_embedded_self_energy
-static auto const fun_14 = c2py::dispatcher_f_kw_t{
+static auto const fun_16 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_embed_dynamic_loc,
                  const nda::matrix<triqs::dcomplex> &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, U); },
               "Sigma_embed_dynamic_loc", "U"),
@@ -575,7 +593,7 @@ static auto const fun_14 = c2py::dispatcher_f_kw_t{
       "Sigma_embed_static_loc", "obe")};
 
 // sigma_to_data_idx
-static auto const fun_15 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const fun_17 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](triqs::modest::spin_kind_e spin_kind, long sigma) { return triqs::modest::sigma_to_data_idx(spin_kind, sigma); }, "spin_kind", "sigma")};
 
 static const auto doc_d_4 = fun_4.doc(R"DOC(
@@ -597,8 +615,9 @@ Returns
                                       {{c2py::python_typename<const std::vector<triqs::tb::tb_hamiltonian> &>()},
                                        {c2py::python_typename<const std::vector<triqs::modest::atomic_orbs> &>()}},
                                       {c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()});
-static const auto doc_d_5 =
-   fun_5.doc(R"DOC(
+static const auto doc_d_5 = fun_5.doc(R"DOC()DOC");
+static const auto doc_d_6 =
+   fun_6.doc(R"DOC(
 Find symmetries of the :math:`R = 0` component of a Hamiltonian to determine a GF block structure.
 
 Discovers (approximate) irreducible symmetries for Green's function from the non-interacting part of the
@@ -627,7 +646,7 @@ Returns
               {c2py::python_typename<double>()},
               {c2py::python_typename<bool>()}},
              {c2py::python_typename<std::pair<nda::array<std::vector<long>, 2>, nda::array<nda::matrix<triqs::dcomplex>, 2>>>()});
-static const auto doc_d_6 = fun_6.doc(R"DOC(
+static const auto doc_d_7 = fun_7.doc(R"DOC(
 Compute double counting correction for a DC type (method) from the density matrix of a Green's function.
 
 Parameters
@@ -651,8 +670,9 @@ Returns
                                        {c2py::python_typename<double>()},
                                        {c2py::python_typename<const std::string>()}},
                                       {c2py::python_typename<std::pair<nda::array<nda::matrix<double>, 2>, nda::matrix<double>>>()});
-static const auto doc_d_7 =
-   fun_7.doc(R"DOC(
+static const auto doc_d_8 = fun_8.doc(R"DOC()DOC");
+static const auto doc_d_9 =
+   fun_9.doc(R"DOC(
 Convert a tight binding Hamiltonian to its superlattice equivalent.
 
 Parameters
@@ -669,12 +689,12 @@ Returns
 )DOC",
              {{c2py::python_typename<const triqs::tb::superlattice &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}},
              {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
-static const auto doc_d_8  = fun_8.doc(R"DOC()DOC");
-static const auto doc_d_9  = fun_9.doc(R"DOC()DOC");
 static const auto doc_d_10 = fun_10.doc(R"DOC()DOC");
 static const auto doc_d_11 = fun_11.doc(R"DOC()DOC");
 static const auto doc_d_12 = fun_12.doc(R"DOC()DOC");
-static const auto doc_d_13 = fun_13.doc(
+static const auto doc_d_13 = fun_13.doc(R"DOC()DOC");
+static const auto doc_d_14 = fun_14.doc(R"DOC()DOC");
+static const auto doc_d_15 = fun_15.doc(
    R"DOC(
 Rotate a tight-binding Hamiltonian by a unitary matrix :math:`U`.
 
@@ -694,7 +714,7 @@ Returns
 )DOC",
    {{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}, {c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()}},
    {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
-static const auto doc_d_14 = fun_14.doc(R"DOC(
+static const auto doc_d_16 = fun_16.doc(R"DOC(
 [1, 2, 3, 4, 5, 6, 7, 8] Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
 
 The rotation is independent of frequency and is performe as UΣ(ω)U†.
@@ -747,7 +767,7 @@ Returns
                                          c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>(),
                                          c2py::python_typename<std::vector<nda::array<triqs::dcomplex, 3>>>(),
                                          c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>()});
-static const auto doc_d_15 = fun_15.doc(R"DOC(
+static const auto doc_d_17 = fun_17.doc(R"DOC(
 Map a spin index to a data index.
 
 The mapping depends on the spin kind:
@@ -760,17 +780,19 @@ The mapping depends on the spin kind:
 
 static PyMethodDef module_methods[] = {
    {"Hloc", (PyCFunction)c2py::pyfkw<fun_4>, METH_VARARGS | METH_KEYWORDS, doc_d_4.c_str()},
-   {"discover_symmetries", (PyCFunction)c2py::pyfkw<fun_5>, METH_VARARGS | METH_KEYWORDS, doc_d_5.c_str()},
-   {"double_counting", (PyCFunction)c2py::pyfkw<fun_6>, METH_VARARGS | METH_KEYWORDS, doc_d_6.c_str()},
-   {"fold", (PyCFunction)c2py::pyfkw<fun_7>, METH_VARARGS | METH_KEYWORDS, doc_d_7.c_str()},
-   {"gloc", (PyCFunction)c2py::pyfkw<fun_8>, METH_VARARGS | METH_KEYWORDS, doc_d_8.c_str()},
-   {"h5_read", (PyCFunction)c2py::pyfkw<fun_9>, METH_VARARGS | METH_KEYWORDS, doc_d_9.c_str()},
-   {"h5_write", (PyCFunction)c2py::pyfkw<fun_10>, METH_VARARGS | METH_KEYWORDS, doc_d_10.c_str()},
-   {"one_body_elements_from_model", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
-   {"permute_local_space", (PyCFunction)c2py::pyfkw<fun_12>, METH_VARARGS | METH_KEYWORDS, doc_d_12.c_str()},
-   {"rotate", (PyCFunction)c2py::pyfkw<fun_13>, METH_VARARGS | METH_KEYWORDS, doc_d_13.c_str()},
-   {"rotate_embedded_self_energy", (PyCFunction)c2py::pyfkw<fun_14>, METH_VARARGS | METH_KEYWORDS, doc_d_14.c_str()},
-   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_15>, METH_VARARGS | METH_KEYWORDS, doc_d_15.c_str()},
+   {"add_local_term", (PyCFunction)c2py::pyfkw<fun_5>, METH_VARARGS | METH_KEYWORDS, doc_d_5.c_str()},
+   {"discover_symmetries", (PyCFunction)c2py::pyfkw<fun_6>, METH_VARARGS | METH_KEYWORDS, doc_d_6.c_str()},
+   {"double_counting", (PyCFunction)c2py::pyfkw<fun_7>, METH_VARARGS | METH_KEYWORDS, doc_d_7.c_str()},
+   {"extend_to_spin", (PyCFunction)c2py::pyfkw<fun_8>, METH_VARARGS | METH_KEYWORDS, doc_d_8.c_str()},
+   {"fold", (PyCFunction)c2py::pyfkw<fun_9>, METH_VARARGS | METH_KEYWORDS, doc_d_9.c_str()},
+   {"gloc", (PyCFunction)c2py::pyfkw<fun_10>, METH_VARARGS | METH_KEYWORDS, doc_d_10.c_str()},
+   {"h5_read", (PyCFunction)c2py::pyfkw<fun_11>, METH_VARARGS | METH_KEYWORDS, doc_d_11.c_str()},
+   {"h5_write", (PyCFunction)c2py::pyfkw<fun_12>, METH_VARARGS | METH_KEYWORDS, doc_d_12.c_str()},
+   {"one_body_elements_from_model", (PyCFunction)c2py::pyfkw<fun_13>, METH_VARARGS | METH_KEYWORDS, doc_d_13.c_str()},
+   {"permute_local_space", (PyCFunction)c2py::pyfkw<fun_14>, METH_VARARGS | METH_KEYWORDS, doc_d_14.c_str()},
+   {"rotate", (PyCFunction)c2py::pyfkw<fun_15>, METH_VARARGS | METH_KEYWORDS, doc_d_15.c_str()},
+   {"rotate_embedded_self_energy", (PyCFunction)c2py::pyfkw<fun_16>, METH_VARARGS | METH_KEYWORDS, doc_d_16.c_str()},
+   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<fun_17>, METH_VARARGS | METH_KEYWORDS, doc_d_17.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
