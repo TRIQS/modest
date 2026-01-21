@@ -1,101 +1,240 @@
+"""
+CT-HYB solver interface with optional post-processing strategies.
+
+This module provides a functional API to the triqs_cthyb solver with:
+- Dynamic dispatch based on mesh type (MeshImFreq, MeshDLRImFreq)
+- Optional post-processing strategies for self-energy extraction
+- Always-on density matrix measurement for moment access
+"""
+
+from __future__ import annotations
+
 import numpy as np
-from triqs.gf import MeshImFreq, MeshDLRImFreq, make_gf_from_fourier, fit_hermitian_tail, make_hermitian
-from triqs.gf import make_gf_dlr, make_gf_imfreq, make_gf_dlr_imfreq, make_gf_imtime, fit_gf_dlr, inverse, iOmega_n
-from triqs.gf.dlr_crm_dyson_solver import minimize_dyson
+from triqs.gf import (
+    MeshImFreq, MeshDLRImFreq, BlockGf,
+    make_gf_from_fourier, fit_hermitian_tail, make_hermitian,
+    make_gf_imfreq, make_gf_dlr_imfreq, make_gf_imtime, 
+    fit_gf_dlr, inverse, iOmega_n,
+)
 from triqs.gf.tools import make_zero_tail
-from triqs.operators import c_dag, c
+from triqs.operators import Operator
 from triqs_cthyb.solver import Solver
 import triqs.utility.mpi as mpi
 
-class SolverResults(dict):
-    def __init__(self, **kwargs): super().__init__(kwargs)
-
-    def __getattr__(self, key):
-        try: return self[key]
-        except KeyError: raise AttributeError(f"SolverResults has no property {key}")
-
-    def __repr__(self):
-        return "\n".join([f"{key:<12}" for key in self.keys() ])
-
-    __str__ = __repr__
+from .utils import SolverResults, matrix_to_many_body_operator
+from .postprocessing import (
+    TailFitParams, LegendreParams, CRMParams, PostProcessParams,
+    apply_postprocessing,
+)
 
 
-def matrix_to_many_body_operator(h_loc_matrix, gf_struct):
-    h_loc0_mat = {block : h_loc_matrix[ibl].real for ibl, (block, _) in enumerate(gf_struct) }
-    c_dag_vec  = {block : np.matrix([[c_dag(block, o) for o in range(bl_size)]]) for block, bl_size in gf_struct }
-    c_vec      = {block : np.matrix([[c(block, o) for o in range(bl_size)]]) for block, bl_size in gf_struct }
-    return sum(c_dag_vec[bl]*h_loc0_mat[bl]*c_vec[bl].T for bl, bl_size in gf_struct)[0,0]
+# =============================================================================
+# Internal Helpers
+# =============================================================================
 
-def prepare_solver(Delta_iw, hloc0_bl_mat, solver_interface_params):
+def _extract_interface_params(solver_params: dict) -> tuple[int, int, dict]:
+    """Extract and remove interface-specific params from solver_params.
+    
+    Returns (n_iw, n_tau, n_l, remaining_params).
+    """
+    params = solver_params.copy()
+    n_tau = params.pop('n_tau', 10001)
+    n_l = params.pop('n_l', 40)
+    return n_tau, n_l, params
 
+
+def _prepare_solver(
+    Delta_iw: BlockGf,
+    hloc0_bl_mat: list[np.ndarray],
+    n_iw: int,
+    n_tau: int,
+    n_l: int,
+    solver_params: dict,
+    postprocess: str | PostProcessParams | None,
+) -> tuple[Solver, Operator, dict]:
+    """Prepare the CT-HYB solver instance and parameters.
+    
+    Parameters
+    ----------
+    Delta_iw : BlockGf
+        Hybridization function Δ(iω).
+    hloc0_bl_mat : list[np.ndarray]
+        Local non-interacting Hamiltonian as list of matrices per block.
+    n_iw : int
+        Number of Matsubara frequencies.
+    n_tau : int
+        Number of imaginary time points.
+    n_l : int
+        Number of Legendre polynomials.
+    solver_params : dict
+        Parameters to pass to solver.solve().
+    postprocess : str | PostProcessParams | None
+        Post-processing strategy (used to configure solver appropriately).
+        
+    Returns
+    -------
+    S : Solver
+        The CT-HYB solver instance.
+    h_loc0 : Operator
+        Local Hamiltonian as many-body operator.
+    solver_params : dict
+        Updated solver parameters.
+    """
     gf_struct = [(bl, gf.target_shape[0]) for (bl, gf) in Delta_iw]
     h_loc0 = matrix_to_many_body_operator(hloc0_bl_mat, gf_struct)
-
     beta = Delta_iw.mesh.beta
-    n_iw = solver_interface_params.pop('n_iw', None)
-    assert n_iw is not None, "The length of the Mastsubara mesh is not defined!"
-
-    n_tau = solver_interface_params.pop('n_tau', 10001)
-    n_l  = solver_interface_params.pop('n_l', 40)
-
-    # measure the density matrix as default for Sigma_Hartree
-    mpi.report("measuring the density matrix as default for self-energy moments.")
-    solver_interface_params['measure_density_matrix'] = True
-    solver_interface_params['use_norm_as_weight']     = True
-
-    S = Solver(gf_struct=gf_struct, beta=beta, n_iw=n_iw, n_tau=n_tau, n_l=n_l, delta_interface=True)
-
-    return S, h_loc0, solver_interface_params
-
-def build_solver_results(S):
-    return SolverResults(G_iw=S.G_iw, G_tau=S.G_tau, Sigma_Hartree=list(S.Sigma_Hartree.values()), Sigma_iw=S.Sigma_iw, Sigma_dynamic=S.Sigma_dynamic, Solver=S)
-
-def SolveMeshImFreq(Delta_iw, hloc0_bl_mat, h_int, **solver_interface_params):
-
-    solver_interface_params.pop('n_iw', None)  # remove n_iw from solver interface params if present
-    solver_interface_params['n_iw'] = len(Delta_iw.mesh) // 2
-
-    S, h_loc0, solver_interface_params = prepare_solver(Delta_iw, hloc0_bl_mat, solver_interface_params)
-
-    # Fourier transform Δ(iω) to Δ(τ)
-    make_gf_from_fourier_with_hermitian_tail = lambda G : make_gf_from_fourier(G, S.Delta_tau[0].mesh, fit_hermitian_tail(G, make_zero_tail(G,1))[0])
-    for block, Delta in S.Delta_tau: S.Delta_tau[block] << make_gf_from_fourier_with_hermitian_tail(Delta_iw[block])
-
-    # call the solver with this Δ
-    S.solve(h_loc0=h_loc0, h_int=h_int, **solver_interface_params)
-
-    S.Sigma_dynamic = S.Sigma_iw.copy()
-    for bl, g in S.Sigma_dynamic: S.Sigma_dynamic[bl] << g - S.Sigma_Hartree[bl]
-
-    return build_solver_results(S)
+    
+    # Always measure density matrix for Sigma_moments access
+    solver_params = solver_params.copy()
+    solver_params['measure_density_matrix'] = True
+    solver_params['use_norm_as_weight'] = True
+    
+    # Configure Legendre measurement if using measured coefficients
+    if isinstance(postprocess, LegendreParams) and postprocess.use_measured:
+        solver_params['measure_G_l'] = True
+    
+    S = Solver(
+        gf_struct=gf_struct,
+        beta=beta,
+        n_iw=n_iw,
+        n_tau=n_tau,
+        n_l=n_l,
+        delta_interface=True,
+    )
+    
+    return S, h_loc0, solver_params
 
 
-def SolveMeshDLRImFreq(Delta_iw, hloc0_bl_mat, h_int, **solver_interface_params):
+def _prepare_delta_tau_imfreq(Delta_iw: BlockGf, S: Solver) -> None:
+    """Fourier transform Δ(iω) to Δ(τ) with hermitian tail fitting (in-place)."""
+    def _fourier_with_tail(G):
+        tail = fit_hermitian_tail(G, make_zero_tail(G, 1))[0]
+        return make_gf_from_fourier(G, S.Delta_tau[0].mesh, tail)
+    
+    for block, _ in S.Delta_tau:
+        S.Delta_tau[block] << _fourier_with_tail(Delta_iw[block])
 
-    S, h_loc0, solver_interface_params = prepare_solver(Delta_iw, hloc0_bl_mat, solver_interface_params)
 
+def _prepare_delta_tau_dlr(Delta_iw: BlockGf, S: Solver) -> None:
+    """Convert Δ from DLR mesh to τ mesh (in-place)."""
     S.Delta_tau << make_gf_imtime(Delta_iw, S.n_tau)
+
+
+def _build_G0_iw(Delta_iw: BlockGf, hloc0_bl_mat: list[np.ndarray]) -> BlockGf:
+    """Construct G₀(iω) = [iω - h_loc0 - Δ(iω)]⁻¹."""
+    G0_iw = Delta_iw.copy()
+    for idx, (bl, g) in enumerate(G0_iw):
+        G0_iw[bl] << inverse(iOmega_n - hloc0_bl_mat[idx] - Delta_iw[bl])
+    return G0_iw
+
+
+
+# =============================================================================
+# Main Solve Function
+# =============================================================================
+
+def solve(
+    Delta_iw: BlockGf,
+    h_loc0: list[np.ndarray],
+    h_int: Operator,
+    postprocess: str | PostProcessParams | None = None,
+    **solver_params,
+) -> SolverResults:
+    """Solve the quantum impurity problem using CT-HYB.
+    
+    Parameters
+    ----------
+    Delta_iw : BlockGf
+        Hybridization function Δ(iω). Mesh type determines preprocessing:
+        - MeshImFreq: Fourier transform with tail fitting
+        - MeshDLRImFreq: Direct DLR to τ conversion
+    h_loc0 : list[np.ndarray]
+        Local non-interacting Hamiltonian as list of matrices per block.
+    h_int : Operator
+        Interaction Hamiltonian (e.g., Hubbard U term).
+    postprocess : str | PostProcessParams | None, optional
+        Post-processing strategy for self-energy extraction:
+        - None: Return raw solver output (G_iw, G_tau, moments)
+        - 'dyson': Plain Dyson equation Σ = G₀⁻¹ - G⁻¹
+        - TailFitParams(...): Use solver's internal tail fitting
+        - LegendreParams(...): Legendre filtering then Dyson
+        - CRMParams(...): Constrained Residual Minimization
+    **solver_params
+        Parameters passed to cthyb solver. Key parameters:
+        - n_iw : int - Number of Matsubara frequencies (required for MeshDLRImFreq)
+        - n_tau : int - Number of τ points (default: 10001)
+        - n_l : int - Number of Legendre polynomials (default: 40)
+        - length_cycle : int - MC cycle length
+        - n_cycles : int - Number of MC cycles per MPI rank
+        - n_warmup_cycles : int - Warmup cycles
         
-    S.solve(h_loc0=h_loc0, h_int=h_int, **solver_interface_params)
+    Returns
+    -------
+    SolverResults
+        Container with solver output. Contents depend on postprocess:
+        - postprocess=None: G_iw, G_tau, Sigma_HartreeFock, Sigma_moments, density_matrix, Solver
+        - postprocess specified: Above plus Sigma_iw, Sigma_dynamic, and strategy-specific fields
+        
+    Examples
+    --------
+    Raw output for custom post-processing:
+    
+    >>> result = solve(Delta_iw, h_loc0, h_int, n_iw=1000, length_cycle=100, n_cycles=1000000)
+    >>> result.G_tau  # Access raw G(τ) for custom analysis
+    
+    With plain Dyson equation:
+    
+    >>> result = solve(Delta_iw, h_loc0, h_int, postprocess='dyson', ...)
+    >>> result.Sigma_iw  # Full self-energy
+    
+    With CRM post-processing:
+    
+    >>> from triqs_modest.solver_interfaces import CRMParams
+    >>> result = solve(Delta_iw, h_loc0, h_int, postprocess=CRMParams(w_max=15.0, eps=1e-12), ...)
+    >>> result.Sigma_dlr  # Self-energy in DLR representation
+    """
+    # Extract interface params
+    n_tau, n_l, solver_params = _extract_interface_params(solver_params)
+    
+    mesh = Delta_iw.mesh
 
-    G_iw_dlr  = make_gf_dlr_imfreq(fit_gf_dlr(S.G_tau, Delta_iw.mesh.w_max, Delta_iw.mesh.eps))
-    G0_iw_dlr = Delta_iw.copy()
-    for idx, (bl, g) in enumerate(G0_iw_dlr): G0_iw_dlr[bl] << inverse(iOmega_n - hloc0_bl_mat[idx] - Delta_iw[bl])
-
-    Sigma_dynamic, Sigma_hartree, err = minimize_dyson(G0_iw_dlr, G_iw_dlr, S.Sigma_moments)
-
-    Sigma_iw = make_gf_imfreq(Sigma_dynamic, S.n_iw)
-    for block, g in Sigma_iw: g += S.Sigma_Hartree[block]
-
-    S.Sigma_dynamic = Sigma_dynamic
-    S.Sigma_iw << Sigma_iw
-
-    return build_solver_results(S)
-
-
-def solve(Delta_iw, h_loc0, h_int, **solver_params):
-    if isinstance(Delta_iw.mesh, MeshImFreq): 
-        return SolveMeshImFreq(Delta_iw, h_loc0, h_int, **solver_params)
-    elif isinstance(Delta_iw.mesh, MeshDLRImFreq): 
-        return SolveMeshDLRImFreq(Delta_iw, h_loc0, h_int, **solver_params)
-    else: raise NotImplementedError
+    # Determine n_iw 
+    n_iw = len(mesh) // 2 if isinstance(mesh, MeshImFreq) else int(2*mesh.values()[-1].n) # conservative estimate for n_iw
+    
+    # Prepare solver
+    S, h_loc0_op, solver_params = _prepare_solver(
+        Delta_iw, h_loc0, n_iw, n_tau, n_l, solver_params, postprocess
+    )
+    
+    # Prepare Δ(τ) based on mesh type
+    if isinstance(mesh, MeshImFreq):
+        _prepare_delta_tau_imfreq(Delta_iw, S)
+    elif isinstance(mesh, MeshDLRImFreq):
+        _prepare_delta_tau_dlr(Delta_iw, S)
+    else:
+        raise NotImplementedError(f"Unsupported mesh type: {type(mesh)}")
+    
+    # Solve
+    mpi.report(f"Solving impurity problem with CT-HYB (postprocess={postprocess})")
+    S.solve(h_loc0=h_loc0_op, h_int=h_int, **solver_params)
+    
+    # Post-process or return raw results
+    if postprocess is None:
+        return SolverResults(Solver=S)
+    
+    # Build G0 for post-processing
+    G0_iw = _build_G0_iw(Delta_iw, h_loc0)
+    
+    # For MeshDLRImFreq, we need G0 on ImFreq mesh for some strategies
+    if isinstance(mesh, MeshDLRImFreq) and not isinstance(postprocess, CRMParams):
+        G0_iw = make_gf_imfreq(G0_iw, n_iw=n_iw)
+    
+    # Apply post-processing
+    pp_result = apply_postprocessing(S, G0_iw, postprocess)
+    
+    # Build final results, filtering out None values
+    # Always include the raw Solver for access to pre-processed data
+    result_kwargs = {k: v for k, v in pp_result.items() if v is not None}
+    result_kwargs['Solver'] = S
+    
+    return SolverResults(**result_kwargs)
