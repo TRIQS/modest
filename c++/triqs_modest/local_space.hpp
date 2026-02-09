@@ -22,6 +22,16 @@ namespace triqs::modest {
     NonColinear   // σ = 0. There is no index, the spin index is grouped with other non-diagonal indices. e.g. Nambu, spin-orbit
   };
 
+  /// Number of σ channels for a given spin_kind_e.
+  inline long n_sigma_from_spin_kind(spin_kind_e sk) {
+    switch (sk) {
+      case spin_kind_e::Polarized: return 2;
+      case spin_kind_e::NonPolarized: return 2;
+      case spin_kind_e::NonColinear: return 1;
+    }
+    __builtin_unreachable();
+  }
+
   // --------------------------------------------------------------------
   /// Info on an atomic shell.
   struct atomic_orbs {
@@ -141,7 +151,7 @@ namespace triqs::modest {
     [[nodiscard]] spin_kind_e spin_kind() const { return _spin_kind; };
 
     /// Dimension of the \f$ \sigma \f$ index.
-    [[nodiscard]] long n_sigma() const { return _spin_kind == spin_kind_e::NonColinear ? 1 : 2; }
+    [[nodiscard]] long n_sigma() const { return n_sigma_from_spin_kind(_spin_kind); }
 
     /// Names of spin indices for naming blocks in block GFs.
     [[nodiscard]] std::vector<std::string> sigma_names() const {
