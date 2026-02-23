@@ -243,6 +243,19 @@ namespace triqs::modest {
   */
     embedding split_block(long imp_idx, long gamma, std::vector<long> const &new_dims) const;
 
+    /**
+     * @brief Create the two-particle embedding from a single-particle embedding.
+     *
+     * @details Merges consecutive \f$ \alpha \f$ blocks that belong to the same atom into a
+     * single block.  Atom boundaries are detected by monitoring the \f$ \gamma \f$ index: within
+     * one atom the \f$ \gamma \f$ values are strictly increasing; when \f$ \gamma \f$ resets or
+     * the impurity index changes a new group is started.  Disconnected blocks (\c imp_idx == -1)
+     * are never merged and pass through unchanged.
+     *
+     * @return New embedding with a coarser block structure suitable for two-particle quantities.
+     */
+    embedding make_2particle() const;
+
     ///@}
 
     //------------------------------------------------------------------------------------

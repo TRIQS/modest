@@ -178,6 +178,95 @@ TEST(embed_desc_tests, Ewijkl) {
   for (auto s : range(n_spin)) { EXPECT_ARRAY_NEAR(Pi[s], Pi_C[s]); }
 }
 
+// ------- make_2particle tests -------
+
+TEST(embed_desc_tests, make_2particle_simple) {
+  // 1 impurity, 3 orbitals with 1x1 blocks → single [3] block
+  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}}, std::vector<long>{0});
+  auto E_2p  = E.make_2particle();
+  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
+  EXPECT_EQ(E_2p, E_ref);
+}
+
+TEST(embed_desc_tests, make_2particle_mixed_blocks) {
+  // 1 impurity, mixed block sizes [3, 2] → [5]
+  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
+  auto E_2p  = E.make_2particle();
+  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{5}}, std::vector<long>{0});
+  EXPECT_EQ(E_2p, E_ref);
+}
+
+TEST(embed_desc_tests, make_2particle_two_impurities) {
+  // 2 impurities: [1,1,1] and [2,1]
+  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {2, 1}}, std::vector<long>{0, 1});
+  auto E_2p  = E.make_2particle();
+  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}}, std::vector<long>{0, 1});
+  EXPECT_EQ(E_2p, E_ref);
+}
+
+TEST(embed_desc_tests, make_2particle_equivalent_atoms) {
+  // 2 atoms mapped to the same impurity — must NOT merge across atom boundaries
+  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {1, 1, 1}}, std::vector<long>{0, 0});
+  auto E_2p  = E.make_2particle();
+  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}}, std::vector<long>{0, 0});
+  EXPECT_EQ(E_2p, E_ref);
+}
+
+TEST(embed_desc_tests, make_2particle_mixed_equiv_and_inequiv) {
+  // 2 equivalent atoms (imp 0) with [1,1,1] each + 1 inequivalent atom (imp 1) with [3,2]
+  // After make_2particle: imp 0 → [3] (shared solver), imp 1 → [5]
+  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {1, 1, 1}, {3, 2}}, std::vector<long>{0, 0, 1});
+  auto E_2p  = E.make_2particle();
+  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}, {5}}, std::vector<long>{0, 0, 1});
+  EXPECT_EQ(E_2p, E_ref);
+}
+
+TEST(embed_desc_tests, make_2particle_idempotent) {
+  // Already a single block per impurity → no change
+  auto E    = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{5}}, std::vector<long>{0});
+  auto E_2p = E.make_2particle();
+  EXPECT_EQ(E_2p, E);
+}
+
+TEST(embed_desc_tests, make_2particle_then_spinless) {
+  // Compose with make_spinless
+  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}}, std::vector<long>{0});
+  auto E_2p  = E.make_2particle().make_spinless();
+  auto E_ref = embedding_builder({"ud"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
+  EXPECT_EQ(E_2p, E_ref);
+}
+
+TEST(embed_desc_tests, make_2particle_with_disconnected) {
+  // 2 impurities, drop the first → its α blocks become disconnected (-1).
+  // The disconnected blocks must NOT be merged with each other or with
+  // the remaining connected blocks.
+  using block_t = embedding::imp_block_t;
+
+  auto E      = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {2, 1}}, std::vector<long>{0, 1});
+  auto E_drop = E.drop(0); // imp 0 gone; its 3 α blocks are now {-1, 0, 0}
+
+  // Verify precondition: first 3 α blocks are disconnected
+  for (auto alpha : range(3))
+    for (auto sigma : range(2)) { EXPECT_EQ(E_drop.get_psi()(alpha, sigma).imp_idx, -1); }
+
+  auto E_2p = E_drop.make_2particle();
+
+  // Expected: 3 standalone disconnected blocks (sizes 1,1,1) + 1 merged block (size 3)
+  // imp_decomps: only impurity 0 (the ex-impurity 1, renumbered after drop) with [3]
+  // sigma_embed_decomp: {1, 1, 1, 3}
+  // psi: first 3 rows → (-1, 0, 0), last row → (0, 0, σ)
+  auto new_sigma_embed_decomp = std::vector<long>{1, 1, 1, 3};
+  nda::array<block_t, 2> new_psi(4, 2);
+  // clang-format off
+  new_psi(0, 0) = block_t{-1, 0, 0};  new_psi(0, 1) = block_t{-1, 0, 0};
+  new_psi(1, 0) = block_t{-1, 0, 0};  new_psi(1, 1) = block_t{-1, 0, 0};
+  new_psi(2, 0) = block_t{-1, 0, 0};  new_psi(2, 1) = block_t{-1, 0, 0};
+  new_psi(3, 0) = block_t{0, 0, 0};   new_psi(3, 1) = block_t{0, 0, 1};
+  // clang-format on
+  auto E_ref = embedding(new_sigma_embed_decomp, std::vector<std::vector<long>>{{3}}, new_psi, {"up", "down"});
+  EXPECT_EQ(E_2p, E_ref);
+}
+
 #if LFS
 TEST(embed_desc_tests, sio_wien2k_soc) { // NOLINT
   auto filename = "ref_data_lfs/sriro3-wien2k-soc.ref.h5";

@@ -168,6 +168,80 @@ namespace triqs::modest {
 
   //-----------------------------------------------------------------
 
+  embedding embedding::make_2particle() const {
+
+    // Group consecutive α blocks that belong to the same atom.
+    // Within one atom the γ values are strictly increasing (0, 1, 2, …).
+    // When γ resets or imp_idx changes we start a new group.
+    // Disconnected blocks (imp_idx == -1) are never merged.
+
+    struct group_t {
+      std::vector<long> alphas; // α indices in this group
+      long imp_idx;             // impurity (or -1)
+    };
+
+    std::vector<group_t> groups;
+
+    for (long alpha = 0; alpha < n_alpha(); ++alpha) {
+      auto const &m = psi(alpha, 0); // reference spin channel for grouping
+
+      bool start_new_group = true;
+      if (m.imp_idx >= 0 && !groups.empty()) {
+        auto &prev         = groups.back();
+        auto const &prev_m = psi(prev.alphas.back(), 0);
+        if (prev.imp_idx == m.imp_idx && m.gamma > prev_m.gamma) { start_new_group = false; }
+      }
+
+      if (start_new_group) {
+        groups.push_back({{alpha}, m.imp_idx});
+      } else {
+        groups.back().alphas.push_back(alpha);
+      }
+    }
+
+    // Build new sigma_embed_decomp: one entry per group, sized as the sum of members.
+    auto new_sigma_embed_decomp = std::vector<long>{};
+    for (auto const &g : groups) {
+      long total = 0;
+      for (auto a : g.alphas) total += sigma_embed_decomp[a];
+      new_sigma_embed_decomp.push_back(total);
+    }
+
+    // Build new imp_decomps: each impurity gets a single merged block.
+    // Equivalent atoms share the same solver, so only the first group
+    // for each impurity defines the block size.
+    auto new_imp_decomps = std::vector<std::vector<long>>(n_impurities());
+    auto imp_seen        = std::vector<bool>(n_impurities(), false);
+    for (long g_idx = 0; g_idx < long(groups.size()); ++g_idx) {
+      auto const &g = groups[g_idx];
+      if (g.imp_idx < 0) continue;
+      if (!imp_seen[g.imp_idx]) {
+        new_imp_decomps[g.imp_idx].push_back(new_sigma_embed_decomp[g_idx]);
+        imp_seen[g.imp_idx] = true;
+      }
+    }
+
+    // Build new psi: one row per group.
+    // All groups for the same impurity map to γ=0 (single block per impurity).
+    auto new_psi = nda::array<imp_block_t, 2>(long(groups.size()), n_sigma());
+
+    for (long g_idx = 0; g_idx < long(groups.size()); ++g_idx) {
+      auto const &g = groups[g_idx];
+      if (g.imp_idx < 0) {
+        for (auto sigma : range(n_sigma())) new_psi(g_idx, sigma) = {-1, 0, 0};
+      } else {
+        for (auto sigma : range(n_sigma())) {
+          auto tau              = psi(g.alphas[0], sigma).tau;
+          new_psi(g_idx, sigma) = {g.imp_idx, 0, tau};
+        }
+      }
+    }
+
+    return {std::move(new_sigma_embed_decomp), std::move(new_imp_decomps), std::move(new_psi), this->_sigma_names};
+  }
+
+  //-----------------------------------------------------------------
+
   embedding embedding::drop(long imp_idx) const {
     auto new_imp_decomps = this->imp_decomps;
     auto new_psi         = this->psi;
