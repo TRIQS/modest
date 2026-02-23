@@ -462,7 +462,7 @@ namespace triqs::modest {
     auto const &embedding_decomp = get_struct(Sigma_embed_dynamic_loc).dims(r_all, 0) | tl::to<std::vector>();
     auto n_sigma                 = Sigma_embed_dynamic_loc.size2();
     auto Sigma_embed_dynamic_rot =
-       range(n_sigma) | stdv::transform([&](auto s) { return gf<Mesh, matrix_valued>{mesh, {U.extent(0), U.extent(0)}}; }) | tl::to<std::vector>();
+       range(n_sigma) | stdv::transform([&](auto) { return gf<Mesh, matrix_valued>{mesh, {U.extent(0), U.extent(0)}}; }) | tl::to<std::vector>();
 
     for (auto s : range(n_sigma))
       for (auto &&[n, w] : enumerate(mesh)) {

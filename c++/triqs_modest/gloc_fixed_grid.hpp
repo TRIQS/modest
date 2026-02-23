@@ -93,10 +93,7 @@ namespace triqs::modest {
     mpi::communicator comm = {};
 #pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none) shared(comm, gloc_k, n_kpts, n_sigma, obe, r_all)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
-      for (auto sigma : range(n_sigma)) {
-        auto P = obe.P.P(sigma, k_idx);
-        gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data();
-      }
+      for (auto sigma : range(n_sigma)) { gloc_result(0, sigma).data()(r_all, r_all, r_all) += obe.H.k_weights(k_idx) * gloc_k(k_idx, sigma).data(); }
     }
 
     gloc_result = mpi::all_reduce(gloc_result);
