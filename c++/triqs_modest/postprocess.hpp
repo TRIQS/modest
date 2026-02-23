@@ -74,4 +74,23 @@ namespace triqs::modest {
   spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe_theta, downfolding_projector const &Proj, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
 
+  /**
+   * @ingroup post
+   * @brief Compute the k-summed band-resolved spectral function matrix.
+   *
+   * The returned array has shape (n_sigma, n_omega, n_bands, n_bands), with
+   *
+   * \\f[
+   *   A(\\omega) = -\\frac{1}{2\\pi i}\\left[G(\\omega) - G^{\\dagger}(\\omega)\\right].
+   * \\f]
+   *
+   * @param obe One-body elements on grid.
+   * @param mu Chemical potential.
+   * @param Sigma_w Self-energy in real-frequencies.
+   * @param broadening Spectral broadening.
+   * @return Band-resolved spectral function matrix.
+   */
+  nda::array<double, 4> spectral_function(one_body_elements_on_grid const &obe, double mu,
+                                          block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
+
 } // namespace triqs::modest

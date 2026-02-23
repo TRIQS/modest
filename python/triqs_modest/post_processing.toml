@@ -27,7 +27,7 @@ namespaces = "triqs triqs::modest  triqs::lattice"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::(projected_spectral_function|spectral_function_on_high_symmetry_path|spectral_function_w|spectral_function_kw)"
+match_names = "triqs::modest::(projected_spectral_function|spectral_function|spectral_function_on_high_symmetry_path|spectral_function_w|spectral_function_kw)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex
