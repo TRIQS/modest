@@ -449,6 +449,20 @@ def extract_screen_matrix_from_D0_tau(blk2_D0_tau, gf_struct, return_4idx=False)
 
 
 def compute_sigma_hartreefock(solver):
+    """
+    Compute the static Hartree-Fock self-energy with density-density interactions
+
+    Parameters
+    ----------
+    solver : CTSEG_Solver
+        The CT-SEG solver instance containing impurity densities and Coulomb interactions. 
+
+    Returns
+    -------
+    Sigma_HartreeFock : dict
+        A block matrix containing the static Hartree-Fock self-energy following the block structure 
+        of the impurity problem. 
+    """
     mpi.report('\nEvaluating static impurity self-energy analytically in density-density basis:')
     Sigma_HartreeFock = {}
 
@@ -465,8 +479,9 @@ def compute_sigma_hartreefock(solver):
 
     # Bare Coulomb in density-density basis
     V = extract_u_tensor_from_h_int(h_int=solver.h_int, gf_struct=solver.gf_struct)
-    # Add screening function at iw=0 in density-density basis
-    U_w0 = V + extract_screen_matrix_from_D0_tau(blk2_D0_tau=solver.D0_tau, gf_struct=solver.gf_struct)
+    if solver.D0_tau is not None:
+        # Add screening function at iw=0 in density-density basis
+        V += extract_screen_matrix_from_D0_tau(blk2_D0_tau=solver.D0_tau, gf_struct=solver.gf_struct)
 
     # impurity density
     densities = np.zeros(n_color, dtype=float)
@@ -480,7 +495,7 @@ def compute_sigma_hartreefock(solver):
 
         for iorb in range(blk_dim):
             for c2 in range(n_color):
-                Sigma_HartreeFock[blk_name][iorb, iorb] += densities[c2] * U_w0[c1, c2].real
+                Sigma_HartreeFock[blk_name][iorb, iorb] += densities[c2] * V[c1, c2].real
             c1 += 1
 
     return Sigma_HartreeFock
