@@ -87,3 +87,91 @@ def many_body_operator_to_matrix(h_loc_operator, gf_struct):
                 coeff = h_loc_operator.get_coeff(op)
                 h_loc_matrix[ibl][i, j] = coeff
     return h_loc_matrix
+
+def extract_u_tensor_from_h_int(h_int, gf_struct, return_4idx=False):
+    """
+    Return Uijkl tensor in TRIQS's notation from a Coulomb many-body operator h_int
+    """
+    from triqs.operators.util.extractors import extract_U_dict2, dict_to_matrix
+
+    U_dd = dict_to_matrix(extract_U_dict2(h_int), gf_struct=gf_struct)
+    if not return_4idx:
+        return U_dd
+
+    n_orb = U_dd.shape[0]//2
+
+    # extract Uijij (inter- and intra-orbital Coulomb) and Uijji (Hund's coupling) terms
+    # a) For static impurity problem, Us are the static screened interactions
+    # b) For dynamic impurity problem, Us are the bare interactions
+    Uijij = U_dd[:n_orb, n_orb:2*n_orb]
+    Uijji = Uijij - U_dd[:n_orb, :n_orb]
+    
+    # construct full Uijkl tensor for static interaction
+    Uijkl = np.zeros((n_orb, n_orb, n_orb, n_orb), dtype=complex)
+
+    # assuming Uijji = Uiijj
+    for i, j, k, l in product(range(n_orb), repeat=4):
+        if i == j == k == l:  # Uiiii
+            Uijkl[i, i, i, i] = Uijij[i, j]
+        elif i == k and j == l:  # Uijij
+            Uijkl[i, j, i, j] = Uijij[i, j]
+        elif i == l and j == k:  # Uijji
+            Uijkl[i, j, j, i] = Uijji[i, j]
+        elif i == j and k == l:  # Uiijj
+            Uijkl[i, i, k, k] = Uijji[i, k]
+    
+    return Uijkl
+
+def fill_dlr_imfreq_gf(
+    g_iw : Gf | BlockGf, 
+    wmax : float, 
+    eps : float
+) -> Gf | BlockGf:
+    """Fill a Green's function defined on MeshDLRImFreq with values from a Green's function defined on MeshImFreq.
+
+    Parameters
+    ----------
+    g_iw : Gf or BlockGf
+        Input Green's function defined on MeshImFreq. The data on this Green's function will be used to fill the output Green's function defined on MeshDLRImFreq.
+    wmax : float
+        Maximum frequency for the DLR mesh. 
+    eps : float
+        Accuracy for the DLR mesh. 
+
+    Returns
+    -------
+    g_dlr_iw : Gf or BlockGf
+        A Green's function defined on MeshDLRImFreq, filled with values from g_iw.
+    """
+
+    assert isinstance(g_iw.mesh, MeshImFreq), (
+        "fill_dlr_imfreq_gf: input Green's function should live on MeshImFreq."
+    )
+
+    mesh_dlr_iw = MeshDLRImFreq(
+        beta=g_iw.mesh.beta, statistic=g_iw.mesh.statistic,
+        w_max=wmax, eps=eps, symmetrize=True
+    )
+
+    mesh_dlr_idx = np.array([iw.index for iw in mesh_dlr_iw])
+    max_dlr_idx = max(abs(mesh_dlr_idx[0]), abs(mesh_dlr_idx[-1]))
+    assert max_dlr_idx <= g_iw.mesh.n_iw, (
+        f"fill_dlr_imfreq_gf: g_iw.mesh.n_iw = {g_iw.mesh.n_iw} < maximum DLRImFreq index ({max_dlr_idx})."
+    )
+
+    if isinstance(g_iw, BlockGf):
+        gf_struct = [(bl, gf.target_shape[0]) for (bl, gf) in g_iw]
+        g_dlr_iw = BlockGf(mesh=mesh_dlr_iw, gf_struct=gf_struct)
+        for w in g_dlr_iw.mesh:
+            for block, gf in g_dlr_iw:
+                gf[w] = g_iw[block](w)
+        return g_dlr_iw
+
+    elif isinstance(g_iw, Gf):
+        g_dlr_iw = Gf(mesh=mesh_dlr_iw, target_shape=g_iw.target_shape)
+        for w in g_dlr_iw.mesh:
+            g_dlr_iw[w] = g_iw(w)
+        return g_dlr_iw
+
+    else:
+        raise NotImplementedError("fill_dlr_imfreq_gf: input Green's function should be either Gf or BlockGf.")
