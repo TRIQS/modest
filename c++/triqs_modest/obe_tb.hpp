@@ -16,6 +16,7 @@
 #include <triqs/gfs/functions/density.hpp>
 #include <triqs/utility/root_finder.hpp>
 #include "triqs/tb/superlattice.hpp"
+#include <triqs/utility/macros.hpp>
 
 namespace triqs::modest {
 
@@ -36,7 +37,7 @@ namespace triqs::modest {
     bool operator==(one_body_elements_tb const &) const = default;
 
     /// MPI broadcast
-    friend void mpi_broadcast(one_body_elements_tb &x, mpi::communicator c = {}, int root = 0) {
+    C2PY_IGNORE friend void mpi_broadcast(one_body_elements_tb &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(x.C_space, c, root);
       mpi::broadcast(x.H, c, root);
     }

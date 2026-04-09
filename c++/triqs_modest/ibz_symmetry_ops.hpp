@@ -11,6 +11,7 @@
 #include <mpi/mpi.hpp>
 #include <triqs/gfs.hpp>
 #include "utils/enumerate_slice.hpp"
+#include <triqs/utility/macros.hpp>
 
 namespace triqs::modest {
 
@@ -57,7 +58,7 @@ namespace triqs::modest {
       bool operator==(op const &) const = default;
 
       /// MPI broadcast
-      friend void mpi_broadcast(op &x, mpi::communicator c = {}, int root = 0) {
+      C2PY_IGNORE friend void mpi_broadcast(op &x, mpi::communicator c = {}, int root = 0) {
         mpi::broadcast(x.mats, c, root);
         mpi::broadcast(x.permutation, c, root);
         mpi::broadcast(x.time_inv, c, root);
@@ -70,7 +71,7 @@ namespace triqs::modest {
     bool operator==(ibz_symmetry_ops const &) const = default;
 
     /// MPI broadcast
-    friend void mpi_broadcast(ibz_symmetry_ops &x, mpi::communicator c = {}, int root = 0) { mpi::broadcast(x.ops, c, root); }
+    C2PY_IGNORE friend void mpi_broadcast(ibz_symmetry_ops &x, mpi::communicator c = {}, int root = 0) { mpi::broadcast(x.ops, c, root); }
 
     // printing
     friend std::ostream &operator<<(std::ostream &out, ibz_symmetry_ops const &ibz);

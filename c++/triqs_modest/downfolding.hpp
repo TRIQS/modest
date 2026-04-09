@@ -5,6 +5,7 @@
 
 #pragma once
 #include <triqs/gfs.hpp>
+#include <triqs/utility/macros.hpp>
 #include <type_traits>
 #include "./local_space.hpp"
 #include "./ibz_symmetry_ops.hpp"
@@ -45,7 +46,7 @@ namespace triqs::modest {
     bool operator==(band_dispersion const &) const = default;
 
     /// MPI broadcast
-    friend void mpi_broadcast(band_dispersion &x, mpi::communicator c = {}, int root = 0) {
+    C2PY_IGNORE friend void mpi_broadcast(band_dispersion &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(x.spin_kind, c, root);
       mpi::broadcast(x.H_k, c, root);
       mpi::broadcast(x.n_bands_per_k, c, root);
@@ -129,7 +130,7 @@ namespace triqs::modest {
     bool operator==(downfolding_projector const &) const = default;
 
     /// MPI broadcast
-    friend void mpi_broadcast(downfolding_projector &x, mpi::communicator c = {}, int root = 0) {
+    C2PY_IGNORE friend void mpi_broadcast(downfolding_projector &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(x.spin_kind, c, root);
       mpi::broadcast(x.P_k, c, root);
       mpi::broadcast(x.n_bands_per_k, c, root);
@@ -179,7 +180,7 @@ namespace triqs::modest {
     bool operator==(one_body_elements_on_grid const &) const = default;
 
     /// MPI broadcast
-    friend void mpi_broadcast(one_body_elements_on_grid &x, mpi::communicator c = {}, int root = 0) {
+    C2PY_IGNORE friend void mpi_broadcast(one_body_elements_on_grid &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(x.H, c, root);
       mpi::broadcast(x.C_space, c, root);
       mpi::broadcast(x.P, c, root);

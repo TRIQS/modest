@@ -5,6 +5,7 @@
 
 #pragma once
 #include <triqs/gfs.hpp>
+#include <triqs/utility/macros.hpp>
 #include <mpi/mpi.hpp>
 #include "./utils/defs.hpp"
 #include "./utils/gf_supp.hpp"
@@ -36,7 +37,7 @@ namespace triqs::modest {
     bool operator==(atomic_orbs const &) const = default;
 
     /// MPI broadcast
-    friend void mpi_broadcast(atomic_orbs &x, mpi::communicator c = {}, int root = 0) {
+    C2PY_IGNORE friend void mpi_broadcast(atomic_orbs &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(x.dim, c, root);
       mpi::broadcast(x.l, c, root);
       mpi::broadcast(x.cls_idx, c, root);
@@ -100,7 +101,7 @@ namespace triqs::modest {
     friend void h5_write(h5::group g, std::string const &name, local_space const &ls);
 
     /// MPI broadcast
-    friend void mpi_broadcast(local_space &x, mpi::communicator c = {}, int root = 0) {
+    C2PY_IGNORE friend void mpi_broadcast(local_space &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(x._spin_kind, c, root);
       mpi::broadcast(x._atomic_shells, c, root);
       mpi::broadcast(x._irreps_decomp_per_atom, c, root);
