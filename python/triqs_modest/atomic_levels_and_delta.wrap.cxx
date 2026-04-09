@@ -18,8 +18,6 @@
 
 using c2py::operator""_a;
 
-// ==================== Wrapped classes =====================
-
 // ==================== enums =====================
 
 // ==================== module classes =====================
@@ -27,41 +25,50 @@ using c2py::operator""_a;
 // ==================== module functions ====================
 
 // hybridization
-static auto const fun_0 = c2py::dispatcher_f_kw_t{c2py::cfun(
-                                                     [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
-                                                        const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc,
-                                                        const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                                                        const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_static) {
-                                                       return triqs::modest::hybridization(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
-                                                     },
-                                                     "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
-                                                  c2py::cfun(
-                                                     [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
-                                                        const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc,
-                                                        const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                                                        const std::vector<nda::matrix<triqs::dcomplex>> &Sigma_static) {
-                                                       return triqs::modest::hybridization(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
-                                                     },
-                                                     "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
-                                                  c2py::cfun(
-                                                     [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
-                                                        const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc) {
-                                                       return triqs::modest::hybridization(epsilon_levels, Gloc);
-                                                     },
-                                                     "epsilon_levels", "Gloc"),
-                                                  c2py::cfun(
-                                                     [](const std::vector<nda::matrix<triqs::dcomplex>> &epsilon_levels,
-                                                        const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc) {
-                                                       return triqs::modest::hybridization(epsilon_levels, Gloc);
-                                                     },
-                                                     "epsilon_levels", "Gloc")};
+static auto const _c2py_fun_0 =
+   c2py::dispatcher_f_kw_t{
+      c2py::cfun(
+         [](const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &epsilon_levels,
+            const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc,
+            const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+            const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &Sigma_static) {
+           return triqs::modest::hybridization<triqs::mesh::imfreq>(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
+         },
+         "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
+      c2py::cfun(
+         [](const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &epsilon_levels,
+            const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc,
+            const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
+            const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &Sigma_static) {
+           return triqs::modest::hybridization<triqs::mesh::dlr_imfreq>(epsilon_levels, Gloc, Sigma_dynamic, Sigma_static);
+         },
+         "epsilon_levels", "Gloc", "Sigma_dynamic", "Sigma_static"),
+      c2py::cfun(
+         [](const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &epsilon_levels,
+            const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Gloc) {
+           return triqs::modest::hybridization<triqs::mesh::imfreq>(epsilon_levels, Gloc);
+         },
+         "epsilon_levels", "Gloc"),
+      c2py::cfun(
+         [](const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &epsilon_levels,
+            const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Gloc) {
+           return triqs::modest::hybridization<triqs::mesh::dlr_imfreq>(epsilon_levels, Gloc);
+         },
+         "epsilon_levels", "Gloc")};
 
 // impurity_levels
-static auto const fun_1 =
+static auto const _c2py_fun_1 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::impurity_levels(obe); }, "obe"),
                            c2py::cfun([](const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::impurity_levels(obe); }, "obe")};
 
-static const auto doc_d_0 = fun_0.doc(R"DOC(
+static const auto _c2py_doc_0 = _c2py_fun_0.doc(
+   R"DOC(
 [1, 2] Compute the hybridization function from the effective impurity levels, the local Green's function, and the impurity self-energy.
 
 ------
@@ -89,15 +96,18 @@ Returns
 [2, 4] : {ret_1}
    Hybridization function :math:`\Delta`.
 )DOC",
-                                      {{c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()},
-                                       {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-                                        c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-                                       {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-                                        c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-                                       {c2py::python_typename<const std::vector<nda::matrix<triqs::dcomplex>> &>()}},
-                                      {c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
-                                       c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>()});
-static const auto doc_d_1 = fun_1.doc(R"DOC(
+   {{c2py::python_typename<const std::vector<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
+    {c2py::python_typename<const std::vector<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &>()}},
+   {c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>()});
+static const auto _c2py_doc_1 = _c2py_fun_1.doc(
+   R"DOC(
 Compute the atomic (impurity) levels from an obe.
 
 Parameters
@@ -110,14 +120,16 @@ Returns
 {ret_0}
    Impurity levels stored in the format [n_atoms, n_sigma].
 )DOC",
-                                      {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
-                                        c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}},
-                                      {c2py::python_typename<nda::array<nda::matrix<triqs::dcomplex>, 2>>()});
+   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(),
+     c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}},
+   {c2py::python_typename<nda::basic_array<
+      nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+      nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"hybridization", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
-   {"impurity_levels", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
+   {"hybridization", (PyCFunction)c2py::pyfkw<_c2py_fun_0>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_0.c_str()},
+   {"impurity_levels", (PyCFunction)c2py::pyfkw<_c2py_fun_1>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_1.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -174,6 +186,9 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_atomic_levels
   auto &conv_table = *c2py::conv_table_sptr.get();
 
   conv_table[std::type_index(typeid(c2py::py_range)).name()] = &c2py::wrap_pytype<c2py::py_range>;
+#define _add_type(T, N) c2py::add_type_object_to_main<T>(N, m, conv_table)
+
+#undef _add_type
 
   return m;
 }

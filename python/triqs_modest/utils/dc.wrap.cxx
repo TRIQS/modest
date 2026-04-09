@@ -18,20 +18,19 @@
 
 using c2py::operator""_a;
 
-// ==================== Wrapped classes =====================
-
-template <> constexpr bool c2py::is_wrapped<triqs::modest::dc_solver> = true;
-
 // ==================== enums =====================
 
 // ==================== module classes =====================
 
-template <> inline constexpr auto c2py::tp_name<triqs::modest::dc_solver> = "triqs_modest.utils.dc.DcSolver";
-static auto init_0 =
-   c2py::dispatcher_c_kw_t{c2py::c_constructor<triqs::modest::dc_solver, long, std::string, double, double>("n_sigma", "method", "U_int", "J_hund")};
-template <> constexpr initproc c2py::tp_init<triqs::modest::dc_solver> = c2py::pyfkw_constructor<init_0>;
+// --------- class _c2py_cls_0 -----------
+using _c2py_cls_0                                            = triqs::modest::dc_solver;
+template <> constexpr bool c2py::is_wrapped<_c2py_cls_0>     = true;
+template <> inline constexpr auto c2py::tp_name<_c2py_cls_0> = "triqs_modest.utils.dc.DcSolver";
+static auto _c2py_init_0 =
+   c2py::dispatcher_c_kw_t{c2py::c_constructor<_c2py_cls_0, long, std::string, double, double>("n_sigma", "method", "U_int", "J_hund")};
+template <> constexpr initproc c2py::tp_init<_c2py_cls_0> = c2py::pyfkw_constructor<_c2py_init_0>;
 template <>
-const std::string c2py::tp_ctor_doc<triqs::modest::dc_solver> = init_0.doc(
+const std::string c2py::tp_ctor_doc<_c2py_cls_0> = _c2py_init_0.doc(
    R"DOC(
 Construct a double counting "solver".
 
@@ -48,18 +47,21 @@ J_hund : {par_3}
 )DOC",
    {{c2py::python_typename<long>()}, {c2py::python_typename<std::string>()}, {c2py::python_typename<double>()}, {c2py::python_typename<double>()}});
 // dc_energy
-static auto const fun_0 = c2py::dispatcher_f_kw_t{
-   c2py::cmethod([](triqs::modest::dc_solver &self,
-                    const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) { return self.dc_energy(gimp); },
-                 "self", "gimp")};
+static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{c2py::cmethod(
+   [](_c2py_cls_0 &self, const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) -> decltype(auto) {
+     return self.dc_energy(gimp);
+   },
+   "self", "gimp")};
 
 // dc_self_energy
-static auto const fun_1 = c2py::dispatcher_f_kw_t{
-   c2py::cmethod([](triqs::modest::dc_solver &self,
-                    const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) { return self.dc_self_energy(gimp); },
-                 "self", "gimp")};
+static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{c2py::cmethod(
+   [](_c2py_cls_0 &self, const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) -> decltype(auto) {
+     return self.dc_self_energy(gimp);
+   },
+   "self", "gimp")};
 
-static const auto doc_d_0 = fun_0.doc(R"DOC(
+static const auto _c2py_doc_0 = _c2py_fun_0.doc(
+   R"DOC(
 Compute the double counting correction to the energy.
 
 Parameters
@@ -73,9 +75,10 @@ Returns
 {ret_0}
    Double counting energy term.
 )DOC",
-                                      {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}},
-                                      {c2py::python_typename<nda::matrix<double>>()});
-static const auto doc_d_1 = fun_1.doc(R"DOC(
+   {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}},
+   {c2py::python_typename<nda::basic_array<double, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>()});
+static const auto _c2py_doc_1 = _c2py_fun_1.doc(
+   R"DOC(
 Compute the double-counting self-energy.
 
 Parameters
@@ -89,40 +92,35 @@ Returns
 {ret_0}
    Double counting self-energy term.
 )DOC",
-                                      {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}},
-                                      {c2py::python_typename<std::vector<nda::matrix<triqs::dcomplex>>>()});
+   {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}},
+   {c2py::python_typename<std::vector<
+      nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>()});
 
 // ----- Method table ----
 template <>
-PyMethodDef c2py::tp_methods<triqs::modest::dc_solver>[] = {
-   {"dc_energy", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
-   {"dc_self_energy", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
+PyMethodDef c2py::tp_methods<_c2py_cls_0>[] = {
+   {"dc_energy", (PyCFunction)c2py::pyfkw<_c2py_fun_0>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_0.c_str()},
+   {"dc_self_energy", (PyCFunction)c2py::pyfkw<_c2py_fun_1>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_1.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-// ----- Method table ----
-
 template <>
-constinit PyGetSetDef c2py::tp_getset<triqs::modest::dc_solver>[] = {
-
-   {nullptr, nullptr, nullptr, nullptr, nullptr}};
-
-template <>
-const std::string c2py::tp_doc<triqs::modest::dc_solver> = R"DOC(Double counting "solver".
+const std::string c2py::tp_doc<_c2py_cls_0> = R"DOC(Double counting "solver".
 
 It implements the double counting correction for DFT+DMFT, which is a phenomenlogical introduced double
 counting the interactions already taken into account at the mean-field level within DFT. This class implements
 several double counting formulas (all of which are functions of the density) relevant for different scenarios.)DOC"
-   + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<triqs::modest::dc_solver>;
+   + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_0>;
 
 // ==================== module functions ====================
 
 // dc_formulas
-static auto const fun_2 = c2py::dispatcher_f_kw_t{c2py::cfun([](const std::string method, double N_tot, double N_sigma, long n_orb, double U,
-                                                                double J) { return triqs::modest::dc_formulas(method, N_tot, N_sigma, n_orb, U, J); },
-                                                             "method", "N_tot", "N_sigma", "n_orb", "U", "J")};
+static auto const _c2py_fun_2 =
+   c2py::dispatcher_f_kw_t{c2py::cfun([](const std::string method, const double N_tot, const double N_sigma, const long n_orb, const double U,
+                                         const double J) { return triqs::modest::dc_formulas(method, N_tot, N_sigma, n_orb, U, J); },
+                                      "method", "N_tot", "N_sigma", "n_orb", "U", "J")};
 
-static const auto doc_d_2 = fun_2.doc(R"DOC(
+static const auto _c2py_doc_2 = _c2py_fun_2.doc(R"DOC(
 Double counting formulas.
 
 Parameters
@@ -145,17 +143,17 @@ Returns
 {ret_0}
    :math:`\Sigma_{DC}` and :math:`E_{DC}`.
 )DOC",
-                                      {{c2py::python_typename<const std::string>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<long>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<double>()}},
-                                      {c2py::python_typename<std::pair<double, double>>()});
+                                                {{c2py::python_typename<const std::string>()},
+                                                 {c2py::python_typename<const double>()},
+                                                 {c2py::python_typename<const double>()},
+                                                 {c2py::python_typename<const long>()},
+                                                 {c2py::python_typename<const double>()},
+                                                 {c2py::python_typename<const double>()}},
+                                                {c2py::python_typename<std::pair<double, double>>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"dc_formulas", (PyCFunction)c2py::pyfkw<fun_2>, METH_VARARGS | METH_KEYWORDS, doc_d_2.c_str()},
+   {"dc_formulas", (PyCFunction)c2py::pyfkw<_c2py_fun_2>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_2.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -195,7 +193,7 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_dc() {
   PyObject *m;
 
   if (PyType_Ready(&c2py::wrap_pytype<c2py::py_range>) < 0) return NULL;
-  if (PyType_Ready(&c2py::wrap_pytype<triqs::modest::dc_solver>) < 0) return NULL;
+  if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_0>) < 0) return NULL;
 
   m = PyModule_Create(&module_def);
   if (m == NULL) return NULL;
@@ -203,7 +201,9 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_dc() {
   auto &conv_table = *c2py::conv_table_sptr.get();
 
   conv_table[std::type_index(typeid(c2py::py_range)).name()] = &c2py::wrap_pytype<c2py::py_range>;
-  c2py::add_type_object_to_main<triqs::modest::dc_solver>("DcSolver", m, conv_table);
+#define _add_type(T, N) c2py::add_type_object_to_main<T>(N, m, conv_table)
+  _add_type(_c2py_cls_0, "DcSolver");
+#undef _add_type
 
   return m;
 }

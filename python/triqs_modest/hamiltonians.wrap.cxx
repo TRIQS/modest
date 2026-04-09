@@ -18,8 +18,6 @@
 
 using c2py::operator""_a;
 
-// ==================== Wrapped classes =====================
-
 // ==================== enums =====================
 
 // ==================== module classes =====================
@@ -27,26 +25,29 @@ using c2py::operator""_a;
 // ==================== module functions ====================
 
 // make_density_density
-static auto const fun_0 =
+static auto const _c2py_fun_0 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double U_prime,
                                          double J_hund) { return triqs::make_density_density(tau_names, dim_gamma, U_int, U_prime, J_hund); },
                                       "tau_names", "dim_gamma", "U_int", "U_prime", "J_hund")};
 
 // make_kanamori
-static auto const fun_1 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double U_prime, double J_hund, bool spin_flip,
       bool pair_hopping) { return triqs::make_kanamori(tau_names, dim_gamma, U_int, U_prime, J_hund, spin_flip, pair_hopping); },
    "tau_names", "dim_gamma", "U_int", "U_prime", "J_hund", "spin_flip"_a = true, "pair_hopping"_a = true)};
 
 // make_slater
-static auto const fun_2 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const _c2py_fun_2 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::vector<std::string> &tau_names, const std::vector<long> &dim_gamma, double U_int, double J_hund,
-      const nda::matrix<triqs::dcomplex> &spherical_to_dft, const std::optional<nda::matrix<triqs::dcomplex>> &dft_to_local) {
+      const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>
+         &spherical_to_dft,
+      const std::optional<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                           nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &dft_to_local) {
      return triqs::make_slater(tau_names, dim_gamma, U_int, J_hund, spherical_to_dft, dft_to_local);
    },
    "tau_names", "dim_gamma", "U_int", "J_hund", "spherical_to_dft", "dft_to_local")};
 
-static const auto doc_d_0 = fun_0.doc(R"DOC(
+static const auto _c2py_doc_0 = _c2py_fun_0.doc(R"DOC(
 Construct a density-density interaction Hamiltonian.
 
 Create a density-density Hamiltonian
@@ -74,13 +75,13 @@ Returns
 {ret_0}
    Many-body operator representing the Hamiltonian.
 )DOC",
-                                      {{c2py::python_typename<const std::vector<std::string> &>()},
-                                       {c2py::python_typename<const std::vector<long> &>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<double>()}},
-                                      {c2py::python_typename<triqs::operators::many_body_operator>()});
-static const auto doc_d_1 = fun_1.doc(R"DOC(
+                                                {{c2py::python_typename<const std::vector<std::string> &>()},
+                                                 {c2py::python_typename<const std::vector<long> &>()},
+                                                 {c2py::python_typename<double>()},
+                                                 {c2py::python_typename<double>()},
+                                                 {c2py::python_typename<double>()}},
+                                                {c2py::python_typename<triqs::operators::many_body_operator>()});
+static const auto _c2py_doc_1 = _c2py_fun_1.doc(R"DOC(
 Construct a Hubbard-Kanamori Hamiltonian.
 
 Create a Hubbard-Kanamori Hamiltonian using the density-density, spin-flip, and pair-hopping interactions,
@@ -113,15 +114,16 @@ Returns
 {ret_0}
    Many-body operator representing the Hamiltonian.
 )DOC",
-                                      {{c2py::python_typename<const std::vector<std::string> &>()},
-                                       {c2py::python_typename<const std::vector<long> &>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<bool>()},
-                                       {c2py::python_typename<bool>()}},
-                                      {c2py::python_typename<triqs::operators::many_body_operator>()});
-static const auto doc_d_2 = fun_2.doc(R"DOC(
+                                                {{c2py::python_typename<const std::vector<std::string> &>()},
+                                                 {c2py::python_typename<const std::vector<long> &>()},
+                                                 {c2py::python_typename<double>()},
+                                                 {c2py::python_typename<double>()},
+                                                 {c2py::python_typename<double>()},
+                                                 {c2py::python_typename<bool>()},
+                                                 {c2py::python_typename<bool>()}},
+                                                {c2py::python_typename<triqs::operators::many_body_operator>()});
+static const auto _c2py_doc_2 = _c2py_fun_2.doc(
+   R"DOC(
 Construct a Slater Hamiltonian.
 
 Create a Slater Hamiltonian using fully rotationally-invariant four-index interactions:
@@ -146,18 +148,20 @@ spherical_to_dft : {par_4}
 dft_to_local : {par_5}
    Rotation matrices from DFT basis to the local impurity basis.
 )DOC",
-                                      {{c2py::python_typename<const std::vector<std::string> &>()},
-                                       {c2py::python_typename<const std::vector<long> &>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<double>()},
-                                       {c2py::python_typename<const nda::matrix<triqs::dcomplex> &>()},
-                                       {c2py::python_typename<const std::optional<nda::matrix<triqs::dcomplex>> &>()}});
+   {{c2py::python_typename<const std::vector<std::string> &>()},
+    {c2py::python_typename<const std::vector<long> &>()},
+    {c2py::python_typename<double>()},
+    {c2py::python_typename<double>()},
+    {c2py::python_typename<
+       const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
+    {c2py::python_typename<const std::optional<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &>()}});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"make_density_density", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
-   {"make_kanamori", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
-   {"make_slater", (PyCFunction)c2py::pyfkw<fun_2>, METH_VARARGS | METH_KEYWORDS, doc_d_2.c_str()},
+   {"make_density_density", (PyCFunction)c2py::pyfkw<_c2py_fun_0>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_0.c_str()},
+   {"make_kanamori", (PyCFunction)c2py::pyfkw<_c2py_fun_1>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_1.c_str()},
+   {"make_slater", (PyCFunction)c2py::pyfkw<_c2py_fun_2>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_2.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -197,6 +201,9 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_hamiltonians(
   auto &conv_table = *c2py::conv_table_sptr.get();
 
   conv_table[std::type_index(typeid(c2py::py_range)).name()] = &c2py::wrap_pytype<c2py::py_range>;
+#define _add_type(T, N) c2py::add_type_object_to_main<T>(N, m, conv_table)
+
+#undef _add_type
 
   return m;
 }

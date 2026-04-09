@@ -18,8 +18,6 @@
 
 using c2py::operator""_a;
 
-// ==================== Wrapped classes =====================
-
 // ==================== enums =====================
 
 // ==================== module classes =====================
@@ -27,62 +25,87 @@ using c2py::operator""_a;
 // ==================== module functions ====================
 
 // density
-static auto const fun_0 = c2py::dispatcher_f_kw_t{
+static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
-         const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_static); },
+         const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static) {
+        return triqs::modest::density<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static);
+      },
       "obe", "mu", "Sigma_dynamic", "Sigma_static"),
    c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
-         const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-         const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_static); },
+         const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static) {
+        return triqs::modest::density<triqs::mesh::dlr_imfreq>(obe, mu, Sigma_dynamic, Sigma_static);
+      },
       "obe", "mu", "Sigma_dynamic", "Sigma_static"),
-   c2py::cfun([](const triqs::modest::one_body_elements_tb &obe, double mu,
-                 const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-                 const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static,
-                 const triqs::lattice::bz_int_options &opt) { return triqs::modest::density(obe, mu, Sigma_dynamic, Sigma_static, opt); },
-              "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt")};
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_tb &obe, double mu,
+         const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         const triqs::lattice::bz_int_options &opt) {
+        return triqs::modest::density<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
+      },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt")};
 
 // density_nk
-static auto const fun_1 = c2py::dispatcher_f_kw_t{
+static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, double mu, double beta) { return triqs::modest::density_nk(obe, mu, beta); },
               "obe", "mu", "beta")};
 
 // find_chemical_potential
-static auto const fun_2 =
-   c2py::dispatcher_f_kw_t{
-      c2py::cfun([](double target_density, const triqs::modest::one_body_elements_on_grid &obe, double beta, std::string method, double precision,
-                    bool verbosity) { return triqs::modest::find_chemical_potential(target_density, obe, beta, method, precision, verbosity); },
-                 "target_density", "obe", "beta", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
-            const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double precision, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, precision, verbosity);
-         },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements_on_grid &obe,
-            const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, std::string method, double precision, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, method, precision, verbosity);
-         },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
-      c2py::cfun(
-         [](double target_density, const triqs::modest::one_body_elements_tb &obe,
-            const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &Sigma_dynamic,
-            const nda::array<nda::matrix<triqs::dcomplex>, 2> &Sigma_static, const triqs::lattice::bz_int_options &opt, std::string method,
-            double precision, bool verbosity) {
-           return triqs::modest::find_chemical_potential(target_density, obe, Sigma_dynamic, Sigma_static, opt, method, precision, verbosity);
-         },
-         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
-      c2py::cfun([](double target_density, const triqs::modest::one_body_elements_tb &obe, const triqs::mesh::imfreq &mesh,
-                    const triqs::lattice::bz_int_options &opt, std::string method, double precision,
-                    bool verbosity) { return triqs::modest::find_chemical_potential(target_density, obe, mesh, opt, method, precision, verbosity); },
-                 "target_density", "obe", "mesh", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true)};
+static auto const _c2py_fun_2 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const double target_density, const triqs::modest::one_body_elements_on_grid &obe, double beta, std::string method, double precision,
+                 bool verbosity) { return triqs::modest::find_chemical_potential(target_density, obe, beta, method, precision, verbosity); },
+              "target_density", "obe", "beta", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](const double target_density, const triqs::modest::one_body_elements_on_grid &obe,
+         const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential<triqs::mesh::imfreq>(target_density, obe, Sigma_dynamic, Sigma_static, method, precision,
+                                                                           verbosity);
+      },
+      "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](const double target_density, const triqs::modest::one_body_elements_on_grid &obe,
+         const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential<triqs::mesh::dlr_imfreq>(target_density, obe, Sigma_dynamic, Sigma_static, method, precision,
+                                                                               verbosity);
+      },
+      "target_density", "obe", "Sigma_dynamic", "Sigma_static", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](const double target_density, const triqs::modest::one_body_elements_tb &obe,
+         const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         const triqs::lattice::bz_int_options &opt, std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential<triqs::mesh::imfreq>(target_density, obe, Sigma_dynamic, Sigma_static, opt, method, precision,
+                                                                           verbosity);
+      },
+      "target_density", "obe", "Sigma_dynamic", "Sigma_static", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](const double target_density, const triqs::modest::one_body_elements_tb &obe, const triqs::mesh::imfreq &mesh,
+         const triqs::lattice::bz_int_options &opt, std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential<triqs::mesh::imfreq>(target_density, obe, mesh, opt, method, precision, verbosity);
+      },
+      "target_density", "obe", "mesh", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true)};
 
-static const auto doc_d_0 = fun_0.doc(
+static const auto _c2py_doc_0 = _c2py_fun_0.doc(
    R"DOC(
 [1, 2] Compute the density of the lattice Green's function with a self-energy using Woodbury.
 
@@ -112,15 +135,17 @@ Returns
 )DOC",
    {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(), c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
     {c2py::python_typename<double>()},
-    {c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-     c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-    {c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+    {c2py::python_typename<const nda::basic_array<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+       nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
     {c2py::python_typename<const triqs::lattice::bz_int_options &>()}},
    {c2py::python_typename<double>()});
-static const auto doc_d_1 = fun_1.doc(R"DOC(
+static const auto _c2py_doc_1 = _c2py_fun_1.doc(R"DOC(
 Compute number of particles :math:`n = \sum f(\beta(\varepsilon(k) - μ))`.
 )DOC");
-static const auto doc_d_2 = fun_2.doc(
+static const auto _c2py_doc_2 = _c2py_fun_2.doc(
    R"DOC(
 [1] Find the chemical potenital from the local Green's function given a target density.
 
@@ -158,24 +183,26 @@ Returns
 {ret_0}
    Chemical potential corresponding to target density.
 )DOC",
-   {{c2py::python_typename<double>()},
+   {{c2py::python_typename<const double>()},
     {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>(), c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
     {c2py::python_typename<double>()},
     {c2py::python_typename<std::string>()},
     {c2py::python_typename<double>()},
     {c2py::python_typename<bool>()},
-    {c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
-     c2py::python_typename<const triqs::gfs::block2_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>()},
-    {c2py::python_typename<const nda::array<nda::matrix<triqs::dcomplex>, 2> &>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+    {c2py::python_typename<const nda::basic_array<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+       nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
     {c2py::python_typename<const triqs::lattice::bz_int_options &>()},
     {c2py::python_typename<const triqs::mesh::imfreq &>()}},
    {c2py::python_typename<double>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"density", (PyCFunction)c2py::pyfkw<fun_0>, METH_VARARGS | METH_KEYWORDS, doc_d_0.c_str()},
-   {"density_nk", (PyCFunction)c2py::pyfkw<fun_1>, METH_VARARGS | METH_KEYWORDS, doc_d_1.c_str()},
-   {"find_chemical_potential", (PyCFunction)c2py::pyfkw<fun_2>, METH_VARARGS | METH_KEYWORDS, doc_d_2.c_str()},
+   {"density", (PyCFunction)c2py::pyfkw<_c2py_fun_0>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_0.c_str()},
+   {"density_nk", (PyCFunction)c2py::pyfkw<_c2py_fun_1>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_1.c_str()},
+   {"find_chemical_potential", (PyCFunction)c2py::pyfkw<_c2py_fun_2>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_2.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -221,6 +248,9 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_rho_and_mu() 
   auto &conv_table = *c2py::conv_table_sptr.get();
 
   conv_table[std::type_index(typeid(c2py::py_range)).name()] = &c2py::wrap_pytype<c2py::py_range>;
+#define _add_type(T, N) c2py::add_type_object_to_main<T>(N, m, conv_table)
+
+#undef _add_type
 
   return m;
 }
