@@ -82,7 +82,9 @@ def generate_reference_data(filename : str, n_iw=30):
     return None
 
 if __name__ == '__main__':
-    for filename in  glob.glob("*.ref.h5"):
-        if 'large-mesh' in filename:  continue
+    ref_filenames = glob.glob("ref_data/*.ref.h5") + glob.glob("ref_data_lfs/*.ref.h5") 
+    skip_files = ['ref_data/u_matrix_slater.ref.h5', 'ref_data_lfs/la5ni3o11-wien2k-large-mesh.ref.h5']
+    for filename in ref_filenames:
+        if filename in skip_files: continue
         generate_reference_data(filename)
-    generate_reference_data("la5ni3o11-wien2k-large-mesh.ref.h5", n_iw=50)
+    generate_reference_data("ref_data_lfs/la5ni3o11-wien2k-large-mesh.ref.h5", n_iw=50)
