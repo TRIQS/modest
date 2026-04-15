@@ -271,18 +271,96 @@ constinit PyGetSetDef c2py::tp_getset<_c2py_cls_2>[] = {
 
 template <> const std::string c2py::tp_doc<_c2py_cls_2> = R"DOC()DOC" + c2py::tp_ctor_doc<_c2py_cls_2>;
 // --------- class _c2py_cls_3 -----------
-using _c2py_cls_3                                            = triqs::tb::superlattice;
+using _c2py_cls_3                                            = triqs::modest::one_body_elements_gw;
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_3>     = true;
+<<<<<<< HEAD
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_3> = "triqs_modest.misc.Superlattice";
 static auto _c2py_init_0                                     = c2py::dispatcher_c_kw_t{c2py::c_constructor<
    _c2py_cls_3, nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
    nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>("sl_units", "cluster_pts")};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_3>    = c2py::pyfkw_constructor<_c2py_init_0>;
 template <> const std::string c2py::tp_ctor_doc<_c2py_cls_3> = _c2py_init_0.doc(R"DOC()DOC");
+=======
+template <> inline constexpr auto c2py::tp_name<_c2py_cls_3> = "triqs_modest.misc.OneBodyElementsGw";
+
+static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs) {
+  if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    ("Error in constructing triqs::modest::one_body_elements_gw.\nNo positional arguments allowed. Use keywords arguments"));
+    return -1;
+  }
+  c2py::pydict_extractor de{kwargs};
+  try {
+    ((c2py::wrap<_c2py_cls_3> *)self)->_c = new _c2py_cls_3{};
+  } catch (std::exception const &e) {
+    PyErr_SetString(PyExc_RuntimeError, ("Error in constructing triqs::modest::one_body_elements_gw from a Python dict.\n   "s + e.what()).c_str());
+    return -1;
+  }
+  auto &self_c = *(((c2py::wrap<_c2py_cls_3> *)self)->_c);
+  de("C_space", self_c.C_space, false);
+  de("P", self_c.P, false);
+  return de.check();
+}
+
+template <> constexpr initproc c2py::tp_init<_c2py_cls_3> = synth_constructor_3;
+
+template <>
+const std::string c2py::tp_ctor_doc<_c2py_cls_3> =
+   c2py::replace_tags(R"DOC(Synthesized constructor with the following keyword arguments:
+
+Parameters
+----------
+C_space : {par_0}
+
+P : {par_1}
+
+)DOC",
+                      "par",
+                      {c2py::python_typename<triqs::modest::local_space>(), c2py::python_typename<triqs::modest::downfolding_projector_ext>()});
+>>>>>>> 843bdd2 (rebase on unstable and update py bindings)
 
 // ----- Method table ----
 template <>
 PyMethodDef c2py::tp_methods<_c2py_cls_3>[] = {
+
+   {nullptr, nullptr, 0, nullptr} // Sentinel
+};
+
+constexpr auto _c2py_doc_member_8 = R"DOC()DOC";
+constexpr auto _c2py_doc_member_9 = R"DOC()DOC";
+static PyObject *prop_get_dict_3(PyObject *self, void *) {
+  auto &self_c = *(((c2py::wrap<_c2py_cls_3> *)self)->_c);
+  c2py::pydict dic;
+  dic["C_space"] = self_c.C_space;
+  dic["P"]       = self_c.P;
+  return dic.new_ref();
+}
+
+// ----- Member and property table ----
+
+template <>
+constinit PyGetSetDef c2py::tp_getset<_c2py_cls_3>[] = {
+   c2py::getsetdef_from_member<&_c2py_cls_3::C_space, _c2py_cls_3>("C_space", _c2py_doc_member_8),
+   c2py::getsetdef_from_member<&_c2py_cls_3::P, _c2py_cls_3>("P", _c2py_doc_member_9),
+   {"__dict__", (getter)prop_get_dict_3, nullptr, "", nullptr},
+   {nullptr, nullptr, nullptr, nullptr, nullptr}};
+
+template <>
+const std::string c2py::tp_doc<_c2py_cls_3> =
+   R"DOC(A one-body elements struct for GW (CoQui) calculations.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_3>;
+// --------- class _c2py_cls_4 -----------
+using _c2py_cls_4                                            = triqs::tb::superlattice;
+template <> constexpr bool c2py::is_wrapped<_c2py_cls_4>     = true;
+template <> inline constexpr auto c2py::tp_name<_c2py_cls_4> = "triqs_modest.misc.Superlattice";
+static auto _c2py_init_0                                     = c2py::dispatcher_c_kw_t{c2py::c_constructor<
+                                       _c2py_cls_4, nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
+                                       nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>("sl_units", "cluster_pts")};
+template <> constexpr initproc c2py::tp_init<_c2py_cls_4>    = c2py::pyfkw_constructor<_c2py_init_0>;
+template <> const std::string c2py::tp_ctor_doc<_c2py_cls_4> = _c2py_init_0.doc(R"DOC()DOC");
+
+// ----- Method table ----
+template <>
+PyMethodDef c2py::tp_methods<_c2py_cls_4>[] = {
 
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
@@ -293,52 +371,61 @@ static constexpr auto prop_doc_1 = R"DOC()DOC";
 // ----- Member and property table ----
 
 template <>
-constinit PyGetSetDef c2py::tp_getset<_c2py_cls_3>[] = {
+constinit PyGetSetDef c2py::tp_getset<_c2py_cls_4>[] = {
 
    {"dim", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::superlattice::dim)>, nullptr, prop_doc_0, nullptr},
    {"n_cluster_sites", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::superlattice::n_cluster_sites)>, nullptr, prop_doc_1, nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> const std::string c2py::tp_doc<_c2py_cls_3> = R"DOC()DOC" + c2py::tp_ctor_doc<_c2py_cls_3>;
-// --------- class _c2py_cls_4 -----------
-using _c2py_cls_4                                            = triqs::tb::tb_hamiltonian;
-template <> constexpr bool c2py::is_wrapped<_c2py_cls_4>     = true;
-template <> inline constexpr auto c2py::tp_name<_c2py_cls_4> = "triqs_modest.misc.TbHamiltonian";
+template <> const std::string c2py::tp_doc<_c2py_cls_4> = R"DOC()DOC" + c2py::tp_ctor_doc<_c2py_cls_4>;
+// --------- class _c2py_cls_5 -----------
+using _c2py_cls_5                                            = triqs::tb::tb_hamiltonian;
+template <> constexpr bool c2py::is_wrapped<_c2py_cls_5>     = true;
+template <> inline constexpr auto c2py::tp_name<_c2py_cls_5> = "triqs_modest.misc.TbHamiltonian";
 static auto _c2py_init_1                                     = c2py::dispatcher_c_kw_t{
+<<<<<<< HEAD
    c2py::c_constructor<_c2py_cls_4, std::vector<std::array<long, 3>>,
                        std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'A',
                                                     nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>("Rs", "hoppings"),
    c2py::c_constructor<_c2py_cls_4>()};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_4>    = c2py::pyfkw_constructor<_c2py_init_1>;
 template <> const std::string c2py::tp_ctor_doc<_c2py_cls_4> = _c2py_init_1.doc(R"DOC()DOC");
+=======
+   c2py::c_constructor<_c2py_cls_5, std::vector<std::array<long, 3>>,
+                                                           std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'A',
+                                                                                        nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>("Rs", "hoppings"),
+   c2py::c_constructor<_c2py_cls_5>()};
+template <> constexpr initproc c2py::tp_init<_c2py_cls_5>    = c2py::pyfkw_constructor<_c2py_init_1>;
+template <> const std::string c2py::tp_ctor_doc<_c2py_cls_5> = _c2py_init_1.doc(R"DOC()DOC");
+>>>>>>> 843bdd2 (rebase on unstable and update py bindings)
 // __call__
 static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cmethod(
-      [](_c2py_cls_4 const &self,
+      [](_c2py_cls_5 const &self,
          nda::basic_array_view<const double, 2, nda::C_stride_layout, 'A', nda::default_accessor, nda::borrowed<nda::mem::AddressSpace::Host>> k_list)
          -> decltype(auto) { return self.operator()(k_list); },
       "self", "k_list"),
-   c2py::cmethod([](_c2py_cls_4 const &self, std::array<double, 3> ks) -> decltype(auto) { return self.operator()(ks); }, "self", "ks")};
+   c2py::cmethod([](_c2py_cls_5 const &self, std::array<double, 3> ks) -> decltype(auto) { return self.operator()(ks); }, "self", "ks")};
 
-template <> inline constexpr ternaryfunc c2py::tp_call<_c2py_cls_4> = c2py::pyfkw<_c2py_fun_0>;
+template <> inline constexpr ternaryfunc c2py::tp_call<_c2py_cls_5> = c2py::pyfkw<_c2py_fun_0>;
 
 // eigenvalues
 static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
-   c2py::cmethod([](_c2py_cls_4 const &self,
+   c2py::cmethod([](_c2py_cls_5 const &self,
                     nda::basic_array_view<double, 2, nda::C_stride_layout, 'A', nda::default_accessor, nda::borrowed<nda::mem::AddressSpace::Host>> k)
                     -> decltype(auto) { return self.eigenvalues(k); },
                  "self", "k")};
 
 // eigenvectors
 static auto const _c2py_fun_2 = c2py::dispatcher_f_kw_t{
-   c2py::cmethod([](_c2py_cls_4 const &self,
+   c2py::cmethod([](_c2py_cls_5 const &self,
                     nda::basic_array_view<double, 2, nda::C_stride_layout, 'A', nda::default_accessor, nda::borrowed<nda::mem::AddressSpace::Host>> k)
                     -> decltype(auto) { return self.eigenvectors(k); },
                  "self", "k")};
 
 // get_R_idx
 static auto const _c2py_fun_3 = c2py::dispatcher_f_kw_t{
-   c2py::cmethod([](_c2py_cls_4 const &self, std::array<long, 3> R) -> decltype(auto) { return self.get_R_idx(R); }, "self", "R")};
+   c2py::cmethod([](_c2py_cls_5 const &self, std::array<long, 3> R) -> decltype(auto) { return self.get_R_idx(R); }, "self", "R")};
 
 static const auto _c2py_doc_0 = _c2py_fun_0.doc(R"DOC()DOC");
 static const auto _c2py_doc_1 = _c2py_fun_1.doc(R"DOC()DOC");
@@ -347,13 +434,13 @@ static const auto _c2py_doc_3 = _c2py_fun_3.doc(R"DOC()DOC");
 
 // ----- Method table ----
 template <>
-PyMethodDef c2py::tp_methods<_c2py_cls_4>[] = {
+PyMethodDef c2py::tp_methods<_c2py_cls_5>[] = {
    {"eigenvalues", (PyCFunction)c2py::pyfkw<_c2py_fun_1>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_1.c_str()},
    {"eigenvectors", (PyCFunction)c2py::pyfkw<_c2py_fun_2>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_2.c_str()},
    {"get_R_idx", (PyCFunction)c2py::pyfkw<_c2py_fun_3>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_3.c_str()},
-   {"__write_hdf5__", c2py::tpxx_write_h5<_c2py_cls_4>, METH_VARARGS, "  "},
-   {"__getstate__", c2py::getstate_h5<_c2py_cls_4>, METH_NOARGS, ""},
-   {"__setstate__", c2py::setstate_h5<_c2py_cls_4>, METH_O, ""},
+   {"__write_hdf5__", c2py::tpxx_write_h5<_c2py_cls_5>, METH_VARARGS, "  "},
+   {"__getstate__", c2py::getstate_h5<_c2py_cls_5>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_h5<_c2py_cls_5>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -365,7 +452,7 @@ static constexpr auto prop_doc_5 = R"DOC()DOC";
 // ----- Member and property table ----
 
 template <>
-constinit PyGetSetDef c2py::tp_getset<_c2py_cls_4>[] = {
+constinit PyGetSetDef c2py::tp_getset<_c2py_cls_5>[] = {
 
    {"elements", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::tb_hamiltonian::elements)>, nullptr, prop_doc_2, nullptr},
    {"hoppings", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::tb_hamiltonian::hoppings)>, nullptr, prop_doc_3, nullptr},
@@ -374,13 +461,13 @@ constinit PyGetSetDef c2py::tp_getset<_c2py_cls_4>[] = {
    {"n_orbitals", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::tb_hamiltonian::n_orbitals)>, nullptr, prop_doc_5, nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> const std::string c2py::tp_doc<_c2py_cls_4> = R"DOC()DOC" + c2py::tp_ctor_doc<_c2py_cls_4>;
-// --------- class _c2py_cls_5 -----------
-using _c2py_cls_5                                            = triqs::lattice::bz_int_options;
-template <> constexpr bool c2py::is_wrapped<_c2py_cls_5>     = true;
-template <> inline constexpr auto c2py::tp_name<_c2py_cls_5> = "triqs_modest.misc.BzIntOptions";
+template <> const std::string c2py::tp_doc<_c2py_cls_5> = R"DOC()DOC" + c2py::tp_ctor_doc<_c2py_cls_5>;
+// --------- class _c2py_cls_6 -----------
+using _c2py_cls_6                                            = triqs::lattice::bz_int_options;
+template <> constexpr bool c2py::is_wrapped<_c2py_cls_6>     = true;
+template <> inline constexpr auto c2py::tp_name<_c2py_cls_6> = "triqs_modest.misc.BzIntOptions";
 
-static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs) {
+static int synth_constructor_4(PyObject *self, PyObject *args, PyObject *kwargs) {
   if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
     PyErr_SetString(PyExc_RuntimeError,
                     ("Error in constructing triqs::lattice::bz_int_options.\nNo positional arguments allowed. Use keywords arguments"));
@@ -388,12 +475,12 @@ static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs)
   }
   c2py::pydict_extractor de{kwargs};
   try {
-    ((c2py::wrap<_c2py_cls_5> *)self)->_c = new _c2py_cls_5{};
+    ((c2py::wrap<_c2py_cls_6> *)self)->_c = new _c2py_cls_6{};
   } catch (std::exception const &e) {
     PyErr_SetString(PyExc_RuntimeError, ("Error in constructing triqs::lattice::bz_int_options from a Python dict.\n   "s + e.what()).c_str());
     return -1;
   }
-  auto &self_c = *(((c2py::wrap<_c2py_cls_5> *)self)->_c);
+  auto &self_c = *(((c2py::wrap<_c2py_cls_6> *)self)->_c);
   de("tolerance", self_c.tolerance, true);
   de("k_grid", self_c.k_grid, true);
   de("delta_k_grid", self_c.delta_k_grid, true);
@@ -404,10 +491,10 @@ static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs)
   return de.check();
 }
 
-template <> constexpr initproc c2py::tp_init<_c2py_cls_5> = synth_constructor_3;
+template <> constexpr initproc c2py::tp_init<_c2py_cls_6> = synth_constructor_4;
 
 template <>
-const std::string c2py::tp_ctor_doc<_c2py_cls_5> = c2py::replace_tags(
+const std::string c2py::tp_ctor_doc<_c2py_cls_6> = c2py::replace_tags(
    R"DOC(Synthesized constructor with the following keyword arguments:
 
 Parameters
@@ -433,20 +520,20 @@ verbose : {par_6}, default=false
 
 // ----- Method table ----
 template <>
-PyMethodDef c2py::tp_methods<_c2py_cls_5>[] = {
+PyMethodDef c2py::tp_methods<_c2py_cls_6>[] = {
 
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto _c2py_doc_member_8  = R"DOC()DOC";
-constexpr auto _c2py_doc_member_9  = R"DOC()DOC";
 constexpr auto _c2py_doc_member_10 = R"DOC()DOC";
 constexpr auto _c2py_doc_member_11 = R"DOC()DOC";
 constexpr auto _c2py_doc_member_12 = R"DOC()DOC";
 constexpr auto _c2py_doc_member_13 = R"DOC()DOC";
 constexpr auto _c2py_doc_member_14 = R"DOC()DOC";
-static PyObject *prop_get_dict_3(PyObject *self, void *) {
-  auto &self_c = *(((c2py::wrap<_c2py_cls_5> *)self)->_c);
+constexpr auto _c2py_doc_member_15 = R"DOC()DOC";
+constexpr auto _c2py_doc_member_16 = R"DOC()DOC";
+static PyObject *prop_get_dict_4(PyObject *self, void *) {
+  auto &self_c = *(((c2py::wrap<_c2py_cls_6> *)self)->_c);
   c2py::pydict dic;
   dic["tolerance"]    = self_c.tolerance;
   dic["k_grid"]       = self_c.k_grid;
@@ -461,18 +548,18 @@ static PyObject *prop_get_dict_3(PyObject *self, void *) {
 // ----- Member and property table ----
 
 template <>
-constinit PyGetSetDef c2py::tp_getset<_c2py_cls_5>[] = {
-   c2py::getsetdef_from_member<&_c2py_cls_5::tolerance, _c2py_cls_5>("tolerance", _c2py_doc_member_8),
-   c2py::getsetdef_from_member<&_c2py_cls_5::k_grid, _c2py_cls_5>("k_grid", _c2py_doc_member_9),
-   c2py::getsetdef_from_member<&_c2py_cls_5::delta_k_grid, _c2py_cls_5>("delta_k_grid", _c2py_doc_member_10),
-   c2py::getsetdef_from_member<&_c2py_cls_5::k_grid_max, _c2py_cls_5>("k_grid_max", _c2py_doc_member_11),
-   c2py::getsetdef_from_member<&_c2py_cls_5::run_adaptive, _c2py_cls_5>("run_adaptive", _c2py_doc_member_12),
-   c2py::getsetdef_from_member<&_c2py_cls_5::run_ptr, _c2py_cls_5>("run_ptr", _c2py_doc_member_13),
-   c2py::getsetdef_from_member<&_c2py_cls_5::verbose, _c2py_cls_5>("verbose", _c2py_doc_member_14),
-   {"__dict__", (getter)prop_get_dict_3, nullptr, "", nullptr},
+constinit PyGetSetDef c2py::tp_getset<_c2py_cls_6>[] = {
+   c2py::getsetdef_from_member<&_c2py_cls_6::tolerance, _c2py_cls_6>("tolerance", _c2py_doc_member_10),
+   c2py::getsetdef_from_member<&_c2py_cls_6::k_grid, _c2py_cls_6>("k_grid", _c2py_doc_member_11),
+   c2py::getsetdef_from_member<&_c2py_cls_6::delta_k_grid, _c2py_cls_6>("delta_k_grid", _c2py_doc_member_12),
+   c2py::getsetdef_from_member<&_c2py_cls_6::k_grid_max, _c2py_cls_6>("k_grid_max", _c2py_doc_member_13),
+   c2py::getsetdef_from_member<&_c2py_cls_6::run_adaptive, _c2py_cls_6>("run_adaptive", _c2py_doc_member_14),
+   c2py::getsetdef_from_member<&_c2py_cls_6::run_ptr, _c2py_cls_6>("run_ptr", _c2py_doc_member_15),
+   c2py::getsetdef_from_member<&_c2py_cls_6::verbose, _c2py_cls_6>("verbose", _c2py_doc_member_16),
+   {"__dict__", (getter)prop_get_dict_4, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-template <> const std::string c2py::tp_doc<_c2py_cls_5> = R"DOC()DOC" + c2py::tp_ctor_doc<_c2py_cls_5>;
+template <> const std::string c2py::tp_doc<_c2py_cls_6> = R"DOC()DOC" + c2py::tp_ctor_doc<_c2py_cls_6>;
 
 // ==================== module functions ====================
 
@@ -568,68 +655,47 @@ static auto const _c2py_fun_13 = c2py::dispatcher_f_kw_t{c2py::cfun(
    },
    "obe", "U")};
 
-// rotate_embedded_self_energy
-static auto const _c2py_fun_14 =
-   c2py::dispatcher_f_kw_t{
-      c2py::cfun(
-         [](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_embed_dynamic_loc,
-            const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>
-               &U) { return triqs::modest::rotate_embedded_self_energy<triqs::mesh::imfreq>(Sigma_embed_dynamic_loc, U); },
-         "Sigma_embed_dynamic_loc", "U"),
-      c2py::cfun(
-         [](const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_embed_dynamic_loc,
-            const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>
-               &U) { return triqs::modest::rotate_embedded_self_energy<triqs::mesh::refreq>(Sigma_embed_dynamic_loc, U); },
-         "Sigma_embed_dynamic_loc", "U"),
-      c2py::cfun(
-         [](const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_embed_dynamic_loc,
-            const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>
-               &U) { return triqs::modest::rotate_embedded_self_energy<triqs::mesh::dlr_imfreq>(Sigma_embed_dynamic_loc, U); },
-         "Sigma_embed_dynamic_loc", "U"),
-      c2py::cfun(
-         [](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_embed_dynamic_loc,
-            const triqs::modest::one_body_elements_on_grid &obe) {
-           return triqs::modest::rotate_embedded_self_energy<triqs::mesh::imfreq>(Sigma_embed_dynamic_loc, obe);
-         },
-         "Sigma_embed_dynamic_loc", "obe"),
-      c2py::cfun(
-         [](const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_embed_dynamic_loc,
-            const triqs::modest::one_body_elements_on_grid &obe) {
-           return triqs::modest::rotate_embedded_self_energy<triqs::mesh::refreq>(Sigma_embed_dynamic_loc, obe);
-         },
-         "Sigma_embed_dynamic_loc", "obe"),
-      c2py::cfun(
-         [](const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_embed_dynamic_loc,
-            const triqs::modest::one_body_elements_on_grid &obe) {
-           return triqs::modest::rotate_embedded_self_energy<triqs::mesh::dlr_imfreq>(Sigma_embed_dynamic_loc, obe);
-         },
-         "Sigma_embed_dynamic_loc", "obe"),
-      c2py::cfun(
-         [](const std::vector<nda::basic_array<std::complex<double>, 3, nda::C_layout, 'A',
-                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &Sigma_embed_dynamic_loc,
-            const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>
-               &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, U); },
-         "Sigma_embed_dynamic_loc", "U"),
-      c2py::cfun(
-         [](const std::vector<nda::basic_array<std::complex<double>, 3, nda::C_layout, 'A',
-                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &Sigma_embed_dynamic_loc,
-            const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_dynamic_loc, obe); },
-         "Sigma_embed_dynamic_loc", "obe"),
-      c2py::cfun(
-         [](const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
-                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &Sigma_embed_static_loc,
-            const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>
-               &U) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_static_loc, U); },
-         "Sigma_embed_static_loc", "U"),
-      c2py::cfun(
-         [](const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
-                                               nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &Sigma_embed_static_loc,
-            const triqs::modest::one_body_elements_on_grid &obe) { return triqs::modest::rotate_embedded_self_energy(Sigma_embed_static_loc, obe); },
-         "Sigma_embed_static_loc", "obe")};
-
 // sigma_to_data_idx
-static auto const _c2py_fun_15 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const _c2py_fun_14 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](triqs::modest::spin_kind_e spin_kind, long sigma) { return triqs::modest::sigma_to_data_idx(spin_kind, sigma); }, "spin_kind", "sigma")};
+
+// spectral_function
+static auto const _c2py_fun_15 =
+   c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, double mu,
+                                         const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
+                                         double broadening) { return triqs::modest::spectral_function(obe, mu, Sigma_w, broadening); },
+                                      "obe", "mu", "Sigma_w", "broadening"_a = 0.01)};
+
+// symmetrize
+static auto const _c2py_fun_16 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &g,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize<triqs::mesh::imfreq>(g, deg_bls); },
+              "g", "deg_bls"),
+   c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::imtime, triqs::gfs::matrix_valued> &g,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize<triqs::mesh::imtime>(g, deg_bls); },
+              "g", "deg_bls"),
+   c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &g,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize<triqs::mesh::dlr_imfreq>(g, deg_bls); },
+              "g", "deg_bls"),
+   c2py::cfun([](const triqs::gfs::block_gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued> &g,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize<triqs::mesh::dlr_imtime>(g, deg_bls); },
+              "g", "deg_bls"),
+   c2py::cfun([](const triqs::gfs::gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &g,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize<triqs::mesh::imfreq>(g, deg_bls); },
+              "g", "deg_bls"),
+   c2py::cfun([](const triqs::gfs::gf<triqs::mesh::imtime, triqs::gfs::matrix_valued> &g,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize<triqs::mesh::imtime>(g, deg_bls); },
+              "g", "deg_bls"),
+   c2py::cfun([](const triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &g,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize<triqs::mesh::dlr_imfreq>(g, deg_bls); },
+              "g", "deg_bls"),
+   c2py::cfun([](const triqs::gfs::gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued> &g,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize<triqs::mesh::dlr_imtime>(g, deg_bls); },
+              "g", "deg_bls"),
+   c2py::cfun([](const std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                                    nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &bl_mat,
+                 std::vector<std::vector<long>> deg_bls) { return triqs::modest::symmetrize(bl_mat, deg_bls); },
+              "bl_mat", "deg_bls")};
 
 static const auto _c2py_doc_4 = _c2py_fun_4.doc(
    R"DOC(
@@ -738,66 +804,7 @@ Returns
                      {c2py::python_typename<const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
                                                                    nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()}},
                     {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
-static const auto _c2py_doc_14 = _c2py_fun_14.doc(
-   R"DOC(
-[1, 2, 3, 4, 5, 6, 7, 8] Rotate the dynamic part of the embedded self-energy from the local (solver) basis to the orbital basis.
-
-The rotation is independent of frequency and is performe as UΣ(ω)U†.
-
-------
-
-[9, 10] Rotate the static part of the embedded self-energy from the local (solver) basis to the orbital basis.
-
-The rotation is independent of frequency and is performe as UΣ(ω)U†.
-
-------
-
-Parameters
-----------
-Sigma_embed_dynamic_loc : {par_0}
-   The dynamic part of the embedded self-energy in the local (solver) basis.
-U : {par_1}
-   The rotation matrix from the local (solver) basis to the orbital basis.
-obe : {par_2}
-   The one-body elements on grid containing the rotation matrices.
-Sigma_embed_static_loc : {par_3}
-   The static part of the embedded self-energy in the local (solver) basis.
-
-Returns
--------
-[1, 4] : {ret_0}
-   The dynamic part of the embedded self-energy in the orbital basis.
-
-[2, 5] : {ret_1}
-   The dynamic part of the embedded self-energy in the orbital basis.
-
-[3, 6] : {ret_2}
-   The dynamic part of the embedded self-energy in the orbital basis.
-
-[7, 8] : {ret_3}
-   The dynamic part of the embedded self-energy in the orbital basis.
-
-[9, 10] : {ret_4}
-   The static part of the embedded self-energy in the orbital basis.
-)DOC",
-   {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
-     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
-     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
-     c2py::python_typename<const std::vector<
-        nda::basic_array<std::complex<double>, 3, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &>()},
-    {c2py::python_typename<
-       const nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
-    {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
-    {c2py::python_typename<const std::vector<
-       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>> &>()}},
-   {c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>>(),
-    c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::refreq, triqs::gfs::matrix_valued>>>(),
-    c2py::python_typename<std::vector<triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>>(),
-    c2py::python_typename<std::vector<
-       nda::basic_array<std::complex<double>, 3, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>(),
-    c2py::python_typename<std::vector<
-       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>()});
-static const auto _c2py_doc_15 = _c2py_fun_15.doc(R"DOC(
+static const auto _c2py_doc_14 = _c2py_fun_14.doc(R"DOC(
 Map a spin index to a data index.
 
 The mapping depends on the spin kind:
@@ -806,6 +813,106 @@ The mapping depends on the spin kind:
 * `NonPolarized`: :math:`\sigma \to 0` (an object is the same for both :math:`\sigma`, so only one copy is stored).
 * `NonCollinear`: :math:`\sigma \to 0` (:math:`\sigma` is always 0).
 )DOC");
+static const auto _c2py_doc_15 = _c2py_fun_15.doc(
+   R"DOC(
+Compute the k-summed band-resolved spectral function matrix.
+
+The returned array has shape (n_sigma, n_omega, n_bands, n_bands), with
+
+\f[
+  A(\omega) = -\frac{1}{2\pi i}\left[G(\omega) - G^{\dagger}(\omega)\right].
+\f]
+
+Parameters
+----------
+obe : {par_0}
+   One-body elements on grid.
+mu : {par_1}
+   Chemical potential.
+Sigma_w : {par_2}
+   Self-energy in real-frequencies.
+broadening : {par_3}
+   Spectral broadening.
+
+Returns
+-------
+{ret_0}
+   Band-resolved spectral function matrix.
+)DOC",
+   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+    {c2py::python_typename<double>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+    {c2py::python_typename<double>()}},
+   {c2py::python_typename<nda::basic_array<double, 4, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>()});
+static const auto _c2py_doc_16 = _c2py_fun_16.doc(
+   R"DOC(
+[1, 2, 3, 4, 5, 6, 7, 8] Symmetrize the blocks of a block Green's function given a list of it's degenerate blocks.
+
+Average the degenerate blocks and replace the degenerate ones with their average.
+
+------
+
+[9] Symmetrize the blocks of a block matrix given a list of it's degenerate blocks.
+
+Average the degenerate blocks and replace the degenerate ones with their average.
+
+------
+
+Parameters
+----------
+g : {par_0}
+   Block Green's function.
+deg_bls : {par_1}
+   A list of the degenerate blocks.
+
+Returns
+-------
+[1] : {ret_0}
+   The symmetrized Green's function.
+
+[2] : {ret_1}
+   The symmetrized Green's function.
+
+[3] : {ret_2}
+   The symmetrized Green's function.
+
+[4] : {ret_3}
+   The symmetrized Green's function.
+
+[5] : {ret_4}
+   The symmetrized Green's function.
+
+[6] : {ret_5}
+   The symmetrized Green's function.
+
+[7] : {ret_6}
+   The symmetrized Green's function.
+
+[8] : {ret_7}
+   The symmetrized Green's function.
+
+[9] : {ret_8}
+   The symmetrized block matrix.
+)DOC",
+   {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imtime, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::gf<triqs::mesh::imtime, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued> &>(),
+     c2py::python_typename<const triqs::gfs::gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued> &>()},
+    {c2py::python_typename<std::vector<std::vector<long>>>()}},
+   {c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imtime, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<triqs::gfs::gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<triqs::gfs::gf<triqs::mesh::imtime, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<triqs::gfs::gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<triqs::gfs::gf<triqs::mesh::dlr_imtime, triqs::gfs::matrix_valued>>(),
+    c2py::python_typename<std::vector<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
@@ -819,8 +926,9 @@ static PyMethodDef module_methods[] = {
    {"one_body_elements_from_model", (PyCFunction)c2py::pyfkw<_c2py_fun_11>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_11.c_str()},
    {"permute_local_space", (PyCFunction)c2py::pyfkw<_c2py_fun_12>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_12.c_str()},
    {"rotate", (PyCFunction)c2py::pyfkw<_c2py_fun_13>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_13.c_str()},
-   {"rotate_embedded_self_energy", (PyCFunction)c2py::pyfkw<_c2py_fun_14>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_14.c_str()},
-   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<_c2py_fun_15>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_15.c_str()},
+   {"sigma_to_data_idx", (PyCFunction)c2py::pyfkw<_c2py_fun_14>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_14.c_str()},
+   {"spectral_function", (PyCFunction)c2py::pyfkw<_c2py_fun_15>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_15.c_str()},
+   {"symmetrize", (PyCFunction)c2py::pyfkw<_c2py_fun_16>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_16.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -858,6 +966,7 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_misc() {
   if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_3>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_4>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_5>) < 0) return NULL;
+  if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_6>) < 0) return NULL;
 
   m = PyModule_Create(&module_def);
   if (m == NULL) return NULL;
@@ -869,16 +978,17 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_misc() {
   _add_type(_c2py_cls_0, "AtomicOrbs");
   _add_type(_c2py_cls_1, "IbzSymmetryOps");
   _add_type(_c2py_cls_2, "Op");
-  _add_type(_c2py_cls_3, "Superlattice");
-  _add_type(_c2py_cls_4, "TbHamiltonian");
-  _add_type(_c2py_cls_5, "BzIntOptions");
+  _add_type(_c2py_cls_3, "OneBodyElementsGw");
+  _add_type(_c2py_cls_4, "Superlattice");
+  _add_type(_c2py_cls_5, "TbHamiltonian");
+  _add_type(_c2py_cls_6, "BzIntOptions");
 #undef _add_type
 
   c2py::pyref module = c2py::pyref::module("h5.formats");
   if (not module) return nullptr;
   c2py::pyref register_class = module.attr("register_class");
 
-  register_h5_type<_c2py_cls_4>(register_class);
+  register_h5_type<_c2py_cls_5>(register_class);
 
   return m;
 }

@@ -171,7 +171,7 @@ namespace triqs::modest {
 
     bool operator==(downfolding_projector_ext const &other) const = default;
 
-    friend void mpi_broadcast(downfolding_projector_ext &x, mpi::communicator c = {}, int root = 0) {
+    C2PY_IGNORE friend void mpi_broadcast(downfolding_projector_ext &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(static_cast<downfolding_projector &>(x), c, root);
       mpi::broadcast(x.band_window, c, root);
       mpi::broadcast(x.kpts, c, root);
@@ -215,7 +215,7 @@ namespace triqs::modest {
     bool operator==(one_body_elements_gw const &) const = default;
 
     /// MPI broadcast
-    friend void mpi_broadcast(one_body_elements_gw &x, mpi::communicator c = {}, int root = 0) {
+    C2PY_IGNORE friend void mpi_broadcast(one_body_elements_gw &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(x.C_space, c, root);
       mpi::broadcast(x.P, c, root);
     }

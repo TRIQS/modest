@@ -475,9 +475,67 @@ Some properties:
   :math:`\sum_{ \nu} P^{\sigma}_{m\nu}(\mathbf{k}) P^{\dagger\sigma}_{\nu m'}(\mathbf{k}) = \delta_{mm'}`.)DOC"
    + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_2>;
 // --------- class _c2py_cls_3 -----------
-using _c2py_cls_3                                            = triqs::modest::one_body_elements_on_grid;
+using _c2py_cls_3                                            = triqs::modest::downfolding_projector_ext;
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_3>     = true;
-template <> inline constexpr auto c2py::tp_name<_c2py_cls_3> = "triqs_modest.obe.OneBodyElementsOnGrid";
+template <> inline constexpr auto c2py::tp_name<_c2py_cls_3> = "triqs_modest.obe.DownfoldingProjectorExt";
+static auto _c2py_init_1                                     = c2py::dispatcher_c_kw_t{c2py::c_constructor<_c2py_cls_3>()};
+template <> constexpr initproc c2py::tp_init<_c2py_cls_3>    = c2py::pyfkw_constructor<_c2py_init_1>;
+template <> const std::string c2py::tp_ctor_doc<_c2py_cls_3> = _c2py_init_1.doc(R"DOC()DOC");
+
+// ----- Method table ----
+template <>
+PyMethodDef c2py::tp_methods<_c2py_cls_3>[] = {
+
+   {nullptr, nullptr, 0, nullptr} // Sentinel
+};
+
+constexpr auto _c2py_doc_member_8 = R"DOC()DOC";
+constexpr auto _c2py_doc_member_9 = R"DOC()DOC";
+
+// ----- Member and property table ----
+
+template <>
+constinit PyGetSetDef c2py::tp_getset<_c2py_cls_3>[] = {
+   c2py::getsetdef_from_member<&_c2py_cls_3::band_window, _c2py_cls_3>("band_window", _c2py_doc_member_8),
+   c2py::getsetdef_from_member<&_c2py_cls_3::kpts, _c2py_cls_3>("kpts", _c2py_doc_member_9),
+
+   {nullptr, nullptr, nullptr, nullptr, nullptr}};
+
+template <>
+const std::string c2py::tp_doc<_c2py_cls_3> = R"DOC(The projector that downfolds the energy bands onto a set of localized atomic-like orbitals.
+
+A downfolding projector contains the projector, the kind of spin used in the projection, and the number of bands
+per k-point for cases when a band goes outside of the projection window.
+
+The projectors :math:`P_{m\nu}^{\sigma}(\mathbf{k})` connect the Bloch space :math:`{\cal B}` to :math:`{\cal C}`. The
+projectors are obtained from DFT codes or Wannier90. They are defined by
+
+.. math::
+
+   P_{(a,m_{a})\nu}^{\sigma}(\mathbf{k})\equiv e^{-i \mathbf{k} R_a}
+   \langle \chi_{m_{a}}^{R_a \sigma} | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle,
+
+where :math:`| \chi_{m_{a}}^{R_a \sigma} \rangle` is a Wannier function localized at atom :math:`a` with index
+:math:`m_a` at position :math:`R_a` and :math:`| \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle` is the Kohn-Sham wavefunction.
+The relation between the Wannier and  Bloch function is therefore
+
+.. math::
+
+   | \chi_{m_{a}}^{R_a \sigma} \rangle = \sum_{\mathbf{k} \nu} e^{-i \mathbf{k} R_a} \bigl(P^\sigma_{(a,m_{a})\nu}
+   (\mathbf{k})\bigr)^* | \psi_{\nu}^{\sigma}(\mathbf{k}) \rangle.
+
+Some properties:
+
+* Basis change in :math:`\cal C` space: They are given by a unitary matrix :math:`U`, the projector transforms as
+  :math:`P^{'\sigma}_{m\nu}(\mathbf{k}) = U^{\dagger}_{m, m'} P^{\sigma}_{m'\nu}(\mathbf{k}).`
+* Partial unitarity property: In general :math:`P` is not unitary as :math:`N_\nu^{\mathbf{k}} > M`. However, if the
+  Wannier functions are reorthonormalized with respect to the truncated band basis, we have
+  :math:`\sum_{ \nu} P^{\sigma}_{m\nu}(\mathbf{k}) P^{\dagger\sigma}_{\nu m'}(\mathbf{k}) = \delta_{mm'}`.)DOC"
+   + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_3>;
+// --------- class _c2py_cls_4 -----------
+using _c2py_cls_4                                            = triqs::modest::one_body_elements_on_grid;
+template <> constexpr bool c2py::is_wrapped<_c2py_cls_4>     = true;
+template <> inline constexpr auto c2py::tp_name<_c2py_cls_4> = "triqs_modest.obe.OneBodyElementsOnGrid";
 
 static int synth_constructor_2(PyObject *self, PyObject *args, PyObject *kwargs) {
   if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
@@ -487,13 +545,13 @@ static int synth_constructor_2(PyObject *self, PyObject *args, PyObject *kwargs)
   }
   c2py::pydict_extractor de{kwargs};
   try {
-    ((c2py::wrap<_c2py_cls_3> *)self)->_c = new _c2py_cls_3{};
+    ((c2py::wrap<_c2py_cls_4> *)self)->_c = new _c2py_cls_4{};
   } catch (std::exception const &e) {
     PyErr_SetString(PyExc_RuntimeError,
                     ("Error in constructing triqs::modest::one_body_elements_on_grid from a Python dict.\n   "s + e.what()).c_str());
     return -1;
   }
-  auto &self_c = *(((c2py::wrap<_c2py_cls_3> *)self)->_c);
+  auto &self_c = *(((c2py::wrap<_c2py_cls_4> *)self)->_c);
   de("H", self_c.H, false);
   de("C_space", self_c.C_space, false);
   de("P", self_c.P, false);
@@ -501,10 +559,10 @@ static int synth_constructor_2(PyObject *self, PyObject *args, PyObject *kwargs)
   return de.check();
 }
 
-template <> constexpr initproc c2py::tp_init<_c2py_cls_3> = synth_constructor_2;
+template <> constexpr initproc c2py::tp_init<_c2py_cls_4> = synth_constructor_2;
 
 template <>
-const std::string c2py::tp_ctor_doc<_c2py_cls_3> = c2py::replace_tags(
+const std::string c2py::tp_ctor_doc<_c2py_cls_4> = c2py::replace_tags(
    R"DOC(Synthesized constructor with the following keyword arguments:
 
 Parameters
@@ -524,17 +582,17 @@ ibz_symm_ops : {par_3}, default={}
 
 // ----- Method table ----
 template <>
-PyMethodDef c2py::tp_methods<_c2py_cls_3>[] = {
+PyMethodDef c2py::tp_methods<_c2py_cls_4>[] = {
 
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto _c2py_doc_member_8  = R"DOC(Band dispersion.)DOC";
-constexpr auto _c2py_doc_member_9  = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
-constexpr auto _c2py_doc_member_10 = R"DOC(Downfolding projector :math:`P`.)DOC";
-constexpr auto _c2py_doc_member_11 = R"DOC(IBZ symmetrizer after a k-sum)DOC";
+constexpr auto _c2py_doc_member_10 = R"DOC(Band dispersion.)DOC";
+constexpr auto _c2py_doc_member_11 = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
+constexpr auto _c2py_doc_member_12 = R"DOC(Downfolding projector :math:`P`.)DOC";
+constexpr auto _c2py_doc_member_13 = R"DOC(IBZ symmetrizer after a k-sum)DOC";
 static PyObject *prop_get_dict_2(PyObject *self, void *) {
-  auto &self_c = *(((c2py::wrap<_c2py_cls_3> *)self)->_c);
+  auto &self_c = *(((c2py::wrap<_c2py_cls_4> *)self)->_c);
   c2py::pydict dic;
   dic["H"]            = self_c.H;
   dic["C_space"]      = self_c.C_space;
@@ -546,21 +604,21 @@ static PyObject *prop_get_dict_2(PyObject *self, void *) {
 // ----- Member and property table ----
 
 template <>
-constinit PyGetSetDef c2py::tp_getset<_c2py_cls_3>[] = {
-   c2py::getsetdef_from_member<&_c2py_cls_3::H, _c2py_cls_3>("H", _c2py_doc_member_8),
-   c2py::getsetdef_from_member<&_c2py_cls_3::C_space, _c2py_cls_3>("C_space", _c2py_doc_member_9),
-   c2py::getsetdef_from_member<&_c2py_cls_3::P, _c2py_cls_3>("P", _c2py_doc_member_10),
-   c2py::getsetdef_from_member<&_c2py_cls_3::ibz_symm_ops, _c2py_cls_3>("ibz_symm_ops", _c2py_doc_member_11),
+constinit PyGetSetDef c2py::tp_getset<_c2py_cls_4>[] = {
+   c2py::getsetdef_from_member<&_c2py_cls_4::H, _c2py_cls_4>("H", _c2py_doc_member_10),
+   c2py::getsetdef_from_member<&_c2py_cls_4::C_space, _c2py_cls_4>("C_space", _c2py_doc_member_11),
+   c2py::getsetdef_from_member<&_c2py_cls_4::P, _c2py_cls_4>("P", _c2py_doc_member_12),
+   c2py::getsetdef_from_member<&_c2py_cls_4::ibz_symm_ops, _c2py_cls_4>("ibz_symm_ops", _c2py_doc_member_13),
    {"__dict__", (getter)prop_get_dict_2, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <>
-const std::string c2py::tp_doc<_c2py_cls_3> = R"DOC(A one-body elements struct where all of the underlying data exists on a fixed momentum grid.)DOC"
-   + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_3>;
-// --------- class _c2py_cls_4 -----------
-using _c2py_cls_4                                            = triqs::modest::one_body_elements_tb;
-template <> constexpr bool c2py::is_wrapped<_c2py_cls_4>     = true;
-template <> inline constexpr auto c2py::tp_name<_c2py_cls_4> = "triqs_modest.obe.OneBodyElementsTb";
+const std::string c2py::tp_doc<_c2py_cls_4> = R"DOC(A one-body elements struct where all of the underlying data exists on a fixed momentum grid.)DOC"
+   + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_4>;
+// --------- class _c2py_cls_5 -----------
+using _c2py_cls_5                                            = triqs::modest::one_body_elements_tb;
+template <> constexpr bool c2py::is_wrapped<_c2py_cls_5>     = true;
+template <> inline constexpr auto c2py::tp_name<_c2py_cls_5> = "triqs_modest.obe.OneBodyElementsTb";
 
 static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs) {
   if (args and PyTuple_Check(args) and (PyTuple_Size(args) > 0)) {
@@ -570,21 +628,21 @@ static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs)
   }
   c2py::pydict_extractor de{kwargs};
   try {
-    ((c2py::wrap<_c2py_cls_4> *)self)->_c = new _c2py_cls_4{};
+    ((c2py::wrap<_c2py_cls_5> *)self)->_c = new _c2py_cls_5{};
   } catch (std::exception const &e) {
     PyErr_SetString(PyExc_RuntimeError, ("Error in constructing triqs::modest::one_body_elements_tb from a Python dict.\n   "s + e.what()).c_str());
     return -1;
   }
-  auto &self_c = *(((c2py::wrap<_c2py_cls_4> *)self)->_c);
+  auto &self_c = *(((c2py::wrap<_c2py_cls_5> *)self)->_c);
   de("C_space", self_c.C_space, false);
   de("H", self_c.H, false);
   return de.check();
 }
 
-template <> constexpr initproc c2py::tp_init<_c2py_cls_4> = synth_constructor_3;
+template <> constexpr initproc c2py::tp_init<_c2py_cls_5> = synth_constructor_3;
 
 template <>
-const std::string c2py::tp_ctor_doc<_c2py_cls_4> =
+const std::string c2py::tp_ctor_doc<_c2py_cls_5> =
    c2py::replace_tags(R"DOC(Synthesized constructor with the following keyword arguments:
 
 Parameters
@@ -598,15 +656,15 @@ H : {par_1}
 
 // ----- Method table ----
 template <>
-PyMethodDef c2py::tp_methods<_c2py_cls_4>[] = {
+PyMethodDef c2py::tp_methods<_c2py_cls_5>[] = {
 
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto _c2py_doc_member_12 = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
-constexpr auto _c2py_doc_member_13 = R"DOC(List of TB Hamiltonians.)DOC";
+constexpr auto _c2py_doc_member_14 = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
+constexpr auto _c2py_doc_member_15 = R"DOC(List of TB Hamiltonians.)DOC";
 static PyObject *prop_get_dict_3(PyObject *self, void *) {
-  auto &self_c = *(((c2py::wrap<_c2py_cls_4> *)self)->_c);
+  auto &self_c = *(((c2py::wrap<_c2py_cls_5> *)self)->_c);
   c2py::pydict dic;
   dic["C_space"] = self_c.C_space;
   dic["H"]       = self_c.H;
@@ -616,26 +674,32 @@ static PyObject *prop_get_dict_3(PyObject *self, void *) {
 // ----- Member and property table ----
 
 template <>
-constinit PyGetSetDef c2py::tp_getset<_c2py_cls_4>[] = {
-   c2py::getsetdef_from_member<&_c2py_cls_4::C_space, _c2py_cls_4>("C_space", _c2py_doc_member_12),
-   c2py::getsetdef_from_member<&_c2py_cls_4::H, _c2py_cls_4>("H", _c2py_doc_member_13),
+constinit PyGetSetDef c2py::tp_getset<_c2py_cls_5>[] = {
+   c2py::getsetdef_from_member<&_c2py_cls_5::C_space, _c2py_cls_5>("C_space", _c2py_doc_member_14),
+   c2py::getsetdef_from_member<&_c2py_cls_5::H, _c2py_cls_5>("H", _c2py_doc_member_15),
    {"__dict__", (getter)prop_get_dict_3, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <>
-const std::string c2py::tp_doc<_c2py_cls_4> =
-   R"DOC(A one-body elements using a tight-binding Hamiltonian.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_4>;
+const std::string c2py::tp_doc<_c2py_cls_5> =
+   R"DOC(A one-body elements using a tight-binding Hamiltonian.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_5>;
 
 // ==================== module functions ====================
 
-// one_body_elements_from_dft_converter
+// make_one_body_elements_gw
 static auto const _c2py_fun_6 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const std::string &filename, double threshold,
+                 bool diagonalize_hloc) { return triqs::modest::make_one_body_elements_gw(filename, threshold, diagonalize_hloc); },
+              "filename", "threshold"_a = 1e-5, "diagonalize_hloc"_a = false)};
+
+// one_body_elements_from_dft_converter
+static auto const _c2py_fun_7 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::string &filename, double threshold,
                  bool diagonalize_hloc) { return triqs::modest::one_body_elements_from_dft_converter(filename, threshold, diagonalize_hloc); },
               "filename", "threshold"_a = 1.e-5, "diagonalize_hloc"_a = false)};
 
 // one_body_elements_from_wannier90
-static auto const _c2py_fun_7 = c2py::dispatcher_f_kw_t{
+static auto const _c2py_fun_8 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
       [](const std::string &wannier_file_path, triqs::modest::spin_kind_e spin_kind, std::vector<triqs::modest::atomic_orbs> atomic_shells) {
         return triqs::modest::one_body_elements_from_wannier90(wannier_file_path, spin_kind, atomic_shells);
@@ -649,14 +713,14 @@ static auto const _c2py_fun_7 = c2py::dispatcher_f_kw_t{
       "wannier_file_path_up", "wannier_file_path_dn", "spin_kind", "atomic_shells")};
 
 // one_body_elements_on_high_symmetry_path
-static auto const _c2py_fun_8 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const _c2py_fun_9 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::string &filename, const triqs::modest::one_body_elements_on_grid &obe) {
      return triqs::modest::one_body_elements_on_high_symmetry_path(filename, obe);
    },
    "filename", "obe")};
 
 // one_body_elements_with_theta_projectors
-static auto const _c2py_fun_9 = c2py::dispatcher_f_kw_t{c2py::cfun(
+static auto const _c2py_fun_10 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::string &filename, const triqs::modest::one_body_elements_on_grid &obe) {
      return triqs::modest::one_body_elements_with_theta_projectors(filename, obe);
    },
@@ -664,6 +728,25 @@ static auto const _c2py_fun_9 = c2py::dispatcher_f_kw_t{c2py::cfun(
 
 static const auto _c2py_doc_6 =
    _c2py_fun_6.doc(R"DOC(
+Create a one-body elements for GW calculations with CoQui.
+
+Using the data from the "dft_input" group, the local space and downfolding projector
+are prepared to create a one-body elements. This object is intended to be used in GW
+calculations.
+
+Parameters
+----------
+filename : {par_0}
+   Hdf5 file from dft_tools converter.
+
+Returns
+-------
+{ret_0}
+   One-body elements for GW calculations.
+)DOC",
+                   {{c2py::python_typename<const std::string &>()}}, {c2py::python_typename<triqs::modest::one_body_elements_gw>()});
+static const auto _c2py_doc_7 =
+   _c2py_fun_7.doc(R"DOC(
 Create a one-body elements with orthonormalized projectors.
 
 Using the data from the "dft_input" group, the band dispersion, local space, downfolding projector, and optional
@@ -718,7 +801,7 @@ Returns
 )DOC",
                    {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<double>()}, {c2py::python_typename<bool>()}},
                    {c2py::python_typename<std::pair<double, triqs::modest::one_body_elements_on_grid>>()});
-static const auto _c2py_doc_7 = _c2py_fun_7.doc(R"DOC(
+static const auto _c2py_doc_8 = _c2py_fun_8.doc(R"DOC(
 [1] Construct a one-body elements TB object from Wannier90 in the case of a single spin index.
 
 ------
@@ -754,8 +837,8 @@ Returns
                                                  {c2py::python_typename<const std::string &>()},
                                                  {c2py::python_typename<const std::string &>()}},
                                                 {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
-static const auto _c2py_doc_8 =
-   _c2py_fun_8.doc(R"DOC(
+static const auto _c2py_doc_9 =
+   _c2py_fun_9.doc(R"DOC(
 Create a one-body elements along specific k-path.
 
 Using the data from the "dft_bands_input" group, the band disperion and downfolding projector
@@ -776,8 +859,8 @@ Returns
 )DOC",
                    {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}},
                    {c2py::python_typename<triqs::modest::one_body_elements_on_grid>()});
-static const auto _c2py_doc_9 =
-   _c2py_fun_9.doc(R"DOC(
+static const auto _c2py_doc_10 =
+   _c2py_fun_10.doc(R"DOC(
 Create a one-body elements with the :math:`\Theta` projectors.
 
 Using the data from the "dft_parproj_input" group, the local space, downfolding projectors,
@@ -796,15 +879,16 @@ Returns
 {ret_0}
    One-body elements using the :math:`\Theta` projectors.
 )DOC",
-                   {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}},
-                   {c2py::python_typename<triqs::modest::one_body_elements_on_grid>()});
+                    {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}},
+                    {c2py::python_typename<triqs::modest::one_body_elements_on_grid>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"one_body_elements_from_dft_converter", (PyCFunction)c2py::pyfkw<_c2py_fun_6>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_6.c_str()},
-   {"one_body_elements_from_wannier90", (PyCFunction)c2py::pyfkw<_c2py_fun_7>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_7.c_str()},
-   {"one_body_elements_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<_c2py_fun_8>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_8.c_str()},
-   {"one_body_elements_with_theta_projectors", (PyCFunction)c2py::pyfkw<_c2py_fun_9>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_9.c_str()},
+   {"make_one_body_elements_gw", (PyCFunction)c2py::pyfkw<_c2py_fun_6>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_6.c_str()},
+   {"one_body_elements_from_dft_converter", (PyCFunction)c2py::pyfkw<_c2py_fun_7>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_7.c_str()},
+   {"one_body_elements_from_wannier90", (PyCFunction)c2py::pyfkw<_c2py_fun_8>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_8.c_str()},
+   {"one_body_elements_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<_c2py_fun_9>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_9.c_str()},
+   {"one_body_elements_with_theta_projectors", (PyCFunction)c2py::pyfkw<_c2py_fun_10>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_10.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -852,8 +936,10 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_obe() {
   if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_0>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_1>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_2>) < 0) return NULL;
+  c2py::wrap_pytype<_c2py_cls_3>.tp_base = &c2py::wrap_pytype<triqs::modest::downfolding_projector>;
   if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_3>) < 0) return NULL;
   if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_4>) < 0) return NULL;
+  if (PyType_Ready(&c2py::wrap_pytype<_c2py_cls_5>) < 0) return NULL;
 
   m = PyModule_Create(&module_def);
   if (m == NULL) return NULL;
@@ -865,8 +951,9 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_obe() {
   _add_type(_c2py_cls_0, "LocalSpace");
   _add_type(_c2py_cls_1, "BandDispersion");
   _add_type(_c2py_cls_2, "DownfoldingProjector");
-  _add_type(_c2py_cls_3, "OneBodyElementsOnGrid");
-  _add_type(_c2py_cls_4, "OneBodyElementsTb");
+  _add_type(_c2py_cls_3, "DownfoldingProjectorExt");
+  _add_type(_c2py_cls_4, "OneBodyElementsOnGrid");
+  _add_type(_c2py_cls_5, "OneBodyElementsTb");
 #undef _add_type
 
   return m;
