@@ -28,6 +28,4 @@ from .utils import *
 from .utils.analyze_gfs import *
 from .utils.dc import *
 from .utils.file_io import *
-from  . import solver_interfaces
-
 __all__ = []
