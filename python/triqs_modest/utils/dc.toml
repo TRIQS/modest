@@ -23,7 +23,7 @@ namespaces = "triqs triqs::modest  triqs::lattice"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::(dc_solver|dc_formulas)"
+match_names = "triqs::modest::(dc_solver|dc_formulas|spin_kind_e)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex
