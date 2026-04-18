@@ -97,8 +97,8 @@ namespace triqs::modest {
   // -------------------------------------------------------------------------------------------------------
 
   std::string embedding::description(bool verbosity) const {
-    auto sigma_embed_shape     = this->sigma_embed_block_shape();
-    auto impurities_shape_list = this->imp_block_shape();
+    auto sigma_embed_shape     = this->embed_block_structure();
+    auto impurities_shape_list = this->imp_block_structure();
 
     std::ostringstream out;
     auto out1 = indented_ostream(out, 2); // same stream, but shifted by 2 spaces

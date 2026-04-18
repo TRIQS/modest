@@ -37,8 +37,35 @@ namespace triqs::modest {
     // FIXME : MAKE ALL NECESSARY CHECKS.... since
   }
 
-  embedding embedding_builder(std::vector<std::string> const &spin_names, nda::array<std::vector<long>, 2> const &block_decomposition,
-                              std::vector<long> const &atom_to_imp) {
+  embedding make_embedding(std::vector<std::string> const &spin_names, nda::array<std::vector<long>, 2> const &block_decomposition,
+                           std::vector<long> const &atom_to_imp) {
+
+    // Validate inputs
+    if (spin_names.empty()) throw std::runtime_error("[make_embedding] spin_names must not be empty");
+
+    auto n_atoms = block_decomposition.extent(0);
+    if (long(atom_to_imp.size()) != n_atoms)
+      throw std::runtime_error(
+         fmt::format("[make_embedding] block_decomposition has {} atoms but atom_to_imp has {} entries", n_atoms, atom_to_imp.size()));
+
+    for (long atom = 0; atom < n_atoms; ++atom) {
+      if (atom_to_imp[atom] < 0)
+        throw std::runtime_error(fmt::format("[make_embedding] atom_to_imp[{}] = {} is negative", atom, atom_to_imp[atom]));
+    }
+
+    // Check that equivalent atoms have identical block decompositions
+    std::unordered_map<long, long> imp_to_first_atom;
+    for (long atom = 0; atom < n_atoms; ++atom) {
+      auto imp = atom_to_imp[atom];
+      if (auto it = imp_to_first_atom.find(imp); it != imp_to_first_atom.end()) {
+        auto first_atom = it->second;
+        if (block_decomposition(atom, 0) != block_decomposition(first_atom, 0))
+          throw std::runtime_error(fmt::format(
+             "[make_embedding] Atoms {} and {} are mapped to the same impurity {} but have different block decompositions", first_atom, atom, imp));
+      } else {
+        imp_to_first_atom[imp] = atom;
+      }
+    }
 
     long n_alpha = stdr::fold_left(block_decomposition(r_all, 0) | stdv::transform([](auto const &x) { return long(x.size()); }), 0, std::plus<>());
     long n_sigma = spin_names.size();
@@ -49,7 +76,6 @@ namespace triqs::modest {
 
     std::set<long> seen_impurities;
 
-    auto n_atoms = block_decomposition.extent(0);
     for (auto atom : range(n_atoms)) {
       for (auto &&[idx, bl_size] : enumerate(block_decomposition(atom, 0))) {
         for (auto sigma : range(n_sigma)) { psi(embed_bl_sizes.size(), sigma) = {atom_to_imp[atom], idx, sigma}; }
@@ -64,14 +90,14 @@ namespace triqs::modest {
     return embedding{std::move(embed_bl_sizes), std::move(imp_decompositions), std::move(psi), std::move(spin_names)};
   }
 
-  embedding embedding_builder(std::vector<std::string> const &spin_names, std::vector<std::vector<long>> const &block_decomposition,
-                              std::vector<long> const &atom_to_imp) {
+  embedding make_embedding(std::vector<std::string> const &spin_names, std::vector<std::vector<long>> const &block_decomposition,
+                           std::vector<long> const &atom_to_imp) {
     auto n_decomps        = block_decomposition.size();
     auto n_sigma          = spin_names.size();
     auto block_decomp_mat = nda::array<std::vector<long>, 2>(n_decomps, n_sigma);
     for (auto d : range(n_decomps))
       for (auto s : range(n_sigma)) block_decomp_mat(d, s) = block_decomposition[d];
-    return embedding_builder(spin_names, block_decomp_mat, atom_to_imp);
+    return make_embedding(spin_names, block_decomp_mat, atom_to_imp);
   }
 
   // -------------------------------------------------------------------------------------------
@@ -82,8 +108,6 @@ namespace triqs::modest {
       atom_to_cls[ish] = sh.cls_idx;
       if (not cls_to_imp.contains(sh.cls_idx)) cls_to_imp[sh.cls_idx] = imp_idx++;
     }
-    auto atom_to_imp_idx = range(C_space.atomic_shells().size()) | stdv::transform([&](auto const &atom) { return cls_to_imp[atom_to_cls[atom]]; })
-       | tl::to<std::vector>();
 
     nda::array<std::vector<long>, 2> decomp(C_space.n_atoms(), C_space.n_sigma());
     if (use_atom_decomp) {
@@ -94,7 +118,11 @@ namespace triqs::modest {
     } else {
       decomp = C_space.atoms_block_decomposition();
     }
-    return embedding_builder(C_space.sigma_names(), decomp, atom_to_imp_idx);
+
+    auto n_atoms_in_decomp = decomp.extent(0);
+    auto atom_to_imp_idx   = range(n_atoms_in_decomp) | stdv::transform([&](auto const &atom) { return cls_to_imp[atom_to_cls[atom]]; })
+       | tl::to<std::vector>();
+    return make_embedding(C_space.sigma_names(), decomp, atom_to_imp_idx);
   };
 
   // -------------------------------------------------------------------------------------------
@@ -109,8 +137,9 @@ namespace triqs::modest {
       decomp = C_space.atoms_block_decomposition();
     }
 
-    auto atom_to_imp_idx = range(C_space.atomic_shells().size()) | tl::to<std::vector>();
-    return embedding_builder(C_space.sigma_names(), decomp, atom_to_imp_idx);
+    auto n_atoms_in_decomp = decomp.extent(0);
+    auto atom_to_imp_idx   = range(n_atoms_in_decomp) | tl::to<std::vector>();
+    return make_embedding(C_space.sigma_names(), decomp, atom_to_imp_idx);
   }
 
   // -------------------------------------------------------------------------------------------
@@ -121,7 +150,7 @@ namespace triqs::modest {
 
   //-----------------------------------------------------------------
 
-  gf_struct2_t embedding::sigma_embed_block_shape() const {
+  gf_struct2_t embedding::embed_block_structure() const {
     auto res = nda::zeros<long>(n_alpha(), n_sigma());
     for (long alpha : range(n_alpha())) res(alpha, r_all) = sigma_embed_decomp[alpha];
     return {.names = {alpha_names, _sigma_names}, .dims = std::move(res)};
@@ -129,7 +158,7 @@ namespace triqs::modest {
 
   //-----------------------------------------------------------------
 
-  std::vector<gf_struct_t> embedding::imp_block_shape() const {
+  std::vector<gf_struct_t> embedding::imp_block_structure() const {
     auto l = [this](std::vector<long> const &decomp) -> gf_struct_t {
       gf_struct_t res;
       for (auto sigma : range(n_sigma())) {
@@ -258,7 +287,7 @@ namespace triqs::modest {
   // HL: re-implementation of replace. Please review.
   embedding embedding::replace(long imp_idx_to_remove, long imp_idx_to_replace_with) const {
     auto new_psi = this->psi;
-    if (imp_block_shape()[imp_idx_to_remove] != imp_block_shape()[imp_idx_to_replace_with])
+    if (imp_block_structure()[imp_idx_to_remove] != imp_block_structure()[imp_idx_to_replace_with])
       throw std::runtime_error(fmt::format("The number of blocks that imp_to_remove= {} and imp_to_replace_with={} connect to do not match!",
                                            imp_idx_to_remove, imp_idx_to_replace_with));
     new_psi = nda::map([&](imp_block_t const &b) -> imp_block_t {
@@ -388,11 +417,17 @@ namespace triqs::modest {
 
   // ----------------------- Embedding and Extracting --------------------------
   block2_matrix_t embedding::embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
+    if (long(Sigma_imp_static_vec.size()) != n_impurities())
+      throw std::runtime_error(fmt::format("[embedding::embed] Wrong number of impurity static self-energies: got {} but embedding has {} impurities",
+                                           Sigma_imp_static_vec.size(), n_impurities()));
     return detail::data_array_to_block2_array(this->embed(detail::matrix_to_array(Sigma_imp_static_vec)), sigma_embed_decomp);
   }
 
   // ----------------------------------------------------------------------
   std::vector<block_matrix_t> embedding::extract(block2_matrix_t const &matrix_C) const {
+    if (matrix_C.extent(1) != n_sigma())
+      throw std::runtime_error(
+         fmt::format("[embedding::extract] Wrong number of spin channels in matrix: got {} but embedding has n_sigma = {}", matrix_C.extent(1), n_sigma()));
     if (matrix_C.extent(0) != 1) return extract(detail::gather_blocks_to_data_view(matrix_C));
     auto data = range(n_sigma()) | stdv::transform([&](auto sigma) { return nda::array<dcomplex, 2>{matrix_C(0, sigma)}; }) | tl::to<std::vector>();
     return detail::array_to_matrix(this->extract(data));

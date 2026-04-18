@@ -12,8 +12,8 @@ void test_embed_desc_from_dft(std::string filename, double threshold) {
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename, threshold);
   auto E                     = make_embedding(obe.C_space);
   auto mesh                  = triqs::mesh::imfreq(40., triqs::mesh::Fermion);
-  auto gf_solver             = make_vec_block_gf(mesh, E.imp_block_shape());
-  auto gf_embed              = make_block2_gf(mesh, E.sigma_embed_block_shape());
+  auto gf_solver             = make_vec_block_gf(mesh, E.imp_block_structure());
+  auto gf_embed              = make_block2_gf(mesh, E.embed_block_structure());
   EXPECT_BLOCK2_GF_NEAR(E.embed(gf_solver), gf_embed, 1.e-12);
   // randomize and check extract embed are inverse of each other
   for (auto &bg : gf_solver)
@@ -101,28 +101,28 @@ TEST(embed_desc_tests, cluster) { // NOLINT
 }
 
 TEST(embed_desc_tests, split_block) { // NOLINT
-  auto E1_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}, {3}, {3}, {3}}, std::vector<long>{0, 1, 2, 3});
-  auto E0     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{5}, {3}, {3}, {3}}, std::vector<long>{0, 1, 2, 3});
+  auto E1_ref = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3, 2}, {3}, {3}, {3}}, std::vector<long>{0, 1, 2, 3});
+  auto E0     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{5}, {3}, {3}, {3}}, std::vector<long>{0, 1, 2, 3});
   auto E1     = E0.split_block(0, 0, std::vector<long>{3, 2});
   EXPECT_EQ(E1, E1_ref);
 
   auto E2_ref =
-     embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, std::vector<long>{0, 1, 1, 1});
+     make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3, 2}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, std::vector<long>{0, 1, 1, 1});
 
   auto E3 = E0.split_block(0, 0, {3, 2}).replace(3, 1).replace(2, 1).split_block(1, 0, std::vector<long>{1, 1, 1});
   EXPECT_EQ(E3, E2_ref);
 }
 
 TEST(embed_desc_tests, spinless) {
-  auto E_ref = embedding_builder({"ud"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
-  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
+  auto E_ref = make_embedding({"ud"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
+  auto E     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
   auto E1    = E.make_spinless();
   EXPECT_EQ(E1, E_ref);
 }
 
 // Rank 2  (i j)
 TEST(embed_desc_tests, Eij) {
-  auto E              = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0});
+  auto E              = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0});
   auto n_spin         = 2;
   auto n_orb          = 2;
   auto dummy_data     = nda::rand<dcomplex>(1, 1);
@@ -136,7 +136,7 @@ TEST(embed_desc_tests, Eij) {
 
 // Rank 3  (w i j)
 TEST(embed_desc_tests, Ewij) {
-  auto E          = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0});
+  auto E          = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0});
   auto n_iw       = 100;
   auto n_spin     = 2;
   auto n_orb      = 2;
@@ -151,7 +151,7 @@ TEST(embed_desc_tests, Ewij) {
 
 // Rank 4 (i j k l)
 TEST(embed_desc_tests, Eijkl) {
-  auto E          = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0}).make_spinless();
+  auto E          = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0}).make_spinless();
   auto n_spin     = 1;
   auto n_orb      = 2;
   auto dummy_data = nda::rand<dcomplex>(1, 1, 1, 1);
@@ -165,7 +165,7 @@ TEST(embed_desc_tests, Eijkl) {
 
 // Rank 5  (w i j k l)
 TEST(embed_desc_tests, Ewijkl) {
-  auto E          = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0}).make_spinless();
+  auto E          = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1}, {1}}, std::vector<long>{0, 0}).make_spinless();
   auto n_iw       = 100;
   auto n_spin     = 1;
   auto n_orb      = 2;
@@ -182,57 +182,57 @@ TEST(embed_desc_tests, Ewijkl) {
 
 TEST(embed_desc_tests, make_2particle_simple) {
   // 1 impurity, 3 orbitals with 1x1 blocks → single [3] block
-  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}}, std::vector<long>{0});
+  auto E     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}}, std::vector<long>{0});
   auto E_2p  = E.make_2particle();
-  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
+  auto E_ref = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
   EXPECT_EQ(E_2p, E_ref);
 }
 
 TEST(embed_desc_tests, make_2particle_mixed_blocks) {
   // 1 impurity, mixed block sizes [3, 2] → [5]
-  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
+  auto E     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3, 2}}, std::vector<long>{0});
   auto E_2p  = E.make_2particle();
-  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{5}}, std::vector<long>{0});
+  auto E_ref = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{5}}, std::vector<long>{0});
   EXPECT_EQ(E_2p, E_ref);
 }
 
 TEST(embed_desc_tests, make_2particle_two_impurities) {
   // 2 impurities: [1,1,1] and [2,1]
-  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {2, 1}}, std::vector<long>{0, 1});
+  auto E     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {2, 1}}, std::vector<long>{0, 1});
   auto E_2p  = E.make_2particle();
-  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}}, std::vector<long>{0, 1});
+  auto E_ref = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}}, std::vector<long>{0, 1});
   EXPECT_EQ(E_2p, E_ref);
 }
 
 TEST(embed_desc_tests, make_2particle_equivalent_atoms) {
   // 2 atoms mapped to the same impurity — must NOT merge across atom boundaries
-  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {1, 1, 1}}, std::vector<long>{0, 0});
+  auto E     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {1, 1, 1}}, std::vector<long>{0, 0});
   auto E_2p  = E.make_2particle();
-  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}}, std::vector<long>{0, 0});
+  auto E_ref = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}}, std::vector<long>{0, 0});
   EXPECT_EQ(E_2p, E_ref);
 }
 
 TEST(embed_desc_tests, make_2particle_mixed_equiv_and_inequiv) {
   // 2 equivalent atoms (imp 0) with [1,1,1] each + 1 inequivalent atom (imp 1) with [3,2]
   // After make_2particle: imp 0 → [3] (shared solver), imp 1 → [5]
-  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {1, 1, 1}, {3, 2}}, std::vector<long>{0, 0, 1});
+  auto E     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {1, 1, 1}, {3, 2}}, std::vector<long>{0, 0, 1});
   auto E_2p  = E.make_2particle();
-  auto E_ref = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}, {5}}, std::vector<long>{0, 0, 1});
+  auto E_ref = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}, {3}, {5}}, std::vector<long>{0, 0, 1});
   EXPECT_EQ(E_2p, E_ref);
 }
 
 TEST(embed_desc_tests, make_2particle_idempotent) {
   // Already a single block per impurity → no change
-  auto E    = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{5}}, std::vector<long>{0});
+  auto E    = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{5}}, std::vector<long>{0});
   auto E_2p = E.make_2particle();
   EXPECT_EQ(E_2p, E);
 }
 
 TEST(embed_desc_tests, make_2particle_then_spinless) {
   // Compose with make_spinless
-  auto E     = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}}, std::vector<long>{0});
+  auto E     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}}, std::vector<long>{0});
   auto E_2p  = E.make_2particle().make_spinless();
-  auto E_ref = embedding_builder({"ud"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
+  auto E_ref = make_embedding({"ud"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
   EXPECT_EQ(E_2p, E_ref);
 }
 
@@ -242,12 +242,12 @@ TEST(embed_desc_tests, make_2particle_with_disconnected) {
   // the remaining connected blocks.
   using block_t = embedding::imp_block_t;
 
-  auto E      = embedding_builder({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {2, 1}}, std::vector<long>{0, 1});
+  auto E      = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{1, 1, 1}, {2, 1}}, std::vector<long>{0, 1});
   auto E_drop = E.drop(0); // imp 0 gone; its 3 α blocks are now {-1, 0, 0}
 
   // Verify precondition: first 3 α blocks are disconnected
   for (auto alpha : range(3))
-    for (auto sigma : range(2)) { EXPECT_EQ(E_drop.get_psi()(alpha, sigma).imp_idx, -1); }
+    for (auto sigma : range(2)) { EXPECT_EQ(E_drop.psi_map()(alpha, sigma).imp_idx, -1); }
 
   auto E_2p = E_drop.make_2particle();
 
@@ -265,6 +265,64 @@ TEST(embed_desc_tests, make_2particle_with_disconnected) {
   // clang-format on
   auto E_ref = embedding(new_sigma_embed_decomp, std::vector<std::vector<long>>{{3}}, new_psi, {"up", "down"});
   EXPECT_EQ(E_2p, E_ref);
+}
+
+// ------- Input validation tests -------
+
+TEST(embed_desc_tests, extract_wrong_n_sigma) {
+  auto E    = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
+  auto data = std::vector<nda::array<dcomplex, 2>>{nda::zeros<dcomplex>(3, 3)}; // 1 spin channel, expect 2
+  EXPECT_THROW(E.extract(data), std::runtime_error);
+}
+
+TEST(embed_desc_tests, extract_wrong_dimension) {
+  auto E    = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
+  auto data = std::vector<nda::array<dcomplex, 2>>{nda::zeros<dcomplex>(5, 5), nda::zeros<dcomplex>(5, 5)}; // dim 5, expect 3
+  EXPECT_THROW(E.extract(data), std::runtime_error);
+}
+
+TEST(embed_desc_tests, embed_wrong_n_impurities) {
+  auto E     = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}, {2}}, std::vector<long>{0, 1});
+  auto blocks = std::vector<std::vector<nda::array<dcomplex, 2>>>{{nda::zeros<dcomplex>(3, 3), nda::zeros<dcomplex>(3, 3)}}; // 1 imp, expect 2
+  EXPECT_THROW(E.embed(blocks), std::runtime_error);
+}
+
+TEST(embed_desc_tests, embed_wrong_n_blocks) {
+  auto E      = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
+  auto blocks = std::vector<std::vector<nda::array<dcomplex, 2>>>{{nda::zeros<dcomplex>(3, 3)}}; // 1 block, expect 2 (up_0, down_0)
+  EXPECT_THROW(E.embed(blocks), std::runtime_error);
+}
+
+TEST(embed_desc_tests, embed_wrong_block_dimension) {
+  auto E      = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0});
+  auto blocks = std::vector<std::vector<nda::array<dcomplex, 2>>>{{nda::zeros<dcomplex>(5, 5), nda::zeros<dcomplex>(5, 5)}}; // dim 5, expect 3
+  EXPECT_THROW(E.embed(blocks), std::runtime_error);
+}
+
+TEST(embed_desc_tests, embed_matrix_wrong_n_impurities) {
+  auto E      = make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}, {2}}, std::vector<long>{0, 1});
+  auto blocks = std::vector<block_matrix_t>{{nda::zeros<dcomplex>(3, 3), nda::zeros<dcomplex>(3, 3)}}; // 1 imp, expect 2
+  EXPECT_THROW(E.embed(blocks), std::runtime_error);
+}
+
+// ------- make_embedding factory validation tests -------
+
+TEST(embed_desc_tests, make_embedding_empty_spin_names) {
+  EXPECT_THROW(make_embedding({}, std::vector<std::vector<long>>{{3}}, std::vector<long>{0}), std::runtime_error);
+}
+
+TEST(embed_desc_tests, make_embedding_atom_count_mismatch) {
+  // 2 atoms in decomposition but only 1 entry in atom_to_imp
+  EXPECT_THROW(make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}, {2}}, std::vector<long>{0}), std::runtime_error);
+}
+
+TEST(embed_desc_tests, make_embedding_negative_imp_idx) {
+  EXPECT_THROW(make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3}}, std::vector<long>{-1}), std::runtime_error);
+}
+
+TEST(embed_desc_tests, make_embedding_inconsistent_equiv_atoms) {
+  // Two atoms mapped to imp 0 but with different block decompositions
+  EXPECT_THROW(make_embedding({"up", "down"}, std::vector<std::vector<long>>{{3, 2}, {1, 1}}, std::vector<long>{0, 0}), std::runtime_error);
 }
 
 #if LFS
@@ -418,8 +476,8 @@ TEST(embed_desc_tests, api2) {
   EXPECT_EQ(Enew, E_ref);
 
   auto mesh      = triqs::mesh::imfreq(40., triqs::mesh::Fermion);
-  auto gf_solver = make_vec_block_gf(mesh, E.imp_block_shape());
-  auto gf_embed  = make_block2_gf(mesh, E.sigma_embed_block_shape());
+  auto gf_solver = make_vec_block_gf(mesh, E.imp_block_structure());
+  auto gf_embed  = make_block2_gf(mesh, E.embed_block_structure());
 
   // randomize and check extract embed are inverse of each other
   for (auto &bg : gf_solver)

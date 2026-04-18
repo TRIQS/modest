@@ -109,9 +109,8 @@ namespace triqs::modest {
      */
     imp_block_t operator[](long alpha, long sigma) const { return psi(alpha, sigma); }
 
-    // HL: get_psi -> psi to match other classes?
     /// The mapping table \f$ \psi \f$.
-    [[nodiscard]] nda::array<imp_block_t, 2> get_psi() const { return psi; }
+    [[nodiscard]] nda::array<imp_block_t, 2> psi_map() const { return psi; }
 
     /// Number of blocks in \f$ \alpha \f$ for the \f$ \Sigma_{\text{embed}} \f$.
     [[nodiscard]] long n_alpha() const { return psi.extent(0); }
@@ -131,11 +130,11 @@ namespace triqs::modest {
     /// The impurity decomposition.
     [[nodiscard]] std::vector<long> imp_decomposition(long imp_idx) const { return imp_decomps[imp_idx]; };
 
-    /// Gf block structure for \f$ \Sigma_{\text{embed}} \f$.
-    C2PY_IGNORE gf_struct2_t sigma_embed_block_shape() const;
+    /// Block structure (names and dimensions) for the embedded self-energy \f$ \Sigma_{\text{embed}} \f$.
+    C2PY_IGNORE gf_struct2_t embed_block_structure() const;
 
-    /// Gf block structure for the impurity solvers.
-    std::vector<gf_struct_t> imp_block_shape() const;
+    /// Block structure (names and dimensions) for each impurity solver.
+    std::vector<gf_struct_t> imp_block_structure() const;
 
     /// Summarize the embedding object.
     std::string description(bool verbosity = false) const;
@@ -144,8 +143,8 @@ namespace triqs::modest {
     // ****************** Operation methods to change the embedding **********************
 
     /**
-     * @name Unary Ops
-     * Embedding methods which operate on itself and return a new Embedding object.
+     * @name Embedding transformations
+     * Methods that return a new embedding with a modified \f$ \psi \f$ map.
      * @{
      */
 
@@ -199,19 +198,26 @@ namespace triqs::modest {
     embedding flip_spin(std::vector<long> alphas) const;
 
     /**
-  * @brief Convert the embedding to a spinless embedding.
-  *
-  * @details This method converts a spinful embedding (with two spin channels, e.g., "up" and "down") into a spinless colloquially referred to as "ud".
-  * This caseful is usefuly when working with sytems with spin-orbit coupling or working with spin-averaged quantities, like the
-  * density-density susceptibility.
-  * 
-  * @return embedding 
-  */
+     * @brief Convert the embedding to a spinless embedding.
+     *
+     * @details Converts a spinful embedding (with two spin channels, e.g., "up" and "down") into a
+     * single-channel embedding labelled "ud". This is useful when working with systems with
+     * spin-orbit coupling or spin-averaged quantities, like the density-density susceptibility.
+     *
+     * @return New embedding with a single spin channel.
+     */
     embedding make_spinless() const;
 
     /**
-     * @brief Split impurity `imp_idx`.
-     * @details Predicate p (long block_idx) -> 0 or 1.
+     * @brief Split impurity `imp_idx` using a predicate.
+     *
+     * @details Partitions the blocks of impurity `imp_idx` into two new impurities based on
+     * predicate `p`. Blocks for which `p(block_idx)` returns true stay with `imp_idx`;
+     * the rest are assigned to a new impurity inserted at `imp_idx + 1`.
+     *
+     * @param imp_idx Impurity number.
+     * @param p Predicate taking a block index and returning true/false.
+     * @return New embedding with the updated \f$ \psi \f$ map.
      */
     embedding split(long imp_idx, std::function<bool(long)> p) const;
 
@@ -265,7 +271,7 @@ namespace triqs::modest {
      *
      * @details Constructs a list of zero-initialized self-energy containers for each impurity,
      * with both dynamic (frequency-dependent) and static components. The block structure of each
-     * impurity's self-energy is determined by `imp_block_shape()`.
+     * impurity's self-energy is determined by `imp_block_structure()`.
      *
      * Each impurity receives a pair consisting of:
      * - A `block_gf` initialized to zero on the provided mesh (dynamic part).
@@ -291,13 +297,13 @@ namespace triqs::modest {
         return std::make_pair(Sigma_dynamic, Sigma_static);
       };
 
-      return imp_block_shape() | stdv::transform(make_self_energy) | tl::to<std::vector>();
+      return imp_block_structure() | stdv::transform(make_self_energy) | tl::to<std::vector>();
     }
     //------------------------------------------------------------------------------------
 
     /**
-     * @name Complex Ops
-     * Embedding methods which operate on a given object X where X ∈ (block2gf, block_gf, block_matrix, etc.)
+     * @name Embed and extract operations
+     * Methods that map data between impurity and embedded representations.
      * @{
      */
 
@@ -331,6 +337,18 @@ namespace triqs::modest {
 
       using array_t = nda::array<dcomplex, Rank>;
 
+      // Validate input dimensions
+      if (long(X.size()) != n_sigma())
+        throw std::runtime_error(fmt::format("[embedding::extract] Wrong number of spin channels: got {} but embedding has n_sigma = {}", X.size(), n_sigma()));
+
+      auto dim_C = stdr::fold_left(sigma_embed_decomp, 0L, std::plus<>());
+      for (long sigma = 0; sigma < n_sigma(); ++sigma) {
+        auto actual_dim = X[sigma].extent(detail::has_frequency<Rank> ? 1 : 0);
+        if (actual_dim != dim_C)
+          throw std::runtime_error(
+             fmt::format("[embedding::extract] Dimension mismatch for spin channel {}: got {} but expected C-space dimension {}", sigma, actual_dim, dim_C));
+      }
+
       // Does this rank have a frequency index?
       [[maybe_unused]] long n_w = 0;
       if constexpr (detail::has_frequency<Rank>) { n_w = X[0].extent(0); }
@@ -342,7 +360,7 @@ namespace triqs::modest {
       }
 
       // Lambda to extract one impurity using the reverse_psi map
-      auto imp_gf_stru_list = imp_block_shape();
+      auto imp_gf_stru_list = imp_block_structure();
       auto extract_one_imp  = [&](long n_imp) -> std::vector<array_t> {
         std::vector<array_t> blocks_imp;
         for (auto [bl_name, bl_size] : imp_gf_stru_list[n_imp]) { blocks_imp.push_back(detail::make_zero_array<Rank, dcomplex>(bl_size, n_w)); }
@@ -387,6 +405,26 @@ namespace triqs::modest {
     template <int Rank> std::vector<nda::array<dcomplex, Rank>> embed(std::vector<std::vector<nda::array<dcomplex, Rank>>> const &imps_blocks) const {
 
       using array_t = nda::array<dcomplex, Rank>;
+
+      // Validate input structure
+      if (long(imps_blocks.size()) != n_impurities())
+        throw std::runtime_error(
+           fmt::format("[embedding::embed] Wrong number of impurities: got {} but embedding has {}", imps_blocks.size(), n_impurities()));
+
+      auto imp_gf_stru = imp_block_structure();
+      for (long imp = 0; imp < n_impurities(); ++imp) {
+        auto expected_n_blocks = long(imp_gf_stru[imp].size());
+        if (long(imps_blocks[imp].size()) != expected_n_blocks)
+          throw std::runtime_error(fmt::format("[embedding::embed] Impurity {} has {} blocks but embedding expects {}", imp, imps_blocks[imp].size(),
+                                               expected_n_blocks));
+        for (long b = 0; b < expected_n_blocks; ++b) {
+          auto expected_dim = imp_gf_stru[imp][b].second;
+          auto actual_dim   = imps_blocks[imp][b].extent(detail::has_frequency<Rank> ? 1 : 0);
+          if (actual_dim != expected_dim)
+            throw std::runtime_error(fmt::format("[embedding::embed] Impurity {}, block {} has dimension {} but embedding expects {}", imp, b,
+                                                 actual_dim, expected_dim));
+        }
+      }
 
       // Does this rank have a frequency index?
       [[maybe_unused]] long n_w = 0;
@@ -433,13 +471,17 @@ namespace triqs::modest {
      * @return \f$ \Sigma_{\text{embed}}[\alpha, \sigma] \f$ in \f$ \mathcal{C} \f$ space using the embed decomposition.
      */
     template <typename Mesh> block2_gf<Mesh, matrix_valued> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const {
+      // Check number of impurities
+      if (long(Sigma_imp_vec.size()) != n_impurities())
+        throw std::runtime_error(
+           fmt::format("[embedding::embed] Wrong number of impurity self-energies: got {} but embedding has {} impurities", Sigma_imp_vec.size(), n_impurities()));
       // Check that all meshes are the same for Sigma_imp_vec
       if (not all_equal(Sigma_imp_vec | stdv::transform([](auto &&x) -> decltype(auto) { return x[0].mesh(); })))
         throw std::runtime_error{"[embedding_desc::embed]: meshes of solvers are not all equal"};
 
       auto const &mesh = Sigma_imp_vec[0][0].mesh();
       auto data        = embed(detail::make_data_view_from_block_gfs(Sigma_imp_vec));
-      return detail::make_block2_gf_from_data_view(data, sigma_embed_block_shape(), mesh);
+      return detail::make_block2_gf_from_data_view(data, embed_block_structure(), mesh);
     }
 
     /**
@@ -453,11 +495,11 @@ namespace triqs::modest {
       // Check that the decomposition of g_loc matches either sigma_embed_decomp
       if (auto decomp = get_struct(g_loc).dims(r_all, 0) | tl::to<std::vector>(); decomp != this->sigma_embed_decomp) {
         if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
-        return extract(decomposition_view(g_loc, this->sigma_embed_block_shape()));
+        return extract(decomposition_view(g_loc, this->embed_block_structure()));
       }
       auto const &mesh      = g_loc(0, 0).mesh();
       auto data             = extract(detail::gather_blocks_to_data_view(g_loc));
-      auto imp_gf_stru_list = imp_block_shape();
+      auto imp_gf_stru_list = imp_block_structure();
       return range(n_impurities()) | stdv::transform([data, imp_gf_stru_list, mesh](auto n_imp) {
                return detail::make_block_gf_from_data_view(data[n_imp], imp_gf_stru_list[n_imp], mesh);
              })
@@ -520,29 +562,28 @@ namespace triqs::modest {
 
   /** @cond DOXYGEN_SKIP_THIS */
   /**
-   * @brief Construct the embedding class from the local space, a description of the block decomposition, and an
-   * equivalence mapping between atom sites.
+   * @brief Construct an embedding from spin names, a block decomposition per atom, and an atom-to-impurity mapping.
    *
-   * @param spin_names The names of the spin indices.
-   * @param block_decomposition The decomposition of atomic orbitals into their irreducible representations.
-   * @param atom_to_imp [optional] A mapping between equivalent atom sites.
+   * @param spin_names The names of the spin indices (e.g., {"up", "down"}).
+   * @param block_decomposition Block sizes for each atom: block_decomposition(atom, sigma) is a vector of block sizes.
+   * @param atom_to_imp Mapping from atom index to impurity index. Atoms with the same value share a solver.
    * @return Embedding object.
    */
-  embedding embedding_builder(std::vector<std::string> const &spin_names, nda::array<std::vector<long>, 2> const &block_decomposition,
-                              std::vector<long> const &atom_to_imp);
+  embedding make_embedding(std::vector<std::string> const &spin_names, nda::array<std::vector<long>, 2> const &block_decomposition,
+                           std::vector<long> const &atom_to_imp);
   /** @endcond */
 
   /**
-   * @brief Construct the embedding class from the local space, a description of the block decomposition, and an
-   * equivalence mapping between atom sites.
+   * @brief Construct an embedding from spin names, a block decomposition per atom, and an atom-to-impurity mapping.
    *
-   * @param spin_names The names of the spin indices.
-   * @param block_decomposition The decomposition of atomic orbitals into their irreducible representations.
-   * @param atom_to_imp [optional] A mapping between equivalent atom sites.
+   * @param spin_names The names of the spin indices (e.g., {"up", "down"}).
+   * @param block_decomposition Block sizes for each atom: block_decomposition[atom] is a vector of block sizes.
+   *        Atoms mapped to the same impurity must have identical decompositions.
+   * @param atom_to_imp Mapping from atom index to impurity index. Atoms with the same value share a solver.
    * @return Embedding object.
    */
-  embedding embedding_builder(std::vector<std::string> const &spin_names, std::vector<std::vector<long>> const &block_decomposition,
-                              std::vector<long> const &atom_to_imp);
+  embedding make_embedding(std::vector<std::string> const &spin_names, std::vector<std::vector<long>> const &block_decomposition,
+                           std::vector<long> const &atom_to_imp);
 
   /**
    * @ingroup embedding

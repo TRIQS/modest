@@ -39,7 +39,7 @@ template <typename Mesh> auto run_gloc_test_case(std::string filename, double co
     if (self_energy_kind == self_energy_kind_e::ZeroSigma) {
       gloc_ref         = to_vector<block_gf<Mesh, matrix_valued>>(sort_keys_as_int(root["ref_data"]["Gloc_DFT"]));
       auto const &mesh = gloc_ref[0][0].mesh();
-      Sigma_imp_solver = make_vec_block_gf(mesh, E.imp_block_shape());
+      Sigma_imp_solver = make_vec_block_gf(mesh, E.imp_block_structure());
     } else if (self_energy_kind == self_energy_kind_e::ConstSigma) {
       gloc_ref         = to_vector<block_gf<Mesh, matrix_valued>>(sort_keys_as_int(root["ref_data"]["Gloc_constSigma"]));
       Sigma_imp_solver = to_vector<block_gf<Mesh, matrix_valued>>(sort_keys_as_int(root["ref_data"]["const_Sigma_input"]));
@@ -65,7 +65,7 @@ auto gloc_two_ways(std::string filename) {
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
   auto E                     = make_embedding(obe.C_space);
   auto mesh                  = mesh::imfreq{10.0, triqs::mesh::Fermion, 251};
-  auto Sigma_imp_solver      = make_vec_block_gf(mesh, E.imp_block_shape());
+  auto Sigma_imp_solver      = make_vec_block_gf(mesh, E.imp_block_structure());
   auto Sigma_static          = Sigma_imp_solver | stdv::transform([](auto &x) { return std::get<0>(split_self_energy(x)); }) | tl::to<std::vector>();
   auto Sigma_dynamic         = Sigma_imp_solver | stdv::transform([](auto &x) { return std::get<1>(split_self_energy(x)); }) | tl::to<std::vector>();
   auto Sigma_embed           = E.embed(Sigma_dynamic);

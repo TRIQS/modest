@@ -40,7 +40,7 @@ namespaces = "triqs triqs::modest  triqs::lattice"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::(embedding|make_embedding|make_embedding_with_clusters|embedding_builder)"
+match_names = "triqs::modest::(embedding|make_embedding|make_embedding_with_clusters)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex
