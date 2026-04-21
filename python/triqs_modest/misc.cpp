@@ -16,5 +16,4 @@
 #include "triqs/tb/superlattice.hpp"
 #include "embedding.wrap.hxx"
 #include "obe.wrap.hxx"
-#include "utils/file_io.wrap.hxx"
 #include "misc.wrap.cxx"

@@ -4,7 +4,7 @@
 #include "triqs_modest/obe_tb.hpp"
 
 namespace c2py_module {
-  using DMFTCheckpoint = triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>;
+  using CheckpointBase = triqs::modest::checkpoint<triqs::modest::iteration_data>;
 } // namespace c2py_module
 
 #include "../embedding.wrap.hxx"

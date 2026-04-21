@@ -7,174 +7,125 @@
 #include "embedding.hpp"
 #include <filesystem>
 #include <string>
-#include <string_view>
 
 namespace triqs::modest {
 
   namespace fs = std::filesystem;
 
+  // ===========================================================================
+  //          Checkpoint data structures for DMFT loop
+  // ===========================================================================
+
+  using block_gf_imfreq_t = block_gf<imfreq, matrix_valued>;
+  using block_gf_imtime_t = block_gf<imtime, matrix_valued>;
+  using block_mat_t       = std::vector<nda::matrix<dcomplex>>;
+
   /**
-   * @ingroup checkpoint
-   * @brief A checkpoint manager for logging data after each DMFT iteration
-   *
-   * @tparam InitialData the initial data of the calculatoin (one_body_elements, embedding)
-   * @tparam IterationData the data after each DMFT iteration
+   * @brief Minimal iteration data required to restart a DMFT loop.
    */
-  template <typename InitialData, typename IterationData> class checkpoint {
+  struct iteration_data {
+    double mu;
+    std::vector<block_gf_imfreq_t> Sigma_imp_list;
+    std::vector<block_mat_t> Sigma_hartree_list;
+
+    C2PY_IGNORE friend void mpi_broadcast(iteration_data &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x.mu, c, root);
+      mpi::broadcast(x.Sigma_imp_list, c, root);
+      mpi::broadcast(x.Sigma_hartree_list, c, root);
+    }
+  };
+
+  // HDF5 serialization for iteration_data
+  inline void h5_write(h5::group g, std::string const &name, iteration_data const &data) {
+    auto g2 = g.create_group(name);
+    h5::write(g2, "mu", data.mu);
+    h5::write(g2, "Sigma_imp_list", data.Sigma_imp_list);
+    h5::write(g2, "Sigma_hartree_list", data.Sigma_hartree_list);
+  }
+
+  inline void h5_read(h5::group g, std::string const &name, iteration_data &data) {
+    auto g2 = g.open_group(name);
+    h5::read(g2, "mu", data.mu);
+    h5::read(g2, "Sigma_imp_list", data.Sigma_imp_list);
+    h5::read(g2, "Sigma_hartree_list", data.Sigma_hartree_list);
+  }
+
+  // ===========================================================================
+  //          checkpoint
+  // ===========================================================================
+
+  template <typename IterationData> class checkpoint {
 
     fs::path _dirname;
     long _n_iter = 0;
+    std::string _iter_file;
+
     struct h5path {
-      std::string file;       // absolute path to the h5 file
-      std::string group_name; // group name in the h5 file
+      std::string file;
+      std::string group_name;
     };
 
-    h5path path_initial_data        = h5path{_dirname.string() + "/initial_data.h5", "initial_data"};
-    std::string iteration_file_path = _dirname.string() + "/iterations.h5";
-
-    [[nodiscard]] h5path path_iteration(long n_iter) const { return {iteration_file_path, std::to_string(n_iter)}; }
-
-    void write(h5path p, auto const &x) const { h5::write(h5::file(p.file, 'a'), p.group_name, x); }
+    [[nodiscard]] h5path path_iteration(long n) const { return {_iter_file, std::to_string(n)}; }
 
     template <typename T> [[nodiscard]] T read(h5path p) const { return h5::read<T>(h5::file(p.file, 'r'), p.group_name); }
 
     public:
-    /**
-     * @brief Open checkpoint from an existing file (rw).
-     * @param dirname Name of the directory containing the checkpoint files.
-     */
-    checkpoint(std::string dirname) : _dirname{dirname} {
-      if (!fs::exists(dirname)) throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' does not exist", dirname)};
-      if (!fs::is_directory(dirname)) throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' exists but is not a directory", dirname)};
-
-      // Read n_iter from file : length of the iteration data in the h5 file
-      auto file = h5::file(iteration_file_path, 'r');
-      _n_iter   = long(h5::group{file}.get_all_subgroup_dataset_names().size());
+    /// Open existing or create new checkpoint directory.
+    checkpoint(std::string dirname) : _dirname{dirname}, _iter_file{dirname + "/iterations.h5"} {
+      if (fs::exists(dirname)) {
+        if (!fs::is_directory(dirname))
+          throw std::runtime_error{fmt::format("Checkpoint: '{}' exists but is not a directory", dirname)};
+        auto file = h5::file(_iter_file, 'r');
+        _n_iter   = long(h5::group{file}.get_all_subgroup_dataset_names().size());
+      } else {
+        fs::create_directory(dirname);
+        h5::file(_iter_file, 'w');
+      }
     }
 
-    /**
-     * @brief Create a new checkpoint from initial_data.
-     * @param dirname Name of the directory containing the checkpoint files. Must not exist.
-     * @param initial_data Initial data to store in the checkpoint.
-     */
-    checkpoint(std::string dirname, InitialData const &initial_data) : _dirname{dirname} {
-      if (fs::exists(dirname)) throw std::runtime_error{fmt::format("Checkpoint: dirname '{}' already exists", dirname)};
-      fs::create_directory(dirname);
-      auto f    = h5::file(path_initial_data.file, 'w');
-      auto root = h5::group{f};
-      h5::write(root, path_initial_data.group_name, initial_data);
-      // Subgroup for logging data
-      auto g = root.create_group("logging");
-      // FIXME : Writout some metadata
-    }
-
-    /// Directory name containing the checkpoint files.
     [[nodiscard]] std::string dirname() const { return _dirname.string(); }
+    [[nodiscard]] long size() const { return _n_iter; }
+    [[nodiscard]] bool empty() const { return _n_iter == 0; }
 
-    /// Initial data.
-    [[nodiscard]] InitialData initial_data() const { return read<InitialData>(path_initial_data); }
+    [[nodiscard]] IterationData last() const {
+      if (empty()) throw std::runtime_error{"Checkpoint: no iterations stored"};
+      return (*this)[-1];
+    }
 
     void append(IterationData const &x) {
-      write(path_iteration(_n_iter), x);
+      auto p    = path_iteration(_n_iter);
+      auto f    = h5::file(p.file, 'a');
+      auto root = h5::group{f};
+      h5::write(root, p.group_name, x);
       _n_iter++;
     }
 
     [[nodiscard]] IterationData operator[](long i) const {
       if (i < 0) i += size();
-      if (i < 0 || i >= size()) throw std::out_of_range{fmt::format("Checkpoint: index {} out of range [0, {}]", i, size())};
+      if (i < 0 || i >= size()) throw std::out_of_range{fmt::format("Checkpoint: index {} out of range [0, {})", i, size())};
       return read<IterationData>(path_iteration(i));
     }
 
-    [[nodiscard]] long size() const { return _n_iter; }
+    // Range-based for loop support
+    class const_iterator {
+      checkpoint const *_cp;
+      long _idx;
+
+      public:
+      const_iterator(checkpoint const *cp, long idx) : _cp{cp}, _idx{idx} {}
+      IterationData operator*() const { return (*_cp)[_idx]; }
+      const_iterator &operator++() {
+        ++_idx;
+        return *this;
+      }
+      bool operator!=(const_iterator const &other) const { return _idx != other._idx; }
+    };
+
+    [[nodiscard]] const_iterator begin() const { return {this, 0}; }
+    [[nodiscard]] const_iterator end() const { return {this, _n_iter}; }
   };
 
-  // ===========================================================================
-  //          Checkpoint data structures for DMFT loop
-  // ===========================================================================
-
-  /// Initial data used for checkpointing.
-  struct initial_data {
-    /// One-body elements.
-    one_body_elements_on_grid obe;
-
-    /// Embedding object.
-    embedding embed;
-
-    /// Impurity model
-    //  impurity_model imp_model;
-  };
-
-  // HDF5 read and write for initial_data
-  void h5_write(h5::group g, std::string const &name, initial_data const &data) {
-    auto g2 = g.create_group(name);
-    h5::write(g2, "one_body_elements_on_grid", data.obe);
-    h5::write(g2, "embedding", data.embed);
-    // h5::write(g, "impurity_model", data.imp_model); // Uncomment if impurity_model is added
-  }
-
-  void h5_read(h5::group g, std::string const &name, initial_data &data) {
-    auto g2 = g.create_group(name);
-    h5::read(g2, "one_body_elements_on_grid", data.obe);
-    h5::read(g2, "embedding", data.embed);
-    // h5::read(g, "impurity_model", data.imp_model); // Uncomment if impurity_model is added
-  }
-
-  // ------------------------------------------------------
-  using block_gf_imfreq_t = block_gf<imfreq, matrix_valued>;
-  using block_gf_imtime_t = block_gf<imtime, matrix_valued>;
-  using block_mat_t       = std::vector<nda::matrix<dcomplex>>;
-
-  /// Iteration data used for checkpointing.
-  struct iteration_data {
-
-    /// Chemical potential.
-    double mu;
-
-    /// Impurities self-energies.
-    std::vector<block_gf_imfreq_t> Sigma_imp_list;
-
-    /// Sigma Hartree.
-    block_mat_t Sigma_hartree_list;
-
-    /// Impurities Green's functions.
-    std::vector<block_gf_imfreq_t> Gimp_freq_list;
-
-    /// Impurities Green's functions.
-    std::vector<block_gf_imtime_t> Gimp_time_list;
-
-    /// Impurities self-energies.
-    std::vector<block_gf_imfreq_t> Sigma_dc_list;
-  };
-
-  // HDF5 read and write for iteration_data
-  void h5_write(h5::group g, std::string const &name, iteration_data const &data) {
-    auto g2 = g.create_group(name);
-    h5::write(g2, "mu", data.mu);
-
-    h5::write(g2, "Sigma_imp_list", data.Sigma_imp_list);
-    h5::write(g2, "Sigma_hartree_list", data.Sigma_hartree_list);
-    h5::write(g2, "Sigma_dc_list", data.Sigma_dc_list);
-
-    h5::write(g2, "Gimp_freq_list", data.Gimp_freq_list);
-    h5::write(g2, "Gimp_time_list", data.Gimp_time_list);
-  }
-
-  void h5_read(h5::group g, std::string const &name, iteration_data &data) {
-    auto g2 = g.open_group(name);
-    h5::read(g2, "mu", data.mu);
-
-    h5::read(g2, "Sigma_imp_list", data.Sigma_imp_list);
-    h5::read(g2, "Sigma_hartree_list", data.Sigma_hartree_list);
-    h5::read(g2, "Sigma_dc_list", data.Sigma_dc_list);
-
-    h5::read(g2, "Gimp_freq_list", data.Gimp_freq_list);
-    h5::read(g2, "Gimp_time_list", data.Gimp_time_list);
-  }
-  // ===========================================================
-
-  // Template specialization for the checkpoint class
-  // For c2py
-  /// A checkpoint manager for logging data after each DMFT iteration.
-  template class checkpoint<initial_data, iteration_data>;
+  // Explicit instantiation for c2py
+  template class checkpoint<iteration_data>;
 
 } // namespace triqs::modest

@@ -17,7 +17,7 @@ namespaces = "triqs triqs::modest  triqs::lattice"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::(checkpoint|initial_data|iteration_data)"
+match_names = "triqs::modest::(checkpoint|iteration_data)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex
