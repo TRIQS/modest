@@ -475,7 +475,7 @@ Create zero-initialized impurity self-energies.
 
 Constructs a list of zero-initialized self-energy containers for each impurity,
 with both dynamic (frequency-dependent) and static components. The block structure of each
-impurity's self-energy is determined by `imp_block_shape()`.
+impurity's self-energy is determined by `imp_block_structure()`.
 
 Each impurity receives a pair consisting of:
 - A `block_gf` initialized to zero on the provided mesh (dynamic part).
@@ -526,10 +526,13 @@ Returns
    A new embedding with the updated :math:`\psi` map.
 )DOC",
                    {{c2py::python_typename<long>()}, {c2py::python_typename<long>()}}, {c2py::python_typename<triqs::modest::embedding>()});
-static const auto _c2py_doc_9 = _c2py_fun_9.doc(R"DOC(
-[1] Split impurity `imp_idx`.
+static const auto _c2py_doc_9 = _c2py_fun_9.doc(
+   R"DOC(
+[1] Split impurity `imp_idx` using a predicate.
 
-Predicate p (long block_idx) -> 0 or 1.
+Partitions the blocks of impurity `imp_idx` into two new impurities based on
+predicate `p`. Blocks for which `p(block_idx)` returns true stay with `imp_idx`;
+the rest are assigned to a new impurity inserted at `imp_idx + 1`.
 
 ------
 
@@ -544,7 +547,9 @@ Parameters
 ----------
 imp_idx : {par_0}
    Impurity number.
-block_list : {par_1}
+p : {par_1}
+   Predicate taking a block index and returning true/false.
+block_list : {par_2}
    A list of blocks of `imp_idx` to split off.
 
 Returns
@@ -552,8 +557,8 @@ Returns
 {ret_0}
    New embedding with the updated :math:`\psi` map.
 )DOC",
-                                                {{c2py::python_typename<long>()}, {c2py::python_typename<const std::vector<long> &>()}},
-                                                {c2py::python_typename<triqs::modest::embedding>()});
+   {{c2py::python_typename<long>()}, {c2py::python_typename<std::function<bool(long)>>()}, {c2py::python_typename<const std::vector<long> &>()}},
+   {c2py::python_typename<triqs::modest::embedding>()});
 static const auto _c2py_doc_10 =
    _c2py_fun_10.doc(R"DOC(
 Split the block (gamma) of an impurity (imp_idx) into multiple blocks with dimensions given by `new_dims`.
@@ -596,23 +601,23 @@ PyMethodDef c2py::tp_methods<_c2py_cls_0>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-static constexpr auto prop_doc_0 = R"DOC(The mapping table :math:`\psi`.)DOC";
-static constexpr auto prop_doc_1 = R"DOC(Gf block structure for the impurity solvers.)DOC";
-static constexpr auto prop_doc_2 = R"DOC(Create the two-particle embedding from a single-particle embedding.
+static constexpr auto prop_doc_0 = R"DOC(Block structure (names and dimensions) for each impurity solver.)DOC";
+static constexpr auto prop_doc_1 = R"DOC(Create the two-particle embedding from a single-particle embedding.
 
 Merges consecutive :math:`\alpha` blocks that belong to the same atom into a
 single block.  Atom boundaries are detected by monitoring the :math:`\gamma` index: within
 one atom the :math:`\gamma` values are strictly increasing; when :math:`\gamma` resets or
 the impurity index changes a new group is started.  Disconnected blocks (``imp_idx`` == -1)
 are never merged and pass through unchanged.)DOC";
-static constexpr auto prop_doc_3 = R"DOC(Convert the embedding to a spinless embedding.
+static constexpr auto prop_doc_2 = R"DOC(Convert the embedding to a spinless embedding.
 
-This method converts a spinful embedding (with two spin channels, e.g., "up" and "down") into a spinless colloquially referred to as "ud".
-This caseful is usefuly when working with sytems with spin-orbit coupling or working with spin-averaged quantities, like the
-density-density susceptibility.)DOC";
-static constexpr auto prop_doc_4 = R"DOC(Number of blocks in :math:`\alpha` for the :math:`\Sigma_{\text{embed}}`.)DOC";
-static constexpr auto prop_doc_5 = R"DOC(Number of impurities.)DOC";
-static constexpr auto prop_doc_6 = R"DOC(Number of blocks in :math:`\sigma` for the :math:`\Sigma_{\text{embed}}`.)DOC";
+Converts a spinful embedding (with two spin channels, e.g., "up" and "down") into a
+single-channel embedding labelled "ud". This is useful when working with systems with
+spin-orbit coupling or spin-averaged quantities, like the density-density susceptibility.)DOC";
+static constexpr auto prop_doc_3 = R"DOC(Number of blocks in :math:`\alpha` for the :math:`\Sigma_{\text{embed}}`.)DOC";
+static constexpr auto prop_doc_4 = R"DOC(Number of impurities.)DOC";
+static constexpr auto prop_doc_5 = R"DOC(Number of blocks in :math:`\sigma` for the :math:`\Sigma_{\text{embed}}`.)DOC";
+static constexpr auto prop_doc_6 = R"DOC(The mapping table :math:`\psi`.)DOC";
 static constexpr auto prop_doc_7 = R"DOC(The names of the sigma indices.)DOC";
 
 // ----- Member and property table ----
@@ -620,13 +625,13 @@ static constexpr auto prop_doc_7 = R"DOC(The names of the sigma indices.)DOC";
 template <>
 constinit PyGetSetDef c2py::tp_getset<_c2py_cls_0>[] = {
 
-   {"get_psi", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::get_psi)>, nullptr, prop_doc_0, nullptr},
-   {"imp_block_shape", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::imp_block_shape)>, nullptr, prop_doc_1, nullptr},
-   {"make_2particle", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::make_2particle)>, nullptr, prop_doc_2, nullptr},
-   {"make_spinless", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::make_spinless)>, nullptr, prop_doc_3, nullptr},
-   {"n_alpha", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::n_alpha)>, nullptr, prop_doc_4, nullptr},
-   {"n_impurities", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::n_impurities)>, nullptr, prop_doc_5, nullptr},
-   {"n_sigma", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::n_sigma)>, nullptr, prop_doc_6, nullptr},
+   {"imp_block_structure", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::imp_block_structure)>, nullptr, prop_doc_0, nullptr},
+   {"make_2particle", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::make_2particle)>, nullptr, prop_doc_1, nullptr},
+   {"make_spinless", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::make_spinless)>, nullptr, prop_doc_2, nullptr},
+   {"n_alpha", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::n_alpha)>, nullptr, prop_doc_3, nullptr},
+   {"n_impurities", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::n_impurities)>, nullptr, prop_doc_4, nullptr},
+   {"n_sigma", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::n_sigma)>, nullptr, prop_doc_5, nullptr},
+   {"psi_map", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::psi_map)>, nullptr, prop_doc_6, nullptr},
    {"sigma_names", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::embedding::sigma_names)>, nullptr, prop_doc_7, nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -681,42 +686,55 @@ const std::string c2py::tp_doc<_c2py_cls_1> =
 
 // ==================== module functions ====================
 
-// embedding_builder
+// make_embedding
 static auto const _c2py_fun_11 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const std::vector<std::string> &spin_names,
                  const nda::basic_array<std::vector<long, std::allocator<long>>, 2, nda::C_layout, 'A',
                                         nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &block_decomposition,
-                 const std::vector<long> &atom_to_imp) { return triqs::modest::embedding_builder(spin_names, block_decomposition, atom_to_imp); },
+                 const std::vector<long> &atom_to_imp) { return triqs::modest::make_embedding(spin_names, block_decomposition, atom_to_imp); },
               "spin_names", "block_decomposition", "atom_to_imp"),
    c2py::cfun([](const std::vector<std::string> &spin_names, const std::vector<std::vector<long>> &block_decomposition,
-                 const std::vector<long> &atom_to_imp) { return triqs::modest::embedding_builder(spin_names, block_decomposition, atom_to_imp); },
-              "spin_names", "block_decomposition", "atom_to_imp")};
-
-// make_embedding
-static auto const _c2py_fun_12 = c2py::dispatcher_f_kw_t{
+                 const std::vector<long> &atom_to_imp) { return triqs::modest::make_embedding(spin_names, block_decomposition, atom_to_imp); },
+              "spin_names", "block_decomposition", "atom_to_imp"),
    c2py::cfun([](const triqs::modest::local_space &C_space, bool use_atom_equivalences,
                  bool use_atom_decomp) { return triqs::modest::make_embedding(C_space, use_atom_equivalences, use_atom_decomp); },
               "C_space", "use_atom_equivalences"_a = true, "use_atom_decomp"_a = false)};
 
 // make_embedding_with_clusters
-static auto const _c2py_fun_13 = c2py::dispatcher_f_kw_t{
+static auto const _c2py_fun_12 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](triqs::modest::one_body_elements_on_grid obe,
                  const std::vector<std::vector<long>> &atom_partition) { return triqs::modest::make_embedding_with_clusters(obe, atom_partition); },
               "obe", "atom_partition")};
 
 static const auto _c2py_doc_11 =
    _c2py_fun_11.doc(R"DOC(
-Construct the embedding class from the local space, a description of the block decomposition, and an
-equivalence mapping between atom sites.
+[1, 2] Construct an embedding from spin names, a block decomposition per atom, and an atom-to-impurity mapping.
+
+------
+
+[3] Make an embedding from the local space.
+
+This function creates an embedding object from the local space, which is typically used in ModEST for
+embedding calculations. The default behavior is to use the equivalences between different atoms when constructing
+the embedding and to use the irrep decomposition of the atomic orbitals. Instead of the irrep decomposition, one
+can use the atomic decomposition.
+
+------
 
 Parameters
 ----------
 spin_names : {par_0}
-   The names of the spin indices.
+   The names of the spin indices (e.g., {"up", "down"}).
 block_decomposition : {par_1}
-   The decomposition of atomic orbitals into their irreducible representations.
+   Block sizes for each atom: block_decomposition(atom, sigma) is a vector of block sizes.
 atom_to_imp : {par_2}
-   [optional] A mapping between equivalent atom sites.
+   Mapping from atom index to impurity index. Atoms with the same value share a solver.
+C_space : {par_3}
+   The local space from a one-body elements (on grid/tight-binding).
+use_atom_equivalences : {par_4}
+   Use the equivalences between different atoms when constructing the embedding.
+use_atom_decomp : {par_5}
+   Use the atomic decomposition instead of the atomic orbital decomposition.
 
 Returns
 -------
@@ -725,36 +743,13 @@ Returns
 )DOC",
                     {{c2py::python_typename<const std::vector<std::string> &>()},
                      {c2py::python_typename<const nda::basic_array<std::vector<long, std::allocator<long>>, 2, nda::C_layout, 'A',
-                                                                   nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>(),
-                      c2py::python_typename<const std::vector<std::vector<long>> &>()},
-                     {c2py::python_typename<const std::vector<long> &>()}},
+                                                                   nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
+                     {c2py::python_typename<const std::vector<long> &>()},
+                     {c2py::python_typename<const triqs::modest::local_space &>()},
+                     {c2py::python_typename<bool>()},
+                     {c2py::python_typename<bool>()}},
                     {c2py::python_typename<triqs::modest::embedding>()});
-static const auto _c2py_doc_12 =
-   _c2py_fun_12.doc(R"DOC(
-Make an embedding from the local space.
-
-This function creates an embedding object from the local space, which is typically used in ModEST for
-embedding calculations. The default behavior is to use the equivalences between different atoms when constructing
-the embedding and to use the irrep decomposition of the atomic orbitals. Instead of the irrep decomposition, one
-can use the atomic decomposition.
-
-Parameters
-----------
-C_space : {par_0}
-   The local space from a one-body elements (on grid/tight-binding).
-use_atom_equivalences : {par_1}
-   Use the equivalences between different atoms when constructing the embedding.
-use_atom_decomp : {par_2}
-   Use the atomic decomposition instead of the atomic orbital decomposition.
-
-Returns
--------
-{ret_0}
-   Embedding object.
-)DOC",
-                    {{c2py::python_typename<const triqs::modest::local_space &>()}, {c2py::python_typename<bool>()}, {c2py::python_typename<bool>()}},
-                    {c2py::python_typename<triqs::modest::embedding>()});
-static const auto _c2py_doc_13 = _c2py_fun_13.doc(
+static const auto _c2py_doc_12 = _c2py_fun_12.doc(
    R"DOC(
 Make an embedding for clusters of atoms.
 
@@ -781,9 +776,8 @@ Returns
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
-   {"embedding_builder", (PyCFunction)c2py::pyfkw<_c2py_fun_11>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_11.c_str()},
-   {"make_embedding", (PyCFunction)c2py::pyfkw<_c2py_fun_12>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_12.c_str()},
-   {"make_embedding_with_clusters", (PyCFunction)c2py::pyfkw<_c2py_fun_13>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_13.c_str()},
+   {"make_embedding", (PyCFunction)c2py::pyfkw<_c2py_fun_11>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_11.c_str()},
+   {"make_embedding_with_clusters", (PyCFunction)c2py::pyfkw<_c2py_fun_12>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_12.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
