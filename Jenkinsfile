@@ -16,10 +16,6 @@ properties([
     upstream(
       threshold: 'SUCCESS',
       upstreamProjects: triqsProject
-    ),
-    upstream(
-      threshold: 'SUCCESS',
-      upstreamProjects: '/TRIQS/clair/unstable'
     )
   ] : [])
 ])
