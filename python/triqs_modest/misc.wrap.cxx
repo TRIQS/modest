@@ -275,8 +275,8 @@ using _c2py_cls_3                                            = triqs::tb::superl
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_3>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_3> = "triqs_modest.misc.Superlattice";
 static auto _c2py_init_0                                     = c2py::dispatcher_c_kw_t{c2py::c_constructor<
-                                       _c2py_cls_3, nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
-                                       nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>("sl_units", "cluster_pts")};
+   _c2py_cls_3, nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
+   nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>("sl_units", "cluster_pts")};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_3>    = c2py::pyfkw_constructor<_c2py_init_0>;
 template <> const std::string c2py::tp_ctor_doc<_c2py_cls_3> = _c2py_init_0.doc(R"DOC()DOC");
 
@@ -306,8 +306,8 @@ template <> constexpr bool c2py::is_wrapped<_c2py_cls_4>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_4> = "triqs_modest.misc.TbHamiltonian";
 static auto _c2py_init_1                                     = c2py::dispatcher_c_kw_t{
    c2py::c_constructor<_c2py_cls_4, std::vector<std::array<long, 3>>,
-                                                           std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'A',
-                                                                                        nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>("Rs", "hoppings"),
+                       std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'A',
+                                                    nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>("Rs", "hoppings"),
    c2py::c_constructor<_c2py_cls_4>()};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_4>    = c2py::pyfkw_constructor<_c2py_init_1>;
 template <> const std::string c2py::tp_ctor_doc<_c2py_cls_4> = _c2py_init_1.doc(R"DOC()DOC");
@@ -360,6 +360,7 @@ PyMethodDef c2py::tp_methods<_c2py_cls_4>[] = {
 static constexpr auto prop_doc_2 = R"DOC()DOC";
 static constexpr auto prop_doc_3 = R"DOC()DOC";
 static constexpr auto prop_doc_4 = R"DOC()DOC";
+static constexpr auto prop_doc_5 = R"DOC()DOC";
 
 // ----- Member and property table ----
 
@@ -368,7 +369,9 @@ constinit PyGetSetDef c2py::tp_getset<_c2py_cls_4>[] = {
 
    {"elements", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::tb_hamiltonian::elements)>, nullptr, prop_doc_2, nullptr},
    {"hoppings", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::tb_hamiltonian::hoppings)>, nullptr, prop_doc_3, nullptr},
-   {"n_orbitals", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::tb_hamiltonian::n_orbitals)>, nullptr, prop_doc_4, nullptr},
+   {"n_R", c2py::getter_from_method_B<triqs::tb::tb_hamiltonian, c2py::castmc<>(&triqs::tb::fourier_polynomial<2, 3>::n_R)>, nullptr, prop_doc_4,
+    nullptr},
+   {"n_orbitals", c2py::getter_from_method<c2py::castmc<>(&triqs::tb::tb_hamiltonian::n_orbitals)>, nullptr, prop_doc_5, nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <> const std::string c2py::tp_doc<_c2py_cls_4> = R"DOC()DOC" + c2py::tp_ctor_doc<_c2py_cls_4>;
@@ -495,26 +498,18 @@ static auto const _c2py_fun_6 = c2py::dispatcher_f_kw_t{c2py::cfun(
       bool diagonalize_hloc) { return triqs::modest::discover_symmetries(Hloc0, atomic_shells, block_threshold, diagonalize_hloc); },
    "Hloc0", "atomic_shells", "block_threshold", "diagonalize_hloc")};
 
-// double_counting
-static auto const _c2py_fun_7 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](const nda::basic_array<
-         nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
-         nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &density_matrix,
-      double U_int, double J_hund, const std::string method) { return triqs::modest::double_counting(density_matrix, U_int, J_hund, method); },
-   "density_matrix", "U_int", "J_hund", "method")};
-
 // extend_to_spin
-static auto const _c2py_fun_8 =
+static auto const _c2py_fun_7 =
    c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::extend_to_spin(obe); }, "obe")};
 
 // fold
-static auto const _c2py_fun_9 = c2py::dispatcher_f_kw_t{
+static auto const _c2py_fun_8 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::tb::superlattice &sl, const triqs::tb::tb_hamiltonian &tb) { return triqs::tb::fold(sl, tb); }, "sl", "tb"),
    c2py::cfun([](const triqs::tb::superlattice &sl, const triqs::modest::one_body_elements_tb &obe) { return triqs::modest::fold(sl, obe); }, "sl",
               "obe")};
 
 // gloc
-static auto const _c2py_fun_10 = c2py::dispatcher_f_kw_t{
+static auto const _c2py_fun_9 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::mesh::imfreq &w_mesh, const triqs::tb::tb_hamiltonian &H_k, double mu,
                  const triqs::lattice::bz_int_options &opt) { return triqs::lattice::gloc<triqs::mesh::imfreq>(w_mesh, H_k, mu, opt); },
               "w_mesh", "H_k", "mu", "opt"),
@@ -533,6 +528,10 @@ static auto const _c2py_fun_10 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::tb::tb_hamiltonian &H_k, double mu, const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued> &Sigma,
                  const triqs::lattice::bz_int_options &opt) { return triqs::lattice::gloc<triqs::mesh::refreq>(H_k, mu, Sigma, opt); },
               "H_k", "mu", "Sigma", "opt")};
+
+// n_sigma_from_spin_kind
+static auto const _c2py_fun_10 =
+   c2py::dispatcher_f_kw_t{c2py::cfun([](triqs::modest::spin_kind_e sk) { return triqs::modest::n_sigma_from_spin_kind(sk); }, "sk")};
 
 // one_body_elements_from_model
 static auto const _c2py_fun_11 = c2py::dispatcher_f_kw_t{
@@ -692,38 +691,8 @@ Returns
                 nda::basic_array<
                    nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
                    2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>()});
-static const auto _c2py_doc_7 = _c2py_fun_7.doc(
-   R"DOC(
-Compute double counting correction for a DC type (method) from the density matrix of a Green's function.
-
-Parameters
-----------
-density_matrix : {par_0}
-   Density matrix [orbital, spin] indices.
-U_int : {par_1}
-   Coulomb interaction parameter.
-J_hund : {par_2}
-   Hund's coupling interaction parameter.
-method : {par_3}
-   DC formula (`sFLL`, `cFLL`, `sAMF`, `cAMF`, `cHeld`).
-
-Returns
--------
-{ret_0}
-   A pair of :math:`\Sigma_{DC}` and :math:`E_{DC}`.
-)DOC",
-   {{c2py::python_typename<const nda::basic_array<
-       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
-       nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
-    {c2py::python_typename<double>()},
-    {c2py::python_typename<double>()},
-    {c2py::python_typename<const std::string>()}},
-   {c2py::python_typename<
-      std::pair<nda::basic_array<nda::basic_array<double, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
-                                 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
-                nda::basic_array<double, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>()});
-static const auto _c2py_doc_8 = _c2py_fun_8.doc(R"DOC()DOC");
-static const auto _c2py_doc_9 = _c2py_fun_9.doc(
+static const auto _c2py_doc_7 = _c2py_fun_7.doc(R"DOC()DOC");
+static const auto _c2py_doc_8 = _c2py_fun_8.doc(
    R"DOC(
 Convert a tight binding Hamiltonian to its superlattice equivalent.
 
@@ -741,7 +710,10 @@ Returns
 )DOC",
    {{c2py::python_typename<const triqs::tb::superlattice &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_tb &>()}},
    {c2py::python_typename<triqs::modest::one_body_elements_tb>()});
-static const auto _c2py_doc_10 = _c2py_fun_10.doc(R"DOC()DOC");
+static const auto _c2py_doc_9  = _c2py_fun_9.doc(R"DOC()DOC");
+static const auto _c2py_doc_10 = _c2py_fun_10.doc(R"DOC(
+Number of σ channels for a given spin_kind_e.
+)DOC");
 static const auto _c2py_doc_11 = _c2py_fun_11.doc(R"DOC()DOC");
 static const auto _c2py_doc_12 = _c2py_fun_12.doc(R"DOC()DOC");
 static const auto _c2py_doc_13 =
@@ -840,10 +812,10 @@ static PyMethodDef module_methods[] = {
    {"Hloc", (PyCFunction)c2py::pyfkw<_c2py_fun_4>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_4.c_str()},
    {"add_local_term", (PyCFunction)c2py::pyfkw<_c2py_fun_5>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_5.c_str()},
    {"discover_symmetries", (PyCFunction)c2py::pyfkw<_c2py_fun_6>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_6.c_str()},
-   {"double_counting", (PyCFunction)c2py::pyfkw<_c2py_fun_7>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_7.c_str()},
-   {"extend_to_spin", (PyCFunction)c2py::pyfkw<_c2py_fun_8>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_8.c_str()},
-   {"fold", (PyCFunction)c2py::pyfkw<_c2py_fun_9>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_9.c_str()},
-   {"gloc", (PyCFunction)c2py::pyfkw<_c2py_fun_10>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_10.c_str()},
+   {"extend_to_spin", (PyCFunction)c2py::pyfkw<_c2py_fun_7>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_7.c_str()},
+   {"fold", (PyCFunction)c2py::pyfkw<_c2py_fun_8>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_8.c_str()},
+   {"gloc", (PyCFunction)c2py::pyfkw<_c2py_fun_9>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_9.c_str()},
+   {"n_sigma_from_spin_kind", (PyCFunction)c2py::pyfkw<_c2py_fun_10>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_10.c_str()},
    {"one_body_elements_from_model", (PyCFunction)c2py::pyfkw<_c2py_fun_11>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_11.c_str()},
    {"permute_local_space", (PyCFunction)c2py::pyfkw<_c2py_fun_12>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_12.c_str()},
    {"rotate", (PyCFunction)c2py::pyfkw<_c2py_fun_13>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_13.c_str()},

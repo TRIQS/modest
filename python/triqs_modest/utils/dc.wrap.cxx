@@ -20,24 +20,29 @@ using c2py::operator""_a;
 
 // ==================== enums =====================
 
+template <>
+std::map<triqs::modest::spin_kind_e, str_t> c2py::enum_to_string<triqs::modest::spin_kind_e> = {
+   {triqs::modest::spin_kind_e::Polarized, "Polarized"},
+   {triqs::modest::spin_kind_e::NonPolarized, "NonPolarized"},
+   {triqs::modest::spin_kind_e::NonColinear, "NonColinear"}};
+
 // ==================== module classes =====================
 
 // --------- class _c2py_cls_0 -----------
 using _c2py_cls_0                                            = triqs::modest::dc_solver;
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_0>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_0> = "triqs_modest.utils.dc.DcSolver";
-static auto _c2py_init_0 =
-   c2py::dispatcher_c_kw_t{c2py::c_constructor<_c2py_cls_0, long, std::string, double, double>("n_sigma", "method", "U_int", "J_hund")};
+static auto _c2py_init_0                                     = c2py::dispatcher_c_kw_t{
+   c2py::c_constructor<_c2py_cls_0, triqs::modest::spin_kind_e, std::string, double, double>("spin_kind", "method", "U_int", "J_hund")};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_0> = c2py::pyfkw_constructor<_c2py_init_0>;
 template <>
-const std::string c2py::tp_ctor_doc<_c2py_cls_0> = _c2py_init_0.doc(
-   R"DOC(
+const std::string c2py::tp_ctor_doc<_c2py_cls_0> = _c2py_init_0.doc(R"DOC(
 Construct a double counting "solver".
 
 Parameters
 ----------
-n_sigma : {par_0}
-   Dimension of the :math:`\sigma` index.
+spin_kind : {par_0}
+   Spin kind of the correlated space (Polarized, NonPolarized, NonColinear).
 method : {par_1}
    Double counting formula (method) to call (options: `cFLL`, `sFLL`, `cAMF`, `sAMF`, `cHeld`).
 U_int : {par_2}
@@ -45,54 +50,93 @@ U_int : {par_2}
 J_hund : {par_3}
    Hund's coupling :math:`J` to use in the DC formula.
 )DOC",
-   {{c2py::python_typename<long>()}, {c2py::python_typename<std::string>()}, {c2py::python_typename<double>()}, {c2py::python_typename<double>()}});
+                                                                    {{c2py::python_typename<triqs::modest::spin_kind_e>()},
+                                                                     {c2py::python_typename<std::string>()},
+                                                                     {c2py::python_typename<double>()},
+                                                                     {c2py::python_typename<double>()}});
 // dc_energy
-static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{c2py::cmethod(
-   [](_c2py_cls_0 &self, const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) -> decltype(auto) {
-     return self.dc_energy(gimp);
-   },
-   "self", "gimp")};
+static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
+   c2py::cmethod([](_c2py_cls_0 &self, const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp)
+                    -> decltype(auto) { return self.dc_energy(gimp); },
+                 "self", "gimp"),
+   c2py::cmethod(
+      [](_c2py_cls_0 &self,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &density_matrix) -> decltype(auto) {
+        return self.dc_energy(density_matrix);
+      },
+      "self", "density_matrix")};
 
 // dc_self_energy
-static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{c2py::cmethod(
-   [](_c2py_cls_0 &self, const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp) -> decltype(auto) {
-     return self.dc_self_energy(gimp);
-   },
-   "self", "gimp")};
+static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
+   c2py::cmethod([](_c2py_cls_0 &self, const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &gimp)
+                    -> decltype(auto) { return self.dc_self_energy(gimp); },
+                 "self", "gimp"),
+   c2py::cmethod(
+      [](_c2py_cls_0 &self,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &density_matrix) -> decltype(auto) {
+        return self.dc_self_energy(density_matrix);
+      },
+      "self", "density_matrix")};
 
 static const auto _c2py_doc_0 = _c2py_fun_0.doc(
    R"DOC(
-Compute the double counting correction to the energy.
+[1] Compute the double counting correction to the energy from a Green's function.
+
+------
+
+[2] Compute the double counting correction to the energy from a density matrix.
+
+------
 
 Parameters
 ----------
 gimp : {par_0}
    The impurity Green's function which is used to calculate the orbital-resolved density matrices to
    evaluate the double counting formula.
+density_matrix : {par_1}
+   Density matrix with shape [n_blocks, n_sigma].
 
 Returns
 -------
 {ret_0}
-   Double counting energy term.
+   Double counting energy :math:`E_{DC}`.
 )DOC",
-   {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}},
-   {c2py::python_typename<nda::basic_array<double, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>()});
+   {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()},
+    {c2py::python_typename<const nda::basic_array<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+       nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()}},
+   {c2py::python_typename<double>()});
 static const auto _c2py_doc_1 = _c2py_fun_1.doc(
    R"DOC(
-Compute the double-counting self-energy.
+[1] Compute the double-counting self-energy from a Green's function.
+
+------
+
+[2] Compute the double-counting self-energy from a density matrix.
+
+------
 
 Parameters
 ----------
 gimp : {par_0}
    The impurity Green's function which is used to calculate the orbital-resolved density matrices to
    evaluate the double counting formula.
+density_matrix : {par_1}
+   Density matrix with shape [n_blocks, n_sigma].
 
 Returns
 -------
 {ret_0}
    Double counting self-energy term.
 )DOC",
-   {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()}},
+   {{c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued> &>()},
+    {c2py::python_typename<const nda::basic_array<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+       nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()}},
    {c2py::python_typename<std::vector<
       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>()});
 
