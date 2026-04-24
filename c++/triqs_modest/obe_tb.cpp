@@ -103,7 +103,7 @@ namespace triqs::modest {
         auto Hloc0_ab = nda::zeros<dcomplex>(shell.dim, shell.dim);
         // need to create a matrix of dim x dim for each
         for (auto iorb : nda::range(shell.dim)) {
-          for (auto jorb : nda::range(shell.dim)) { Hloc0_ab(iorb, jorb) = H.hoppings()[iR0](start_orb + iorb, start_orb + jorb); }
+          for (auto jorb : nda::range(shell.dim)) { Hloc0_ab(iorb, jorb) = H[iR0](start_orb + iorb, start_orb + jorb); }
           start_orb += shell.dim;
         }
         Hloc_result(ishell, isigma) = Hloc0_ab;
@@ -114,7 +114,7 @@ namespace triqs::modest {
 
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_tb const &obe) {
     nda::array<nda::matrix<dcomplex>, 2> Hloc_result(1, obe.C_space.n_sigma());
-    for (auto sigma : range(obe.C_space.n_sigma())) { Hloc_result(0, sigma) = obe.H[sigma].hoppings()[obe.H[sigma].get_R_idx({0, 0, 0})]; }
+    for (auto sigma : range(obe.C_space.n_sigma())) { Hloc_result(0, sigma) = obe.H[sigma][{0, 0, 0}]; }
     return Hloc_result;
   }
 
@@ -158,19 +158,17 @@ namespace triqs::modest {
 
   one_body_elements_tb rotate(one_body_elements_tb const &obe, nda::matrix<dcomplex> const &U) {
 
-    auto rotate = [](tb_hamiltonian const &H, nda::matrix<dcomplex> const &U) {
-      if (U.extent(0) != H.n_orbitals()) {
+    auto new_H = obe.H;
+    for (auto &h : new_H) {
+      if (U.extent(0) != h.n_orbitals()) {
         throw std::runtime_error(
            "Cannot rotate a tb_hamiltonian with a unitary matrix that has a different number of rows than the number of orbitals in the Hamiltonian.");
       }
-
-      auto const &Rs = H.get_R_list();
-      std::vector<nda::array<dcomplex, 2>> rotated_hoppings;
-      for (auto const &tR : H.hoppings()) { rotated_hoppings.emplace_back(U * nda::matrix<dcomplex>(tR) * dagger(U)); }
-      return tb_hamiltonian{Rs, std::move(rotated_hoppings)};
-    };
-
-    auto new_H = obe.H | stdv::transform([&](auto x) { return rotate(x, U); }) | tl::to<std::vector>();
+      for (auto i : nda::range(long(h.get_R_list().size()))) {
+        auto tR = nda::matrix<dcomplex>(h[i]);
+        h[i]    = U * tR * dagger(U);
+      }
+    }
 
     return {.C_space = obe.C_space, .H = std::move(new_H)};
   }
@@ -181,10 +179,9 @@ namespace triqs::modest {
       throw std::runtime_error("Can only extend to spin a non-spin-polarized one_body_elements_tb.");
     }
 
-    auto const &Rs       = obe.H[0].get_R_list();
-    auto const &hoppings = obe.H[0].hoppings();
-    auto n_orb           = obe.C_space.dim();
-    auto new_orb         = 2 * n_orb;
+    auto const &Rs = obe.H[0].get_R_list();
+    auto n_orb     = obe.C_space.dim();
+    auto new_orb   = 2 * n_orb;
 
     auto extend_matrix = [&new_orb, &n_orb](auto const &mat) {
       auto ext_mat = nda::array<dcomplex, 2>(new_orb, new_orb);
@@ -197,8 +194,9 @@ namespace triqs::modest {
       return ext_mat;
     };
 
-    auto new_hoppings = hoppings | stdv::transform([&](auto const &tR) { return extend_matrix(tR); }) | tl::to<std::vector>();
-    auto new_tb_H     = std::vector<tb_hamiltonian>{{std::move(Rs), std::move(new_hoppings)}};
+    std::vector<nda::array<dcomplex, 2>> new_hoppings;
+    for (auto const &tR : obe.H[0].hoppings()) new_hoppings.emplace_back(extend_matrix(tR));
+    auto new_tb_H = std::vector<tb_hamiltonian>{{Rs, std::move(new_hoppings)}};
 
     auto const &sh         = obe.C_space.atomic_shells();
     auto new_atomic_shells = sh
@@ -213,13 +211,8 @@ namespace triqs::modest {
       throw std::runtime_error("Cannot add a local term with a different dimension than the one_body_elements_tb.");
     }
 
-    std::vector<tb_hamiltonian> new_tb_H;
-    for (auto H : obe.H) {
-      auto hoppings  = H.hoppings();
-      auto const &Rs = H.get_R_list();
-      hoppings[H.get_R_idx({0, 0, 0})] += local_term;
-      new_tb_H.emplace_back(Rs, hoppings);
-    }
+    auto new_tb_H = obe.H;
+    for (auto &h : new_tb_H) { h[{0, 0, 0}] += local_term; }
 
     auto spin_kind = obe.C_space.spin_kind();
     auto shells    = obe.C_space.atomic_shells();
