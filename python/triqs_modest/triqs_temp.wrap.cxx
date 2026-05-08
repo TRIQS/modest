@@ -29,8 +29,8 @@ template <> constexpr bool c2py::is_wrapped<_c2py_cls_0>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_0> = "triqs.triqs_temp.TbHamiltonian";
 static auto _c2py_init_0                                     = c2py::dispatcher_c_kw_t{
    c2py::c_constructor<_c2py_cls_0, std::vector<std::array<long, 3>>,
-                       std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'A',
-                                                    nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>("Rs", "hoppings"),
+                                                           std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'A',
+                                                                                        nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>("Rs", "hoppings"),
    c2py::c_constructor<_c2py_cls_0>()};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_0>    = c2py::pyfkw_constructor<_c2py_init_0>;
 template <> const std::string c2py::tp_ctor_doc<_c2py_cls_0> = _c2py_init_0.doc(R"DOC()DOC");

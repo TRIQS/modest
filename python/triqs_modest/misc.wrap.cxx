@@ -273,14 +273,6 @@ template <> const std::string c2py::tp_doc<_c2py_cls_2> = R"DOC()DOC" + c2py::tp
 // --------- class _c2py_cls_3 -----------
 using _c2py_cls_3                                            = triqs::modest::one_body_elements_gw;
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_3>     = true;
-<<<<<<< HEAD
-template <> inline constexpr auto c2py::tp_name<_c2py_cls_3> = "triqs_modest.misc.Superlattice";
-static auto _c2py_init_0                                     = c2py::dispatcher_c_kw_t{c2py::c_constructor<
-   _c2py_cls_3, nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
-   nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>("sl_units", "cluster_pts")};
-template <> constexpr initproc c2py::tp_init<_c2py_cls_3>    = c2py::pyfkw_constructor<_c2py_init_0>;
-template <> const std::string c2py::tp_ctor_doc<_c2py_cls_3> = _c2py_init_0.doc(R"DOC()DOC");
-=======
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_3> = "triqs_modest.misc.OneBodyElementsGw";
 
 static int synth_constructor_3(PyObject *self, PyObject *args, PyObject *kwargs) {
@@ -317,7 +309,6 @@ P : {par_1}
 )DOC",
                       "par",
                       {c2py::python_typename<triqs::modest::local_space>(), c2py::python_typename<triqs::modest::downfolding_projector_ext>()});
->>>>>>> 843bdd2 (rebase on unstable and update py bindings)
 
 // ----- Method table ----
 template <>
@@ -383,21 +374,12 @@ using _c2py_cls_5                                            = triqs::tb::tb_ham
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_5>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_5> = "triqs_modest.misc.TbHamiltonian";
 static auto _c2py_init_1                                     = c2py::dispatcher_c_kw_t{
-<<<<<<< HEAD
-   c2py::c_constructor<_c2py_cls_4, std::vector<std::array<long, 3>>,
-                       std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'A',
-                                                    nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>("Rs", "hoppings"),
-   c2py::c_constructor<_c2py_cls_4>()};
-template <> constexpr initproc c2py::tp_init<_c2py_cls_4>    = c2py::pyfkw_constructor<_c2py_init_1>;
-template <> const std::string c2py::tp_ctor_doc<_c2py_cls_4> = _c2py_init_1.doc(R"DOC()DOC");
-=======
    c2py::c_constructor<_c2py_cls_5, std::vector<std::array<long, 3>>,
                                                            std::vector<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'A',
                                                                                         nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>>("Rs", "hoppings"),
    c2py::c_constructor<_c2py_cls_5>()};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_5>    = c2py::pyfkw_constructor<_c2py_init_1>;
 template <> const std::string c2py::tp_ctor_doc<_c2py_cls_5> = _c2py_init_1.doc(R"DOC()DOC");
->>>>>>> 843bdd2 (rebase on unstable and update py bindings)
 // __call__
 static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cmethod(
