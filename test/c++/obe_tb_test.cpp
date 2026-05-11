@@ -3,6 +3,7 @@
 
 using namespace triqs::modest;
 using namespace triqs::gfs;
+using namespace triqs::experimental;
 using namespace triqs;
 
 ///-----------------------------------------
@@ -51,7 +52,7 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
   auto gloc_dft               = gloc(iw_mesh, obe_dft, mu_dft);
 
   // run gloc, forcing gloc to use PTR on the same grid as the DFT calculation was done
-  triqs::lattice::bz_int_options opt = {.k_grid = {7, 7, 7}, .k_grid_max = {7, 7, 7}, .run_adaptive = false};
+  bz_int_options opt = {.k_grid = {7, 7, 7}, .k_grid_max = {7, 7, 7}, .run_adaptive = false};
   auto gloc_tb                       = gloc(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
 
   // Check equivalence
@@ -105,7 +106,7 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   auto gloc_dft               = gloc(iw_mesh, obe_dft, mu_dft);
 
   // run gloc, forcing gloc to use PTR on the same grid as the DFT calculation was done
-  triqs::lattice::bz_int_options opt = {.k_grid = {5, 5, 5}, .k_grid_max = {5, 5, 5}, .run_adaptive = false};
+  bz_int_options opt = {.k_grid = {5, 5, 5}, .k_grid_max = {5, 5, 5}, .run_adaptive = false};
   auto gloc_tb                       = gloc(iw_mesh, obe_tb, mu_dft, opt);
 
   // FIXME : something about this seems potentially wrong
@@ -193,7 +194,7 @@ TEST(obe_tb, sr2moo4_wannier90) { // NOLINT
     //auto gloc_dft               = gloc(obe_dft, mu_dft, Sigma_dyn, Sigma_static);
   }
   // run gloc, forcing gloc to use PTR on the same grid as the DFT calculation was done
-  triqs::lattice::bz_int_options opt = {.k_grid = {40, 40, 40}, .k_grid_max = {40, 40, 40}, .run_adaptive = false};
+  bz_int_options opt = {.k_grid = {40, 40, 40}, .k_grid_max = {40, 40, 40}, .run_adaptive = false};
   //auto gloc_tb                       = gloc(obe_tb, mu_dft, Sigma_dyn, Sigma_static, opt);
 
   // check mu finding

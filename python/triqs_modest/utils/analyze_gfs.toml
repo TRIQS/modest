@@ -6,7 +6,7 @@ documentation = "Methods to analyze the degenerate blocks of a Green's function 
 
 # Namespace. 
 # Only the classes/functions/enums declared in this namespace will be wrapped
-namespaces = "triqs triqs::modest  triqs::lattice"
+namespaces = "triqs triqs::modest"
 
 # Match/reject elements according to regex
 # If match_names/match_names are both set, filter for all elements 

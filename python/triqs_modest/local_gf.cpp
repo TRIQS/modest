@@ -5,6 +5,5 @@
 #include "triqs_modest/obe_tb.hpp"
 
 #include "obe.wrap.hxx"
-#include "misc.wrap.hxx"
 
 #include "local_gf.wrap.cxx"

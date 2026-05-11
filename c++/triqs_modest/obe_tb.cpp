@@ -9,7 +9,7 @@
 #include <triqs/utility/exceptions.hpp>
 #include <type_traits>
 #include "./local_space.hpp"
-#include <triqs/tb/wannier_loader.hpp>
+#include <triqs/experimental/wannier_loader.hpp>
 #include "downfolding.hpp"
 #include <stdexcept>
 #include "./obe_tb.hpp"
@@ -25,10 +25,10 @@ namespace triqs::modest {
     if (spin_kind == spin_kind_e::Polarized) {
       throw std::runtime_error("If performing a spin-polarized calculation, you need to supply two Wannier file paths for up and down channels.\n");
     }
-    // call the wannier90 loader and set up tb_hamiltonian
+    // call the wannier90 loader and set up tb_hk
     // FIXME check if tb or hr exists -- write a lambda that checks which exists and returns just one of the two
     auto [R, HR, _] = read_wannier90_tb_data(wannier_file_path);
-    std::vector<tb_hamiltonian> tb_H;
+    std::vector<tb_hk> tb_H;
     tb_H.emplace_back(R, HR);
     // put the same H a second time for two spin channels
     if (spin_kind == spin_kind_e::NonPolarized) { tb_H.emplace_back(R, HR); }
@@ -38,7 +38,7 @@ namespace triqs::modest {
 
   one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR,
                                                     spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
-    std::vector<tb_hamiltonian> tb_H = {tb_hamiltonian(Rs, HR)};
+    std::vector<tb_hk> tb_H = {tb_hk(Rs, HR)};
     if (spin_kind == spin_kind_e::NonPolarized) { tb_H.emplace_back(Rs, HR); }
     return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   }
@@ -46,7 +46,7 @@ namespace triqs::modest {
   one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR_up,
                                                     std::vector<nda::array<dcomplex, 2>> const &HR_dn, spin_kind_e spin_kind,
                                                     std::vector<atomic_orbs> atomic_shells) {
-    std::vector<tb_hamiltonian> tb_H = {tb_hamiltonian(Rs, HR_up), tb_hamiltonian(Rs, HR_dn)};
+    std::vector<tb_hk> tb_H = {tb_hk(Rs, HR_up), tb_hk(Rs, HR_dn)};
     return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   }
 
@@ -56,8 +56,8 @@ namespace triqs::modest {
       throw std::runtime_error("For a non-spin polarized calculation, you should specify only one Wannier Hamiltonian.\n");
     }
 
-    // call the wannier90 loader and set up tb_hamiltonian list
-    std::vector<tb_hamiltonian> tb_H;
+    // call the wannier90 loader and set up tb_hk list
+    std::vector<tb_hk> tb_H;
     for (auto file : {wannier_file_path_up, wannier_file_path_dn}) {
       auto [R, HR, _] = read_wannier90_tb_data(file);
       tb_H.emplace_back(R, HR);
@@ -72,7 +72,7 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hamiltonian> const &H_sigma, std::vector<atomic_orbs> const &atomic_shells) {
+  nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hk> const &H_sigma, std::vector<atomic_orbs> const &atomic_shells) {
 
     // group the shells into atom indices
     // makes a vector containing the dim of each atomic shell...
@@ -120,7 +120,7 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  one_body_elements_tb make_obe_from_tb(std::vector<tb_hamiltonian> H_sigma, spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
+  one_body_elements_tb make_obe_from_tb(std::vector<tb_hk> H_sigma, spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
 
     // calculate Hloc using helper function -- Hloc here is dim [nshells, nsigma]
     nda::array<nda::matrix<dcomplex>, 2> hloc = Hloc(H_sigma, atomic_shells);
@@ -139,7 +139,7 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  one_body_elements_tb fold(tb::superlattice const &sl, one_body_elements_tb const &obe) {
+  one_body_elements_tb fold(experimental::superlattice const &sl, one_body_elements_tb const &obe) {
     auto new_H = obe.H | stdv::transform([&](auto x) { return fold(sl, x); }) | tl::to<std::vector>();
     auto sh    = obe.C_space.atomic_shells();
     decltype(sh) new_atomic_shells;
@@ -162,7 +162,7 @@ namespace triqs::modest {
     for (auto &h : new_H) {
       if (U.extent(0) != h.n_orbitals()) {
         throw std::runtime_error(
-           "Cannot rotate a tb_hamiltonian with a unitary matrix that has a different number of rows than the number of orbitals in the Hamiltonian.");
+           "Cannot rotate a tb_hk with a unitary matrix that has a different number of rows than the number of orbitals in the Hamiltonian.");
       }
       for (auto i : nda::range(long(h.get_R_list().size()))) {
         auto tR = nda::matrix<dcomplex>(h[i]);
@@ -196,7 +196,7 @@ namespace triqs::modest {
 
     std::vector<nda::array<dcomplex, 2>> new_hoppings;
     for (auto const &tR : obe.H[0].hoppings()) new_hoppings.emplace_back(extend_matrix(tR));
-    auto new_tb_H = std::vector<tb_hamiltonian>{{Rs, std::move(new_hoppings)}};
+    auto new_tb_H = std::vector<tb_hk>{{Rs, std::move(new_hoppings)}};
 
     auto const &sh         = obe.C_space.atomic_shells();
     auto new_atomic_shells = sh
