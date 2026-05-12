@@ -186,9 +186,9 @@ namespace triqs::modest {
     /// Names of the atoms in the orbital set.
     [[nodiscard]] std::vector<std::string> atom_names() const { return _atom_names; }
 
-    /// Transformed view containing the dimension of each atomic shell.
-    [[nodiscard]] auto atomic_decomposition() const {
-      return atomic_shells() | stdv::transform([](auto const &s) { return s.dim; });
+    /// Dimensions of each atomic shell, in order.
+    [[nodiscard]] std::vector<long> atomic_decomposition() const {
+      return _atomic_shells | stdv::transform([](auto const &s) { return s.dim; }) | tl::to<std::vector<long>>();
     }
 
     ///@}

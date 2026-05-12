@@ -4,19 +4,17 @@
 // See LICENSE in the root of this distribution for details.
 
 #pragma once
-#include <triqs/experimental/tb_hk.hpp>
 #include <mpi/mpi.hpp>
-#include <stdexcept>
-#include <triqs/mesh/imfreq.hpp>
-#include "loaders.hpp"
-#include "triqs/experimental/bz_integrators.hpp"
-#include "triqs/experimental/gloc.hpp"
-#include "triqs_modest/utils/gf_supp.hpp"
 #include <nda/nda.hpp>
-#include <triqs/gfs/functions/density.hpp>
+
+#include <triqs/experimental.hpp>
+#include <triqs/mesh/imfreq.hpp>
+#include <triqs/gfs.hpp>
 #include <triqs/utility/root_finder.hpp>
-#include "triqs/experimental/superlattice.hpp"
 #include <triqs/utility/macros.hpp>
+
+#include "loaders.hpp"
+#include "triqs_modest/utils/gf_supp.hpp"
 
 namespace triqs::modest {
 
