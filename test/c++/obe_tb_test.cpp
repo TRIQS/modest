@@ -58,9 +58,11 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
   // Check equivalence
   for (auto iw : iw_mesh) { EXPECT_COMPLEX_NEAR(gloc_tb(0, 0)[iw](0, 0), gloc_dft(0, 0)[iw](0, 0), 1e-5); }
 
-  // density calculation for one spin channel
+  // density calculation for one spin channel, using the function which takes self energy and also the function assuming zero self energy
   double n = density(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
+  double n_zero_sigma = density(obe_tb, mu_dft, iw_mesh, opt); 
   EXPECT_NEAR(n, 1.0, 1e-4);
+  EXPECT_NEAR(n_zero_sigma, 1.0, 1e-4);
 
   // check mu finding
   double mu_calc = find_chemical_potential(n, obe_tb, Sigma_block2, Sigma_static, opt);
@@ -92,14 +94,6 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   long n_sigma                = 2;
   long n_atoms                = 1;
 
-  // TODO replace this with function calls that don't take self energy
-  // make a zero self energy
-  auto Sigma        = gfs::gf<mesh::imfreq>{iw_mesh, {dim, dim}};
-  auto Sigma_block2 = make_block2_gf(n_atoms, n_sigma, Sigma); // block, nsigma, fill with empty sigma
-  nda::array<nda::matrix<dcomplex>, 2> Sigma_static(n_atoms, n_sigma);
-  // spin up and down both zero for now, 3 orbitals in the single block
-  for (auto sigma : nda::range(n_sigma)) { Sigma_static(0, sigma) = nda::diag(nda::vector<dcomplex>{0., 0., 0.}); }
-
   // read in some reference data
   auto [dft_density, obe_dft] = one_body_elements_from_dft_converter("./ref_data_lfs/svo_t2g_w90_fixedgrid.ref.h5");
   double mu_dft               = find_chemical_potential(dft_density, obe_dft, beta);
@@ -122,12 +116,12 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   }
 
   // density calculation for one spin channel
-  double n = density(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
+  double n = density(obe_tb, mu_dft, iw_mesh, opt);
   // calculation does not give exactly 1 for density because of inaccurate int paramters
   EXPECT_NEAR(n, 0.99999579030866403, 1e-4);
 
   // check mu finding
-  double mu_calc = find_chemical_potential(n, obe_tb, Sigma_block2, Sigma_static, opt);
+  double mu_calc = find_chemical_potential(n, obe_tb, iw_mesh, opt);
   EXPECT_NEAR(mu_calc, mu_dft, 1e-4);
 
   // check spin up and down channels
@@ -139,10 +133,10 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   auto Sigma_single = make_random_self(obe_tb.H[0].n_orbitals(), beta);
   auto Sigma_dyn    = make_block2_gf(n_atoms, n_sigma, Sigma_single);
   // spin up/down, 3 orbitals in the single block
+  nda::array<nda::matrix<dcomplex>, 2> Sigma_static(n_atoms, n_sigma);
   for (auto sigma : nda::range(n_sigma)) { Sigma_static(0, sigma) = nda::diag(nda::vector<dcomplex>{0.7, 0.6, 0.8}); }
 
   // try with a self energy
-  // TODO why does this not return exactly the same type as the earlier function call?
   auto gloc_tb_SE  = gloc(obe_tb, mu_dft, Sigma_dyn, Sigma_static, opt);
   auto gloc_dft_SE = gloc(obe_dft, mu_dft, Sigma_dyn, Sigma_static);
 

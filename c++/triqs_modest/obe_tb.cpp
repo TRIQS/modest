@@ -33,25 +33,12 @@ namespace triqs::modest {
     // put the same H a second time for two spin channels
     if (spin_kind == spin_kind_e::NonPolarized) { tb_H.emplace_back(R, HR); }
 
-    return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
-  };
-
-  one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR,
-                                                    spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
-    std::vector<tb_hk> tb_H = {tb_hk(Rs, HR)};
-    if (spin_kind == spin_kind_e::NonPolarized) { tb_H.emplace_back(Rs, HR); }
-    return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
-  }
-
-  one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR_up,
-                                                    std::vector<nda::array<dcomplex, 2>> const &HR_dn, spin_kind_e spin_kind,
-                                                    std::vector<atomic_orbs> atomic_shells) {
-    std::vector<tb_hk> tb_H = {tb_hk(Rs, HR_up), tb_hk(Rs, HR_dn)};
-    return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
+    return one_body_elements_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   }
 
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path_up, std::string const &wannier_file_path_dn,
                                                         spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
+
     if (spin_kind != spin_kind_e::Polarized) {
       throw std::runtime_error("For a non-spin polarized calculation, you should specify only one Wannier Hamiltonian.\n");
     }
@@ -62,33 +49,54 @@ namespace triqs::modest {
       auto [R, HR, _] = read_wannier90_tb_data(file);
       tb_H.emplace_back(R, HR);
     }
-    if (tb_H[0].n_orbitals() != tb_H[1].n_orbitals()) {
-      throw std::runtime_error(
-         "Cannot construct a one_body_elements "
-         "using up and down H_k that have a different number of orbtials.");
+    return one_body_elements_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
+  }
+
+  // -----------------------------------------------------------------------
+
+  one_body_elements_tb::one_body_elements_tb(std::vector<tb_hk> H_sigma, spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells)
+     : H{std::move(H_sigma)} {
+
+    // check that appropriate Hamiltonian information was provided
+    if (spin_kind == spin_kind_e::Polarized) {
+      if (H_sigma.size() != 2) {
+        throw std::runtime_error("Cannot construct a spin-polarized one_body_elements unless H_sigma contains only up and down Hamiltonians.");
+      }
+      if (H_sigma[0].n_orbitals() != H_sigma[1].n_orbitals()) {
+        throw std::runtime_error(
+           "Cannot construct a one_body_elements "
+           "using up and down H_k that have a different number of orbitals.");
+      }
+    } else { // if it is not spin polarized
+      if (H_sigma.size() != 1) { throw std::runtime_error("Hamiltonian should only include one channel for spin non-polarized calculations."); }
     }
-    return make_obe_from_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
+
+    // calculate Hloc using helper function -- Hloc here is dim [nshells, nsigma]
+    nda::array<nda::matrix<dcomplex>, 2> hloc = Hloc(H_sigma, atomic_shells);
+
+    // construct block structure using Hloc
+    double block_threshold  = 1e-6;
+    bool diagonalize_hloc   = false; // CHECK this would mean looking at band energies at k = 0?
+    auto [decomposition, U] = discover_symmetries(hloc, atomic_shells, block_threshold, diagonalize_hloc);
+
+    // call constructor for local space, for now ignoring rotation_from_spherical_to_dft_basis
+    C_space = local_space(spin_kind, atomic_shells, decomposition, U, {});
   }
 
   // -----------------------------------------------------------------------
 
   nda::array<nda::matrix<dcomplex>, 2> Hloc(std::vector<tb_hk> const &H_sigma, std::vector<atomic_orbs> const &atomic_shells) {
 
-    // group the shells into atom indices
-    // makes a vector containing the dim of each atomic shell...
-    //auto shell_decomposition = atomic_shells | stdv::transform([](auto const &s) { return s.dim; });
-
     // return Hloc with shape [n_atoms, nsigma]
     nda::array<nda::matrix<dcomplex>, 2> Hloc_result(atomic_shells.size(), H_sigma.size());
 
     for (auto [isigma, H] : enumerate(H_sigma)) {
 
-      // FIXME : REFACTOR decomposition from atomic shells
       // check that HR and atomic shells list have the same total size
       long n_orb = 0;
       for (auto shell : atomic_shells) { n_orb += shell.dim; }
       if (H.n_orbitals() != n_orb) {
-        throw std::runtime_error("Wannier Hamiltonian does not have the same number of orbitals as the provided atomic shells: HR "
+        throw std::runtime_error("TB Hamiltonian does not have the same number of orbitals as the provided atomic shells: HR "
                                  + std::to_string(H.n_orbitals()) + " , atomic_shells total " + std::to_string(n_orb));
       }
 
@@ -120,26 +128,7 @@ namespace triqs::modest {
 
   // -----------------------------------------------------------------------
 
-  one_body_elements_tb make_obe_from_tb(std::vector<tb_hk> H_sigma, spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells) {
-
-    // calculate Hloc using helper function -- Hloc here is dim [nshells, nsigma]
-    nda::array<nda::matrix<dcomplex>, 2> hloc = Hloc(H_sigma, atomic_shells);
-
-    // construct block structure using Hloc
-    double block_threshold  = 1e-6;
-    bool diagonalize_hloc   = false; // CHECK this would mean looking at band energies at k = 0?
-    auto [decomposition, U] = discover_symmetries(hloc, atomic_shells, block_threshold, diagonalize_hloc);
-
-    // call constructor for local space, for now ignoring rotation_from_spherical_to_dft_basis
-    auto LS = local_space(spin_kind, atomic_shells, decomposition, U, {});
-
-    // construct and return obe_tb
-    return one_body_elements_tb{.C_space = std::move(LS), .H = std::move(H_sigma)};
-  }
-
-  // -----------------------------------------------------------------------
-
-  one_body_elements_tb fold(experimental::superlattice const &sl, one_body_elements_tb const &obe) {
+  one_body_elements_tb fold(superlattice const &sl, one_body_elements_tb const &obe) {
     auto new_H = obe.H | stdv::transform([&](auto x) { return fold(sl, x); }) | tl::to<std::vector>();
     auto sh    = obe.C_space.atomic_shells();
     decltype(sh) new_atomic_shells;
@@ -151,7 +140,7 @@ namespace triqs::modest {
         new_dec(i * sh.size() + j, r_all) = dec(j, r_all);
       }
     }
-    return {.C_space = local_space{obe.C_space.spin_kind(), std::move(new_atomic_shells), new_dec, {}, {}}, .H = std::move(new_H)};
+    return one_body_elements_tb(std::move(new_H), local_space{obe.C_space.spin_kind(), std::move(new_atomic_shells), new_dec, {}, {}});
   }
 
   // -----------------------------------------------------------------------
@@ -170,8 +159,10 @@ namespace triqs::modest {
       }
     }
 
-    return {.C_space = obe.C_space, .H = std::move(new_H)};
+    return one_body_elements_tb(std::move(new_H), obe.C_space);
   }
+
+  // -----------------------------------------------------------------------
 
   one_body_elements_tb extend_to_spin(one_body_elements_tb const &obe) {
 
@@ -203,8 +194,10 @@ namespace triqs::modest {
        | stdv::transform([](auto const &s) { return atomic_orbs{.dim = 2 * s.dim, .l = s.l, .cls_idx = s.cls_idx, .dft_idx = s.dft_idx}; })
        | tl::to<std::vector>();
 
-    return make_obe_from_tb(std::move(new_tb_H), spin_kind_e::NonColinear, std::move(new_atomic_shells));
+    return one_body_elements_tb(std::move(new_tb_H), spin_kind_e::NonColinear, std::move(new_atomic_shells));
   }
+
+  // -----------------------------------------------------------------------
 
   one_body_elements_tb add_local_term(one_body_elements_tb const &obe, nda::matrix<dcomplex> const &local_term) {
     if (local_term.extent(0) != obe.C_space.dim()) {
@@ -217,7 +210,6 @@ namespace triqs::modest {
     auto spin_kind = obe.C_space.spin_kind();
     auto shells    = obe.C_space.atomic_shells();
 
-    return make_obe_from_tb(std::move(new_tb_H), spin_kind, shells);
+    return one_body_elements_tb(std::move(new_tb_H), spin_kind, std::move(shells));
   }
-
 } // namespace triqs::modest

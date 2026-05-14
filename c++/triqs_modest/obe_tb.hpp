@@ -25,10 +25,14 @@ namespace triqs::modest {
    * @brief A one-body elements using a tight-binding Hamiltonian.
    */
   struct one_body_elements_tb {
-    local_space C_space;           ///< Local \f$ \mathcal{C} \f$ space.
+    local_space C_space;  ///< Local \f$ \mathcal{C} \f$ space.
     std::vector<tb_hk> H; ///< List of TB Hamiltonians.
     //downfolding_projector P;
     //C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
+
+    // Constructor
+    one_body_elements_tb(std::vector<tb_hk> H_sigma, local_space ls) : C_space{std::move(ls)}, H{std::move(H_sigma)} {};
+    one_body_elements_tb(std::vector<tb_hk> H_sigma, spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells);
 
     /// Equality comparison operator.
     bool operator==(one_body_elements_tb const &) const = default;
@@ -39,13 +43,6 @@ namespace triqs::modest {
       mpi::broadcast(x.H, c, root);
     }
   };
-
-  one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR,
-                                                    spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells);
-
-  one_body_elements_tb one_body_elements_from_model(std::vector<std::array<long, 3>> const &Rs, std::vector<nda::array<dcomplex, 2>> const &HR_up,
-                                                    std::vector<nda::array<dcomplex, 2>> const &HR_dn, spin_kind_e spin_kind,
-                                                    std::vector<atomic_orbs> atomic_shells);
 
   /** @name OBE factories using a TB Hamiltonian
  *  Factory functions to create one_body_elements_on_tb
@@ -157,7 +154,6 @@ namespace triqs::modest {
     auto &mesh       = Sigma_dynamic(0, 0).mesh();
     auto n_sigma     = obe.C_space.n_sigma();
     auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
-    // TODO also check safety of orbital space sizes...
     if (n_sigma != Sigma_static.shape(1)) { throw std::runtime_error("Mismatch between the spin channels in Sigma_Static and Sigma_Dynamic"); }
     if (n_sigma != obe.H.size()) { throw std::runtime_error("Mismatch between the spin channels in Sigma and spin channels in Hamiltonian."); }
 
@@ -231,6 +227,25 @@ namespace triqs::modest {
     return n;
   }
 
+  /**
+   * @ingroup mu
+   * @brief Compute the density of the lattice Green's function without
+   *
+   * @tparam Mesh The mesh type.
+   * @param obe One-body elements.
+   * @param mu Chemical potential.
+   * @param mesh Mesh on which local GF will be computed.
+   * @param opt Container for options related to the integration of the BZ.
+   * @return Electron density of the lattice Green's function.
+   */
+  template <typename Mesh> double density(one_body_elements_tb const &obe, double mu, Mesh const &mesh, bz_int_options const &opt) {
+
+    auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    auto Sigma_static  = nda::array<nda::matrix<dcomplex>, 2>(1, obe.C_space.n_sigma());
+    for (auto [i, j] : Sigma_static.indices()) { Sigma_static(i, j) = nda::zeros<dcomplex>(obe.C_space.dim(), obe.C_space.dim()); }
+    return density(obe, mu, Sigma_dynamic, Sigma_static, opt);
+  }
+
   //  -----------------------------------------------------------------------
   /**
    * @ingroup mu
@@ -273,9 +288,8 @@ namespace triqs::modest {
    * @return Chemical potential corresponding to target density.
    */
   template <typename Mesh>
-  double find_chemical_potential(double const target_density, one_body_elements_tb const &obe, Mesh const &mesh,
-                                 bz_int_options const &opt, std::string method = "dichotomy", double precision = 1.e-5,
-                                 bool verbosity = true) {
+  double find_chemical_potential(double const target_density, one_body_elements_tb const &obe, Mesh const &mesh, bz_int_options const &opt,
+                                 std::string method = "dichotomy", double precision = 1.e-5, bool verbosity = true) {
 
     auto Sigma_dynamic = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
     auto Sigma_static  = nda::array<nda::matrix<dcomplex>, 2>(1, obe.C_space.n_sigma());
@@ -288,8 +302,7 @@ namespace triqs::modest {
   /** @cond DOXYGEN_SKIP_THIS */
   template block2_gf<mesh::imfreq, matrix_valued> gloc(one_body_elements_tb const &obe, double mu,
                                                        block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
-                                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static,
-                                                       bz_int_options const &opt);
+                                                       nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, bz_int_options const &opt);
 
   template block2_gf<mesh::imfreq, matrix_valued> gloc(mesh::imfreq const &mesh, one_body_elements_tb const &obe, double mu,
                                                        bz_int_options const &opt);
@@ -297,10 +310,12 @@ namespace triqs::modest {
   template double density(one_body_elements_tb const &obe, double mu, block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
                           nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, bz_int_options const &opt);
 
+  template double density(one_body_elements_tb const &obe, double mu, mesh::imfreq const &mesh, bz_int_options const &opt);
+
   template double find_chemical_potential(double const target_density, one_body_elements_tb const &obe,
                                           block2_gf<mesh::imfreq, matrix_valued> const &Sigma_dynamic,
-                                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, bz_int_options const &opt,
-                                          std::string method, double precision, bool verbosity);
+                                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, bz_int_options const &opt, std::string method,
+                                          double precision, bool verbosity);
 
   template double find_chemical_potential(double const target_density, one_body_elements_tb const &obe, mesh::imfreq const &mesh,
                                           bz_int_options const &opt, std::string method, double precision, bool verbosity);
