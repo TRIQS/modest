@@ -46,7 +46,6 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
   }
 
   // read in some reference data
-  // REFACTOR: put all the args so I can set verbotisty to false on find mu?
   auto [dft_density, obe_dft] = one_body_elements_from_dft_converter("./ref_data/lco_wannier.ref.h5");
   double mu_dft               = find_chemical_potential(dft_density, obe_dft, beta);
   auto gloc_dft               = gloc(iw_mesh, obe_dft, mu_dft);
@@ -103,10 +102,9 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
   bz_int_options opt = {.k_grid = {5, 5, 5}, .k_grid_max = {5, 5, 5}, .run_adaptive = false};
   auto gloc_tb                       = gloc(iw_mesh, obe_tb, mu_dft, opt);
 
-  // FIXME : something about this seems potentially wrong
-  // Check equivalence -- note, this is a very coarse DFT grid, it seems Wannierization has a tiny variation that
-  // results in a small but meaningful (second decimal) difference in gloc for the frequency closest to zero.
-  // therefore we set a lower tolerance for two points near zero.
+  // NOTE: The first frequency point here does not agree exactly, likely due to a small 
+  // difference in the Wannier H vs. the DFT data. 
+  // This may also be due to the fact that DFT mesh was on [-0.5,0.5), and the PTR integration is 0,1
   for (auto iw : iw_mesh) { //
     if (std::abs(dcomplex(iw.value())) < 1.7) {
       EXPECT_COMPLEX_NEAR(gloc_tb(0, 0)[iw](0, 0), gloc_dft(0, 0)[iw](0, 0), 1e-2);
