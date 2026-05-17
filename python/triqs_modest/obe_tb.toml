@@ -1,0 +1,31 @@
+# Name of the package if any. Package.ModuleName will be the module name
+package_name = "triqs_modest"
+
+# The documentation string of the module.
+documentation = '''The one-body elements abstraction in ModEST, to be used with tight binding Hamiltonians.
+
+One-body elements (obe for short) from tight binding contains all of the one-body data that is typically converted from a
+ Wannier90 calculation or other tight binding model. The one-body elements struct for tight binding contains two components:
+
+- **H** List of tight binding Hamiltonians, of length number of spin channels (spin-polarized calculations should have both H_spin_up, H_spin_down).
+- **Local space** defines the local correlated subspace to be solved within DMFT.
+
+To set this up, a user will need to provide a list of atomic_orbitals used in the tight binding Hamiltonian, so that ModEST can construct the local space.
+'''
+
+# Namespace.
+# Only the classes/functions/enums declared in this namespace will be wrapped
+namespaces = "triqs triqs::modest"
+
+# Match/reject elements according to regex
+# If match_names/match_names are both set, filter for all elements
+# Algorithm is (for an element X of fully qualified name Qname)
+#    if match_names and not match_names match Qname : skip X
+#    if reject_names and reject_names match Qname : skip X
+#    else keep X.
+
+# Only keep elements declared in files matching the pattern
+match_files = "obe_tb.hpp"
+
+exclude_system_headers = false
+wrap_no_arg_methods_as_properties = true

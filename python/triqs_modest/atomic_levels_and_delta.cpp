@@ -4,6 +4,7 @@
 #include "triqs_modest/obe_tb.hpp"
 #include "triqs_modest/downfolding.hpp"
 
+#include "obe_tb.wrap.hxx"
 #include "obe.wrap.hxx"
 
 #include "atomic_levels_and_delta.wrap.cxx"

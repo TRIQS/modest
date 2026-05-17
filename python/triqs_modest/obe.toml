@@ -4,8 +4,8 @@ package_name = "triqs_modest"
 # The documentation string of the module. 
 documentation = '''The one-body elements abstraction in ModEST.
 
-One-body elements (obe for short) contains all of the one-body data that is typically converted from a density-functional theory (DFT) 
-calculation or Wannier90 calculation. The one-body elements struct contains four components:
+One-body elements (obe for short) from DFT data contains all of the one-body data that is typically converted from a density-functional theory (DFT) 
+calculation. The one-body elements struct from DFT contains four components:
 
 - **Local space** defines the local correlated subspace to be solved within DMFT.
 - **Band dispersion** contains the band dispersion :math:`\varepsilon(k, \nu, \sigma)`  where :math:`\varepsilon` is the energy at 
@@ -13,8 +13,7 @@ calculation or Wannier90 calculation. The one-body elements struct contains four
 - **Downfolding projector** contains the projector which downfolds from Bloch space :math:`\mathcal{B}` (indexed by :math:`\nu`) to the 
   correlated space (index by :math:`m`).    
 
-To make it easy to build this object, ModEST provides factory functions that convert raw DFT data (from codes like VASP, Wien2k, or 
-Wannier90) into fully prepared OBE objects ready for DMFT.
+To make it easy to build this object, ModEST provides factory functions that convert raw DFT data (from codes like VASP, Wien2k) into fully prepared OBE objects ready for DMFT.
 '''
 
 # Namespace. 
@@ -28,7 +27,7 @@ namespaces = "triqs triqs::modest"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::(atomic_orbs|ibz_symmetry_ops|band_dispersion|downfolding_projector|local_space|one_body_elements_on_grid|one_body_elements_tb|one_body_elements_from_dft_converter|one_body_elements_with_theta_projectors|one_body_elements_on_high_symmetry_path|spin_kind_e|one_body_elements_from_wannier90)"
+match_names = "triqs::modest::(atomic_orbs|ibz_symmetry_ops|band_dispersion|downfolding_projector|local_space|one_body_elements_on_grid|one_body_elements_from_dft_converter|one_body_elements_with_theta_projectors|one_body_elements_on_high_symmetry_path|spin_kind_e)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex

@@ -4,6 +4,7 @@
 #include "triqs_modest/gloc_fixed_grid.hpp"
 #include "triqs_modest/obe_tb.hpp"
 
+#include "obe_tb.wrap.hxx"
 #include "obe.wrap.hxx"
 
 #include "local_gf.wrap.cxx"

@@ -5,5 +5,6 @@
 #include <triqs/experimental.hpp>
 
 #include "obe.wrap.hxx"
+#include "obe_tb.wrap.hxx"
 
 #include "rho_and_mu.wrap.cxx"

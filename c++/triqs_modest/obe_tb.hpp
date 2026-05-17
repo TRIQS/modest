@@ -13,6 +13,7 @@
 #include <triqs/utility/root_finder.hpp>
 #include <triqs/utility/macros.hpp>
 
+#include "downfolding.hpp"
 #include "loaders.hpp"
 #include "triqs_modest/utils/gf_supp.hpp"
 
@@ -27,11 +28,28 @@ namespace triqs::modest {
   struct one_body_elements_tb {
     local_space C_space;  ///< Local \f$ \mathcal{C} \f$ space.
     std::vector<tb_hk> H; ///< List of TB Hamiltonians.
-    //downfolding_projector P;
-    //C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
+    // downfolding_projector P;
+    // C2PY_IGNORE std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; //< IBZ symmetrizer after a k-sum
 
-    // Constructor
+    /**
+     * @ingroup one_body_elements
+     * @brief Construct a one-body elements TB object from a list of tb_hk objects.
+     *
+     * @param H_sigma A list of TB Hamiltonians of length \f$ n_\sigma \f$.
+     * @param ls Local \f$ \mathcal{C} \f$ space.
+     * @return One-body elements containing the Wannier90 tight binding Hamiltonian.
+     */
     one_body_elements_tb(std::vector<tb_hk> H_sigma, local_space ls) : C_space{std::move(ls)}, H{std::move(H_sigma)} {};
+    
+    /**
+     * @ingroup one_body_elements
+     * @brief Construct a one-body elements TB object from a list of tb_hk objects.
+     *
+     * @param H_sigma A list of TB Hamiltonians of length \f$ n_\sigma \f$.
+     * @param spin_kind Spin kind for this calculation.
+     * @param atomic_shells List of atomic shells input by the user.
+     * @return One-body elements containing the tight binding Hamiltonian.
+     */
     one_body_elements_tb(std::vector<tb_hk> H_sigma, spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells);
 
     /// Equality comparison operator.
@@ -45,9 +63,9 @@ namespace triqs::modest {
   };
 
   /** @name OBE factories using a TB Hamiltonian
- *  Factory functions to create one_body_elements_on_tb
- *  @{
- */
+   *  Factory functions to create one_body_elements_on_tb
+   *  @{
+   */
 
   /**
    * @ingroup one_body_elements
@@ -79,10 +97,6 @@ namespace triqs::modest {
 
   /** @} */ // tb  factories
 
-  /// Helper to contruct and return an OBE_tb object given a list of tb_hks of length n_sigma
-  C2PY_IGNORE one_body_elements_tb make_obe_from_tb(std::vector<tb_hk> const tb_H_sigma, spin_kind_e spin_kind,
-                                                    std::vector<atomic_orbs> atomic_shells);
-
   /**
    * @brief Compute \f$ H_{\text{loc}} = H(R=0) \f$ given \f$ n_\sigma \f$ tight binding Hamiltonians.
    *
@@ -112,14 +126,14 @@ namespace triqs::modest {
   one_body_elements_tb fold(superlattice const &sl, one_body_elements_tb const &obe);
 
   /**
- * @brief Rotate a tight-binding Hamiltonian by a unitary matrix \f$ U \f$.
- *
- * @details The rotation is performed as \f$ H' = U H U^\dagger \f$.
- *
- * @param obe One-body elements containing the TB Hamiltonian.
- * @param U Unitary matrix used for the rotation.
- * @return One-body elements containing the rotated TB Hamiltonian.
- */
+   * @brief Rotate a tight-binding Hamiltonian by a unitary matrix \f$ U \f$.
+   *
+   * @details The rotation is performed as \f$ H' = U H U^\dagger \f$.
+   *
+   * @param obe One-body elements containing the TB Hamiltonian.
+   * @param U Unitary matrix used for the rotation.
+   * @return One-body elements containing the rotated TB Hamiltonian.
+   */
   one_body_elements_tb rotate(one_body_elements_tb const &obe, nda::matrix<dcomplex> const &U);
 
   one_body_elements_tb extend_to_spin(one_body_elements_tb const &obe);
@@ -128,7 +142,7 @@ namespace triqs::modest {
   //  -----------------------------------------------------------------------
 
   /** @name Local Green's function using a TB Hamiltonian
-  */
+   */
   ///@{
 
   /**
@@ -176,18 +190,18 @@ namespace triqs::modest {
   }
 
   /**
-    * @ingroup gloc
-    * @brief Compute the local Green's function without a self-energy.
-    *
-    * @details See other overloads (gloc) for more details.
-    *
-    * @tparam Mesh The mesh type.
-    * @param mesh The mesh on which \f$ G_{\mathrm{loc}} \f$ will be computed.
-    * @param obe One-body elements containing the TB Hamiltonian.
-    * @param mu Chemical potential \f$ \mu \f$.
-    * @param opt Container for options related to integration of the BZ.
-    * @return \f$ G_{\mathrm{loc}}^{\sigma} \f$, the local Green's function.
-    */
+   * @ingroup gloc
+   * @brief Compute the local Green's function without a self-energy.
+   *
+   * @details See other overloads (gloc) for more details.
+   *
+   * @tparam Mesh The mesh type.
+   * @param mesh The mesh on which \f$ G_{\mathrm{loc}} \f$ will be computed.
+   * @param obe One-body elements containing the TB Hamiltonian.
+   * @param mu Chemical potential \f$ \mu \f$.
+   * @param opt Container for options related to integration of the BZ.
+   * @return \f$ G_{\mathrm{loc}}^{\sigma} \f$, the local Green's function.
+   */
   template <typename Mesh>
   block2_gf<Mesh, matrix_valued> gloc(Mesh const &mesh, one_body_elements_tb const &obe, double mu, bz_int_options const &opt) {
     auto result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
@@ -215,7 +229,7 @@ namespace triqs::modest {
   double density(one_body_elements_tb const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                  nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, bz_int_options const &opt) {
 
-    //auto n_blocks = Sigma_dynamic.size1();
+    // auto n_blocks = Sigma_dynamic.size1();
     auto n_sigma = obe.C_space.n_sigma();
 
     double n  = 0;

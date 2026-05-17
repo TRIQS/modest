@@ -17,8 +17,8 @@ from .atomic_levels_and_delta import *
 from .embedding import *
 from .hamiltonians import *
 from .local_gf import *
-from .misc import *
 from .obe import *
+from .obe_tb import *
 from .post_processing import *
 from .rho_and_mu import *
 from .utils import *

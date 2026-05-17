@@ -3,6 +3,7 @@
 #include "triqs_modest/postprocess.hpp"
 #include "triqs_modest/obe_tb.hpp"
 
+#include "obe_tb.wrap.hxx"
 #include "obe.wrap.hxx"
 
 #include "post_processing.wrap.cxx"

@@ -8,17 +8,18 @@
 #include <triqs/gfs.hpp>
 #include <triqs/utility/exceptions.hpp>
 #include <type_traits>
-#include "./local_space.hpp"
 #include <triqs/experimental/wannier_loader.hpp>
-#include "downfolding.hpp"
 #include <stdexcept>
 #include "./obe_tb.hpp"
 #include "triqs_modest/utils/defs.hpp"
 
-// DANGEROUS : no way to check that wannier hamiltonian has atoms in the same order if user specifies their positions/
-// the atomic shell info. We are relying on them to get this right somehow, so there should be some print check
-
 namespace triqs::modest {
+
+  // -----------------------------------------------------------------------
+  // Functions to construct using wannier90 input directly
+
+  // NOTE : there is no way to check that wannier hamiltonian has atoms in the same order if user specifies their positions/
+  // the atomic shell info. We are relying on them to get this right.
 
   one_body_elements_tb one_body_elements_from_wannier90(std::string const &wannier_file_path, spin_kind_e spin_kind,
                                                         std::vector<atomic_orbs> atomic_shells) {
@@ -26,8 +27,7 @@ namespace triqs::modest {
       throw std::runtime_error("If performing a spin-polarized calculation, you need to supply two Wannier file paths for up and down channels.\n");
     }
     // call the wannier90 loader and set up tb_hk
-    // FIXME check if tb or hr exists -- write a lambda that checks which exists and returns just one of the two
-    auto [R, HR, _] = read_wannier90_tb_data(wannier_file_path);
+    auto [R, HR, r_op, lvs] = read_wannier90_tb_data(wannier_file_path);
     std::vector<tb_hk> tb_H;
     tb_H.emplace_back(R, HR);
     // put the same H a second time for two spin channels
@@ -46,33 +46,27 @@ namespace triqs::modest {
     // call the wannier90 loader and set up tb_hk list
     std::vector<tb_hk> tb_H;
     for (auto file : {wannier_file_path_up, wannier_file_path_dn}) {
-      auto [R, HR, _] = read_wannier90_tb_data(file);
+      auto [R, HR, r_op, lvs] = read_wannier90_tb_data(file);
       tb_H.emplace_back(R, HR);
     }
     return one_body_elements_tb(std::move(tb_H), spin_kind, std::move(atomic_shells));
   }
 
   // -----------------------------------------------------------------------
+  // constructor
 
   one_body_elements_tb::one_body_elements_tb(std::vector<tb_hk> H_sigma, spin_kind_e spin_kind, std::vector<atomic_orbs> atomic_shells)
      : H{std::move(H_sigma)} {
 
     // check that appropriate Hamiltonian information was provided
-    if (spin_kind == spin_kind_e::Polarized) {
-      if (H_sigma.size() != 2) {
-        throw std::runtime_error("Cannot construct a spin-polarized one_body_elements unless H_sigma contains only up and down Hamiltonians.");
-      }
-      if (H_sigma[0].n_orbitals() != H_sigma[1].n_orbitals()) {
-        throw std::runtime_error(
-           "Cannot construct a one_body_elements "
-           "using up and down H_k that have a different number of orbitals.");
-      }
-    } else { // if it is not spin polarized
-      if (H_sigma.size() != 1) { throw std::runtime_error("Hamiltonian should only include one channel for spin non-polarized calculations."); }
+    if (H[0].n_orbitals() != H[1].n_orbitals()) {
+      throw std::runtime_error(
+         "Cannot construct a one_body_elements "
+         "using up and down H_k that have a different number of orbitals.");
     }
 
     // calculate Hloc using helper function -- Hloc here is dim [nshells, nsigma]
-    nda::array<nda::matrix<dcomplex>, 2> hloc = Hloc(H_sigma, atomic_shells);
+    nda::array<nda::matrix<dcomplex>, 2> hloc = Hloc(H, atomic_shells);
 
     // construct block structure using Hloc
     double block_threshold  = 1e-6;
