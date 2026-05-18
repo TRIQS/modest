@@ -341,14 +341,15 @@ namespace triqs::modest {
 
       // Validate input dimensions
       if (long(X.size()) != n_sigma())
-        throw std::runtime_error(fmt::format("[embedding::extract] Wrong number of spin channels: got {} but embedding has n_sigma = {}", X.size(), n_sigma()));
+        throw std::runtime_error(
+           fmt::format("[embedding::extract] Wrong number of spin channels: got {} but embedding has n_sigma = {}", X.size(), n_sigma()));
 
       auto dim_C = stdr::fold_left(sigma_embed_decomp, 0L, std::plus<>());
       for (long sigma = 0; sigma < n_sigma(); ++sigma) {
         auto actual_dim = X[sigma].extent(detail::has_frequency<Rank> ? 1 : 0);
         if (actual_dim != dim_C)
-          throw std::runtime_error(
-             fmt::format("[embedding::extract] Dimension mismatch for spin channel {}: got {} but expected C-space dimension {}", sigma, actual_dim, dim_C));
+          throw std::runtime_error(fmt::format(
+             "[embedding::extract] Dimension mismatch for spin channel {}: got {} but expected C-space dimension {}", sigma, actual_dim, dim_C));
       }
 
       // Does this rank have a frequency index?
@@ -417,14 +418,14 @@ namespace triqs::modest {
       for (long imp = 0; imp < n_impurities(); ++imp) {
         auto expected_n_blocks = long(imp_gf_stru[imp].size());
         if (long(imps_blocks[imp].size()) != expected_n_blocks)
-          throw std::runtime_error(fmt::format("[embedding::embed] Impurity {} has {} blocks but embedding expects {}", imp, imps_blocks[imp].size(),
-                                               expected_n_blocks));
+          throw std::runtime_error(
+             fmt::format("[embedding::embed] Impurity {} has {} blocks but embedding expects {}", imp, imps_blocks[imp].size(), expected_n_blocks));
         for (long b = 0; b < expected_n_blocks; ++b) {
           auto expected_dim = imp_gf_stru[imp][b].second;
           auto actual_dim   = imps_blocks[imp][b].extent(detail::has_frequency<Rank> ? 1 : 0);
           if (actual_dim != expected_dim)
-            throw std::runtime_error(fmt::format("[embedding::embed] Impurity {}, block {} has dimension {} but embedding expects {}", imp, b,
-                                                 actual_dim, expected_dim));
+            throw std::runtime_error(
+               fmt::format("[embedding::embed] Impurity {}, block {} has dimension {} but embedding expects {}", imp, b, actual_dim, expected_dim));
         }
       }
 
@@ -475,15 +476,20 @@ namespace triqs::modest {
     template <typename Mesh> block2_gf<Mesh, matrix_valued> embed(std::vector<block_gf<Mesh, matrix_valued>> const &Sigma_imp_vec) const {
       // Check number of impurities
       if (long(Sigma_imp_vec.size()) != n_impurities())
-        throw std::runtime_error(
-           fmt::format("[embedding::embed] Wrong number of impurity self-energies: got {} but embedding has {} impurities", Sigma_imp_vec.size(), n_impurities()));
+        throw std::runtime_error(fmt::format("[embedding::embed] Wrong number of impurity self-energies: got {} but embedding has {} impurities",
+                                             Sigma_imp_vec.size(), n_impurities()));
       // Check that all meshes are the same for Sigma_imp_vec
       if (not all_equal(Sigma_imp_vec | stdv::transform([](auto &&x) -> decltype(auto) { return x[0].mesh(); })))
         throw std::runtime_error{"[embedding_desc::embed]: meshes of solvers are not all equal"};
 
+      // build the result
       auto const &mesh = Sigma_imp_vec[0][0].mesh();
-      auto data        = embed(detail::make_data_view_from_block_gfs(Sigma_imp_vec));
-      return detail::make_block2_gf_from_data_view(data, embed_block_structure(), mesh);
+      auto Sigma_embed = make_block2_gf(mesh, this->embed_block_structure());
+      for (auto &&[S, m] : zip(Sigma_embed, psi)) {
+        if (m.imp_idx == -1) continue;
+        S() = Sigma_imp_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
+      }
+      return Sigma_embed;
     }
 
     /**
@@ -499,13 +505,20 @@ namespace triqs::modest {
         if (decomp.size() != 1) throw std::runtime_error{"extract: g should have decomp = sigma_embedding_decomp or [1]"};
         return extract(decomposition_view(g_loc, this->embed_block_structure()));
       }
-      auto const &mesh      = g_loc(0, 0).mesh();
-      auto data             = extract(detail::gather_blocks_to_data_view(g_loc));
+
       auto imp_gf_stru_list = imp_block_structure();
-      return range(n_impurities()) | stdv::transform([data, imp_gf_stru_list, mesh](auto n_imp) {
-               return detail::make_block_gf_from_data_view(data[n_imp], imp_gf_stru_list[n_imp], mesh);
-             })
-         | tl::to<std::vector>();
+      auto extract_one_imp  = [&](long n_imp) {
+        auto gimp        = block_gf{g_loc(0, 0).mesh(), imp_gf_stru_list[n_imp]};
+        auto const &rpsi = reverse_psi[n_imp];
+        for (auto [gamma, tau] : rpsi.indices()) {
+          if (rpsi(gamma, tau).empty()) continue;
+          auto [alpha, sigma]                       = rpsi(gamma, tau)[0];
+          gimp[gamma + n_gamma(n_imp) * tau].data() = g_loc(alpha, sigma).data();
+        }
+        return gimp;
+      };
+
+      return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
     }
 
     /**
