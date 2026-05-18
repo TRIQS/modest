@@ -105,6 +105,20 @@ namespace triqs::modest {
     auto out2 = indented_ostream(out, 4);
     auto out3 = indented_ostream(out, 6);
 
+    // Detect dangling impurities: those with no alpha block pointing to them.
+    auto dangling_imps = std::vector<long>{};
+    for (long n = 0; n < n_impurities(); ++n) {
+      bool connected = false;
+      for (auto [gamma, tau] : reverse_psi[n].indices()) {
+        if (!reverse_psi[n](gamma, tau).empty()) {
+          connected = true;
+          break;
+        }
+      }
+      if (!connected) dangling_imps.push_back(n);
+    }
+    auto is_dangling = [&](long n) { return stdr::find(dangling_imps, n) != dangling_imps.end(); };
+
     if (!verbosity) {
       out << "Embedding: ";
       out << fmt::format("{} impurities\n", this->n_impurities());
@@ -117,10 +131,12 @@ namespace triqs::modest {
       out1 << "\nImpurities\n";
       out2 << "Block dimensions, dim_γ for all γ:\n";
       for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
-        auto head = fmt::format("[n_imp = {}]", n);
-        out3 << fmt::format("{} dim_γ = {}", head, pr_vec(dec));
+        auto head    = fmt::format("[n_imp = {}]", n);
+        auto tag     = is_dangling(n) ? "   (dangling)" : "";
+        out3 << fmt::format("{} dim_γ = {}{}", head, fmt::join(dec | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "), tag) << "\n";
         out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
       }
+      if (!dangling_imps.empty()) out << fmt::format("\nDangling impurities: {}\n", dangling_imps);
       return out.str();
     }
 
@@ -132,12 +148,12 @@ namespace triqs::modest {
     };
     out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
     out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
-    //out << fmt::format("  {}\n", enumerate(E.sigma_embed_decomp));
     out1 << "\nImpurities\n";
     out2 << "Block dimensions, dim_γ for all γ:\n";
     for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
       auto head = fmt::format("[n_imp = {}]", n);
-      out3 << fmt::format("{} dim_γ = {}", head, pr_vec(dec));
+      auto tag  = is_dangling(n) ? "   (dangling)" : "";
+      out3 << fmt::format("{} dim_γ = {}{}", head, fmt::join(dec | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "), tag) << "\n";
       out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
     }
     out2 << "Gf Block structures for solvers as names, [dim]:\n";
@@ -146,11 +162,11 @@ namespace triqs::modest {
       out3 << fmt::format("[imp_idx = {}] {}\n", n, fmt::join(formatted_vec, ", "));
     }
     out1 << "\nMapping ψ(α,σ) = (imp_idx, γ, τ) \n";
-    //out2 << fmt::format("{}", E.psi);
     auto row_labels = range(this->n_alpha()) | stdv::transform([](auto x) { return fmt::format("α = {}", x); }) | tl::to<std::vector>();
     auto col_labels = range(this->n_sigma()) | stdv::transform([&](auto i) { return fmt::format("σ = {} / {}", i, this->sigma_names()[i]); })
        | tl::to<std::vector>();
     nda::format_as_table(out3, this->psi, row_labels, col_labels);
+    if (!dangling_imps.empty()) out << fmt::format("\nDangling impurities: {}\n", dangling_imps);
 
     return out.str();
   }

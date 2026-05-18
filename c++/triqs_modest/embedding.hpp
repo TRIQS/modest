@@ -161,44 +161,46 @@ namespace triqs::modest {
      * @param imp_idx Index of the impurity to remove from the table \f$ \psi \f$.
      * @return New embedding with the updated \f$ \psi \f$ map.
      */
-    embedding drop(long imp_idx) const;
+    embedding drop_imp(long imp_idx) const;
 
     /**
-     * @brief Replaces one impurity in the embedding table \f$ \psi \f$.
+     * @brief Redirect all \f$ \psi \f$ entries from one impurity to another.
      *
-     * @details Replaces the impurity solver corresponding to `imp_idx_to_remove` with the impurity solver at
-     * `imp_idx_to_replace_with` and updates the underlying table \f$ \psi \f$.
+     * @details Rewires every \f$ (\alpha, \sigma) \f$ that currently points to `imp_idx_old` so that
+     * it points to `imp_idx_new` instead. The impurity at `imp_idx_old` remains in the embedding but
+     * becomes *dangling* — no \f$ \alpha \f$ block maps to it any longer.
+     * Call `drop_imp(imp_idx_old)` afterwards to remove the dangling entry and compact the indices.
      *
-     * @param imp_idx_to_remove The index of the impurity solver to be replaced.
-     * @param imp_idx_to_replace_with The index of the impurity solver that will replace `imp_idx_to_remove`.
-     * @return A new embedding with the updated \f$ \psi \f$ map.
+     * @param imp_idx_old The impurity whose \f$ \alpha \f$ connections are redirected.
+     * @param imp_idx_new The impurity that will receive those connections.
+     * @return New embedding with the updated \f$ \psi \f$ map (dangling impurity retained).
      */
-    embedding replace(long imp_idx_to_remove, long imp_idx_to_replace_with) const;
+    embedding replace_imp(long imp_idx_old, long imp_idx_new) const;
 
     /**
-     * @brief Flip the spins (\f$ \sigma \f$) for block \f$ \alpha \f$.
+     * @brief Swap the \f$ \sigma \f$ (spin) assignment for \f$ \alpha \f$ block `alpha`.
      *
      * @details For block \f$ \alpha \f$ transforms \f$ (\sigma,\sigma') \to (\tau, \tau') \f$ to
      * \f$ (\sigma, \sigma') \to (\tau', \tau)\f$.
      *
-     * @param alpha The index of the alpha block to flip the spins.
+     * @param alpha The index of the alpha block whose spin assignment is swapped.
      * @return New embedding with the updated \f$ \psi \f$ map.
      */
-    embedding flip_spin(long alpha) const;
+    embedding swap_sigma(long alpha) const;
 
     /**
-     * @brief Flip the spins (\f$ \sigma \f$) for all \f$ [\alpha] \f$.
+     * @brief Swap the \f$ \sigma \f$ (spin) assignment for all \f$ \alpha \f$ blocks in `alphas`.
      *
-     * @details For block \f$ \alpha \f$ transforms \f$ (\sigma,\sigma') \to (\tau, \tau') \f$ to
+     * @details For each block \f$ \alpha \f$ in `alphas`, transforms \f$ (\sigma,\sigma') \to (\tau, \tau') \f$ to
      * \f$ (\sigma, \sigma') \to (\tau', \tau)\f$.
      *
-     * @param alphas A list of alpha blocks to flip the spins.
+     * @param alphas A list of alpha blocks whose spin assignments are swapped.
      * @return New embedding with the updated \f$ \psi \f$ map.
      */
-    embedding flip_spin(std::vector<long> alphas) const;
+    embedding swap_sigma(std::vector<long> alphas) const;
 
     /**
-     * @brief Convert the embedding to a spinless embedding.
+     * @brief Slice the embedding to a single \f$ \sigma \f$ channel ("ud").
      *
      * @details Converts a spinful embedding (with two spin channels, e.g., "up" and "down") into a
      * single-channel embedding labelled "ud". This is useful when working with systems with
@@ -206,7 +208,7 @@ namespace triqs::modest {
      *
      * @return New embedding with a single spin channel.
      */
-    embedding make_spinless() const;
+    embedding slice_sigma() const;
 
     /**
      * @brief Split impurity `imp_idx` using a predicate.
@@ -219,7 +221,7 @@ namespace triqs::modest {
      * @param p Predicate taking a block index and returning true/false.
      * @return New embedding with the updated \f$ \psi \f$ map.
      */
-    embedding split(long imp_idx, std::function<bool(long)> p) const;
+    embedding split_imp(long imp_idx, std::function<bool(long)> p) const;
 
     /**
      * @brief Split impurity `imp_idx` based on `block_list`.
@@ -231,26 +233,26 @@ namespace triqs::modest {
      * @param block_list A list of blocks of `imp_idx` to split off.
      * @return New embedding with the updated \f$ \psi \f$ map.
      */
-    embedding split(long imp_idx, std::vector<long> const &block_list) const;
+    embedding split_imp(long imp_idx, std::vector<long> const &block_list) const;
 
-    embedding split(long imp_idx, std::initializer_list<const char *> x) = delete;
-
-    /**
-  * @brief Split the block (gamma) of an impurity (imp_idx) into multiple blocks with dimensions given by `new_dims`.
-  *
-  * @details This method splits a specific block (gamma) of an impurity (imp_idx) into multiple blocks with dimensions
-  * specified by `new_dims`. The sum of `new_dims` must equal the original dimension of the block. For example, if the
-  * original block has a dimension of 5, it could be split into blocks of dimensions 2 (eg) and 3 (t2g).
-  *
-  * @param imp_idx The index of the impurity to split.
-  * @param gamma The block index of the impurity to split.
-  * @param new_dims The new dimensions of the split blocks. The sum of `new_dims` must equal the original dimension of the block.
-  * @return New embedding with the impurity structure and \f$ \psi \f$ mapping.
-  */
-    embedding split_block(long imp_idx, long gamma, std::vector<long> const &new_dims) const;
+    embedding split_imp(long imp_idx, std::initializer_list<const char *> x) = delete;
 
     /**
-     * @brief Create the two-particle embedding from a single-particle embedding.
+     * @brief Split a single \f$ \gamma \f$ block of an impurity into multiple blocks.
+     *
+     * @details Splits block `gamma` of impurity `imp_idx` into multiple blocks whose sizes are given by
+     * `new_dims`. The sum of `new_dims` must equal the original dimension of the block. For example, a
+     * block of dimension 5 could be split into blocks of dimensions 2 (e.g.) and 3 (t2g).
+     *
+     * @param imp_idx The index of the impurity to operate on.
+     * @param gamma The block index of the impurity to split.
+     * @param new_dims New dimensions of the split blocks; must sum to the original block dimension.
+     * @return New embedding with the updated impurity structure and \f$ \psi \f$ mapping.
+     */
+    embedding split_imp_block(long imp_idx, long gamma, std::vector<long> const &new_dims) const;
+
+    /**
+     * @brief Merge consecutive \f$ \alpha \f$ blocks belonging to the same impurity into a single block.
      *
      * @details Merges consecutive \f$ \alpha \f$ blocks that belong to the same atom into a
      * single block.  Atom boundaries are detected by monitoring the \f$ \gamma \f$ index: within
@@ -260,7 +262,7 @@ namespace triqs::modest {
      *
      * @return New embedding with a coarser block structure suitable for two-particle quantities.
      */
-    embedding make_2particle() const;
+    embedding merge_embed_block_by_imp() const;
 
     ///@}
 

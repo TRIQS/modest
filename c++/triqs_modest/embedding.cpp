@@ -170,8 +170,8 @@ namespace triqs::modest {
   }
 
   //-----------------------------------------------------------------
-  embedding embedding::flip_spin(long alpha) const {
-    if (n_sigma() != 2) throw std::runtime_error(fmt::format("Can not flip spin when {} != 2", n_sigma()));
+  embedding embedding::swap_sigma(long alpha) const {
+    if (n_sigma() != 2) throw std::runtime_error(fmt::format("Can not swap sigma when {} != 2", n_sigma()));
     if (alpha >= n_alpha()) throw std::runtime_error(fmt::format("Out of bounds {} >= {}", alpha, n_alpha()));
     auto new_psi = this->psi;
     for (auto sigma : range(n_sigma())) new_psi(alpha, sigma).tau = 1 - new_psi(alpha, sigma).tau;
@@ -179,16 +179,16 @@ namespace triqs::modest {
   }
 
   //-----------------------------------------------------------------
-  embedding embedding::flip_spin(std::vector<long> alphas) const {
+  embedding embedding::swap_sigma(std::vector<long> alphas) const {
     auto res = *this;
-    for (auto alpha : alphas) { res = res.flip_spin(alpha); }
+    for (auto alpha : alphas) { res = res.swap_sigma(alpha); }
     return res;
   }
 
   //------------------------------------------------------------------
 
-  embedding embedding::make_spinless() const {
-    if (n_sigma() != 2) throw std::runtime_error(fmt::format("Can not make spinless when {} != 2", n_sigma()));
+  embedding embedding::slice_sigma() const {
+    if (n_sigma() != 2) throw std::runtime_error(fmt::format("Can not slice sigma when {} != 2", n_sigma()));
     auto new_psi         = nda::array<imp_block_t, 2>(n_alpha(), 1);
     auto new_sigma_names = std::vector<std::string>{"ud"};
     new_psi(r_all, 0)    = this->psi(r_all, 0);
@@ -197,7 +197,7 @@ namespace triqs::modest {
 
   //-----------------------------------------------------------------
 
-  embedding embedding::make_2particle() const {
+  embedding embedding::merge_embed_block_by_imp() const {
 
     // Group consecutive α blocks that belong to the same atom.
     // Within one atom the γ values are strictly increasing (0, 1, 2, …).
@@ -271,7 +271,7 @@ namespace triqs::modest {
 
   //-----------------------------------------------------------------
 
-  embedding embedding::drop(long imp_idx) const {
+  embedding embedding::drop_imp(long imp_idx) const {
     auto new_imp_decomps = this->imp_decomps;
     auto new_psi         = this->psi;
     new_imp_decomps.erase(begin(new_imp_decomps) + imp_idx);
@@ -284,22 +284,21 @@ namespace triqs::modest {
   }
 
   //-----------------------------------------------------------------
-  // HL: re-implementation of replace. Please review.
-  embedding embedding::replace(long imp_idx_to_remove, long imp_idx_to_replace_with) const {
+  embedding embedding::replace_imp(long imp_idx_old, long imp_idx_new) const {
     auto new_psi = this->psi;
-    if (imp_block_structure()[imp_idx_to_remove] != imp_block_structure()[imp_idx_to_replace_with])
-      throw std::runtime_error(fmt::format("The number of blocks that imp_to_remove= {} and imp_to_replace_with={} connect to do not match!",
-                                           imp_idx_to_remove, imp_idx_to_replace_with));
+    if (imp_block_structure()[imp_idx_old] != imp_block_structure()[imp_idx_new])
+      throw std::runtime_error(fmt::format("Block structures of imp_idx_old={} and imp_idx_new={} do not match; cannot redirect.",
+                                           imp_idx_old, imp_idx_new));
     new_psi = nda::map([&](imp_block_t const &b) -> imp_block_t {
-      if (b.imp_idx == imp_idx_to_remove) return {imp_idx_to_replace_with, b.gamma, b.tau};
+      if (b.imp_idx == imp_idx_old) return {imp_idx_new, b.gamma, b.tau};
       return b;
     })(new_psi);
-    return embedding(this->sigma_embed_decomp, this->imp_decomps, new_psi, this->_sigma_names).drop(imp_idx_to_remove);
+    return {this->sigma_embed_decomp, this->imp_decomps, new_psi, this->_sigma_names};
   }
 
   //-----------------------------------------------------------------
 
-  embedding embedding::split(long imp_idx, std::function<bool(long)> p) const {
+  embedding embedding::split_imp(long imp_idx, std::function<bool(long)> p) const {
     // auto res        = *this; // copy. We will modify the impurities_gf_struct and the table
     auto new_psi         = this->psi;
     auto new_imp_decomps = this->imp_decomps;
@@ -334,16 +333,16 @@ namespace triqs::modest {
 
   // ----------------------------------------------------------------------
 
-  embedding embedding::split(long imp_idx, std::vector<long> const &block_list) const {
+  embedding embedding::split_imp(long imp_idx, std::vector<long> const &block_list) const {
     if (not stdr::all_of(block_list, [&](auto i) { return (i >= 0) and (i < n_gamma(imp_idx)); }))
-      throw std::runtime_error(fmt::format("[embedding::split] The list of block indices {} is incorrect. Indices i should all be 0<= i < N_γ = {}",
+      throw std::runtime_error(fmt::format("[embedding::split_imp] The list of block indices {} is incorrect. Indices i should all be 0<= i < N_γ = {}",
                                            block_list, n_gamma(imp_idx)));
-    return split(imp_idx, [&](long idx) { return stdr::find(block_list, idx) != block_list.end(); });
+    return split_imp(imp_idx, [&](long idx) { return stdr::find(block_list, idx) != block_list.end(); });
   }
 
   // ----------------------------------------------------------------------
 
-  embedding embedding::split_block(long imp_idx, long gamma, std::vector<long> const &new_dims) const {
+  embedding embedding::split_imp_block(long imp_idx, long gamma, std::vector<long> const &new_dims) const {
     // Validation:
     // Impurity index
     if (imp_idx < 0 or imp_idx >= n_impurities())
