@@ -103,9 +103,9 @@ namespace triqs::modest {
     auto impurities_shape_list = this->imp_block_structure();
 
     std::ostringstream out;
-    auto out1 = indented_ostream(out, 2); // same stream, but shifted by 2 spaces
-    auto out2 = indented_ostream(out, 4);
-    auto out3 = indented_ostream(out, 6);
+    auto out1 = utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = utility::indented_ostream(out, 4);
+    auto out3 = utility::indented_ostream(out, 6);
 
     // Detect impurities not connected to any alpha block.
     auto unconnected_imps = std::vector<long>{};
