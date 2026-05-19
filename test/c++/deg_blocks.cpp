@@ -21,7 +21,7 @@ TEST(deg_blocks, SrVO3_symmetrize) {
   auto Gimp       = E.extract(gloc(mesh, obe, 0.0));
   auto deg_blocks = Gimp | stdv::transform([](auto &G) { return analyze_degenerate_blocks(G); }) | tl::to<std::vector>();
   auto Gsymm =
-     Gimp | stdv::transform([deg_blocks, idx = 0](auto const &Gin) mutable { return symmetrize_gf(Gin, deg_blocks[idx++]); }) | tl::to<std::vector>();
+     Gimp | stdv::transform([deg_blocks, idx = 0](auto const &Gin) mutable { return symmetrize(Gin, deg_blocks[idx++]); }) | tl::to<std::vector>();
 }
 
 #if LFS
@@ -41,6 +41,6 @@ TEST(deg_blocks, LiV2O4_symmetrize) {
   auto Gimp       = E.extract(gloc(mesh, obe, 0.0));
   auto deg_blocks = Gimp | stdv::transform([](auto &G) { return analyze_degenerate_blocks(G); }) | tl::to<std::vector>();
   auto Gsymm =
-     Gimp | stdv::transform([deg_blocks, idx = 0](auto const &Gin) mutable { return symmetrize_gf(Gin, deg_blocks[idx++]); }) | tl::to<std::vector>();
+     Gimp | stdv::transform([deg_blocks, idx = 0](auto const &Gin) mutable { return symmetrize(Gin, deg_blocks[idx++]); }) | tl::to<std::vector>();
 }
 #endif

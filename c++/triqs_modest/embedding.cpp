@@ -6,7 +6,6 @@
 #include "embedding.hpp"
 #include "utils/gf_supp.hpp"
 #include "utils/defs.hpp"
-#include "utils/nda_pretty_printer.hpp"
 #include <triqs/utility/report_stream.hpp>
 #include <ranges>
 #include <set>
@@ -38,8 +37,35 @@ namespace triqs::modest {
     // FIXME : MAKE ALL NECESSARY CHECKS.... since
   }
 
-  embedding embedding_builder(std::vector<std::string> const &spin_names, nda::array<std::vector<long>, 2> const &block_decomposition,
-                              std::vector<long> const &atom_to_imp) {
+  embedding make_embedding(std::vector<std::string> const &spin_names, nda::array<std::vector<long>, 2> const &block_decomposition,
+                           std::vector<long> const &atom_to_imp) {
+
+    // Validate inputs
+    if (spin_names.empty()) throw std::runtime_error("[make_embedding] spin_names must not be empty");
+
+    auto n_atoms = block_decomposition.extent(0);
+    if (long(atom_to_imp.size()) != n_atoms)
+      throw std::runtime_error(
+         fmt::format("[make_embedding] block_decomposition has {} atoms but atom_to_imp has {} entries", n_atoms, atom_to_imp.size()));
+
+    for (long atom = 0; atom < n_atoms; ++atom) {
+      if (atom_to_imp[atom] < 0)
+        throw std::runtime_error(fmt::format("[make_embedding] atom_to_imp[{}] = {} is negative", atom, atom_to_imp[atom]));
+    }
+
+    // Check that equivalent atoms have identical block decompositions
+    std::unordered_map<long, long> imp_to_first_atom;
+    for (long atom = 0; atom < n_atoms; ++atom) {
+      auto imp = atom_to_imp[atom];
+      if (auto it = imp_to_first_atom.find(imp); it != imp_to_first_atom.end()) {
+        auto first_atom = it->second;
+        if (block_decomposition(atom, 0) != block_decomposition(first_atom, 0))
+          throw std::runtime_error(fmt::format(
+             "[make_embedding] Atoms {} and {} are mapped to the same impurity {} but have different block decompositions", first_atom, atom, imp));
+      } else {
+        imp_to_first_atom[imp] = atom;
+      }
+    }
 
     long n_alpha = stdr::fold_left(block_decomposition(r_all, 0) | stdv::transform([](auto const &x) { return long(x.size()); }), 0, std::plus<>());
     long n_sigma = spin_names.size();
@@ -50,7 +76,6 @@ namespace triqs::modest {
 
     std::set<long> seen_impurities;
 
-    auto n_atoms = block_decomposition.extent(0);
     for (auto atom : range(n_atoms)) {
       for (auto &&[idx, bl_size] : enumerate(block_decomposition(atom, 0))) {
         for (auto sigma : range(n_sigma)) { psi(embed_bl_sizes.size(), sigma) = {atom_to_imp[atom], idx, sigma}; }
@@ -65,14 +90,14 @@ namespace triqs::modest {
     return embedding{std::move(embed_bl_sizes), std::move(imp_decompositions), std::move(psi), std::move(spin_names)};
   }
 
-  embedding embedding_builder(std::vector<std::string> const &spin_names, std::vector<std::vector<long>> const &block_decomposition,
-                              std::vector<long> const &atom_to_imp) {
+  embedding make_embedding(std::vector<std::string> const &spin_names, std::vector<std::vector<long>> const &block_decomposition,
+                           std::vector<long> const &atom_to_imp) {
     auto n_decomps        = block_decomposition.size();
     auto n_sigma          = spin_names.size();
     auto block_decomp_mat = nda::array<std::vector<long>, 2>(n_decomps, n_sigma);
     for (auto d : range(n_decomps))
       for (auto s : range(n_sigma)) block_decomp_mat(d, s) = block_decomposition[d];
-    return embedding_builder(spin_names, block_decomp_mat, atom_to_imp);
+    return make_embedding(spin_names, block_decomp_mat, atom_to_imp);
   }
 
   // -------------------------------------------------------------------------------------------
@@ -83,35 +108,38 @@ namespace triqs::modest {
       atom_to_cls[ish] = sh.cls_idx;
       if (not cls_to_imp.contains(sh.cls_idx)) cls_to_imp[sh.cls_idx] = imp_idx++;
     }
-    auto atom_to_imp_idx = range(C_space.atomic_shells().size()) | stdv::transform([&](auto const &atom) { return cls_to_imp[atom_to_cls[atom]]; })
-       | tl::to<std::vector>();
 
     nda::array<std::vector<long>, 2> decomp(C_space.n_atoms(), C_space.n_sigma());
     if (use_atom_decomp) {
-      auto atom_decomp = C_space.atomic_decomposition();
+      auto atom_decomp = C_space.atomic_decomposition() | tl::to<std::vector>();
       for (auto &&[iatom, atom] : enumerate(atom_decomp)) {
-        for (auto sigma : range(C_space.n_sigma())) { decomp(atom, sigma).emplace_back(atom); }
+        for (auto sigma : range(C_space.n_sigma())) { decomp(iatom, sigma).emplace_back(atom); }
       }
     } else {
       decomp = C_space.atoms_block_decomposition();
     }
-    return embedding_builder(C_space.sigma_names(), decomp, atom_to_imp_idx);
+
+    auto n_atoms_in_decomp = decomp.extent(0);
+    auto atom_to_imp_idx   = range(n_atoms_in_decomp) | stdv::transform([&](auto const &atom) { return cls_to_imp[atom_to_cls[atom]]; })
+       | tl::to<std::vector>();
+    return make_embedding(C_space.sigma_names(), decomp, atom_to_imp_idx);
   };
 
   // -------------------------------------------------------------------------------------------
   embedding make_embedding_with_no_equivalences(local_space const &C_space, bool use_atom_decomp) {
     nda::array<std::vector<long>, 2> decomp(C_space.n_atoms(), C_space.n_sigma());
     if (use_atom_decomp) {
-      auto atom_decomp = C_space.atomic_decomposition();
+      auto atom_decomp = C_space.atomic_decomposition() | tl::to<std::vector>();
       for (auto &&[iatom, atom] : enumerate(atom_decomp)) {
-        for (auto sigma : range(C_space.n_sigma())) { decomp(atom, sigma).emplace_back(atom); }
+        for (auto sigma : range(C_space.n_sigma())) { decomp(iatom, sigma).emplace_back(atom); }
       }
     } else {
       decomp = C_space.atoms_block_decomposition();
     }
 
-    auto atom_to_imp_idx = range(C_space.atomic_shells().size()) | tl::to<std::vector>();
-    return embedding_builder(C_space.sigma_names(), decomp, atom_to_imp_idx);
+    auto n_atoms_in_decomp = decomp.extent(0);
+    auto atom_to_imp_idx   = range(n_atoms_in_decomp) | tl::to<std::vector>();
+    return make_embedding(C_space.sigma_names(), decomp, atom_to_imp_idx);
   }
 
   // -------------------------------------------------------------------------------------------
@@ -120,82 +148,9 @@ namespace triqs::modest {
                                      make_embedding_with_no_equivalences(C_space, use_atom_decomp);
   }
 
-  // ------------------------------ PRINTING -------------------------------------------------------------
-
-  auto format_as(embedding::imp_block_t const &p) {
-    //return fmt::format("({},{},{})", p.n_imp, p.gamma, p.tau);
-    return fmt::format("(imp_idx = {}, γ = {}, τ = {})", p.imp_idx, p.gamma, p.tau);
-  }
-
-  // -------------------------------------------------------------------------------------------------------
-
-  std::string embedding::description(bool verbosity) const {
-    auto sigma_embed_shape     = this->sigma_embed_block_shape();
-    auto impurities_shape_list = this->imp_block_shape();
-
-    std::ostringstream out;
-    auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
-    auto out2 = triqs::utility::indented_ostream(out, 4);
-    auto out3 = triqs::utility::indented_ostream(out, 6);
-
-    if (!verbosity) {
-      out << "Embedding: ";
-      out << fmt::format("{} impurities\n", this->n_impurities());
-      out1 << "Σ_embed block decomposition:\n";
-      auto pr_vec = [](auto const &V) {
-        return fmt::format("{}\n", fmt::join(V | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "));
-      };
-      out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
-      out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
-      out1 << "\nImpurities\n";
-      out2 << "Block dimensions, dim_γ for all γ:\n";
-      for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
-        auto head = fmt::format("[n_imp = {}]", n);
-        out3 << fmt::format("{} dim_γ = {}", head, pr_vec(dec));
-        out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
-      }
-      return out.str();
-    }
-
-    out << "Embedding:\n";
-    out1 << fmt::format("Spin index (σ/τ) names: {}\n\n", this->sigma_names());
-    out1 << "Σ_embed block decomposition:\n";
-    auto pr_vec = [](auto const &V) {
-      return fmt::format("{}\n", fmt::join(V | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "));
-    };
-    out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
-    out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
-    //out << fmt::format("  {}\n", enumerate(E.sigma_embed_decomp));
-    out1 << "\nImpurities\n";
-    out2 << "Block dimensions, dim_γ for all γ:\n";
-    for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
-      auto head = fmt::format("[n_imp = {}]", n);
-      out3 << fmt::format("{} dim_γ = {}", head, pr_vec(dec));
-      out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
-    }
-    out2 << "Gf Block structures for solvers as names, [dim]:\n";
-    for (auto &&[n, ish] : enumerate(impurities_shape_list)) {
-      auto formatted_vec = ish | stdv::transform([](auto &&p) { return fmt::format("{} [{}]", p.first, p.second); }) | tl::to<std::vector>();
-      out3 << fmt::format("[imp_idx = {}] {}\n", n, fmt::join(formatted_vec, ", "));
-    }
-    out1 << "\nMapping ψ(α,σ) = (imp_idx, γ, τ) \n";
-    //out2 << fmt::format("{}", E.psi);
-    auto row_labels = range(this->n_alpha()) | stdv::transform([](auto x) { return fmt::format("α = {}", x); }) | tl::to<std::vector>();
-    auto col_labels = range(this->n_sigma()) | stdv::transform([&](auto i) { return fmt::format("σ = {} / {}", i, this->sigma_names()[i]); })
-       | tl::to<std::vector>();
-    nda::format_as_table(out3, this->psi, row_labels, col_labels);
-
-    return out.str();
-  }
-
-  std::ostream &operator<<(std::ostream &out, embedding const &E) {
-    out << E.description(false);
-    return out;
-  }
-
   //-----------------------------------------------------------------
 
-  gf_struct2_t embedding::sigma_embed_block_shape() const {
+  gf_struct2_t embedding::embed_block_structure() const {
     auto res = nda::zeros<long>(n_alpha(), n_sigma());
     for (long alpha : range(n_alpha())) res(alpha, r_all) = sigma_embed_decomp[alpha];
     return {.names = {alpha_names, _sigma_names}, .dims = std::move(res)};
@@ -203,7 +158,7 @@ namespace triqs::modest {
 
   //-----------------------------------------------------------------
 
-  std::vector<gf_struct_t> embedding::imp_block_shape() const {
+  std::vector<gf_struct_t> embedding::imp_block_structure() const {
     auto l = [this](std::vector<long> const &decomp) -> gf_struct_t {
       gf_struct_t res;
       for (auto sigma : range(n_sigma())) {
@@ -215,8 +170,8 @@ namespace triqs::modest {
   }
 
   //-----------------------------------------------------------------
-  embedding embedding::flip_spin(long alpha) const {
-    if (n_sigma() != 2) throw std::runtime_error(fmt::format("Can not flip spin when {} != 2", n_sigma()));
+  embedding embedding::swap_sigma(long alpha) const {
+    if (n_sigma() != 2) throw std::runtime_error(fmt::format("Can not swap sigma when {} != 2", n_sigma()));
     if (alpha >= n_alpha()) throw std::runtime_error(fmt::format("Out of bounds {} >= {}", alpha, n_alpha()));
     auto new_psi = this->psi;
     for (auto sigma : range(n_sigma())) new_psi(alpha, sigma).tau = 1 - new_psi(alpha, sigma).tau;
@@ -224,15 +179,99 @@ namespace triqs::modest {
   }
 
   //-----------------------------------------------------------------
-  embedding embedding::flip_spin(std::vector<long> alphas) const {
+  embedding embedding::swap_sigma(std::vector<long> alphas) const {
     auto res = *this;
-    for (auto alpha : alphas) { res = res.flip_spin(alpha); }
+    for (auto alpha : alphas) { res = res.swap_sigma(alpha); }
     return res;
+  }
+
+  //------------------------------------------------------------------
+
+  embedding embedding::slice_sigma() const {
+    if (n_sigma() != 2) throw std::runtime_error(fmt::format("Can not slice sigma when {} != 2", n_sigma()));
+    auto new_psi         = nda::array<imp_block_t, 2>(n_alpha(), 1);
+    auto new_sigma_names = std::vector<std::string>{"ud"};
+    new_psi(r_all, 0)    = this->psi(r_all, 0);
+    return {this->sigma_embed_decomp, this->imp_decomps, std::move(new_psi), new_sigma_names};
   }
 
   //-----------------------------------------------------------------
 
-  embedding embedding::drop(long imp_idx) const {
+  embedding embedding::merge_embed_block_by_imp() const {
+
+    // Group consecutive α blocks that belong to the same atom.
+    // Within one atom the γ values are strictly increasing (0, 1, 2, …).
+    // When γ resets or imp_idx changes we start a new group.
+    // Disconnected blocks (imp_idx == -1) are never merged.
+
+    struct group_t {
+      std::vector<long> alphas; // α indices in this group
+      long imp_idx;             // impurity (or -1)
+    };
+
+    std::vector<group_t> groups;
+
+    for (long alpha = 0; alpha < n_alpha(); ++alpha) {
+      auto const &m = psi(alpha, 0); // reference spin channel for grouping
+
+      bool start_new_group = true;
+      if (m.imp_idx >= 0 && !groups.empty()) {
+        auto &prev         = groups.back();
+        auto const &prev_m = psi(prev.alphas.back(), 0);
+        if (prev.imp_idx == m.imp_idx && m.gamma > prev_m.gamma) { start_new_group = false; }
+      }
+
+      if (start_new_group) {
+        groups.push_back({{alpha}, m.imp_idx});
+      } else {
+        groups.back().alphas.push_back(alpha);
+      }
+    }
+
+    // Build new sigma_embed_decomp: one entry per group, sized as the sum of members.
+    auto new_sigma_embed_decomp = std::vector<long>{};
+    for (auto const &g : groups) {
+      long total = 0;
+      for (auto a : g.alphas) total += sigma_embed_decomp[a];
+      new_sigma_embed_decomp.push_back(total);
+    }
+
+    // Build new imp_decomps: each impurity gets a single merged block.
+    // Equivalent atoms share the same solver, so only the first group
+    // for each impurity defines the block size.
+    auto new_imp_decomps = std::vector<std::vector<long>>(n_impurities());
+    auto imp_seen        = std::vector<bool>(n_impurities(), false);
+    for (long g_idx = 0; g_idx < long(groups.size()); ++g_idx) {
+      auto const &g = groups[g_idx];
+      if (g.imp_idx < 0) continue;
+      if (!imp_seen[g.imp_idx]) {
+        new_imp_decomps[g.imp_idx].push_back(new_sigma_embed_decomp[g_idx]);
+        imp_seen[g.imp_idx] = true;
+      }
+    }
+
+    // Build new psi: one row per group.
+    // All groups for the same impurity map to γ=0 (single block per impurity).
+    auto new_psi = nda::array<imp_block_t, 2>(long(groups.size()), n_sigma());
+
+    for (long g_idx = 0; g_idx < long(groups.size()); ++g_idx) {
+      auto const &g = groups[g_idx];
+      if (g.imp_idx < 0) {
+        for (auto sigma : range(n_sigma())) new_psi(g_idx, sigma) = {-1, 0, 0};
+      } else {
+        for (auto sigma : range(n_sigma())) {
+          auto tau              = psi(g.alphas[0], sigma).tau;
+          new_psi(g_idx, sigma) = {g.imp_idx, 0, tau};
+        }
+      }
+    }
+
+    return {std::move(new_sigma_embed_decomp), std::move(new_imp_decomps), std::move(new_psi), this->_sigma_names};
+  }
+
+  //-----------------------------------------------------------------
+
+  embedding embedding::drop_imp(long imp_idx) const {
     auto new_imp_decomps = this->imp_decomps;
     auto new_psi         = this->psi;
     new_imp_decomps.erase(begin(new_imp_decomps) + imp_idx);
@@ -245,22 +284,21 @@ namespace triqs::modest {
   }
 
   //-----------------------------------------------------------------
-  // HL: re-implementation of replace. Please review.
-  embedding embedding::replace(long imp_idx_to_remove, long imp_idx_to_replace_with) const {
+  embedding embedding::replace_imp(long imp_idx_old, long imp_idx_new) const {
     auto new_psi = this->psi;
-    if (imp_block_shape()[imp_idx_to_remove] != imp_block_shape()[imp_idx_to_replace_with])
-      throw std::runtime_error(fmt::format("The number of blocks that imp_to_remove= {} and imp_to_replace_with={} connect to do not match!",
-                                           imp_idx_to_remove, imp_idx_to_replace_with));
+    if (imp_block_structure()[imp_idx_old] != imp_block_structure()[imp_idx_new])
+      throw std::runtime_error(fmt::format("Block structures of imp_idx_old={} and imp_idx_new={} do not match; cannot redirect.",
+                                           imp_idx_old, imp_idx_new));
     new_psi = nda::map([&](imp_block_t const &b) -> imp_block_t {
-      if (b.imp_idx == imp_idx_to_remove) return {imp_idx_to_replace_with, b.gamma, b.tau};
+      if (b.imp_idx == imp_idx_old) return {imp_idx_new, b.gamma, b.tau};
       return b;
     })(new_psi);
-    return embedding(this->sigma_embed_decomp, this->imp_decomps, new_psi, this->_sigma_names).drop(imp_idx_to_remove);
+    return {this->sigma_embed_decomp, this->imp_decomps, new_psi, this->_sigma_names};
   }
 
   //-----------------------------------------------------------------
 
-  embedding embedding::split(long imp_idx, std::function<bool(long)> p) const {
+  embedding embedding::split_imp(long imp_idx, std::function<bool(long)> p) const {
     // auto res        = *this; // copy. We will modify the impurities_gf_struct and the table
     auto new_psi         = this->psi;
     auto new_imp_decomps = this->imp_decomps;
@@ -295,233 +333,104 @@ namespace triqs::modest {
 
   // ----------------------------------------------------------------------
 
-  embedding embedding::split(long imp_idx, std::vector<long> const &block_list) const {
+  embedding embedding::split_imp(long imp_idx, std::vector<long> const &block_list) const {
     if (not stdr::all_of(block_list, [&](auto i) { return (i >= 0) and (i < n_gamma(imp_idx)); }))
-      throw std::runtime_error(fmt::format("[embedding::split] The list of block indices {} is incorrect. Indices i should all be 0<= i < N_γ = {}",
+      throw std::runtime_error(fmt::format("[embedding::split_imp] The list of block indices {} is incorrect. Indices i should all be 0<= i < N_γ = {}",
                                            block_list, n_gamma(imp_idx)));
-    return split(imp_idx, [&](long idx) { return stdr::find(block_list, idx) != block_list.end(); });
+    return split_imp(imp_idx, [&](long idx) { return stdr::find(block_list, idx) != block_list.end(); });
+  }
+
+  // ----------------------------------------------------------------------
+
+  embedding embedding::split_imp_block(long imp_idx, long gamma, std::vector<long> const &new_dims) const {
+    // Validation:
+    // Impurity index
+    if (imp_idx < 0 or imp_idx >= n_impurities())
+      throw std::runtime_error(fmt::format("Invalid impurity index {} (must be 0 <= imp_idx < {})", imp_idx, n_impurities()));
+    // Gamma index for impurity
+    if (gamma < 0 or gamma >= n_gamma(imp_idx))
+      throw std::runtime_error(fmt::format("Invalid gamma {} for impurity {} (must be 0 <= gamma < {})", gamma, imp_idx, n_gamma(imp_idx)));
+    // Dimensionality check
+    auto old_dim = imp_decomps[imp_idx][gamma];
+    if (stdr::fold_left(new_dims, 0, std::plus<>()) != old_dim)
+      throw std::runtime_error(fmt::format("New dimensions sum {} != old dimension {}", stdr::fold_left(new_dims, 0, std::plus<>()), old_dim));
+
+    // Update impurity decomposition
+    auto new_imp_decomps = imp_decomps;
+    new_imp_decomps[imp_idx].erase(begin(new_imp_decomps[imp_idx]) + gamma);
+    new_imp_decomps[imp_idx].insert(begin(new_imp_decomps[imp_idx]) + gamma, begin(new_dims), end(new_dims));
+
+    // Find all (alpha, sigma) pairs that map to (imp_idx, gamma, *) and update sigma_embed_decomposition
+    std::set<long> alphas_to_split;
+    auto const &alpha_list = reverse_psi[imp_idx](gamma, 0);
+    for (auto const &[alpha, sigma] : alpha_list) { alphas_to_split.insert(alpha); }
+
+    if (alphas_to_split.empty())
+      throw std::runtime_error(fmt::format("No embedding block maps to impurity {}, gamma {}. Cannot update!", imp_idx, gamma));
+
+    std::vector<long> sorted_alphas(alphas_to_split.begin(), alphas_to_split.end());
+    stdr::sort(sorted_alphas, std::greater<>());
+
+    auto new_sigma_embed_decomp = sigma_embed_decomp;
+    long n_new_blocks           = long(new_dims.size());
+    for (auto alpha : sorted_alphas) {
+      new_sigma_embed_decomp.erase(begin(new_sigma_embed_decomp) + alpha);
+      new_sigma_embed_decomp.insert(begin(new_sigma_embed_decomp) + alpha, begin(new_dims), end(new_dims));
+    }
+
+    // Build new psi mapping
+    long n_new_alphas = long(new_sigma_embed_decomp.size());
+    auto new_psi      = nda::array<imp_block_t, 2>(n_new_alphas, n_sigma());
+
+    long new_alpha_idx = 0;
+    for (long old_alpha = 0; old_alpha < n_alpha(); ++old_alpha) {
+      auto old_map = psi(old_alpha, 0); // check first sigma as reference
+
+      // Check if this alpha maps to the block we're splitting
+      bool is_split_alpha = (old_map.imp_idx == imp_idx && old_map.gamma == gamma);
+
+      if (is_split_alpha) {
+        // insert n_new_blocks number of new alphas
+        for (long split_idx = 0; split_idx < n_new_blocks; ++split_idx) {
+          for (auto sigma : range(n_sigma())) {
+            auto m                        = psi(old_alpha, sigma);
+            new_psi(new_alpha_idx, sigma) = {m.imp_idx, gamma + split_idx, m.tau};
+          }
+          new_alpha_idx++;
+        }
+      } else {
+        // copy with potential gamma adjustment
+        for (auto sigma : range(n_sigma())) {
+          auto m = psi(old_alpha, sigma);
+          if (m.imp_idx == imp_idx && m.gamma > gamma) {
+            new_psi(new_alpha_idx, sigma) = {m.imp_idx, m.gamma + n_new_blocks - 1, m.tau};
+          } else {
+            new_psi(new_alpha_idx, sigma) = m;
+          }
+        }
+        new_alpha_idx++;
+      }
+    }
+    return {std::move(new_sigma_embed_decomp), std::move(new_imp_decomps), std::move(new_psi), this->_sigma_names};
   }
 
   // ----------------------- Embedding and Extracting --------------------------
-
-  // T = Block Matrix
-
-  // ----------------------------------------------------------------------
   block2_matrix_t embedding::embed(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
-    auto Sigma_static_embed = nda::array<nda::matrix<dcomplex>, 2>(n_alpha(), n_sigma());
-    for (auto &&[alpha, sigma] : psi.indices()) {
-      auto bl_size                     = sigma_embed_decomp[alpha];
-      Sigma_static_embed(alpha, sigma) = nda::zeros<dcomplex>(bl_size, bl_size);
-    }
-    for (auto &&[S, m] : zip(Sigma_static_embed, psi)) {
-      if (m.imp_idx == -1) continue;
-      S = Sigma_imp_static_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
-    }
-    return Sigma_static_embed;
-  }
-
-  // TODO: helper functions to scatter and gather to avoid code duplication:
-  // A common pattern is to scatter/ gather from/to a large matrix to/from smaller matrices
-  block_matrix_t embedding::embed_ij(std::vector<block_matrix_t> const &Sigma_imp_static_vec) const {
-    auto Sigma_static_embed = this->embed(Sigma_imp_static_vec);
-    auto dim_C              = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
-    block_matrix_t Sigma_static_embed_ij;
-    for (auto const &sigma : range(n_sigma())) {
-      auto mat = nda::zeros<dcomplex>(dim_C, dim_C);
-      for (auto &&[alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { mat(r_alpha, r_alpha) = Sigma_static_embed(alpha, sigma); }
-      Sigma_static_embed_ij.push_back(mat);
-    }
-    return Sigma_static_embed_ij;
+    if (long(Sigma_imp_static_vec.size()) != n_impurities())
+      throw std::runtime_error(fmt::format("[embedding::embed] Wrong number of impurity static self-energies: got {} but embedding has {} impurities",
+                                           Sigma_imp_static_vec.size(), n_impurities()));
+    return detail::data_array_to_block2_array(this->embed(detail::matrix_to_array(Sigma_imp_static_vec)), sigma_embed_decomp);
   }
 
   // ----------------------------------------------------------------------
   std::vector<block_matrix_t> embedding::extract(block2_matrix_t const &matrix_C) const {
-
-    auto imp_gf_stru_list = imp_block_shape();
-
-    auto matrix_E = nda::matrix<nda::matrix<dcomplex>>(n_alpha(), n_sigma());
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
-      for (auto sigma : range(n_sigma())) { matrix_E(alpha, sigma) = matrix_C(0, sigma)(r_alpha, r_alpha); }
-    }
-
-    auto extract_one_imp = [&](long n_imp) {
-      auto matrix_imp = std::vector<nda::matrix<dcomplex>>{};
-      for (auto [bl, bl_size] : imp_gf_stru_list[n_imp]) { matrix_imp.emplace_back(bl_size, bl_size); }
-      auto const &rpsi = reverse_psi[n_imp];
-      for (auto [gamma, tau] : rpsi.indices()) {
-        auto [alpha, sigma]                      = rpsi(gamma, tau)[0];
-        matrix_imp[gamma + n_gamma(n_imp) * tau] = matrix_E(alpha, sigma);
-      }
-      return matrix_imp;
-    };
-
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
+    if (matrix_C.extent(1) != n_sigma())
+      throw std::runtime_error(
+         fmt::format("[embedding::extract] Wrong number of spin channels in matrix: got {} but embedding has n_sigma = {}", matrix_C.extent(1), n_sigma()));
+    if (matrix_C.extent(0) != 1) return extract(detail::gather_blocks_to_data_view(matrix_C));
+    auto data = range(n_sigma()) | stdv::transform([&](auto sigma) { return nda::array<dcomplex, 2>{matrix_C(0, sigma)}; }) | tl::to<std::vector>();
+    return detail::array_to_matrix(this->extract(data));
   }
-
-  // T = Tensors
-
   // ----------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 4>> embedding::extract_ijkl(nda::array<dcomplex, 4> const &U_tensor) const {
-
-    auto imp_gf_stru_list = imp_block_shape();
-
-    auto tensor_E = std::vector<nda::array<dcomplex, 4>>(n_alpha());
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { tensor_E[alpha] = U_tensor(r_alpha, r_alpha, r_alpha, r_alpha); }
-
-    auto extract_one_imp = [&](long n_imp) {
-      auto bl_size    = imp_decomposition(n_imp)[0];
-      auto tensor_imp = nda::zeros<dcomplex>(bl_size, bl_size, bl_size, bl_size);
-      auto alpha      = reverse_psi[n_imp](0, 0)[0][0];
-      return tensor_E[alpha];
-    };
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-
-  // --------------------------------------------------------------------------------------------
-  nda::array<dcomplex, 4> embedding::embed_ijkl(std::vector<nda::array<dcomplex, 4>> const &U_tensor_vec) const {
-    auto Utensor_E = std::vector<nda::array<dcomplex, 4>>(n_alpha());
-
-    for (auto alpha : range(n_alpha())) {
-      auto bl_size     = sigma_embed_decomp[alpha];
-      Utensor_E[alpha] = nda::zeros<dcomplex>(bl_size, bl_size, bl_size, bl_size);
-    }
-
-    for (auto &&[U, a] : zip(Utensor_E, range(n_alpha()))) {
-      if (psi(a, 0).imp_idx == -1) continue;
-      U = U_tensor_vec[psi(a, 0).imp_idx];
-    }
-
-    auto dim_C      = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
-    auto U_tensor_C = nda::array<dcomplex, 4>(dim_C, dim_C, dim_C, dim_C);
-    for (auto &&[index, sli] : enumerated_sub_slices(sigma_embed_decomp)) { U_tensor_C(sli, sli, sli, sli) = Utensor_E[index]; }
-    return U_tensor_C;
-  }
-
-  // T = Block Green's functions
-  // --------------------------------------------------------------------------------------------
-  std::vector<std::vector<nda::array<dcomplex, 3>>> embedding::extract_wij(nda::array<dcomplex, 4> const &g_loc) const {
-
-    auto imp_gf_stru_list = imp_block_shape();
-    auto n_w              = g_loc.extent(0);
-
-    auto gloc_E = nda::array<nda::array<dcomplex, 3>, 2>(n_alpha(), n_sigma());
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) {
-      for (auto sigma : range(n_sigma())) { gloc_E(alpha, sigma) = g_loc(r_all, sigma, r_alpha, r_alpha); }
-    }
-    auto extract_one_imp = [&](long n_imp) {
-      auto g_imp = std::vector<nda::array<dcomplex, 3>>{};
-      for (auto [bl, bl_size] : imp_gf_stru_list[n_imp]) { g_imp.emplace_back(n_w, bl_size, bl_size); }
-      auto const &rpsi = reverse_psi[n_imp];
-      for (auto [gamma, tau] : rpsi.indices()) {
-        auto [alpha, sigma]                 = rpsi(gamma, tau)[0];
-        g_imp[gamma + n_gamma(n_imp) * tau] = gloc_E(alpha, sigma);
-      }
-      return g_imp;
-    };
-
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-
-  // --------------------------------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 3>> embedding::embed_wij(std::vector<std::vector<nda::array<dcomplex, 3>>> const &Sigma_imp_vec) const {
-
-    auto Sigma_embed = nda::array<nda::array<dcomplex, 3>, 2>(n_alpha(), n_sigma());
-    auto n_w         = Sigma_imp_vec[0][0].extent(0);
-
-    for (auto &&[alpha, sigma] : psi.indices()) {
-      auto bl_size              = sigma_embed_decomp[alpha];
-      Sigma_embed(alpha, sigma) = nda::zeros<dcomplex>(n_w, bl_size, bl_size);
-    }
-
-    for (auto &&[S, m] : zip(Sigma_embed, psi)) {
-      if (m.imp_idx == -1) continue;
-      S = Sigma_imp_vec[m.imp_idx][m.gamma + n_gamma(m.imp_idx) * m.tau];
-    }
-
-    auto dim_C = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
-    auto Sigma_C =
-       range(n_sigma()) | stdv::transform([n_w, dim_C](auto) { return nda::array<dcomplex, 3>(n_w, dim_C, dim_C); }) | tl::to<std::vector>();
-
-    for (auto sigma : range(n_sigma())) {
-      for (auto &&[index, sli] : enumerated_sub_slices(sigma_embed_decomp)) { Sigma_C[sigma](r_all, sli, sli) = Sigma_embed(index, sigma); }
-    }
-
-    return Sigma_C;
-  }
-
-  // --------------------------------------------------------------------------------------------
-  //FIXME : protect this function as it will only work with a Pi_embed_decomp
-  std::vector<nda::array<dcomplex, 5>> embedding::extract_wijkl(nda::array<dcomplex, 5> const &pi_loc) const {
-
-    auto Pi_E = std::vector<nda::array<dcomplex, 5>>{};
-    for (auto [alpha, r_alpha] : enumerated_sub_slices(sigma_embed_decomp)) { Pi_E.emplace_back(pi_loc(r_all, r_alpha, r_alpha, r_alpha, r_alpha)); }
-
-    auto extract_one_imp = [&](long n_imp) {
-      auto const &rpsi    = reverse_psi[n_imp];
-      auto [alpha, sigma] = rpsi(0, 0)[0];
-      return Pi_E[alpha];
-    };
-
-    return range(n_impurities()) | stdv::transform(extract_one_imp) | tl::to<std::vector>();
-  }
-  // --------------------------------------------------------------------------------------------
-
-  //FIXME : protect this function as it will only work with a Pi_embed_decomp
-  nda::array<dcomplex, 5> embedding::embed_wijkl(std::vector<nda::array<dcomplex, 5>> const &pi_imp_vec) const {
-
-    auto n_w = pi_imp_vec[0].extent(0);
-
-    auto Pi_embed = std::vector<nda::array<dcomplex, 5>>(n_alpha());
-    for (auto alpha : range(n_alpha())) {
-      auto bl_size    = sigma_embed_decomp[alpha];
-      Pi_embed[alpha] = nda::zeros<dcomplex>(n_w, bl_size, bl_size, bl_size, bl_size);
-    }
-
-    for (auto alpha : range(n_alpha())) {
-      auto const &m = psi(alpha, 0);
-      if (m.imp_idx == -1) continue; // check
-      Pi_embed[alpha] = pi_imp_vec[m.imp_idx];
-    }
-
-    auto dim_C = stdr::fold_left(sigma_embed_decomp, 0, std::plus<>());
-    auto Pi_C  = nda::array<dcomplex, 5>(n_w, dim_C, dim_C, dim_C, dim_C);
-    for (auto &&[alpha, sli] : enumerated_sub_slices(sigma_embed_decomp)) { Pi_C(r_all, sli, sli, sli, sli) = Pi_embed[alpha]; }
-
-    return Pi_C;
-  }
-
-  //-------------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 3>> rotate_embedded_self_energy(std::vector<nda::array<dcomplex, 3>> const &Sigma_embed_dynamic_loc,
-                                                                   nda::matrix<dcomplex> const &U) {
-    auto n_sigma                     = Sigma_embed_dynamic_loc.size();
-    auto n_w                         = Sigma_embed_dynamic_loc[0].extent(0);
-    auto Sigma_embed_dynamic_rotated = range(Sigma_embed_dynamic_loc.size())
-       | stdv::transform([&](auto) { return nda::zeros<dcomplex>(Sigma_embed_dynamic_loc[0].shape()); }) | tl::to<std::vector>();
-    for (auto const &sigma : range(n_sigma))
-      for (auto const &w : range(n_w))
-        Sigma_embed_dynamic_rotated[sigma](w, r_all, r_all) = U * nda::matrix<dcomplex>{Sigma_embed_dynamic_loc[sigma](w, r_all, r_all)} * dagger(U);
-    return Sigma_embed_dynamic_rotated;
-  }
-
-  //-------------------------------------------------------------------------
-  std::vector<nda::array<dcomplex, 3>> rotate_embedded_self_energy(std::vector<nda::array<dcomplex, 3>> const &Sigma_embed_dynamic_loc,
-                                                                   one_body_elements_on_grid const &obe) {
-    auto const &U = obe.C_space.rotation_from_dft_to_local_basis()(r_all, 0) | tl::to<std::vector<nda::matrix<dcomplex>>>();
-    return rotate_embedded_self_energy(Sigma_embed_dynamic_loc, nda::block_diag(U));
-  }
-
-  //-------------------------------------------------------------------------
-  std::vector<nda::matrix<dcomplex>> rotate_embedded_self_energy(std::vector<nda::matrix<dcomplex>> const &Sigma_embed_static_loc,
-                                                                 nda::matrix<dcomplex> const &U) {
-    return range(Sigma_embed_static_loc.size()) | stdv::transform([&](auto sigma) { return U * Sigma_embed_static_loc[sigma] * dagger(U); })
-       | tl::to<std::vector>();
-  }
-
-  //-------------------------------------------------------------------------
-  std::vector<nda::matrix<dcomplex>> rotate_embedded_self_energy(std::vector<nda::matrix<dcomplex>> const &Sigma_embed_static_loc,
-                                                                 one_body_elements_on_grid const &obe) {
-    auto const &U = obe.C_space.rotation_from_dft_to_local_basis()(r_all, 0) | tl::to<std::vector<nda::matrix<dcomplex>>>();
-    return rotate_embedded_self_energy(Sigma_embed_static_loc, nda::block_diag(U));
-  }
 
 } // namespace triqs::modest

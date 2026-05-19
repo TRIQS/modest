@@ -60,18 +60,8 @@ namespace triqs::gfs {
     auto Gout    = make_block2_gf(g(0, 0).mesh(), stru);
     auto decomp  = stru.dims(r_all, 0);
     auto n_sigma = g.size2();
-    for (auto [alpha, Ralpha] : enumerated_sub_slices(decomp)) {
-      for (auto sigma : range(n_sigma)) { Gout(alpha, sigma).data() = g(0, sigma).data()(r_all, Ralpha, Ralpha); }
-    }
-    return Gout;
-  }
-
-  template <typename Mesh> block2_gf<Mesh> decomposition_view(block_gf<Mesh> const &g, gf_struct2_t const &stru) {
-    auto Gout    = make_block2_gf(g[0].mesh(), stru);
-    auto decomp  = stru.dims(r_all, 0);
-    auto n_sigma = g.size();
-    for (auto [alpha, Ralpha] : enumerated_sub_slices(decomp)) {
-      for (auto sigma : range(n_sigma)) { Gout(alpha, sigma).data() = g(0, sigma).data()(r_all, Ralpha, Ralpha); }
+    for (auto [alpha, r_alpha] : enumerated_sub_slices(decomp)) {
+      for (auto sigma : range(n_sigma)) { Gout(alpha, sigma).data() = g(0, sigma).data()(r_all, r_alpha, r_alpha); }
     }
     return Gout;
   }

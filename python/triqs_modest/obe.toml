@@ -27,7 +27,7 @@ namespaces = "triqs triqs::modest"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::(atomic_orbs|ibz_symmetry_ops|band_dispersion|downfolding_projector|local_space|one_body_elements_on_grid|one_body_elements_from_dft_converter|one_body_elements_with_theta_projectors|one_body_elements_on_high_symmetry_path|spin_kind_e)"
+match_names = "triqs::modest::(atomic_orbs|ibz_symmetry_ops|band_dispersion|downfolding_projector|downfolding_projector_ext|local_space|one_body_elements_on_grid|one_body_elements_from_dft_converter|make_one_body_elements_gw|one_body_elements_with_theta_projectors|one_body_elements_on_high_symmetry_path|spin_kind_e)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex

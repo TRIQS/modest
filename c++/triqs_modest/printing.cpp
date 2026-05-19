@@ -4,9 +4,13 @@
 // See LICENSE in the root of this distribution for details.
 
 #include "./downfolding.hpp"
+#include "./embedding.hpp"
+#include <algorithm>
+#include <fmt/base.h>
 #include <triqs/utility/report_stream.hpp>
+#include "utils/nda_pretty_printer.hpp"
 #include <fmt/ranges.h>
-
+#include <ranges>
 namespace triqs::modest {
 
   // -----------------------------  PRINT FUNCTIONS ---------------------------------------------
@@ -82,6 +86,86 @@ namespace triqs::modest {
     out2 << obe.P;
     out1 << fmt::format("IBZ = {}\n", bool(obe.ibz_symm_ops));
     if (obe.ibz_symm_ops) { out2 << obe.ibz_symm_ops.value(); };
+    return out;
+  }
+
+  // ------------------------------ PRINTING -------------------------------------------------------------
+
+  auto format_as(embedding::imp_block_t const &p) {
+    //return fmt::format("({},{},{})", p.n_imp, p.gamma, p.tau);
+    return fmt::format("(imp_idx = {}, γ = {}, τ = {})", p.imp_idx, p.gamma, p.tau);
+  }
+
+  // -------------------------------------------------------------------------------------------------------
+
+  std::string embedding::description(bool verbosity) const {
+    auto sigma_embed_shape     = this->embed_block_structure();
+    auto impurities_shape_list = this->imp_block_structure();
+
+    std::ostringstream out;
+    auto out1 = indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = indented_ostream(out, 4);
+    auto out3 = indented_ostream(out, 6);
+
+    // Detect impurities not connected to any alpha block.
+    auto unconnected_imps = std::vector<long>{};
+    auto is_unconnected   = std::vector<bool>(n_impurities(), true);
+    for (long n = 0; n < n_impurities(); ++n) {
+      is_unconnected[n] = stdr::all_of(reverse_psi[n], [](auto const &v) { return v.empty(); });
+      if (is_unconnected[n]) unconnected_imps.push_back(n);
+    }
+
+    auto fmt_vec = [](auto const &V) { return fmt::join(V | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "); };
+    auto pr_vec  = [&](auto const &V) { return fmt::format("{}\n", fmt_vec(V)); };
+
+    if (!verbosity) {
+      out << "Embedding: ";
+      out << fmt::format("{} impurities\n", this->n_impurities());
+      out1 << "Σ_embed block decomposition:\n";
+      out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
+      out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
+      out1 << "\nImpurities\n";
+      out2 << "Block dimensions, dim_γ for all γ:\n";
+      for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
+        auto head = fmt::format("[n_imp = {}]", n);
+        auto tag  = is_unconnected[n] ? "   \033[31m(not connected)\033[0m" : "";
+        out3 << fmt::format("{} dim_γ = {}{}\n", head, fmt_vec(dec), tag);
+        out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
+      }
+      if (!unconnected_imps.empty()) out << fmt::format("\nImpurities not connected to any alpha block: {}\n", unconnected_imps);
+      return out.str();
+    }
+
+    out << "Embedding:\n";
+    out1 << fmt::format("Spin index (σ/τ) names: {}\n\n", this->sigma_names());
+    out1 << "Σ_embed block decomposition:\n";
+    out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
+    out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
+    out1 << "\nImpurities\n";
+    out2 << "Block dimensions, dim_γ for all γ:\n";
+    for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
+      auto head = fmt::format("[n_imp = {}]", n);
+      auto tag  = is_unconnected[n] ? "   \033[31m(not connected)\033[0m" : "";
+      out3 << fmt::format("{} dim_γ = {}{}\n", head, fmt_vec(dec), tag);
+      out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
+    }
+    out2 << "Gf Block structures for solvers as names, [dim]:\n";
+    for (auto &&[n, ish] : enumerate(impurities_shape_list)) {
+      auto formatted_vec = ish | stdv::transform([](auto &&p) { return fmt::format("{} [{}]", p.first, p.second); }) | tl::to<std::vector>();
+      out3 << fmt::format("[imp_idx = {}] {}\n", n, fmt::join(formatted_vec, ", "));
+    }
+    out1 << "\nMapping ψ(α,σ) = (imp_idx, γ, τ) \n";
+    auto row_labels = range(this->n_alpha()) | stdv::transform([](auto x) { return fmt::format("α = {}", x); }) | tl::to<std::vector>();
+    auto col_labels = range(this->n_sigma()) | stdv::transform([&](auto i) { return fmt::format("σ = {} / {}", i, this->sigma_names()[i]); })
+       | tl::to<std::vector>();
+    nda::format_as_table(out3, this->psi, row_labels, col_labels);
+    if (!unconnected_imps.empty()) out << fmt::format("\nImpurities not connected to any alpha block: {}\n", unconnected_imps);
+
+    return out.str();
+  }
+
+  std::ostream &operator<<(std::ostream &out, embedding const &E) {
+    out << E.description(false);
     return out;
   }
 

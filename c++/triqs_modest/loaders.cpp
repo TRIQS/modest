@@ -163,6 +163,20 @@ namespace triqs::modest {
     }
   }
 
+  nda::array<long, 3> read_band_window(std::string const &filename) {
+    auto root = h5::proxy{filename, 'r'};
+    // if (!root.has_group("dft_misc_input")) {
+    //   throw std::runtime_error{fmt::format("The group dft_misc_input is missing in the hdf5 file ({})", filename)};
+    // }
+    return as<nda::array<long, 3>>(root["dft_misc_input"]["band_window"]);
+  }
+
+  nda::array<double, 2> read_kpts(std::string const &filename) {
+    // TODO: add error handling
+    auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
+    return as<nda::array<double, 2>>(g_dft["kpts"]);
+  }
+
   //-------------------------------------------------------
   // Setup spin_kind enum. (internal)
   spin_kind_e read_spin_kind(auto const &filename) {
@@ -423,5 +437,30 @@ namespace triqs::modest {
 
     mpi::broadcast(obe_final, comm, root);
     return obe_final;
+  }
+
+  //-------------------------------------------------------
+  one_body_elements_gw make_one_body_elements_gw(std::string const &filename, double threshold, bool diagonalize_hloc) {
+
+    mpi::communicator comm;
+    int root = 0;
+    one_body_elements_gw obe_gw;
+
+    if (comm.rank() == root) {
+
+      auto [target_density, obe] = read_obe_from_dft_converter_hdf5(filename, threshold, diagonalize_hloc);
+
+      // read the band window
+      auto band_window = read_band_window(filename);
+      auto kpts        = read_kpts(filename);
+
+      // build the extended projector
+      auto proj = downfolding_projector_ext{{obe.P}, std::move(band_window), std::move(kpts)};
+
+      obe_gw = one_body_elements_gw{.C_space = obe.C_space, .P = proj};
+    }
+
+    mpi::broadcast(obe_gw, comm, root);
+    return obe_gw;
   }
 } // namespace triqs::modest

@@ -18,7 +18,7 @@ load_data_w_selfenergy(std::string filename, bool zero_self = false) {
   auto w_max                 = 5.0 * nda::max_element(abs(obe.H.H_k)); // FIXME
   // std::cout << fmt::format("Sigma created with random DLR coefficents: w_max= {} eps= {}\n", w_max, eps);
 
-  auto Sigma_imp_dlr = make_vec_block_gf(mesh::dlr_imfreq{40.0, triqs::mesh::statistic_enum::Fermion, w_max, eps}, E.imp_block_shape());
+  auto Sigma_imp_dlr = make_vec_block_gf(mesh::dlr_imfreq{40.0, triqs::mesh::statistic_enum::Fermion, w_max, eps}, E.imp_block_structure());
   auto const &mesh   = Sigma_imp_dlr[0][0].mesh();
   for (auto &bg : Sigma_imp_dlr) {
     for (auto &g : bg) {

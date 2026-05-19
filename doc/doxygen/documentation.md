@@ -45,14 +45,14 @@ Typical use cases covered by embedding:
 * **Equivalent atoms**: Use the same impurity model (i.e. same \f$n_{\mathrm{imp}}\f$) for different blocks \f$ \alpha \f$.
 * **Magnetic order**: Just reverse the spin for some atoms, \f$\tau(\sigma) = 1-\sigma\f$.
 * **Splitting impurity models**: Depending on the block structure of the problem, the corresponding impurity model connected to atom \f$a\f$
-  can be *split*. Different impurity solvers can then be used for each of these split impurity models. The self-energies from both models map
-  back to the a single atom \f$a\f$. Or a trivial solver is used to obtain zero self-energy (*drop*).
+  can be *split_imp*. Different impurity solvers can then be used for each of these split impurity models. The self-energies from both models map
+  back to the a single atom \f$a\f$. Or a trivial solver is used to obtain zero self-energy (*drop_imp*).
 * **cluster DMFT**: Re-group a subset of atoms \f$a\f$ into a larger *super atom* which will be treated as a cluster DMFT problem.
 
 The embedding object provides:
 
 * Factory functions to conveniently construct common embeddings.
-* Operations to adapt and modify an embedding (e.g., split, drop, etc.).
+* Operations to adapt and modify an embedding (e.g., split_imp, drop_imp, etc.).
 * Methods to map data between impurity and embed spaces.
 
 This abstrction simplifies the DMFT loop, making it easy to construct arbitrary embedding scenarios.
