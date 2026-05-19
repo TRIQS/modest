@@ -5,10 +5,12 @@
 
 #include "./downfolding.hpp"
 #include "./embedding.hpp"
+#include <algorithm>
+#include <fmt/base.h>
 #include <triqs/utility/streams.hpp>
 #include "utils/nda_pretty_printer.hpp"
 #include <fmt/ranges.h>
-
+#include <ranges>
 namespace triqs::modest {
 
   // -----------------------------  PRINT FUNCTIONS ---------------------------------------------
@@ -105,19 +107,13 @@ namespace triqs::modest {
     auto out2 = indented_ostream(out, 4);
     auto out3 = indented_ostream(out, 6);
 
-    // Detect dangling impurities: those with no alpha block pointing to them.
-    auto dangling_imps = std::vector<long>{};
+    // Detect impurities not connected to any alpha block.
+    auto unconnected_imps = std::vector<long>{};
+    auto is_unconnected   = std::vector<bool>(n_impurities(), true);
     for (long n = 0; n < n_impurities(); ++n) {
-      bool connected = false;
-      for (auto [gamma, tau] : reverse_psi[n].indices()) {
-        if (!reverse_psi[n](gamma, tau).empty()) {
-          connected = true;
-          break;
-        }
-      }
-      if (!connected) dangling_imps.push_back(n);
+      is_unconnected[n] = stdr::all_of(reverse_psi[n], [](auto const &v) { return v.empty(); });
+      if (is_unconnected[n]) unconnected_imps.push_back(n);
     }
-    auto is_dangling = [&](long n) { return stdr::find(dangling_imps, n) != dangling_imps.end(); };
 
     if (!verbosity) {
       out << "Embedding: ";
@@ -131,12 +127,12 @@ namespace triqs::modest {
       out1 << "\nImpurities\n";
       out2 << "Block dimensions, dim_γ for all γ:\n";
       for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
-        auto head    = fmt::format("[n_imp = {}]", n);
-        auto tag     = is_dangling(n) ? "   (dangling)" : "";
+        auto head = fmt::format("[n_imp = {}]", n);
+        auto tag  = is_unconnected[n] ? "   \033[31m(not connected)\033[0m" : "";
         out3 << fmt::format("{} dim_γ = {}{}", head, fmt::join(dec | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "), tag) << "\n";
         out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
       }
-      if (!dangling_imps.empty()) out << fmt::format("\nDangling impurities: {}\n", dangling_imps);
+      if (!unconnected_imps.empty()) out << fmt::format("\nImpurities not connected to any alpha block: {}\n", unconnected_imps);
       return out.str();
     }
 
@@ -152,7 +148,7 @@ namespace triqs::modest {
     out2 << "Block dimensions, dim_γ for all γ:\n";
     for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
       auto head = fmt::format("[n_imp = {}]", n);
-      auto tag  = is_dangling(n) ? "   (dangling)" : "";
+      auto tag  = is_unconnected[n] ? "   \033[31m(not connected)\033[0m" : "";
       out3 << fmt::format("{} dim_γ = {}{}", head, fmt::join(dec | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "), tag) << "\n";
       out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
     }
@@ -166,7 +162,7 @@ namespace triqs::modest {
     auto col_labels = range(this->n_sigma()) | stdv::transform([&](auto i) { return fmt::format("σ = {} / {}", i, this->sigma_names()[i]); })
        | tl::to<std::vector>();
     nda::format_as_table(out3, this->psi, row_labels, col_labels);
-    if (!dangling_imps.empty()) out << fmt::format("\nDangling impurities: {}\n", dangling_imps);
+    if (!unconnected_imps.empty()) out << fmt::format("\nImpurities not connected to any alpha block: {}\n", unconnected_imps);
 
     return out.str();
   }
