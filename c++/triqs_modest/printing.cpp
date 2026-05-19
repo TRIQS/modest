@@ -115,13 +115,13 @@ namespace triqs::modest {
       if (is_unconnected[n]) unconnected_imps.push_back(n);
     }
 
+    auto fmt_vec = [](auto const &V) { return fmt::join(V | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "); };
+    auto pr_vec  = [&](auto const &V) { return fmt::format("{}\n", fmt_vec(V)); };
+
     if (!verbosity) {
       out << "Embedding: ";
       out << fmt::format("{} impurities\n", this->n_impurities());
       out1 << "Σ_embed block decomposition:\n";
-      auto pr_vec = [](auto const &V) {
-        return fmt::format("{}\n", fmt::join(V | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "));
-      };
       out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
       out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
       out1 << "\nImpurities\n";
@@ -129,7 +129,7 @@ namespace triqs::modest {
       for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
         auto head = fmt::format("[n_imp = {}]", n);
         auto tag  = is_unconnected[n] ? "   \033[31m(not connected)\033[0m" : "";
-        out3 << fmt::format("{} dim_γ = {}{}", head, fmt::join(dec | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "), tag) << "\n";
+        out3 << fmt::format("{} dim_γ = {}{}\n", head, fmt_vec(dec), tag);
         out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
       }
       if (!unconnected_imps.empty()) out << fmt::format("\nImpurities not connected to any alpha block: {}\n", unconnected_imps);
@@ -139,9 +139,6 @@ namespace triqs::modest {
     out << "Embedding:\n";
     out1 << fmt::format("Spin index (σ/τ) names: {}\n\n", this->sigma_names());
     out1 << "Σ_embed block decomposition:\n";
-    auto pr_vec = [](auto const &V) {
-      return fmt::format("{}\n", fmt::join(V | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "));
-    };
     out2 << "dim_α: " << pr_vec(this->sigma_embed_decomp);
     out2 << "    α: " << pr_vec(range(this->sigma_embed_decomp.size()));
     out1 << "\nImpurities\n";
@@ -149,7 +146,7 @@ namespace triqs::modest {
     for (auto &&[n, dec] : enumerate(this->imp_decomps)) {
       auto head = fmt::format("[n_imp = {}]", n);
       auto tag  = is_unconnected[n] ? "   \033[31m(not connected)\033[0m" : "";
-      out3 << fmt::format("{} dim_γ = {}{}", head, fmt::join(dec | stdv::transform([](auto x) { return fmt::format("{:>3}", x); }), " "), tag) << "\n";
+      out3 << fmt::format("{} dim_γ = {}{}\n", head, fmt_vec(dec), tag);
       out3 << fmt::format("{:>{}}     γ = {}", " ", head.size(), pr_vec(range(dec.size())));
     }
     out2 << "Gf Block structures for solvers as names, [dim]:\n";
