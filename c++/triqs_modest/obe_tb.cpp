@@ -8,7 +8,7 @@
 #include <triqs/gfs.hpp>
 #include <triqs/utility/exceptions.hpp>
 #include <type_traits>
-#include <triqs/experimental/wannier_loader.hpp>
+#include <triqs/experimental/lattice/wannier_loader.hpp>
 #include <stdexcept>
 #include "./obe_tb.hpp"
 #include "triqs_modest/utils/defs.hpp"

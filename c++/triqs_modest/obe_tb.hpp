@@ -10,7 +10,7 @@
 #include <triqs/experimental.hpp>
 #include <triqs/mesh/imfreq.hpp>
 #include <triqs/gfs.hpp>
-#include <triqs/utility/root_finder.hpp>
+#include <triqs/experimental/utility/root_finder.hpp>
 #include <triqs/utility/macros.hpp>
 
 #include "downfolding.hpp"
@@ -19,7 +19,8 @@
 
 namespace triqs::modest {
 
-  using namespace triqs::experimental;
+  using namespace triqs::experimental::lattice;
+  using namespace triqs::experimental::utility;
 
   /**
    * @ingroup one_body_elements
@@ -284,7 +285,7 @@ namespace triqs::modest {
       return density(obe, x, Sigma_dynamic, Sigma_static, opt);
     };
     return std::get<0>(
-       triqs::utility::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+       root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
   }
 
   /**

@@ -4,7 +4,7 @@
 // See LICENSE in the root of this distribution for details.
 
 #include "./downfolding.hpp"
-#include <triqs/utility/streams.hpp>
+#include <triqs/utility/report_stream.hpp>
 #include <fmt/ranges.h>
 
 namespace triqs::modest {
@@ -13,7 +13,7 @@ namespace triqs::modest {
 
   std::ostream &operator<<(std::ostream &out, band_dispersion const &x) {
     out << "Band dispersion ε^σ(k) on a grid [band_dispersion]:\n";
-    auto out1 = indented_ostream(out, 2);
+    auto out1 = triqs::utility::indented_ostream(out, 2);
     out1 << fmt::format("Number of bands (max): {}\n", x.H_k.extent(3));
     out1 << fmt::format("Represented on a fixed grid of {} points.\n", x.n_k());
     out1 << fmt::format("Shape of H[k_idx, σ, ν, ν'] = {}\n", x.H_k.shape());
@@ -25,7 +25,7 @@ namespace triqs::modest {
 
   std::ostream &operator<<(std::ostream &out, downfolding_projector const &x) {
     out << "Downfolding projector P^σ_mν(k) on a grid [downfolding_projector]:\n";
-    auto out1 = indented_ostream(out, 2);
+    auto out1 = triqs::utility::indented_ostream(out, 2);
     out1 << fmt::format("Shape of P[k_idx, σ, m, ν]  = {}\n", x.P_k.shape());
     return out;
   }
@@ -34,9 +34,9 @@ namespace triqs::modest {
 
   std::ostream &operator<<(std::ostream &out, local_space const &x) {
     out << "Local space [orbital_set]:\n";
-    auto out1 = indented_ostream(out, 2); // same stream, but shifted by 2 spaces
-    auto out2 = indented_ostream(out, 4);
-    auto out3 = indented_ostream(out, 6);
+    auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = triqs::utility::indented_ostream(out, 4);
+    auto out3 = triqs::utility::indented_ostream(out, 6);
     out1 << fmt::format("Total dimension [M]: {}\n", x.dim());
     out1 << fmt::format("Number of correlated atoms: {}\n", x.atomic_shells().size());
     // auto ineq = 0;
@@ -62,7 +62,7 @@ namespace triqs::modest {
   // ---------------------------------------------------------------------------------------------
   std::ostream &operator<<(std::ostream &out, ibz_symmetry_ops const &ibz) {
     out << "[I]rreduicible [B]rillouin [Z]one symmetry operations from the DFT code [ibz_symmetry_ops]\n";
-    auto out1 = indented_ostream(out, 2);
+    auto out1 = triqs::utility::indented_ostream(out, 2);
     out1 << fmt::format("Number of symmetry ops: {}\n", ibz.ops.size());
     out1 << fmt::format("Number of rotations per op: {}\n", ibz.ops[0].mats.size());
     return out;
@@ -71,8 +71,8 @@ namespace triqs::modest {
   // ---------------------------------------------------------------------------------------------
 
   std::ostream &operator<<(std::ostream &out, one_body_elements_on_grid const &obe) {
-    auto out1 = indented_ostream(out, 2); // same stream, but shifted by 2 spaces
-    auto out2 = indented_ostream(out, 4);
+    auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = triqs::utility::indented_ostream(out, 4);
     out << "One body elements representing a downfolding from (restricted) Bloch 𝓑 to Correlated space 𝓒 from DFT code [one_body_elements_on_grid]\n";
     out1 << "H:\n";
     out2 << obe.H;

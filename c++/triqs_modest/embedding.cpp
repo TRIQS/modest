@@ -7,7 +7,7 @@
 #include "utils/gf_supp.hpp"
 #include "utils/defs.hpp"
 #include "utils/nda_pretty_printer.hpp"
-#include <triqs/utility/streams.hpp>
+#include <triqs/utility/report_stream.hpp>
 #include <ranges>
 #include <set>
 //#include <fmt/ranges.h>
@@ -134,9 +134,9 @@ namespace triqs::modest {
     auto impurities_shape_list = this->imp_block_shape();
 
     std::ostringstream out;
-    auto out1 = indented_ostream(out, 2); // same stream, but shifted by 2 spaces
-    auto out2 = indented_ostream(out, 4);
-    auto out3 = indented_ostream(out, 6);
+    auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = triqs::utility::indented_ostream(out, 4);
+    auto out3 = triqs::utility::indented_ostream(out, 6);
 
     if (!verbosity) {
       out << "Embedding: ";

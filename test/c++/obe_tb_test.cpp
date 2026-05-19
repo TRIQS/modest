@@ -3,7 +3,7 @@
 
 using namespace triqs::modest;
 using namespace triqs::gfs;
-using namespace triqs::experimental;
+using namespace triqs::experimental::lattice;
 using namespace triqs;
 
 ///-----------------------------------------

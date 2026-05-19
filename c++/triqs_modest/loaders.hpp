@@ -5,7 +5,6 @@
 
 #pragma once
 #include "./downfolding.hpp"
-#include <triqs/utility/streams.hpp>
 #include "utils/nda_supp.hpp"
 
 namespace triqs::modest {
