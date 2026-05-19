@@ -40,7 +40,7 @@ namespace triqs::modest {
      * @return One-body elements containing the Wannier90 tight binding Hamiltonian.
      */
     one_body_elements_tb(std::vector<tb_hk> H_sigma, local_space ls) : C_space{std::move(ls)}, H{std::move(H_sigma)} {};
-    
+
     /**
      * @ingroup one_body_elements
      * @brief Construct a one-body elements TB object from a list of tb_hk objects.
@@ -243,7 +243,7 @@ namespace triqs::modest {
 
   /**
    * @ingroup mu
-   * @brief Compute the density of the lattice Green's function without
+   * @brief Compute the density of the lattice Green's function without a self-energy.
    *
    * @tparam Mesh The mesh type.
    * @param obe One-body elements.
