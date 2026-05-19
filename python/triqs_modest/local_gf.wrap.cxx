@@ -67,10 +67,12 @@ static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
          const nda::basic_array<
             nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
             nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
-         const triqs::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt); },
+         const triqs::experimental::lattice::bz_int_options &opt) {
+        return triqs::modest::gloc<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
+      },
       "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
    c2py::cfun([](const triqs::mesh::imfreq &mesh, const triqs::modest::one_body_elements_tb &obe, double mu,
-                 const triqs::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::imfreq>(mesh, obe, mu, opt); },
+                 const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::imfreq>(mesh, obe, mu, opt); },
               "mesh", "obe", "mu", "opt")};
 
 static const auto _c2py_doc_0 = _c2py_fun_0.doc(
@@ -168,7 +170,7 @@ Returns
        nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
        nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
     {c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()},
-    {c2py::python_typename<const triqs::lattice::bz_int_options &>()}},
+    {c2py::python_typename<const triqs::experimental::lattice::bz_int_options &>()}},
    {c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>(),
     c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>(),
     c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>(),

@@ -26,7 +26,7 @@ using c2py::operator""_a;
 using _c2py_cls_0                                            = triqs::modest::embedding;
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_0>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_0> = "triqs_modest.embedding.Embedding";
-static auto _c2py_init_0 =
+static const auto _c2py_init_0 =
    c2py::dispatcher_c_kw_t{c2py::c_constructor<_c2py_cls_0, std::vector<long>, std::vector<std::vector<long>>,
                                                nda::basic_array<triqs::modest::embedding::imp_block_t, 2, nda::C_layout, 'A',
                                                                 nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
@@ -487,7 +487,7 @@ lattice self-energy and the local Green's function.)DOC"
 using _c2py_cls_1                                            = triqs::modest::embedding::imp_block_t;
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_1>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_1> = "triqs_modest.embedding.ImpBlockT";
-static auto _c2py_init_1 =
+static const auto _c2py_init_1 =
    c2py::dispatcher_c_kw_t{c2py::c_constructor<_c2py_cls_1>(), c2py::c_constructor<_c2py_cls_1, long, long, long>("n_imp", "gamma", "tau")};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_1>    = c2py::pyfkw_constructor<_c2py_init_1>;
 template <> const std::string c2py::tp_ctor_doc<_c2py_cls_1> = _c2py_init_1.doc(R"DOC()DOC");

@@ -188,7 +188,7 @@ const std::string c2py::tp_doc<_c2py_cls_1> =
 using _c2py_cls_2                                            = triqs::modest::checkpoint<triqs::modest::initial_data, triqs::modest::iteration_data>;
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_2>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_2> = "triqs_modest.utils.file_io.DMFTCheckpoint";
-static auto _c2py_init_0 =
+static const auto _c2py_init_0 =
    c2py::dispatcher_c_kw_t{c2py::c_constructor<_c2py_cls_2, std::string>("dirname"),
                            c2py::c_constructor<_c2py_cls_2, std::string, const triqs::modest::initial_data &>("dirname", "initial_data")};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_2> = c2py::pyfkw_constructor<_c2py_init_0>;
