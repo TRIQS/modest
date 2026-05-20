@@ -4,7 +4,7 @@ def dockerName = projectName.toLowerCase();
 /* which platform to build documentation on */
 def documentationPlatform = "ubuntu-clang"
 /* depend on triqs upstream branch/project */
-def triqsBranch = 'modest_updates' //env.CHANGE_TARGET ?: env.BRANCH_NAME
+def triqsBranch = "unstable"
 def triqsProject = '/TRIQS/triqs/' + triqsBranch.replaceAll('/', '%2F')
 /* whether to keep and publish the results */
 def keepInstall = !env.BRANCH_NAME.startsWith("PR-")
@@ -61,8 +61,8 @@ for (int i = 0; i < dockerPlatforms.size(); i++) {
 
 /****************** osx builds (on host) */
 def osxPlatforms = [
-  //["gcc", ['CC=gcc-15', 'CXX=g++-15', 'FC=gfortran-15']],
-  //["clang", ['CC=$BREW/opt/llvm/bin/clang', 'CXX=$BREW/opt/llvm/bin/clang++', 'FC=gfortran-15', 'CXXFLAGS=-I$BREW/opt/llvm/include', 'LDFLAGS=-L$BREW/opt/llvm/lib']]
+  ["gcc", ['CC=gcc-15', 'CXX=g++-15', 'FC=gfortran-15']],
+  ["clang", ['CC=$BREW/opt/llvm/bin/clang', 'CXX=$BREW/opt/llvm/bin/clang++', 'FC=gfortran-15', 'CXXFLAGS=-I$BREW/opt/llvm/include', 'LDFLAGS=-L$BREW/opt/llvm/lib']]
 ]
 for (int i = 0; i < osxPlatforms.size(); i++) {
   def platformEnv = osxPlatforms[i]
