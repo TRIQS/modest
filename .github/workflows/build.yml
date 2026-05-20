@@ -44,13 +44,8 @@ jobs:
         restore-keys: |
           ccache-${{ matrix.os }}-${{ matrix.cxx }}-
 
-    - name: Set cxx variables
-      run: |
-        if [[ ${{ matrix.os }} == 'macos-15' && ${{ matrix.cxx }} == 'g++' ]]; then
-          echo "CXX=g++-15" >> $GITHUB_ENV
-        else
-          echo "CXX=${{ matrix.cxx }}" >> $GITHUB_ENV
-        fi
+    - name: Set compiler
+      run: echo "CXX=${{ matrix.cxx }}" >> $GITHUB_ENV
 
     - name: Install ubuntu dependencies
       if: ${{ contains(matrix.os, 'ubuntu') }}
@@ -92,13 +87,12 @@ jobs:
         python3-scipy
         python3-ipython
 
-    - name: Set up virtualenv
+    - name: Set up Python venv
       run: |
-        mkdir -p $HOME/.venv
+        # --system-site-packages exposes apt- (Linux) / brew- (macOS) installed mpi4py/numpy/scipy
         python3 -m venv --system-site-packages $HOME/.venv/my_python
-        source $HOME/.venv/my_python/bin/activate
-        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
-        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "VIRTUAL_ENV=$HOME/.venv/my_python" >> $GITHUB_ENV
+        echo "$HOME/.venv/my_python/bin"         >> $GITHUB_PATH
 
     - name: Install homebrew dependencies
       if: ${{ contains(matrix.os, 'macos') }}
@@ -110,19 +104,36 @@ jobs:
         echo "PATH=$(brew --prefix llvm)/bin:$(brew --prefix gcc)/bin:$PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$(brew --prefix llvm)/lib/python3.13/site-packages" >> $GITHUB_ENV
         echo "SDKROOT=$(xcrun --show-sdk-path)" >> $GITHUB_ENV
-        echo "LDFLAGS=-L$(brew --prefix llvm)/lib/c++ -L/opt/homebrew/opt/llvm/lib/unwind -lunwind" >> $GITHUB_ENV
+        echo "CPPFLAGS=-I$(brew --prefix libomp)/include $CPPFLAGS" >> $GITHUB_ENV
+        echo "LDFLAGS=-L$(brew --prefix libomp)/lib -L$(brew --prefix llvm)/lib/c++ -L/opt/homebrew/opt/llvm/lib/unwind -lunwind" >> $GITHUB_ENV
 
     - name: Add clang CXXFLAGS
-      if: ${{ matrix.cxx == 'clang++' }}
+      if: ${{ contains(matrix.cxx, 'clang') }}
       run: |
         echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
+
+    - name: Build & Install clair
+      env:
+        CXX: ${{ matrix.clang_cxx }}
+        CXXFLAGS: ""
+      run: |
+        git clone https://github.com/flatironinstitute/clair --branch unstable
+        cmake -S clair -B clair/build -G Ninja \
+          -DPython_EXECUTABLE=$VIRTUAL_ENV/bin/python \
+          -DBuild_Tests=OFF \
+          -DCMAKE_INSTALL_PREFIX=$HOME/install
+        cmake --build clair/build --target install --verbose
 
     - name: Build & Install TRIQS
       env:
         TRIQS_BRANCH: modest_updates # ${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
       run: |
+        git ls-remote --exit-code --heads https://github.com/TRIQS/triqs "$TRIQS_BRANCH" > /dev/null 2>&1 || TRIQS_BRANCH=unstable
         git clone https://github.com/TRIQS/triqs --branch "$TRIQS_BRANCH"
-        cmake -S triqs -B triqs/build -G Ninja -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
+        cmake -S triqs -B triqs/build -G Ninja \
+          -DPython_EXECUTABLE=$VIRTUAL_ENV/bin/python \
+          -DBuild_Tests=OFF \
+          -DCMAKE_INSTALL_PREFIX=$HOME/install
         cmake --build triqs/build --target install --verbose
 
     - name: Build & Install clair

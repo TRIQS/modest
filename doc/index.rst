@@ -28,5 +28,5 @@ Learn how to use modest in the :ref:`documentation`.
    install
    documentation
    issues
-   ChangeLog.md
+   ChangeLog
    about
