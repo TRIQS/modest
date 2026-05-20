@@ -21,6 +21,12 @@ using c2py::operator""_a;
 // ==================== enums =====================
 
 // ==================== module classes =====================
+template <>
+const std::map<triqs::modest::spin_kind_e, str_t> c2py::enum_to_string<triqs::modest::spin_kind_e> = {
+   {triqs::modest::spin_kind_e::Polarized, "Polarized"},
+   {triqs::modest::spin_kind_e::NonPolarized, "NonPolarized"},
+   {triqs::modest::spin_kind_e::NonColinear, "NonColinear"}};
+
 
 // --------- class _c2py_cls_0 -----------
 using _c2py_cls_0                                            = triqs::modest::one_body_elements_tb;

@@ -13,6 +13,9 @@ Modularity is achieved through four key abstractions
 These abstractions let you describe complex DMFT problems -- from simple single-site DMFT to multi-impurity, spin-orbit, or cluster DMFT
 --in a clean and modular way.
 """
+
+from triqs.experimental import *
+
 from .atomic_levels_and_delta import *
 from .embedding import *
 from .hamiltonians import *
