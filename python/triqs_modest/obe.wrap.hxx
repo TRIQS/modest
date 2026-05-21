@@ -20,4 +20,10 @@ template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements_on_
 template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements_on_grid> = "triqs_modest.obe.OneBodyElementsOnGrid";
 template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements_gw>          = true;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements_gw>      = "triqs_modest.obe.OneBodyElementsGw";
+template <> constexpr bool c2py::is_wrapped<triqs::modest::spin_kind_e>                   = true;
+template <>
+const std::map<triqs::modest::spin_kind_e, str_t> c2py::enum_to_string<triqs::modest::spin_kind_e> = {
+   {triqs::modest::spin_kind_e::Polarized, "Polarized"},
+   {triqs::modest::spin_kind_e::NonPolarized, "NonPolarized"},
+   {triqs::modest::spin_kind_e::NonColinear, "NonColinear"}};
 #endif

@@ -20,6 +20,7 @@ using c2py::operator""_a;
 
 // ==================== enums =====================
 
+template <> constexpr bool c2py::is_wrapped<triqs::modest::spin_kind_e> = true;
 template <>
 const std::map<triqs::modest::spin_kind_e, str_t> c2py::enum_to_string<triqs::modest::spin_kind_e> = {
    {triqs::modest::spin_kind_e::Polarized, "Polarized"},
