@@ -42,13 +42,15 @@ namespace triqs::modest {
     auto n_k         = obe_theta.H.n_k();
     auto n_M         = obe_theta.C_space.dim();
     auto n_w         = mesh.size();
+    auto im          = dcomplex(0, 1.0);
+    auto delta       = im * broadening;
 
     // Accumulate local Green's function over k-points
     auto gloc_result = make_block2_gf(mesh, obe_theta.C_space.Gc_block_shape());
 
     for (auto k_idx : range(n_k)) {
       for (auto sigma : range(n_sigma)) {
-        auto P    = Proj.P(sigma, k_idx);
+        auto P    = obe_theta.P.P(sigma, k_idx);
         auto Pdag = dagger(P);
         auto H_k  = obe_theta.H.H(sigma, k_idx);
         auto w_k  = obe_theta.H.k_weights(k_idx);
@@ -57,8 +59,8 @@ namespace triqs::modest {
         auto PSP_all = detail::upfold_self_energy_all_freq(obe_theta, Proj, Sigma_w, k_idx, sigma);
 
         for (auto &&[n, w] : enumerate(mesh)) {
-          auto G_k = inv(w + dcomplex(0, broadening) + mu - H_k - PSP_all(n, r_all, r_all));
-          gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * (P * nda::matrix<dcomplex>{G_k} * Pdag);
+          auto G_k = nda::matrix<dcomplex>{inv(w + delta + mu - H_k - PSP_all(n, r_all, r_all))};
+          gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * (P * G_k * Pdag);
         }
       }
     }
@@ -66,17 +68,18 @@ namespace triqs::modest {
     if (auto const &S = obe_theta.ibz_symm_ops; S) { gloc_result = S->symmetrize(gloc_result, obe_theta.C_space.atomic_decomposition()); }
 
     // Extract spectral functions from local Green's function
-    auto total     = nda::array<double, 2>(n_sigma, n_w);
-    auto per_theta = nda::array<double, 4>(n_sigma, n_w, n_M, n_M);
+    auto total     = nda::zeros<double>(n_sigma, n_w);
+    auto per_theta = nda::zeros<double>(n_sigma, n_w, n_M, n_M);
 
     for (auto sigma : range(n_sigma)) {
-      auto g  = gloc_result(0, sigma).data();
-      auto gC = conj(gloc_result(0, sigma)).data();
+      auto const &G = gloc_result(0, sigma).data();
       for (auto &&[n, w] : enumerate(mesh)) {
-        total(sigma, n)                   = (-1.0 / M_PI) * imag(trace(g(n, r_all, r_all)));
-        per_theta(sigma, n, r_all, r_all) = real(dcomplex(0, 1.0) * (g(n, r_all, r_all) - transpose(gC(n, r_all, r_all))) / (2.0 * M_PI));
+        auto g                            = nda::matrix<dcomplex>{G(n, r_all, r_all)};
+        total(sigma, n)                   = (-1.0 / M_PI) * imag(trace(g));
+        per_theta(sigma, n, r_all, r_all) = real(im * (g - dagger(g)) / (2 * M_PI));
       }
     }
+
     return {.total = total, .per_theta = per_theta};
   }
 
@@ -90,13 +93,6 @@ namespace triqs::modest {
     auto n_w         = mesh.size();
     auto n_bands     = obe.H.N_nu(0, 0);
     auto delta       = dcomplex(0, broadening);
-
-    for (auto sigma : range(n_sigma)) {
-      for (auto k_idx : range(n_k)) {
-        if (obe.H.N_nu(sigma, k_idx) != n_bands)
-          throw std::runtime_error("spectral_function requires a fixed number of bands over all k and spin blocks");
-      }
-    }
 
     auto data = nda::zeros<double>(n_sigma, n_w, n_bands, n_bands);
 
@@ -129,8 +125,8 @@ namespace triqs::modest {
     auto n_M         = obe.C_space.dim();
     auto delta       = dcomplex(0, broadening);
 
-    auto data      = nda::array<double, 3>(n_sigma, n_k, n_w);
-    auto proj_data = nda::array<double, 5>(n_sigma, n_k, n_w, n_M, n_M);
+    auto data      = nda::zeros<double>(n_sigma, n_k, n_w);
+    auto proj_data = nda::zeros<double>(n_sigma, n_k, n_w, n_M, n_M);
 
 #pragma omp parallel for default(none) shared(n_k, n_sigma, n_w, obe, mu, delta, Sigma_w, broadening, mesh, data, proj_data, r_all)
     for (auto k_idx : range(n_k)) {
