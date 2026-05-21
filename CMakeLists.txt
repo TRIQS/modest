@@ -55,6 +55,16 @@ set(${PROJECT_NAME}_BINARY_DIR ${PROJECT_BINARY_DIR} CACHE STRING "Binary direct
 # Make additional Find Modules available
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/share/cmake/Modules)
 
+# On macOS the linker resolves TRIQS libs via their install_name rather than adding
+# LC_RPATH entries, so CMake's two-step build-rpath→install-rpath fixup fails at
+# install time with "no LC_RPATH load command" errors. Build with the install RPATH
+# directly to skip that fixup entirely.
+if(APPLE)
+  set(CMAKE_MACOSX_RPATH ON)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif()
+
 # ############
 # CMake Options
 
