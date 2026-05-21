@@ -3,7 +3,7 @@ import numpy as np
 
 from h5 import HDFArchive
 
-from triqs.gf import BlockGf, GfImFreq, MeshImFreq, iOmega_n, inverse
+from triqs.gfs import BlockGf, GfImFreq, MeshImFreq, iOmega_n, inverse
 
 from triqs_dft_tools.sumk_dft import SumkDFT
 
