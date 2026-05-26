@@ -15,7 +15,7 @@ namespaces = "triqs triqs::modest"
 #    if reject_names and reject_names match Qname : skip X
 #    else keep X.
 
-match_names = "triqs::modest::(analyze_degenerate_blocks|symmetrize_gf)"
+match_names = "triqs::modest::(analyze_degenerate_blocks|symmetrize)"
 
 # Only keep elements declared in files matching the pattern
 # match_files = "" # String must be a regex
