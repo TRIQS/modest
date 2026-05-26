@@ -44,7 +44,7 @@ for (int i = 0; i < dockerPlatforms.size(); i++) {
       /* build and tag */
       def regen = regenPlatforms.contains(platform)
       def args = regen ? '-DUpdate_Python_Bindings=ON' : '-DUpdate_Python_Bindings=OFF'
-      def args += ' -DEnable_LFS_Tests=ON'
+      args += ' -DEnable_LFS_Tests=ON'
       if (platform == documentationPlatform)
         args += ' -DBuild_Documentation=ON'
       else if (platform == "sanitize")
