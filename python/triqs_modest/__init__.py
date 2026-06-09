@@ -28,4 +28,9 @@ from .utils import *
 from .utils.analyze_gfs import *
 from .utils.dc import *
 from .utils.file_io import *
+
+# Explicit imports to prevent function shadowing by later wildcard imports.
+from .atomic_levels_and_delta import impurity_levels
+from .local_gf import gloc
+from .rho_and_mu import density, find_chemical_potential
 __all__ = []
