@@ -33,13 +33,13 @@ TEST_F(MpiTest, BroadcastOneBodyElementsOnGridWithHighSymmPath) {
   EXPECT_EQ(obe2, ref_obe_bands);
 }
 
-TEST_F(MpiTest, BroadcastOneBodyElementsOnGridWithThetaProjectors) {
+TEST_F(MpiTest, BroadcastOneBodyElementsOnGridWithPartialProjectors) {
   std::string const filename = "ref_data/SrVO3-cubic-t2g.ref.h5";
   auto [target_density, obe] = one_body_elements_from_dft_converter(filename);
   // implicity reads on rank 0 and broadcasts
-  auto obe2 = one_body_elements_with_theta_projectors(filename, obe);
+  auto obe2 = one_body_elements_with_partial_projectors(filename, obe);
   // read on all ranks the data
-  auto ref_obe = read_theta_projectors_for_obe(filename, obe);
+  auto ref_obe = read_partial_projectors_for_obe(filename, obe);
   EXPECT_EQ(obe2, ref_obe);
 }
 
