@@ -5,6 +5,7 @@
 
 #include "./downfolding.hpp"
 #include "./embedding.hpp"
+#include "./postprocess.hpp"
 #include <algorithm>
 #include <fmt/base.h>
 #include <triqs/utility/report_stream.hpp>
@@ -166,6 +167,26 @@ namespace triqs::modest {
 
   std::ostream &operator<<(std::ostream &out, embedding const &E) {
     out << E.description(false);
+    return out;
+  }
+
+  // ---------------------------------------------------------------------------------------------
+
+  std::ostream &operator<<(std::ostream &out, spectral_function_w const &x) {
+    out << "Spectral functions on a real-frequency mesh [spectral_function_w]:\n";
+    auto out1 = triqs::utility::indented_ostream(out, 2);
+    out1 << fmt::format("total[σ, ω]            A^σ(ω)         shape = {}\n", x.total.shape());
+    out1 << fmt::format("projected[σ, ω, m, m'] A^σ_mm'(ω)     shape = {}\n", x.projected.shape());
+    return out;
+  }
+
+  // ---------------------------------------------------------------------------------------------
+
+  std::ostream &operator<<(std::ostream &out, spectral_function_kw const &x) {
+    out << "Momentum-resolved spectral functions on a real-frequency mesh [spectral_function_kw]:\n";
+    auto out1 = triqs::utility::indented_ostream(out, 2);
+    out1 << fmt::format("total[σ, k, ω]              A^σ(k, ω)       shape = {}\n", x.total.shape());
+    out1 << fmt::format("projected[σ, k, ω, m]       A^σ_mm(k, ω)    shape = {}\n", x.projected.shape());
     return out;
   }
 

@@ -52,7 +52,7 @@ TEST(load_data_tests, obe_high_symm_path) {
 TEST(load_data_tests, obe_parproj) {
   auto [_, obe] = one_body_elements_from_dft_converter("ref_data/SrVO3-cubic-t2g.ref.h5");
   std::cout << obe << std::endl;
-  auto obe_dos = one_body_elements_with_theta_projectors("ref_data/SrVO3-cubic-t2g.ref.h5", obe);
+  auto obe_dos = one_body_elements_with_partial_projectors("ref_data/SrVO3-cubic-t2g.ref.h5", obe);
   std::cout << obe_dos << std::endl;
 }
 

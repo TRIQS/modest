@@ -37,8 +37,10 @@ namespace triqs::modest {
 
   /// Store data of spectral functions.
   struct spectral_function_kw {
-    nda::array<double, 3> data;      ///< \f$ A^\sigma(k,\omega) \f$.
-    nda::array<double, 5> proj_data; ///< \f$ A^\sigma(k,\omega) \f$.
+    nda::array<double, 3> total;     ///< \f$ A^\sigma(k,\omega) \f$.
+    nda::array<double, 4> projected; ///< \f$ A^\sigma_{mm}(k,\omega) \f$ (diagonal in \f$m\f$).
+    static std::string hdf5_format() { return "SpectralFunctionKw"; }
+    friend std::ostream &operator<<(std::ostream &out, spectral_function_kw const &x);
   };
 
   /**
@@ -57,21 +59,23 @@ namespace triqs::modest {
   /// Store data of spectral functions.
   struct spectral_function_w {
     nda::array<double, 2> total;     ///< \f$ A^\sigma(\omega) \f$.
-    nda::array<double, 4> per_theta; ///< \f$ A^{\sigma}_{mm'}(\omega) \f$.
+    nda::array<double, 4> projected; ///< \f$ A^{\sigma}_{mm'}(\omega) \f$.
+
+    friend std::ostream &operator<<(std::ostream &out, spectral_function_w const &x);
   };
 
   /**
    * @ingroup post
    * @brief Compute the atom- and orbital-resolved spectral function (interacting density of states).
    *
-   * @param obe_theta One-body elements on grid created from one_body_elements_with_theta_projectors.
+   * @param obe One-body elements on grid created from one_body_elements_with_partial_projectors.
    * @param Proj Downfolding projector defined in the correlated space using to upfold the DMFT self-energies.
    * @param mu Chemical potential.
    * @param Sigma_w Self-energy in real-frequencies.
    * @param broadening Spectral broadening.
    * @return Atom- and orbital-resolved spectral function.
    */
-  spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe_theta, downfolding_projector const &Proj, double mu,
+  spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
 
   /**
@@ -90,7 +94,7 @@ namespace triqs::modest {
    * @param broadening Spectral broadening.
    * @return Band-resolved spectral function matrix.
    */
-  nda::array<double, 4> spectral_function(one_body_elements_on_grid const &obe, double mu,
-                                          block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
+  nda::array<double, 4> spectral_function(one_body_elements_on_grid const &obe, double mu, block2_gf<mesh::refreq, matrix_valued> const &Sigma_w,
+                                          double broadening = 0.01);
 
 } // namespace triqs::modest
