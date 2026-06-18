@@ -4,39 +4,27 @@
 // See LICENSE in the root of this distribution for details.
 
 #include "./postprocess.hpp"
+#include "./lattice_gf_helpers.hpp"
+#include "utils/defs.hpp"
 #include <iostream>
-#include <atomic>
-#include <stdexcept>
+#include <chrono>
 
 namespace triqs::modest {
 
-  namespace detail {
+  // All `detail::` helpers used here (upfold_self_energy_all_freq, detect_active_subspace,
+  // compute_bare_projected, compute_sigma_active, apply_K, …) live in `lattice_gf_helpers.hpp`.
 
-    // Upfold self-energy for ALL frequencies at once for a given (k, sigma)
-    // Returns array of shape (n_w, N_nu, N_nu)
-    auto upfold_self_energy_all_freq(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, auto const &Sigma_w, long k_idx,
-                                     long sigma_idx) {
-      auto N_nu = obe.H.N_nu(sigma_idx, k_idx);
-      auto n_w  = Sigma_w(0, 0).mesh().size();
-      auto out  = nda::zeros<dcomplex>(n_w, N_nu, N_nu);
+  // Single-projector overload — delegates to the two-projector implementation with Proj = obe.P.
+  spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe, double mu,
+                                                  block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening) {
+    return projected_spectral_function(obe, obe.P, mu, Sigma_w, broadening);
+  }
 
-      for (auto &&[alpha, R] : enumerated_sub_slices(get_struct(Sigma_w).dims(r_all, 0) | tl::to<std::vector>())) {
-        auto P         = Proj.P(sigma_idx, k_idx)(R, r_all);
-        auto Pdag      = dagger(P);
-        auto Sigma_blk = Sigma_w(alpha, sigma_idx).data();
-
-        // Batch over all frequencies
-        for (auto n : range(n_w)) { out(n, r_all, r_all) += Pdag * nda::matrix<dcomplex>{Sigma_blk(n, r_all, r_all)} * P; }
-      }
-      return out;
-    }
-
-  } // namespace detail
-
+  // Two-projector overload — the canonical implementation. Used directly for cases where Σ is
+  // upfolded by a `Proj` distinct from `obe.P`; the single-projector overload above just calls
+  // through with Proj = obe.P.
   spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening) {
-    using nda::linalg::inv;
-
     auto const &mesh = Sigma_w(0, 0).mesh();
     auto n_sigma     = obe.C_space.n_sigma();
     auto n_k         = obe.H.n_k();
@@ -45,32 +33,84 @@ namespace triqs::modest {
     auto im          = dcomplex(0, 1.0);
     auto delta       = im * broadening;
 
-    // Accumulate local Green's function over k-points
-    auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    // Accumulate local Green's function over k-points (MPI-chunked).
+    auto gloc_result       = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+    mpi::communicator comm = {};
 
-    for (auto k_idx : range(n_k)) {
-      for (auto sigma : range(n_sigma)) {
-        auto P    = obe.P.P(sigma, k_idx);
-        auto Pdag = dagger(P);
-        auto H_k  = obe.H.H(sigma, k_idx);
-        auto w_k  = obe.H.k_weights(k_idx);
-
-        // Precompute upfolded self-energy for all frequencies
-        auto PSP_all = detail::upfold_self_energy_all_freq(obe, Proj, Sigma_w, k_idx, sigma);
-
-        for (auto &&[n, w] : enumerate(mesh)) {
-          auto G_k = nda::matrix<dcomplex>{inv(w + delta + mu - H_k - PSP_all(n, r_all, r_all))};
-          gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * (P * G_k * Pdag);
+    if (obe.H.matrix_valued) {
+      // Matrix-valued H(k): direct N_ν × N_ν inversion fallback.
+      using nda::linalg::inv;
+      for (auto k_idx : mpi::chunk(range(n_k), comm)) {
+        for (auto sigma : range(n_sigma)) {
+          auto P       = obe.P.P(sigma, k_idx);
+          auto Pdag    = dagger(P);
+          auto H_k     = obe.H.H(sigma, k_idx);
+          auto w_k     = obe.H.k_weights(k_idx);
+          auto PSP_all = detail::upfold_self_energy_all_freq(obe, Proj, Sigma_w, k_idx, sigma);
+          for (auto &&[n, w] : enumerate(mesh)) {
+            auto G_k = nda::matrix<dcomplex>{inv(w + delta + mu - H_k - PSP_all(n, r_all, r_all))};
+            gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * (P * G_k * Pdag);
+          }
         }
       }
+    } else {
+      // Diagonal H(k): rank-reduced Woodbury per (k, σ, ω), uses two projectors:
+      //   obe.P  for the output projection (M × N_ν)
+      //   Proj   for the active rows that upfold Σ  (its first `rank` active rows form Q).
+      //
+      // Per ω:
+      //   K = Σ_a · (I − Q M₀⁻¹ Q† · Σ_a)⁻¹                                  (rank × rank)
+      //   gloc(σ, ω) += w_k · ( obe.P · M₀⁻¹ · obe.P†  +  L · K · R ),
+      //   L = obe.P · M₀⁻¹ · Q†,  R = Q · M₀⁻¹ · obe.P†   (R ≠ L† for complex ω).
+      auto decomp = get_struct(Sigma_w).dims(r_all, 0) | tl::to<std::vector>();
+      auto active = detail::detect_active_subspace(Sigma_w, decomp);
+      long rank   = active.rank;
+
+      auto omegas       = mesh | stdv::transform([&](auto w) { return dcomplex(w) + delta; }) | tl::to<std::vector>();
+      auto Sa_per_sigma = range(n_sigma) | stdv::transform([&](long sigma) { return detail::compute_sigma_active(Sigma_w, active, sigma); }) //
+         | tl::to<std::vector>();
+
+      if (comm.rank() == 0)
+        std::cerr << "projected_spectral_function: starting  (n_k=" << n_k << " n_sigma=" << n_sigma //
+                  << " n_w=" << n_w << " M=" << n_M << " rank=" << rank << ")\n";
+      auto t_start = std::chrono::steady_clock::now();
+
+      for (auto k_idx : mpi::chunk(range(n_k), comm)) {
+        for (auto sigma : range(n_sigma)) {
+          auto bare        = detail::compute_bare_projected(obe, Proj, mu, k_idx, sigma, omegas, active);
+          auto w_k         = obe.H.k_weights(k_idx);
+          auto const &Sa_n = Sa_per_sigma[sigma];
+
+          // Σ ≡ 0 short-circuit: G_loc^C = G0_PP, no correction. Avoids the 0 × 0 K-solve.
+          if (rank == 0) {
+            for (long n = 0; n < n_w; ++n) gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * bare.G0_PP(n, r_all, r_all);
+            continue;
+          }
+
+          for (long n = 0; n < n_w; ++n) {
+            auto Sa      = nda::matrix<dcomplex>{Sa_n(n, r_all, r_all)};
+            auto Yaa     = nda::matrix<dcomplex>{bare.G0_QQ(n, r_all, r_all)};
+            auto KR      = detail::apply_K(Sa, Yaa, bare.G0_QPdag(n, r_all, r_all));
+            auto L_n     = nda::matrix<dcomplex>{bare.G0_PQ(n, r_all, r_all)};
+            auto contrib = nda::matrix<dcomplex>{bare.G0_PP(n, r_all, r_all) + L_n * KR};
+            gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * contrib;
+          }
+        }
+      }
+
+      auto t_end  = std::chrono::steady_clock::now();
+      double secs = std::chrono::duration<double>(t_end - t_start).count();
+      if (comm.rank() == 0) std::cerr << "projected_spectral_function: total " << secs << " s\n";
     }
+
+    // Combine per-rank partial sums.  Each rank has accumulated its own k-chunk into gloc_result.
+    gloc_result = mpi::all_reduce(gloc_result);
 
     if (auto const &S = obe.ibz_symm_ops; S) { gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition()); }
 
-    // Extract spectral functions from local Green's function
+    // Extract spectral functions from the local Green's function.
     auto total     = nda::zeros<double>(n_sigma, n_w);
     auto projected = nda::zeros<double>(n_sigma, n_w, n_M, n_M);
-
     for (auto sigma : range(n_sigma)) {
       auto const &G = gloc_result(0, sigma).data();
       for (auto &&[n, w] : enumerate(mesh)) {
@@ -83,55 +123,16 @@ namespace triqs::modest {
     return {.total = total, .projected = projected};
   }
 
-  nda::array<double, 4> spectral_function(one_body_elements_on_grid const &obe, double mu, block2_gf<mesh::refreq, matrix_valued> const &Sigma_w,
-                                          double broadening) {
-    using nda::linalg::inv;
-
-    auto const &mesh = Sigma_w(0, 0).mesh() | tl::to<std::vector>();
-    auto n_sigma     = obe.C_space.n_sigma();
-    auto n_k         = obe.H.n_k();
-    auto n_w         = mesh.size();
-    auto n_bands     = obe.H.N_nu(0, 0);
-    auto delta       = dcomplex(0, broadening);
-
-    auto data = nda::zeros<double>(n_sigma, n_w, n_bands, n_bands);
-
-    for (auto k_idx : range(n_k)) {
-      for (auto sigma : range(n_sigma)) {
-        auto H_k      = obe.H.H(sigma, k_idx);
-        auto k_weight = obe.H.k_weights(k_idx);
-
-        auto PSP_all = detail::upfold_self_energy_all_freq(obe, obe.P, Sigma_w, k_idx, sigma);
-
-        for (auto &&[n, w] : enumerate(mesh)) {
-          auto G_k = inv(w + delta + mu - H_k - PSP_all(n, r_all, r_all));
-          auto A_k = real(dcomplex(0, 1.0) * (G_k - dagger(G_k)) / (2.0 * M_PI));
-          data(sigma, n, r_all, r_all) += k_weight * A_k;
-        }
-      }
-    }
-
-    return data;
-  }
-
   spectral_function_kw spectral_function_on_high_symmetry_path(one_body_elements_on_grid const &obe, double mu,
                                                                block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening) {
-    using nda::linalg::inv;
 
-    auto const &mesh = Sigma_w(0, 0).mesh() | tl::to<std::vector>();
+    auto const &mesh = Sigma_w(0, 0).mesh();
     auto n_sigma     = obe.C_space.n_sigma();
     auto n_w         = mesh.size();
     auto n_k         = obe.H.n_k();
     auto n_M         = obe.C_space.dim();
     auto delta       = dcomplex(0, broadening);
 
-<<<<<<< HEAD
-    auto data      = nda::zeros<double>(n_sigma, n_k, n_w);
-    auto proj_data = nda::zeros<double>(n_sigma, n_k, n_w, n_M, n_M);
-
-#pragma omp parallel for default(none) shared(n_k, n_sigma, n_w, obe, mu, delta, Sigma_w, broadening, mesh, data, proj_data, r_all)
-    for (auto k_idx : range(n_k)) {
-=======
     auto total     = nda::zeros<double>(n_sigma, n_k, n_w);
     auto projected = nda::zeros<double>(n_sigma, n_k, n_w, n_M);
 
@@ -183,16 +184,10 @@ namespace triqs::modest {
 #pragma omp parallel for collapse(2) default(none)                                                                                                   \
    shared(comm, n_k, n_sigma, n_M, n_w, rank, obe, mu, omegas, Sigma_w, active, Sa_per_sigma, total, projected, r_all)
     for (auto k_idx : mpi::chunk(range(n_k), comm)) {
->>>>>>> 894f1e0 (WIP)
       for (auto sigma : range(n_sigma)) {
-        auto P    = obe.P.P(sigma, k_idx);
-        auto Pdag = dagger(P);
-        auto H_k  = obe.H.H(sigma, k_idx);
+        auto bare        = detail::compute_bare_projected(obe, obe.P, mu, k_idx, sigma, omegas, active);
+        auto const &Sa_n = Sa_per_sigma[sigma];
 
-<<<<<<< HEAD
-        // Precompute upfolded self-energy for all frequencies
-        auto PSP_all = detail::upfold_self_energy_all_freq(obe, obe.P, Sigma_w, k_idx, sigma);
-=======
         // Σ ≡ 0 short-circuit: only the bare terms contribute. Avoids the 0 × 0 K-solve.
         if (rank == 0) {
           for (long n = 0; n < n_w; ++n) {
@@ -201,24 +196,22 @@ namespace triqs::modest {
           }
           continue;
         }
->>>>>>> 894f1e0 (WIP)
 
-        for (auto &&[n, w] : enumerate(mesh)) {
-          auto G_k = inv(w + delta + mu - H_k - PSP_all(n, r_all, r_all));
+        for (long n = 0; n < n_w; ++n) {
+          // Rank-reduced Woodbury without inverting Σ:  K · X = Σ_a · (I − Y_aa · Σ_a)⁻¹ · X.
+          // Solve once for both right-hand sides — trace and band-projection — by stacking
+          //   (I − Y_aa · Σ_a) · Y = [ G0_QQ_sq | G0_QPdag ],
+          // then K · [G0_QQ_sq | G0_QPdag] = Σ_a · Y.
+          auto Sa  = nda::matrix<dcomplex>{Sa_n(n, r_all, r_all)};
+          auto Yaa = nda::matrix<dcomplex>{bare.G0_QQ(n, r_all, r_all)};
+          auto LHS = nda::matrix<dcomplex, nda::F_layout>{-Yaa * Sa};
+          for (auto i : range(rank)) LHS(i, i) += 1.0;
 
-          // Total spectral function from trace
-          data(sigma, k_idx, n) = (-1.0 / M_PI) * imag(trace(G_k));
+          auto RHS                            = nda::matrix<dcomplex, nda::F_layout>::zeros(rank, rank + n_M);
+          RHS(r_all, range(0, rank))          = bare.G0_QQ_sq(n, r_all, r_all);
+          RHS(r_all, range(rank, rank + n_M)) = bare.G0_QPdag(n, r_all, r_all);
+          Ainv_B(LHS, RHS);
 
-<<<<<<< HEAD
-          // Orbital-resolved from projection
-          auto PGP                                 = P * nda::matrix<dcomplex>{G_k} * Pdag;
-          proj_data(sigma, k_idx, n, r_all, r_all) = (-1.0 / M_PI) * imag(PGP);
-        }
-      }
-    }
-
-    return {.data = data, .proj_data = proj_data};
-=======
           auto SaRHS   = nda::matrix<dcomplex>{Sa * nda::matrix<dcomplex>{RHS}};
           auto X_trace = SaRHS(r_all, range(0, rank));          // K · G0_QQ_sq   (rank × rank)
           auto KR      = SaRHS(r_all, range(rank, rank + n_M)); // K · G0_QPdag   (rank × M)
@@ -242,7 +235,6 @@ namespace triqs::modest {
     total     = mpi::all_reduce(total);
     projected = mpi::all_reduce(projected);
     return {.total = total, .projected = projected};
->>>>>>> 894f1e0 (WIP)
   }
 
 } // namespace triqs::modest

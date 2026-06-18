@@ -246,11 +246,4 @@ namespace triqs::modest {
   nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements_on_grid const &obe);
   // -------------------------------------------------------------
 
-  // These functions are not part of the public API: not documented, not wrapped.
-  namespace detail {
-    /// The projected bare function on the C space, cf notes.
-    nda::array<dcomplex, 3> G0_C_k_sigma(one_body_elements_on_grid const &obe, double mu, long k_idx, long sigma, std::vector<dcomplex> const &omegas,
-                                         bool mu_derivative = false);
-  } // namespace detail
-
 } // namespace triqs::modest
