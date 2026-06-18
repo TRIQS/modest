@@ -52,14 +52,14 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
 
   // run gloc, forcing gloc to use PTR on the same grid as the DFT calculation was done
   bz_int_options opt = {.k_grid = {7, 7, 7}, .k_grid_max = {7, 7, 7}, .run_adaptive = false};
-  auto gloc_tb                       = gloc(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
+  auto gloc_tb       = gloc(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
 
   // Check equivalence
   for (auto iw : iw_mesh) { EXPECT_COMPLEX_NEAR(gloc_tb(0, 0)[iw](0, 0), gloc_dft(0, 0)[iw](0, 0), 1e-5); }
 
   // density calculation for one spin channel, using the function which takes self energy and also the function assuming zero self energy
-  double n = density(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
-  double n_zero_sigma = density(obe_tb, mu_dft, iw_mesh, opt); 
+  double n            = density(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
+  double n_zero_sigma = density(obe_tb, mu_dft, iw_mesh, opt);
   EXPECT_NEAR(n, 1.0, 1e-4);
   EXPECT_NEAR(n_zero_sigma, 1.0, 1e-4);
 
@@ -100,10 +100,10 @@ TEST(obe_tb, svo_t2g_wannier90_multiorbtial) { // NOLINT
 
   // run gloc, forcing gloc to use PTR on the same grid as the DFT calculation was done
   bz_int_options opt = {.k_grid = {5, 5, 5}, .k_grid_max = {5, 5, 5}, .run_adaptive = false};
-  auto gloc_tb                       = gloc(iw_mesh, obe_tb, mu_dft, opt);
+  auto gloc_tb       = gloc(iw_mesh, obe_tb, mu_dft, opt);
 
-  // NOTE: The first frequency point here does not agree exactly, likely due to a small 
-  // difference in the Wannier H vs. the DFT data. 
+  // NOTE: The first frequency point here does not agree exactly, likely due to a small
+  // difference in the Wannier H vs. the DFT data.
   // This may also be due to the fact that DFT mesh was on [-0.5,0.5), and the PTR integration is 0,1
   for (auto iw : iw_mesh) { //
     if (std::abs(dcomplex(iw.value())) < 1.7) {
