@@ -59,7 +59,7 @@ namespace triqs::modest {
      : H{std::move(H_sigma)} {
 
     // check that appropriate Hamiltonian information was provided
-    if (H[0].n_orbitals() != H[1].n_orbitals()) {
+    if (spin_kind != spin_kind_e::NonColinear && H[0].n_orbitals() != H[1].n_orbitals()) {
       throw std::runtime_error(
          "Cannot construct a one_body_elements "
          "using up and down H_k that have a different number of orbitals.");
@@ -153,7 +153,7 @@ namespace triqs::modest {
       }
     }
 
-    return one_body_elements_tb(std::move(new_H), obe.C_space);
+    return {std::move(new_H), obe.C_space};
   }
 
   // -----------------------------------------------------------------------
@@ -179,16 +179,17 @@ namespace triqs::modest {
       return ext_mat;
     };
 
-    std::vector<nda::array<dcomplex, 2>> new_hoppings;
-    for (auto const &tR : obe.H[0].hoppings()) new_hoppings.emplace_back(extend_matrix(tR));
-    auto new_tb_H = std::vector<tb_hk>{{Rs, std::move(new_hoppings)}};
+    std::vector<nda::array<dcomplex, 2>> ext_hoppings;
+    for (auto const &tR : obe.H[0].hoppings()) ext_hoppings.emplace_back(extend_matrix(tR));
+    std::vector<tb_hk> ext_tb_H;
+    ext_tb_H.emplace_back(Rs, std::move(ext_hoppings));
 
     auto const &sh         = obe.C_space.atomic_shells();
     auto new_atomic_shells = sh
        | stdv::transform([](auto const &s) { return atomic_orbs{.dim = 2 * s.dim, .l = s.l, .cls_idx = s.cls_idx, .dft_idx = s.dft_idx}; })
        | tl::to<std::vector>();
 
-    return one_body_elements_tb(std::move(new_tb_H), spin_kind_e::NonColinear, std::move(new_atomic_shells));
+    return {std::move(ext_tb_H), spin_kind_e::NonColinear, std::move(new_atomic_shells)};
   }
 
   // -----------------------------------------------------------------------

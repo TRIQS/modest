@@ -2,7 +2,7 @@
 // This file is part of TRIQS/modest and is licensed under the terms of GPLv3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See LICENSE in the root of this distribution for details.
-
+#include "./obe_tb.hpp"
 #include "./downfolding.hpp"
 #include "./embedding.hpp"
 #include "./postprocess.hpp"
@@ -87,6 +87,28 @@ namespace triqs::modest {
     out2 << obe.P;
     out1 << fmt::format("IBZ = {}\n", bool(obe.ibz_symm_ops));
     if (obe.ibz_symm_ops) { out2 << obe.ibz_symm_ops.value(); };
+    return out;
+  }
+
+  std::ostream &operator<<(std::ostream &out, one_body_elements_tb const &obe) {
+    auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = triqs::utility::indented_ostream(out, 4);
+    out << "One body elements tight-binding: Fourier representation of one-body dispersion [one_body_elements_tb]\n";
+    out1 << "H^σ(k):\n";
+    for (auto &h : obe.H) { out2 << h; }
+    out1 << "C_space:\n";
+    out2 << obe.C_space;
+    return out;
+  }
+
+  std::ostream &operator<<(std::ostream &out, one_body_elements_gw const &obe) {
+    auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = triqs::utility::indented_ostream(out, 4);
+    out << "One body elements GW: [one_body_elements_gw]\n";
+    out1 << "C_space:\n";
+    out2 << obe.C_space;
+    out1 << "P:\n";
+    out2 << obe.P;
     return out;
   }
 

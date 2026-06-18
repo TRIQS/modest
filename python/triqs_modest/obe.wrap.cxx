@@ -117,14 +117,14 @@ template <> constexpr bool c2py::is_wrapped<_c2py_cls_1>     = true;
 template <> inline constexpr auto c2py::tp_name<_c2py_cls_1> = "triqs_modest.obe.LocalSpace";
 static const auto _c2py_init_0                               = c2py::dispatcher_c_kw_t{
    c2py::c_constructor<_c2py_cls_1, triqs::modest::spin_kind_e, std::vector<triqs::modest::atomic_orbs>,
-                       nda::basic_array<std::vector<long, std::allocator<long>>, 2, nda::C_layout, 'A',
-                                        nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
-                       nda::basic_array<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
-                                                         nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
-                                        2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
-                       nda::basic_array<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
-                                                         nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
-                                        1, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>(
+                                                     nda::basic_array<std::vector<long, std::allocator<long>>, 2, nda::C_layout, 'A',
+                                                                      nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
+                                                     nda::basic_array<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                                                                       nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
+                                                                      2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
+                                                     nda::basic_array<nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M',
+                                                                                       nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
+                                                                      1, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>(
       "spin_kind", "atomic_shells", "irreps_decomp_per_atom", "rotation_from_dft_to_local_basis", "rotation_from_spherical_to_dft_basis"),
    c2py::c_constructor<_c2py_cls_1>()};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_1> = c2py::pyfkw_constructor<_c2py_init_0>;
@@ -948,10 +948,10 @@ static auto const _c2py_fun_8 = c2py::dispatcher_f_kw_t{c2py::cfun(
    },
    "filename", "obe")};
 
-// one_body_elements_with_theta_projectors
+// one_body_elements_with_partial_projectors
 static auto const _c2py_fun_9 = c2py::dispatcher_f_kw_t{c2py::cfun(
    [](const std::string &filename, const triqs::modest::one_body_elements_on_grid &obe) {
-     return triqs::modest::one_body_elements_with_theta_projectors(filename, obe);
+     return triqs::modest::one_body_elements_with_partial_projectors(filename, obe);
    },
    "filename", "obe")};
 
@@ -1054,7 +1054,7 @@ Returns
                    {c2py::python_typename<triqs::modest::one_body_elements_on_grid>()});
 static const auto _c2py_doc_9 =
    _c2py_fun_9.doc(R"DOC(
-Create a one-body elements with the :math:`\Theta` projectors.
+Create a one-body elements with partial (all-atom) projectors.
 
 Using the data from the "dft_parproj_input" group, the local space, downfolding projectors,
 and optional IBZ symmetry ops are prepared to create a one-body elements. This object is
@@ -1070,7 +1070,7 @@ obe : {par_1}
 Returns
 -------
 {ret_0}
-   One-body elements using the :math:`\Theta` projectors.
+   One-body elements using the partial projectors.
 )DOC",
                    {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}},
                    {c2py::python_typename<triqs::modest::one_body_elements_on_grid>()});
@@ -1080,7 +1080,7 @@ static PyMethodDef module_methods[] = {
    {"make_one_body_elements_gw", (PyCFunction)c2py::pyfkw<_c2py_fun_6>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_6.c_str()},
    {"one_body_elements_from_dft_converter", (PyCFunction)c2py::pyfkw<_c2py_fun_7>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_7.c_str()},
    {"one_body_elements_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<_c2py_fun_8>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_8.c_str()},
-   {"one_body_elements_with_theta_projectors", (PyCFunction)c2py::pyfkw<_c2py_fun_9>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_9.c_str()},
+   {"one_body_elements_with_partial_projectors", (PyCFunction)c2py::pyfkw<_c2py_fun_9>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_9.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
