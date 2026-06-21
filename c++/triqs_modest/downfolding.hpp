@@ -219,6 +219,8 @@ namespace triqs::modest {
       mpi::broadcast(x.C_space, c, root);
       mpi::broadcast(x.P, c, root);
     }
+
+    friend std::ostream &operator<<(std::ostream &out, one_body_elements_gw const &x);
   };
 
   //-------------------------------------------------------------
