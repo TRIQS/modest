@@ -179,14 +179,24 @@ static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, const triqs::modest::downfolding_projector &Proj, double mu,
                  const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
                  double broadening) { return triqs::modest::projected_spectral_function(obe, Proj, mu, Sigma_w, broadening); },
-              "obe", "Proj", "mu", "Sigma_w", "broadening"_a = 0.01)};
+              "obe", "Proj", "mu", "Sigma_w", "broadening"_a = 0.01),
+   c2py::cfun([](const triqs::modest::one_body_elements_tb &obe, double mu,
+                 const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
+                 const triqs::experimental::lattice::bz_int_options &opt,
+                 double broadening) { return triqs::modest::projected_spectral_function(obe, mu, Sigma_w, opt, broadening); },
+              "obe", "mu", "Sigma_w", "opt", "broadening"_a = 0.01)};
 
 // spectral_function_on_high_symmetry_path
 static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, double mu,
                  const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
                  double broadening) { return triqs::modest::spectral_function_on_high_symmetry_path(obe, mu, Sigma_w, broadening); },
-              "obe", "mu", "Sigma_w", "broadening"_a = 0.01)};
+              "obe", "mu", "Sigma_w", "broadening"_a = 0.01),
+   c2py::cfun([](const triqs::modest::one_body_elements_tb &obe,
+                 const nda::basic_array<double, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &k_list,
+                 double mu, const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
+                 double broadening) { return triqs::modest::spectral_function_on_high_symmetry_path(obe, k_list, mu, Sigma_w, broadening); },
+              "obe", "k_list", "mu", "Sigma_w", "broadening"_a = 0.01)};
 
 static const auto _c2py_doc_0 =
    _c2py_fun_0.doc(R"DOC(
@@ -202,6 +212,16 @@ W space instead of the C space.
 
 ------
 
+[3] Compute the atom- and orbital-resolved spectral function (interacting DOS) from a tight-binding OBE.
+
+Accumulates the local Green's function on a uniform :math:`\Gamma`-centered Monkhorst-Pack grid built from
+`opt.k_grid`, projects to the C-space by index-slicing the first `C_space.dim()` rows/cols of the full
+n_orb × n_orb Wannier matrix (the same embedding convention used by `gloc(one_body_elements_tb, ...)`),
+and reports both the C-space trace (`total`) and the full C-space matrix (`projected`). Adaptive
+integration is not supported: `opt.run_adaptive` must be `false`.
+
+------
+
 Parameters
 ----------
 obe : {par_0}
@@ -214,6 +234,8 @@ broadening : {par_3}
    Spectral broadening.
 Proj : {par_4}
    Downfolding projector defined in the correlated space used to upfold the DMFT self-energies.
+opt : {par_5}
+   Container for BZ-integration options; `opt.k_grid` defines the uniform mesh.
 
 Returns
 -------
@@ -224,11 +246,22 @@ Returns
                     {c2py::python_typename<double>()},
                     {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
                     {c2py::python_typename<double>()},
-                    {c2py::python_typename<const triqs::modest::downfolding_projector &>()}},
+                    {c2py::python_typename<const triqs::modest::downfolding_projector &>()},
+                    {c2py::python_typename<const triqs::experimental::lattice::bz_int_options &>()}},
                    {c2py::python_typename<triqs::modest::spectral_function_w>()});
-static const auto _c2py_doc_1 =
-   _c2py_fun_1.doc(R"DOC(
-Compute momentum-resolved spectral function :math:`A^\sigma(k, \omega)` along high-symmetry path.
+static const auto _c2py_doc_1 = _c2py_fun_1.doc(
+   R"DOC(
+[1] Compute momentum-resolved spectral function :math:`A^\sigma(k, \omega)` along high-symmetry path.
+
+------
+
+[2] Compute the momentum-resolved spectral function :math:`A^\sigma(k,\omega)` along a user-supplied path.
+
+H(k) is evaluated on the fly at each row of `k_list` (fractional coordinates, units of reciprocal lattice
+vectors). Use `triqs.lattice.utils.k_space_path` to build a path. The returned `projected` field is the
+diagonal in the C-space orbital index (shape `[n_sigma, n_k, n_w, n_M]`), matching the on-grid path version.
+
+------
 
 Parameters
 ----------
@@ -240,17 +273,24 @@ Sigma_w : {par_2}
    Self-energy in real-frequencies.
 broadening : {par_3}
    Spectral broadening.
+k_list : {par_4}
+   Array of shape `[nk, 3]` of fractional k-points.
 
 Returns
 -------
-{ret_0}
+[1] : {ret_0}
    Momentum-resolved spectral function.
+
+[2] : {ret_1}
+   Momentum-resolved spectral function (total Wannier trace + C-space projection).
 )DOC",
-                   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
-                    {c2py::python_typename<double>()},
-                    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
-                    {c2py::python_typename<double>()}},
-                   {c2py::python_typename<triqs::modest::spectral_function_kw>()});
+   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+    {c2py::python_typename<double>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+    {c2py::python_typename<double>()},
+    {c2py::python_typename<
+       const nda::basic_array<double, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()}},
+   {c2py::python_typename<triqs::modest::spectral_function_kw>(), c2py::python_typename<triqs::modest::spectral_function_kw>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {

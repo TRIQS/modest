@@ -8,6 +8,7 @@
 #include <nda/nda.hpp>
 #include <triqs/gfs.hpp>
 #include "./downfolding.hpp"
+#include "./obe_tb.hpp"
 
 namespace triqs::modest {
 
@@ -76,5 +77,47 @@ namespace triqs::modest {
    */
   spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
+
+  //-------------------------------------------------------------------------------------------
+  // OBE tight-binding overloads
+  //-------------------------------------------------------------------------------------------
+
+  /**
+   * @ingroup post
+   * @brief Compute the atom- and orbital-resolved spectral function (interacting DOS) from a tight-binding OBE.
+   *
+   * Accumulates the local Green's function on a uniform \f$\Gamma\f$-centered Monkhorst-Pack grid built from
+   * `opt.k_grid`, projects to the C-space by index-slicing the first `C_space.dim()` rows/cols of the full
+   * n_orb × n_orb Wannier matrix (the same embedding convention used by `gloc(one_body_elements_tb, ...)`),
+   * and reports both the C-space trace (`total`) and the full C-space matrix (`projected`). Adaptive
+   * integration is not supported: `opt.run_adaptive` must be `false`.
+   *
+   * @param obe One-body elements built from a tight-binding Hamiltonian.
+   * @param mu Chemical potential.
+   * @param Sigma_w Self-energy in real-frequencies.
+   * @param opt Container for BZ-integration options; `opt.k_grid` defines the uniform mesh.
+   * @param broadening Spectral broadening.
+   * @return Atom- and orbital-resolved spectral function.
+   */
+  spectral_function_w projected_spectral_function(one_body_elements_tb const &obe, double mu, block2_gf<mesh::refreq, matrix_valued> const &Sigma_w,
+                                                  bz_int_options const &opt, double broadening = 0.01);
+
+  /**
+   * @ingroup post
+   * @brief Compute the momentum-resolved spectral function \f$A^\sigma(k,\omega)\f$ along a user-supplied path.
+   *
+   * H(k) is evaluated on the fly at each row of `k_list` (fractional coordinates, units of reciprocal lattice
+   * vectors). Use `triqs.lattice.utils.k_space_path` to build a path. The returned `projected` field is the
+   * diagonal in the C-space orbital index (shape `[n_sigma, n_k, n_w, n_M]`), matching the on-grid path version.
+   *
+   * @param obe One-body elements built from a tight-binding Hamiltonian.
+   * @param k_list Array of shape `[nk, 3]` of fractional k-points.
+   * @param mu Chemical potential.
+   * @param Sigma_w Self-energy in real-frequencies.
+   * @param broadening Spectral broadening.
+   * @return Momentum-resolved spectral function (total Wannier trace + C-space projection).
+   */
+  spectral_function_kw spectral_function_on_high_symmetry_path(one_body_elements_tb const &obe, nda::array<double, 2> const &k_list, double mu,
+                                                               block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening = 0.01);
 
 } // namespace triqs::modest

@@ -95,7 +95,7 @@ namespace triqs::modest {
     auto out2 = triqs::utility::indented_ostream(out, 4);
     out << "One body elements tight-binding: Fourier representation of one-body dispersion [one_body_elements_tb]\n";
     out1 << "H^σ(k):\n";
-    for (auto &h : obe.H) { out2 << h; }
+    for (auto &h : obe.H) { out2 << h << "\n"; }
     out1 << "C_space:\n";
     out2 << obe.C_space;
     return out;

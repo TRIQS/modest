@@ -11,18 +11,13 @@
 
 namespace triqs::modest {
 
-  // All `detail::` helpers used here (upfold_self_energy_all_freq, detect_active_subspace,
-  // compute_bare_projected, compute_sigma_active, apply_K, …) live in `lattice_gf_helpers.hpp`.
-
-  // Single-projector overload — delegates to the two-projector implementation with Proj = obe.P.
+  // Single-projector overload
   spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening) {
     return projected_spectral_function(obe, obe.P, mu, Sigma_w, broadening);
   }
 
-  // Two-projector overload — the canonical implementation. Used directly for cases where Σ is
-  // upfolded by a `Proj` distinct from `obe.P`; the single-projector overload above just calls
-  // through with Proj = obe.P.
+  // Two-projector overload — the canonical implementation.
   spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening) {
     auto const &mesh = Sigma_w(0, 0).mesh();
@@ -81,7 +76,7 @@ namespace triqs::modest {
           auto w_k         = obe.H.k_weights(k_idx);
           auto const &Sa_n = Sa_per_sigma[sigma];
 
-          // Σ ≡ 0 short-circuit: G_loc^C = G0_PP, no correction. Avoids the 0 × 0 K-solve.
+          // Σ ≡ 0 short-circuit: G_loc^C = G0_PP, no correction.
           if (rank == 0) {
             for (long n = 0; n < n_w; ++n) gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * bare.G0_PP(n, r_all, r_all);
             continue;
@@ -136,9 +131,6 @@ namespace triqs::modest {
     auto total     = nda::zeros<double>(n_sigma, n_k, n_w);
     auto projected = nda::zeros<double>(n_sigma, n_k, n_w, n_M);
 
-    // Each k-point's outputs land in independent slots of (total, projected).  Each MPI rank fills
-    // only its own k-chunk and leaves the other slots zero, so all_reduce(+) acts as a gather —
-    // not a sum over k in the mathematical sense.
     mpi::communicator comm = {};
 
     // Matrix-valued H(k): direct N_ν × N_ν inversion.
@@ -232,6 +224,132 @@ namespace triqs::modest {
     auto t_end        = std::chrono::steady_clock::now();
     double total_secs = std::chrono::duration<double>(t_end - t_start).count();
     if (comm.rank() == 0) std::cerr << "spectral_function_on_high_symmetry_path: total " << total_secs << " s\n";
+    total     = mpi::all_reduce(total);
+    projected = mpi::all_reduce(projected);
+    return {.total = total, .projected = projected};
+  }
+
+  //-------------------------------------------------------------------------------------------
+  // OBE tight-binding implementations
+  //-------------------------------------------------------------------------------------------
+
+  spectral_function_w projected_spectral_function(one_body_elements_tb const &obe, double mu, block2_gf<mesh::refreq, matrix_valued> const &Sigma_w,
+                                                  bz_int_options const &opt, double broadening) {
+    using nda::linalg::inv;
+
+    auto const &mesh = Sigma_w(0, 0).mesh();
+    long n_sigma     = obe.C_space.n_sigma();
+    long n_M         = obe.C_space.dim();
+    long n_w         = mesh.size();
+    auto im          = dcomplex(0, 1.0);
+    auto delta       = im * broadening;
+    auto R_C         = nda::range(0, n_M);
+
+    auto k_list     = detail::make_uniform_k_mesh(opt);
+    long n_k        = k_list.extent(0);
+    double k_weight = 1.0 / double(n_k);
+
+    mpi::communicator comm = {};
+
+    auto my_indices = mpi::chunk(range(n_k), comm) | tl::to<std::vector<long>>();
+    long my_n_k     = long(my_indices.size());
+    nda::array<double, 2> my_k_list(my_n_k, 3);
+    for (long i = 0; i < my_n_k; ++i) {
+      long k_idx = my_indices[i];
+      for (long d = 0; d < 3; ++d) my_k_list(i, d) = k_list(k_idx, d);
+    }
+
+    if (comm.rank() == 0)
+      std::cerr << "projected_spectral_function: starting  (n_k=" << n_k << " n_sigma=" << n_sigma //
+                << " n_w=" << n_w << " M=" << n_M << ")\n";
+    auto t_start = std::chrono::steady_clock::now();
+
+    auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
+
+    for (auto sigma : range(n_sigma)) {
+      auto Sigma_emb  = detail::embed_self_energy_all_freq(obe, Sigma_w, sigma);
+      auto H_all_my_k = obe.H[sigma](nda::array_const_view<double, 2>(my_k_list)); // [my_n_k, n_orb, n_orb]
+
+      for (long i = 0; i < my_n_k; ++i) {
+        nda::matrix<dcomplex> H_k = H_all_my_k(i, r_all, r_all);
+        for (auto &&[n, w] : enumerate(mesh)) {
+          auto G_k = nda::matrix<dcomplex>{inv(w + delta + mu - H_k - nda::matrix<dcomplex>{Sigma_emb(n, r_all, r_all)})};
+          gloc_result(0, sigma).data()(n, r_all, r_all) += k_weight * G_k(R_C, R_C);
+        }
+      }
+    }
+
+    // Combine per-rank partial sums.
+    gloc_result = mpi::all_reduce(gloc_result);
+
+    auto t_end  = std::chrono::steady_clock::now();
+    double secs = std::chrono::duration<double>(t_end - t_start).count();
+    if (comm.rank() == 0) std::cerr << "projected_spectral_function: total " << secs << " s\n";
+
+    // Extract spectral functions from the local Green's function.
+    auto total     = nda::zeros<double>(n_sigma, n_w);
+    auto projected = nda::zeros<double>(n_sigma, n_w, n_M, n_M);
+    for (auto sigma : range(n_sigma)) {
+      auto const &G = gloc_result(0, sigma).data();
+      for (auto &&[n, w] : enumerate(mesh)) {
+        auto g                            = nda::matrix<dcomplex>{G(n, r_all, r_all)};
+        total(sigma, n)                   = (-1.0 / M_PI) * imag(trace(g));
+        projected(sigma, n, r_all, r_all) = real(im * (g - dagger(g)) / (2 * M_PI));
+      }
+    }
+    return {.total = total, .projected = projected};
+  }
+
+  spectral_function_kw spectral_function_on_high_symmetry_path(one_body_elements_tb const &obe, nda::array<double, 2> const &k_list, double mu,
+                                                               block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening) {
+    using nda::linalg::inv;
+
+    auto const &mesh = Sigma_w(0, 0).mesh();
+    auto mesh_vec    = mesh | tl::to<std::vector>();
+    long n_sigma     = obe.C_space.n_sigma();
+    long n_k         = k_list.extent(0);
+    long n_w         = mesh.size();
+    long n_M         = obe.C_space.dim();
+    auto delta       = dcomplex(0, broadening);
+
+    auto total     = nda::zeros<double>(n_sigma, n_k, n_w);
+    auto projected = nda::zeros<double>(n_sigma, n_k, n_w, n_M);
+
+    mpi::communicator comm = {};
+
+    // Batch-evaluate H(k) for the full k-list once per σ (BLAS-3 gemm); each rank then
+    // iterates its own k-chunk and writes into the corresponding slots of (total, projected).
+    std::vector<nda::array<dcomplex, 3>> Sigma_emb_per_sigma;
+    Sigma_emb_per_sigma.reserve(n_sigma);
+    for (auto sigma : range(n_sigma)) Sigma_emb_per_sigma.push_back(detail::embed_self_energy_all_freq(obe, Sigma_w, sigma));
+
+    std::vector<nda::array<dcomplex, 3>> H_per_sigma;
+    H_per_sigma.reserve(n_sigma);
+    for (auto sigma : range(n_sigma)) H_per_sigma.push_back(obe.H[sigma](nda::array_const_view<double, 2>(k_list)));
+
+    if (comm.rank() == 0)
+      std::cerr << "spectral_function_on_high_symmetry_path: starting  (n_k=" << n_k << " n_sigma=" << n_sigma //
+                << " n_w=" << n_w << " M=" << n_M << ")\n";
+    auto t_start = std::chrono::steady_clock::now();
+
+#pragma omp parallel for collapse(2) default(none)                                                                                                   \
+   shared(comm, n_k, n_sigma, n_M, H_per_sigma, Sigma_emb_per_sigma, mu, delta, mesh_vec, total, projected, r_all)
+    for (auto k_idx : mpi::chunk(range(n_k), comm)) {
+      for (auto sigma : range(n_sigma)) {
+        nda::matrix<dcomplex> H_k = H_per_sigma[sigma](k_idx, r_all, r_all);
+        auto const &Sigma_emb     = Sigma_emb_per_sigma[sigma];
+        for (auto &&[n, w] : enumerate(mesh_vec)) {
+          auto G_k               = inv(w + delta + mu - H_k - nda::matrix<dcomplex>{Sigma_emb(n, r_all, r_all)});
+          total(sigma, k_idx, n) = (-1.0 / M_PI) * imag(trace(G_k));
+          for (auto m : range(n_M)) projected(sigma, k_idx, n, m) = (-1.0 / M_PI) * imag(G_k(m, m));
+        }
+      }
+    }
+
+    auto t_end  = std::chrono::steady_clock::now();
+    double secs = std::chrono::duration<double>(t_end - t_start).count();
+    if (comm.rank() == 0) std::cerr << "spectral_function_on_high_symmetry_path: total " << secs << " s\n";
+
     total     = mpi::all_reduce(total);
     projected = mpi::all_reduce(projected);
     return {.total = total, .projected = projected};

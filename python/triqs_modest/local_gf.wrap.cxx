@@ -38,6 +38,19 @@ static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{c2py::cfun(
 // gloc
 static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
    c2py::cfun(
+      [](const triqs::modest::one_body_elements_tb &obe, double mu,
+         const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         const triqs::experimental::lattice::bz_int_options &opt) {
+        return triqs::modest::gloc<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
+      },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
+   c2py::cfun([](const triqs::mesh::imfreq &mesh, const triqs::modest::one_body_elements_tb &obe, double mu,
+                 const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::imfreq>(mesh, obe, mu, opt); },
+              "mesh", "obe", "mu", "opt"),
+   c2py::cfun(
       [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
          const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
          const nda::basic_array<
@@ -60,20 +73,7 @@ static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
               "mesh", "obe", "mu"),
    c2py::cfun([](const triqs::mesh::dlr_imfreq &mesh, const triqs::modest::one_body_elements_on_grid &obe,
                  double mu) { return triqs::modest::gloc<triqs::mesh::dlr_imfreq>(mesh, obe, mu); },
-              "mesh", "obe", "mu"),
-   c2py::cfun(
-      [](const triqs::modest::one_body_elements_tb &obe, double mu,
-         const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
-         const nda::basic_array<
-            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
-            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
-         const triqs::experimental::lattice::bz_int_options &opt) {
-        return triqs::modest::gloc<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
-      },
-      "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
-   c2py::cfun([](const triqs::mesh::imfreq &mesh, const triqs::modest::one_body_elements_tb &obe, double mu,
-                 const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::imfreq>(mesh, obe, mu, opt); },
-              "mesh", "obe", "mu", "opt")};
+              "mesh", "obe", "mu")};
 
 static const auto _c2py_doc_0 = _c2py_fun_0.doc(
    R"DOC(
@@ -107,7 +107,13 @@ Returns
       nda::basic_array<std::complex<double>, 4, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>()});
 static const auto _c2py_doc_1 = _c2py_fun_1.doc(
    R"DOC(
-[1, 2] Compute local Green's function on a :math:`M \times M` mesh.
+[1, 2, 5, 6] Compute the local Green's function without a self-energy.
+
+See other overloads (gloc) for more details.
+
+------
+
+[3, 4] Compute local Green's function on a :math:`M \times M` mesh.
 
 When the one-body dispersion is defined as fixed k-grid, which is the case when working with DFT codes
 (e.g., VASP, Wien2k, Elk) or performing charge self-consistent calculations with any DFT code, :math:`H(\mathbf{k})`
@@ -125,16 +131,10 @@ using the Woodbury formula which allows us to perform the matrix inversion in th
 
 ------
 
-[3, 4, 5, 6] Compute the local Green's function without a self-energy.
-
-See other overloads (gloc) for more details.
-
-------
-
 Parameters
 ----------
 obe : {par_0}
-   One-body elements on a fixed grid.
+   One-body elements containing the TB Hamiltonian.
 mu : {par_1}
    Chemical potential :math:`\mu`.
 Sigma_dynamic : {par_2}
@@ -143,37 +143,37 @@ Sigma_dynamic : {par_2}
 Sigma_static : {par_3}
    The static part of the embedded self-energy in the embedded view,
    :math:`\Sigma_{\text{static}}[\alpha,\sigma]`.
-mesh : {par_4}
-   (DLR) imaginary frequency mesh.
-opt : {par_5}
+opt : {par_4}
    Container for options related to integration of the BZ.
+mesh : {par_5}
+   The mesh on which :math:`G_{\mathrm{loc}}` will be computed.
 
 Returns
 -------
-[1] : {ret_0}
-   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function in the full :math:`\mathcal{C}` space.
-
-[2] : {ret_1}
-   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function in the full :math:`\mathcal{C}` space.
-
-[3, 5, 6] : {ret_2}
+[1, 2, 5] : {ret_0}
    :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
 
-[4] : {ret_3}
+[3] : {ret_1}
+   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function in the full :math:`\mathcal{C}` space.
+
+[4] : {ret_2}
+   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function in the full :math:`\mathcal{C}` space.
+
+[6] : {ret_3}
    :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
 )DOC",
-   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+   {{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
     {c2py::python_typename<double>()},
     {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
      c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
     {c2py::python_typename<const nda::basic_array<
        nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
        nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
-    {c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()},
-    {c2py::python_typename<const triqs::experimental::lattice::bz_int_options &>()}},
+    {c2py::python_typename<const triqs::experimental::lattice::bz_int_options &>()},
+    {c2py::python_typename<const triqs::mesh::imfreq &>()}},
    {c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>(),
-    c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>(),
     c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>(),
+    c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>(),
     c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>()});
 //--------------------- module function table  -----------------------------
 
