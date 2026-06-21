@@ -61,6 +61,7 @@ namespace triqs::modest {
       mpi::broadcast(x.C_space, c, root);
       mpi::broadcast(x.H, c, root);
     }
+    friend std::ostream &operator<<(std::ostream &out, one_body_elements_tb const &x);
   };
 
   /** @name OBE factories using a TB Hamiltonian
@@ -284,8 +285,7 @@ namespace triqs::modest {
     std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static, &opt](double x) {
       return density(obe, x, Sigma_dynamic, Sigma_static, opt);
     };
-    return std::get<0>(
-       root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+    return std::get<0>(root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
   }
 
   /**
