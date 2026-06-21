@@ -7,6 +7,7 @@
 #include <nda/nda.hpp>
 #include <triqs/gfs.hpp>
 #include "./downfolding.hpp"
+#include "./obe_tb.hpp"
 #include "utils/defs.hpp"
 #include "utils/enumerate_slice.hpp"
 #include "utils/nda_supp.hpp"
@@ -275,6 +276,55 @@ namespace triqs::modest::detail {
       }
     }
     return out;
+  }
+
+  // ===================================================================================
+  // OBE-TB helpers.  The TB Hamiltonian lives in the Wannier basis already, so Σ is
+  // "upfolded" by writing its impurity blocks into the embedding rows/cols of the full
+  // n_orb × n_orb matrix (no projector multiplication).
+  // ===================================================================================
+
+  /// Index-embed Σ for ALL frequencies into the full Wannier basis, given (σ).
+  /// Returns (n_w, n_orb, n_orb).  Sibling of `upfold_self_energy_all_freq` for OBE-TB.
+  inline auto embed_self_energy_all_freq(one_body_elements_tb const &obe, auto const &Sigma_w, long sigma_idx) {
+    long n_orb = obe.H[sigma_idx].n_orbitals();
+    long n_w   = Sigma_w(0, 0).mesh().size();
+    auto out   = nda::zeros<dcomplex>(n_w, n_orb, n_orb);
+
+    auto embedding_decomp = get_struct(Sigma_w).dims(r_all, 0) | tl::to<std::vector>();
+    for (auto &&[block, R] : enumerated_sub_slices(embedding_decomp)) {
+      auto Sigma_blk = Sigma_w(block, sigma_idx).data();
+      for (auto n : range(n_w)) { out(n, R, R) += nda::matrix<dcomplex>{Sigma_blk(n, r_all, r_all)}; }
+    }
+    return out;
+  }
+
+  /// Uniform Γ-centered Monkhorst-Pack k-mesh from `opt.k_grid`, in fractional coords.
+  /// Convention k_i = i / N_i (i = 0..N_i-1), matching `integrate_ptr`.
+  /// Throws if `opt.run_adaptive` — adaptive integration is not supported for spectral
+  /// postprocessing.
+  inline nda::array<double, 2> make_uniform_k_mesh(bz_int_options const &opt) {
+    if (opt.run_adaptive) {
+      throw std::runtime_error("make_uniform_k_mesh: adaptive integration is unsupported "
+                               "for spectral postprocessing — set opt.run_adaptive = false.");
+    }
+    auto Nx  = opt.k_grid[0];
+    auto Ny  = opt.k_grid[1];
+    auto Nz  = opt.k_grid[2];
+    long n_k = Nx * Ny * Nz;
+    nda::array<double, 2> k_list(n_k, 3);
+    long i = 0;
+    for (long ix = 0; ix < Nx; ++ix) {
+      for (long iy = 0; iy < Ny; ++iy) {
+        for (long iz = 0; iz < Nz; ++iz) {
+          k_list(i, 0) = double(ix) / double(Nx);
+          k_list(i, 1) = double(iy) / double(Ny);
+          k_list(i, 2) = double(iz) / double(Nz);
+          ++i;
+        }
+      }
+    }
+    return k_list;
   }
 
 } // namespace triqs::modest::detail

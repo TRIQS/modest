@@ -61,6 +61,7 @@ namespace triqs::modest {
       mpi::broadcast(x.C_space, c, root);
       mpi::broadcast(x.H, c, root);
     }
+    friend std::ostream &operator<<(std::ostream &out, one_body_elements_tb const &x);
   };
 
   /** @name OBE factories using a TB Hamiltonian
