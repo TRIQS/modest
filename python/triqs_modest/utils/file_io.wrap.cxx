@@ -44,14 +44,18 @@ static int synth_constructor_0(PyObject *self, PyObject *args, PyObject *kwargs)
   de("mu", self_c.mu, false);
   de("Sigma_imp_list", self_c.Sigma_imp_list, false);
   de("Sigma_hartree_list", self_c.Sigma_hartree_list, false);
+  de("Gimp_list", self_c.Gimp_list, true);
+  de("Sigma_dc_list", self_c.Sigma_dc_list, true);
+  de("Gloc_list", self_c.Gloc_list, true);
+  de("Delta_list", self_c.Delta_list, true);
   return de.check();
 }
 
 template <> constexpr initproc c2py::tp_init<_c2py_cls_0> = synth_constructor_0;
 
 template <>
-const std::string c2py::tp_ctor_doc<_c2py_cls_0> =
-   c2py::replace_tags(R"DOC(Synthesized constructor with the following keyword arguments:
+const std::string c2py::tp_ctor_doc<_c2py_cls_0> = c2py::replace_tags(
+   R"DOC(Synthesized constructor with the following keyword arguments:
 
 Parameters
 ----------
@@ -61,10 +65,20 @@ Sigma_imp_list : {par_1}
 
 Sigma_hartree_list : {par_2}
 
+Gimp_list : {par_3}, default={}
+
+Sigma_dc_list : {par_4}, default={}
+
+Gloc_list : {par_5}, default={}
+
+Delta_list : {par_6}, default={}
+
 )DOC",
-                      "par",
-                      {c2py::python_typename<double>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>(),
-                       c2py::python_typename<std::vector<triqs::modest::block_mat_t>>()});
+   "par",
+   {c2py::python_typename<double>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>(),
+    c2py::python_typename<std::vector<triqs::modest::block_mat_t>>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>(),
+    c2py::python_typename<std::vector<triqs::modest::block_mat_t>>(), c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>(),
+    c2py::python_typename<std::vector<triqs::modest::block_gf_imfreq_t>>()});
 
 // ----- Method table ----
 template <>
@@ -76,12 +90,20 @@ PyMethodDef c2py::tp_methods<_c2py_cls_0>[] = {
 constexpr auto _c2py_doc_member_0 = R"DOC()DOC";
 constexpr auto _c2py_doc_member_1 = R"DOC()DOC";
 constexpr auto _c2py_doc_member_2 = R"DOC()DOC";
+constexpr auto _c2py_doc_member_3 = R"DOC()DOC";
+constexpr auto _c2py_doc_member_4 = R"DOC()DOC";
+constexpr auto _c2py_doc_member_5 = R"DOC()DOC";
+constexpr auto _c2py_doc_member_6 = R"DOC()DOC";
 static PyObject *prop_get_dict_0(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<_c2py_cls_0> *)self)->_c);
   c2py::pydict dic;
   dic["mu"]                 = self_c.mu;
   dic["Sigma_imp_list"]     = self_c.Sigma_imp_list;
   dic["Sigma_hartree_list"] = self_c.Sigma_hartree_list;
+  dic["Gimp_list"]          = self_c.Gimp_list;
+  dic["Sigma_dc_list"]      = self_c.Sigma_dc_list;
+  dic["Gloc_list"]          = self_c.Gloc_list;
+  dic["Delta_list"]         = self_c.Delta_list;
   return dic.new_ref();
 }
 
@@ -92,12 +114,21 @@ constinit PyGetSetDef c2py::tp_getset<_c2py_cls_0>[] = {
    c2py::getsetdef_from_member<&_c2py_cls_0::mu, _c2py_cls_0>("mu", _c2py_doc_member_0),
    c2py::getsetdef_from_member<&_c2py_cls_0::Sigma_imp_list, _c2py_cls_0>("Sigma_imp_list", _c2py_doc_member_1),
    c2py::getsetdef_from_member<&_c2py_cls_0::Sigma_hartree_list, _c2py_cls_0>("Sigma_hartree_list", _c2py_doc_member_2),
+   c2py::getsetdef_from_member<&_c2py_cls_0::Gimp_list, _c2py_cls_0>("Gimp_list", _c2py_doc_member_3),
+   c2py::getsetdef_from_member<&_c2py_cls_0::Sigma_dc_list, _c2py_cls_0>("Sigma_dc_list", _c2py_doc_member_4),
+   c2py::getsetdef_from_member<&_c2py_cls_0::Gloc_list, _c2py_cls_0>("Gloc_list", _c2py_doc_member_5),
+   c2py::getsetdef_from_member<&_c2py_cls_0::Delta_list, _c2py_cls_0>("Delta_list", _c2py_doc_member_6),
    {"__dict__", (getter)prop_get_dict_0, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 template <>
-const std::string c2py::tp_doc<_c2py_cls_0> =
-   R"DOC(Minimal iteration data required to restart a DMFT loop.)DOC" + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_0>;
+const std::string c2py::tp_doc<_c2py_cls_0> = R"DOC(Per-iteration DMFT data: restart-required self-energies plus optional inputs/outputs.
+
+The fields split semantically into inputs to the impurity solver (Gloc, Delta) and outputs
+from it (Gimp, Sigma_imp, Sigma_hartree, Sigma_dc). The HDF5 layout mirrors that split
+(`inputs/` and `outputs/` subgroups); the API is flat. All optional fields default to
+empty vectors so callers only fill what they have.)DOC"
+   + std::string{"\n\n----------\n\n"} + c2py::tp_ctor_doc<_c2py_cls_0>;
 // --------- class _c2py_cls_1 -----------
 using _c2py_cls_1                                            = triqs::modest::checkpoint<triqs::modest::iteration_data>;
 template <> constexpr bool c2py::is_wrapped<_c2py_cls_1>     = true;
