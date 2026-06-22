@@ -955,6 +955,21 @@ static auto const _c2py_fun_9 = c2py::dispatcher_f_kw_t{c2py::cfun(
    },
    "filename", "obe")};
 
+// rotate_local_basis
+static auto const _c2py_fun_10 = c2py::dispatcher_f_kw_t{
+   c2py::cfun(
+      [](const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &U,
+         const triqs::modest::ibz_symmetry_ops &x) { return triqs::modest::rotate_local_basis(U, x); },
+      "U", "x"),
+   c2py::cfun(
+      [](const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &U,
+         const triqs::modest::one_body_elements_on_grid &x) { return triqs::modest::rotate_local_basis(U, x); },
+      "U", "x")};
+
 static const auto _c2py_doc_6 =
    _c2py_fun_6.doc(R"DOC(
 Create a one-body elements for GW calculations with CoQui.
@@ -1074,6 +1089,33 @@ Returns
 )DOC",
                    {{c2py::python_typename<const std::string &>()}, {c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()}},
                    {c2py::python_typename<triqs::modest::one_body_elements_on_grid>()});
+static const auto _c2py_doc_10 = _c2py_fun_10.doc(
+   R"DOC(
+[1] Change basis
+
+------
+
+[2] Rotates the local basis of the downfolding projector
+
+------
+
+Parameters
+----------
+U : {par_0}
+   Rotations by block in atomic decomposition
+x : {par_1}
+   ibz_symmetry_ops to rotate
+
+Returns
+-------
+{ret_0}
+   A new symmetrizer operating in the rotated basis U^† U
+)DOC",
+   {{c2py::python_typename<const nda::basic_array<
+       nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+       nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
+    {c2py::python_typename<const triqs::modest::ibz_symmetry_ops &>()}},
+   {c2py::python_typename<triqs::modest::ibz_symmetry_ops>()});
 //--------------------- module function table  -----------------------------
 
 static PyMethodDef module_methods[] = {
@@ -1081,6 +1123,7 @@ static PyMethodDef module_methods[] = {
    {"one_body_elements_from_dft_converter", (PyCFunction)c2py::pyfkw<_c2py_fun_7>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_7.c_str()},
    {"one_body_elements_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<_c2py_fun_8>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_8.c_str()},
    {"one_body_elements_with_partial_projectors", (PyCFunction)c2py::pyfkw<_c2py_fun_9>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_9.c_str()},
+   {"rotate_local_basis", (PyCFunction)c2py::pyfkw<_c2py_fun_10>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_10.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
