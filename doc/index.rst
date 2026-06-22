@@ -19,9 +19,8 @@ modest
 
 To get started, see the :ref:`installation instructions <install>`.
 
-Learn how to use modest in the :ref:`User guide <userguide>` or jump straight
-to the :ref:`API reference <reference>`.
-
+Learn how to use modest in the :ref:`User guide <userguide>` and :ref:`tutorials` 
+or jump straight to the :ref:`API reference <reference>`.
 
 .. toctree::
    :maxdepth: 2

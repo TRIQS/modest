@@ -1,0 +1,38 @@
+System  = SrVO3
+
+ISMEAR = 0
+SIGMA  = 0.1
+
+KSPACING = 0.2
+
+# converge the wave functions
+EDIFF = 1.E-7
+
+# energy window (absolute) in which the projector channels are optimized
+EMIN   = -1.0
+EMAX   = 10.1
+NBANDS = 32
+
+LMAXMIX = 4
+
+# project onto the vanadium d (t2g) states; atom 2 in the POSCAR is V
+LORBIT  = 14
+LOCPROJ = "2 : d : Pr"
+
+# --- charge self-consistency -------------------------------------------------
+# ICHARG = 5 makes VASP wait after every electronic step for the DMFT charge
+# update and read it back, keeping the externally supplied density correction.
+ICHARG = 5
+NELM   = 1000
+NELMIN = 1000
+NELMDL = -3
+IMIX   = 4
+BMIX   = 0.2
+AMIX   = 0.02
+
+# exchange the projectors and the charge update through the HDF5 interface
+# (vaspout.h5 / vaspgamma.h5); requires VASP >= 6.5.0 built with HDF5 support
+LSYNCH5 = True
+
+LWAVE = False
+LCHG  = False

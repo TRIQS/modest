@@ -1,0 +1,25 @@
+System  = SrVO3
+
+NCORE = 1
+KPAR  = 4
+
+ISMEAR = 0
+SIGMA  = 0.1
+
+KSPACING = 0.2
+
+# converge the wave functions tightly
+EDIFF  = 1.E-10
+NELMIN = 20
+NBANDS = 32
+
+# energy window (absolute) in which the projector channels are optimized
+EMIN  = -1.0
+EMAX  = 10.1
+NEDOS = 5001
+
+LMAXMIX = 4
+
+# project onto the vanadium d (t2g) states; atom 2 in the POSCAR is V
+LORBIT  = 14
+LOCPROJ = "2 : d : Pr"
