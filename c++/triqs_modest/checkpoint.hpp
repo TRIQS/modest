@@ -21,33 +21,67 @@ namespace triqs::modest {
   using block_mat_t       = std::vector<nda::matrix<dcomplex>>;
 
   /**
-   * @brief Minimal iteration data required to restart a DMFT loop.
+   * @brief Per-iteration DMFT data: restart-required self-energies plus optional inputs/outputs.
+   *
+   * The fields split semantically into inputs to the impurity solver (Gloc, Delta) and outputs
+   * from it (Gimp, Sigma_imp, Sigma_hartree, Sigma_dc). The HDF5 layout mirrors that split
+   * (`inputs/` and `outputs/` subgroups); the API is flat. All optional fields default to
+   * empty vectors so callers only fill what they have.
    */
   struct iteration_data {
     double mu;
+
+    // restart-required outputs
     std::vector<block_gf_imfreq_t> Sigma_imp_list;
     std::vector<block_mat_t> Sigma_hartree_list;
+
+    // additional outputs (optional)
+    std::vector<block_gf_imfreq_t> Gimp_list     = {};
+    std::vector<block_mat_t> Sigma_dc_list       = {}; // CSC double-counting self-energy
+
+    // inputs (optional)
+    std::vector<block_gf_imfreq_t> Gloc_list  = {};
+    std::vector<block_gf_imfreq_t> Delta_list = {};
 
     C2PY_IGNORE friend void mpi_broadcast(iteration_data &x, mpi::communicator c = {}, int root = 0) {
       mpi::broadcast(x.mu, c, root);
       mpi::broadcast(x.Sigma_imp_list, c, root);
       mpi::broadcast(x.Sigma_hartree_list, c, root);
+      mpi::broadcast(x.Gimp_list, c, root);
+      mpi::broadcast(x.Sigma_dc_list, c, root);
+      mpi::broadcast(x.Gloc_list, c, root);
+      mpi::broadcast(x.Delta_list, c, root);
     }
   };
 
-  // HDF5 serialization for iteration_data
+  // HDF5 serialization for iteration_data. Layout:
+  //   <name>/mu
+  //   <name>/inputs/{Gloc_list, Delta_list}
+  //   <name>/outputs/{Gimp_list, Sigma_imp_list, Sigma_hartree_list, Sigma_dc_list}
   inline void h5_write(h5::group g, std::string const &name, iteration_data const &data) {
-    auto g2 = g.create_group(name);
+    auto g2    = g.create_group(name);
     h5::write(g2, "mu", data.mu);
-    h5::write(g2, "Sigma_imp_list", data.Sigma_imp_list);
-    h5::write(g2, "Sigma_hartree_list", data.Sigma_hartree_list);
+    auto g_in  = g2.create_group("inputs");
+    h5::write(g_in, "Gloc_list", data.Gloc_list);
+    h5::write(g_in, "Delta_list", data.Delta_list);
+    auto g_out = g2.create_group("outputs");
+    h5::write(g_out, "Gimp_list", data.Gimp_list);
+    h5::write(g_out, "Sigma_imp_list", data.Sigma_imp_list);
+    h5::write(g_out, "Sigma_hartree_list", data.Sigma_hartree_list);
+    h5::write(g_out, "Sigma_dc_list", data.Sigma_dc_list);
   }
 
   inline void h5_read(h5::group g, std::string const &name, iteration_data &data) {
-    auto g2 = g.open_group(name);
+    auto g2    = g.open_group(name);
     h5::read(g2, "mu", data.mu);
-    h5::read(g2, "Sigma_imp_list", data.Sigma_imp_list);
-    h5::read(g2, "Sigma_hartree_list", data.Sigma_hartree_list);
+    auto g_in  = g2.open_group("inputs");
+    h5::read(g_in, "Gloc_list", data.Gloc_list);
+    h5::read(g_in, "Delta_list", data.Delta_list);
+    auto g_out = g2.open_group("outputs");
+    h5::read(g_out, "Gimp_list", data.Gimp_list);
+    h5::read(g_out, "Sigma_imp_list", data.Sigma_imp_list);
+    h5::read(g_out, "Sigma_hartree_list", data.Sigma_hartree_list);
+    h5::read(g_out, "Sigma_dc_list", data.Sigma_dc_list);
   }
 
   // ===========================================================================
