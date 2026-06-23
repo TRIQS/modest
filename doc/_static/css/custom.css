@@ -3,3 +3,24 @@
 .wy-nav-content {
     max-width: 70em;
 }
+
+/* Render equation numbers on the right, vertically centered with the equation */
+div.math {
+    position: relative;
+}
+
+div.math span.eqno {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+}
+
+div.math span.eqno a.headerlink {
+    visibility: hidden;
+}
+
+div.math:hover span.eqno a.headerlink {
+    visibility: visible;
+}

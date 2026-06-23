@@ -15,18 +15,22 @@ modest
 
 
 .. include:: ./common_docs/common_overview.md
+   :parser: myst_parser.sphinx_
 
 To get started, see the :ref:`installation instructions <install>`.
 
-Learn how to use modest in the :ref:`documentation`.
+Learn how to use modest in the :ref:`User guide <userguide>` or jump straight
+to the :ref:`API reference <reference>`.
 
-    
+
 .. toctree::
    :maxdepth: 2
    :hidden:
 
-   install
-   documentation
-   issues
-   ChangeLog
    about
+   install
+   userguide/index
+   tutorials/index
+   reference/index
+   ChangeLog
+   issues
