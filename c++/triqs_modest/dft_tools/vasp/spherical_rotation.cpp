@@ -16,13 +16,13 @@ namespace triqs::modest::dft_tools::vasp {
     auto size  = 2 * l + 1;
 
     auto Ylm = nda::zeros<dcomplex>(size, size);
-    // l = 1 : "x", "y", "z"
+    // l = 1 : "y", "z", "x"  (VASP real-harmonic order: py, pz, px)
     if (l == 1) {
-      Ylm(0, 0) = 1.0 / sqrt2;
-      Ylm(1, 0) = I / sqrt2;
-      Ylm(2, 1) = 1.0;
-      Ylm(0, 2) = -1.0 / sqrt2;
-      Ylm(1, 2) = I / sqrt2;
+      Ylm(0, 0) = I / sqrt2;     // y = i (Y_-1 + Y_+1) / sqrt2
+      Ylm(0, 2) = I / sqrt2;
+      Ylm(1, 1) = 1.0;           // z = Y_0
+      Ylm(2, 0) = 1.0 / sqrt2;   // x = (Y_-1 - Y_+1) / sqrt2
+      Ylm(2, 2) = -1.0 / sqrt2;
     }
     // l = 2 : "xy", "yz", "z^2", "xz", "x^2-y^2"
     else if (l == 2) {
