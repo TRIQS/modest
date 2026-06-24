@@ -24,7 +24,7 @@ Factories
 
    triqs_modest.obe.one_body_elements_from_dft_converter
    triqs_modest.obe.one_body_elements_on_high_symmetry_path
-   triqs_modest.obe.one_body_elements_with_theta_projectors
+   triqs_modest.obe.one_body_elements_with_partial_projectors
    triqs_modest.obe.make_one_body_elements_gw
    triqs_modest.obe_tb.one_body_elements_from_wannier90
 
@@ -48,3 +48,15 @@ Supporting types
    triqs_modest.obe.LocalSpace
    triqs_modest.obe.AtomicOrbs
    triqs_modest.obe.IbzSymmetryOps
+
+Operations
+==========
+
+Apply a unitary rotation :math:`U` to the local correlated basis of an
+existing :py:class:`~triqs_modest.obe.OneBodyElementsOnGrid` (or its
+:py:class:`~triqs_modest.obe.IbzSymmetryOps`). The projector
+:math:`P(\mathbf{k})` is transformed as in :eq:`eq_ChangeBasisP`.
+
+.. autosummary::
+
+   triqs_modest.obe.rotate_local_basis

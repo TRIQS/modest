@@ -42,6 +42,16 @@ on the chosen path,
 where :math:`G_{\mathcal{B}}^{\sigma}` is evaluated on the
 high-symmetry path with the analytically-continued self-energy.
 
+Both functions accept either a
+:py:class:`~triqs_modest.obe.OneBodyElementsOnGrid` (DFT / Wannier90
+input, where the projector :math:`P(\mathbf{k})` performs the
+downfolding from :math:`\mathcal{B}` to :math:`\mathcal{C}`) or a
+:py:class:`~triqs_modest.obe_tb.OneBodyElementsTb` (tight-binding
+input). In the tight-binding case there is no downfolding projector;
+the embedded self-energy is placed directly into the Wannier basis by
+index-slicing, and :math:`\mathcal{C}` is identified with the subset
+of Wannier orbitals on which :math:`\Sigma` is non-zero.
+
 .. autosummary::
 
    triqs_modest.post_processing.projected_spectral_function
@@ -49,6 +59,15 @@ high-symmetry path with the analytically-continued self-energy.
 
 Container types
 ===============
+
+The output containers carry two views of the spectral function:
+
+* ``total`` — the scalar (band / Wannier) trace
+  :math:`A^{\sigma}(\omega)` or :math:`A^{\sigma}(\mathbf{k}, \omega)`.
+* ``projected`` — the matrix in :math:`\mathcal{C}`,
+  :math:`A^{\sigma}_{m m'}(\omega)` for ``SpectralFunctionW`` or the
+  diagonal :math:`A^{\sigma}_{m m}(\mathbf{k}, \omega)` for
+  ``SpectralFunctionKw``.
 
 .. autosummary::
 
