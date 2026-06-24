@@ -13,11 +13,3 @@ CPMAddPackage(
   URI "gh:TartanLlama/ranges#main"
   OPTIONS "RANGES_BUILD_TESTS OFF"
 )
-
-# -- dftkit --
-CPMAddPackage(
-  NAME dftkit
-  GITHUB_REPOSITORY triqs/dftkit
-  GIT_TAG unstable
-  EXCLUDE_FROM_ALL NO
-)
