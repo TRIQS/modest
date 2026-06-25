@@ -151,11 +151,11 @@ namespace triqs::modest {
     // Embedding decomposition from structure of Sigma
     auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
 
-    auto timer = scoped_timer{};
     // ---------
     // NOTE: Is there any reason why sigma loop should be the external one?
     // Internal is favorable for maximum parallelization.
     mpi::communicator comm = {};
+    auto timer = scoped_timer{comm.rank() == 0};
 #pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                                                            \
    shared(comm, r_all, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_static)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
