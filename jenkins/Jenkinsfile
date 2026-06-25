@@ -9,7 +9,7 @@ def regenPlatforms = ["ubuntu-clang"]
 def triqsBranch = env.BRANCH_NAME == "jenkins" ? "jenkins" : "unstable"
 def triqsProject = '/CCQ/TRIQS/triqs/' + triqsBranch.replaceAll('/', '%2F')
 /* whether to keep and publish the results */
-def keepInstall = false // disabled on jenkins-new: !env.BRANCH_NAME.startsWith("PR-")
+def keepInstall = !env.BRANCH_NAME.startsWith("PR-")
 
 properties([
   disableConcurrentBuilds(),
@@ -142,7 +142,7 @@ for (int i = 0; i < macosPlatforms.size(); i++) {
 catchError {
   parallel platforms
 
-  if (keepInstall) {
+  if (false && keepInstall) {
     /* Publish results */
     stage("publish") {
       timeout(time: 10, unit: 'MINUTES') {
