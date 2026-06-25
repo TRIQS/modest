@@ -1,5 +1,5 @@
 # See ../triqs/packaging for other options
 FROM flatironinstitute/triqs:unstable-ubuntu-clang
 
-# Install here missing dependencies, e.g.
-# RUN apt-get update && apt-get install -y python3-skimage
+# git-lfs is required when Enable_LFS_Tests=ON pulls reference data in test/c++/ref_data_lfs
+RUN apt-get update && apt-get install -y --no-install-recommends git-lfs && rm -rf /var/lib/apt/lists/*

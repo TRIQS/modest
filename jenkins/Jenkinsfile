@@ -65,12 +65,19 @@ def runBuild = { String platform, String prefix, List<String> envs ->
     sh """#!/bin/sh -ex
       source $venv/bin/activate
       pip3 install -U -r $WORKSPACE/requirements.txt
+      command -v git-lfs >/dev/null || brew install git-lfs
     """
   } else {
     def path = sh(returnStdout: true, script: 'echo $PATH').trim()
     envs << "PATH=$triqsDir/bin:$path"
   }
   withEnv(envs) {
+    /* Enable_LFS_Tests=ON below needs the real LFS files; the Jenkins SCM checkout only fetches pointers.
+       Use fetch+checkout rather than `git lfs install + pull` so we don't touch .git/hooks
+       (which Jenkins symlinks to /dev/null to disable hooks). */
+    dir(WORKSPACE) {
+      sh "git lfs fetch && git lfs checkout"
+    }
     def args = regen ? '-DUpdate_Python_Bindings=ON' : ''
     args += ' -DEnable_LFS_Tests=ON'
     if (platform == documentationPlatform)
