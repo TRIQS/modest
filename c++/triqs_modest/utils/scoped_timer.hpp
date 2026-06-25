@@ -19,21 +19,28 @@ namespace triqs {
    * It is useful for profiling and measuring the performance of specific
    * code blocks.
    *
+   * The print is gated by the `enabled` flag (default false), so the timer is
+   * silent unless explicitly switched on. Under MPI the caller is the layer
+   * that knows the rank context, so pass e.g. `comm.rank() == 0` to print only
+   * on the master rank instead of once per rank.
+   *
    * Example usage:
    * @code
    * {
-   *     scoped_timer timer; // Timer starts here
+   *     scoped_timer timer{comm.rank() == 0}; // Timer starts here, prints on rank 0 only
    *     // Code to measure
    * } // Timer stops and prints elapsed time here
    * @endcode
    */
   class scoped_timer {
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
+    bool enabled;
 
     public:
-    scoped_timer() : start(std::chrono::high_resolution_clock::now()) {}
+    scoped_timer(bool enabled = false) : start(std::chrono::high_resolution_clock::now()), enabled(enabled) {}
 
     ~scoped_timer() {
+      if (!enabled) return;
       auto end                              = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double> elapsed = end - start;
       std::cerr << "Execution time: " << elapsed.count() << " seconds\n";
