@@ -26,14 +26,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-24.04, cxx: g++,         clang_cxx: clang++-19, lfs: false}
-          - {os: ubuntu-24.04, cxx: clang++-19,  clang_cxx: clang++-19, lfs: true}
-          - {os: macos-15,     cxx: clang++,     clang_cxx: clang++,    lfs: false}
+          - { os: ubuntu-24.04, cxx: clang++-20, clang_cxx: clang++-20 }
+          - { os: ubuntu-24.04, cxx: g++-14, clang_cxx: clang++-20 }
+          - { os: macos-15, cxx: clang++, clang_cxx: clang++ }
+          - { os: macos-15, cxx: g++, clang_cxx: clang++ }
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         lfs: ${{ matrix.lfs }}
 
@@ -53,18 +54,18 @@ jobs:
         ccache
         cmake
         ninja-build
-        clang-19
-        clang-tools-19
+        clang-20
+        clang-tools-20
         g++
         gfortran
         git-lfs
         hdf5-tools
         libboost-dev
-        llvm-19-dev
-        libclang-19-dev
-        libomp-19-dev
-        libc++-19-dev
-        libc++abi-19-dev
+        llvm-20-dev
+        libclang-20-dev
+        libomp-20-dev
+        libc++-20-dev
+        libc++abi-20-dev
         libfftw3-dev
         libgfortran5
         libgmp-dev
@@ -129,7 +130,7 @@ jobs:
 
     - name: Build & Install TRIQS
       env:
-        TRIQS_BRANCH: modest_updates # ${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
+        TRIQS_BRANCH: ${{ github.event_name == 'pull_request' && github.base_ref || 'unstable' }}
       run: |
         git ls-remote --exit-code --heads https://github.com/TRIQS/triqs "$TRIQS_BRANCH" > /dev/null 2>&1 || TRIQS_BRANCH=unstable
         git clone https://github.com/TRIQS/triqs --branch "$TRIQS_BRANCH"
@@ -138,15 +139,6 @@ jobs:
           -DBuild_Tests=OFF \
           -DCMAKE_INSTALL_PREFIX=$HOME/install
         cmake --build triqs/build --target install --verbose
-
-    - name: Build & Install clair
-      env:
-        CXX: ${{ matrix.clang_cxx }}
-        CXXFLAGS: ""
-      run: |
-        git clone https://github.com/flatironinstitute/clair --branch unstable
-        cmake -S clair -B clair/build -G Ninja -DBuild_Tests=OFF -DCMAKE_INSTALL_PREFIX=$HOME/install
-        cmake --build clair/build --target install --verbose
 
     - name: Build triqs_modest
       run: |
