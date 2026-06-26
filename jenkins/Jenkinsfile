@@ -103,7 +103,13 @@ def dockerPlatforms = ["ubuntu-clang", "ubuntu-gcc", "ubuntu-intel", "sanitize"]
 buildImages(dockerPlatforms.collect { platform ->
   [ tag: platform,
     context: 'jenkins',
-    dockerfile: "Dockerfile.$platform"
+    dockerfile: "Dockerfile.$platform",
+    prep: {
+      /* construct a Dockerfile for this base */
+      sh """
+        ( echo "FROM $REGISTRY_PREFIX${triqsProject.toLowerCase()}:$platform" ; sed '0,/^FROM /d' jenkins/Dockerfile ) > jenkins/Dockerfile.$platform
+      """
+    }
   ]
 }, checkout: true)
 for (int i = 0; i < dockerPlatforms.size(); i++) {
@@ -113,13 +119,7 @@ for (int i = 0; i < dockerPlatforms.size(); i++) {
       timeout(time: 1, unit: 'HOURS') {
         runPod(tag: platform,
           devShm: true,
-          mounts: mounts,
-          prep: {
-            /* construct a Dockerfile for this base */
-            sh """
-              ( echo "FROM $REGISTRY_PREFIX${triqsProject.toLowerCase()}:$platform" ; sed '0,/^FROM /d' jenkins/Dockerfile ) > jenkins/Dockerfile.$platform
-            """
-          }) {
+          mounts: mounts) {
           runBuild(platform, installBase, [])
         }
       }
