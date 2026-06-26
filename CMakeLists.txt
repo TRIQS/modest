@@ -1,6 +1,6 @@
 # ##############################################################################
 #
-# app4triqs - An example application using triqs and cpp2py
+# app4triqs - An example application using triqs and c2py + clair
 #
 # Copyright (C) ...
 #
