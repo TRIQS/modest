@@ -29,7 +29,9 @@ foreach(test ${all_tests})
     add_test(NAME ${test_name} COMMAND ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${test_dir})
   endif()
 
-  if (Enable_LFS_Tests AND NOT ${test} MATCHES "impurity_model_test|density_test|utility")
+  # checkpoint_test has no LFS-specific code and writes a fixed-name file in the shared working
+  # dir; building an _lfs duplicate makes the two collide on the HDF5 file lock under `ctest -j`.
+  if (Enable_LFS_Tests AND NOT ${test} MATCHES "impurity_model_test|density_test|utility|checkpoint_test")
     add_executable(${test_name}_lfs ${test})
     target_compile_definitions(${test_name}_lfs PRIVATE LFS)
     target_link_libraries(${test_name}_lfs ${PROJECT_NAME}::${PROJECT_NAME}_c ${PROJECT_NAME}_warnings gtest_main)
