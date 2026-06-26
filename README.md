@@ -75,7 +75,7 @@ according to your needs (replace app4triqs in the following by the name of your 
 ```bash
 c++2py -r app4triqs_module_desc.py
 ```
-* Add your email address to the bottom section of `Jenkinsfile` for Jenkins CI notification emails
+* Add your email address to the bottom section of `jenkins/Jenkinsfile` for Jenkins CI notification emails
 ```
 End of build log:
 \${BUILD_LOG,maxLines=60}
