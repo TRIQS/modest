@@ -30,6 +30,8 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include FILES_MATCHING
 
 target_link_libraries(${PROJECT_NAME}_c PUBLIC ranges)
 install(TARGETS ranges EXPORT ${PROJECT_NAME}-targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
+# Install the tl/ ranges headers consumed by our public headers (defs.hpp, ibz_symmetry_ops.hpp)
+install(DIRECTORY ${ranges_SOURCE_DIR}/include/ DESTINATION include)
 
 # ========= Static Analyzer Checks ==========
 
