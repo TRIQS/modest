@@ -108,22 +108,26 @@ def platforms = [:]
 /****************** linux builds (in docker) */
 /* Each platform must have a corresponding Dockerfile.PLATFORM in triqs/packaging */
 def dockerPlatforms = ["ubuntu-clang", "ubuntu-gcc", "ubuntu-intel", "sanitize"]
+buildImages(dockerPlatforms.collect { platform ->
+  [ tag: platform,
+    context: 'jenkins',
+    dockerfile: "Dockerfile.$platform",
+    prep: {
+      /* construct a Dockerfile for this base */
+      sh """
+        ( echo "FROM $REGISTRY_PREFIX${triqsProject.toLowerCase()}:$platform" ; sed '0,/^FROM /d' jenkins/Dockerfile ) > jenkins/Dockerfile.$platform
+      """
+    }
+  ]
+}, checkout: true)
 for (int i = 0; i < dockerPlatforms.size(); i++) {
   def platform = dockerPlatforms[i]
   platforms[platform] = { ->
     stage(platform) {
       timeout(time: 1, unit: 'HOURS') {
-        buildPod(tag: platform,
-          context: 'jenkins',
-          dockerfile: "Dockerfile.$platform",
+        runPod(tag: platform,
           devShm: true,
-          mounts: mounts,
-          prep: {
-            /* construct a Dockerfile for this base */
-            sh """
-              ( echo "FROM $REGISTRY_PREFIX${triqsProject.toLowerCase()}:$platform" ; sed '0,/^FROM /d' jenkins/Dockerfile ) > jenkins/Dockerfile.$platform
-            """
-          }) {
+          mounts: mounts) {
           runBuild(platform, installBase, [])
         }
       }

@@ -1,6 +1,6 @@
 # ##############################################################################
 #
-# triqs_modest - An example application using triqs and cpp2py
+# triqs_modest - An example application using triqs and c2py + clair
 #
 # Copyright (C) ...
 #
