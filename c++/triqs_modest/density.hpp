@@ -198,8 +198,9 @@ namespace triqs::modest {
    */
   inline double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe, double beta,
                                         std::string method = "dichotomy", double precision = 1.e-5, bool verbosity = true) {
+    mpi::communicator comm = {};
     std::function<double(double)> f = [&obe, beta](double x) { return density_nk(obe, x, beta); };
-    return std::get<0>(triqs::experimental::utility::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+    return std::get<0>(triqs::experimental::utility::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity && comm.rank() == 0));
   }
 
   /**
@@ -220,8 +221,9 @@ namespace triqs::modest {
   double find_chemical_potential(double const target_density, one_body_elements_on_grid const &obe,
                                  block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static,
                                  std::string method = "dichotomy", double precision = 1.e-5, bool verbosity = true) {
+    mpi::communicator comm = {};
     std::function<double(double)> f = [&obe, &Sigma_dynamic, &Sigma_static](double x) { return density(obe, x, Sigma_dynamic, Sigma_static); };
-    return std::get<0>(triqs::experimental::utility::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity));
+    return std::get<0>(triqs::experimental::utility::root_finder(method, f, 0.0, target_density, precision, 0.5, 1000, "Chemical Potential", "Total Density", verbosity && comm.rank() == 0));
   }
 
   /** @cond DOXYGEN_SKIP_THIS */
