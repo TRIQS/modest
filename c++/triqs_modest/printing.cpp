@@ -37,6 +37,17 @@ namespace triqs::modest {
 
   // ---------------------------------------------------------------------------------------------
 
+  std::ostream &operator<<(std::ostream &out, band_velocities const &x) {
+    out << "Band-basis velocities v^σ_ανν'(k) on a grid [band_velocities]:\n";
+    auto out1 = triqs::utility::indented_ostream(out, 2);
+    out1 << fmt::format("Shape of v[k_idx, σ, α, ν, ν'] = {}\n", x.v_k.shape());
+    out1 << fmt::format("Number of Cartesian directions = {}\n", x.n_directions());
+    out1 << fmt::format("Number of symmetry operations  = {}\n", x.rot_symmetries.size());
+    return out;
+  }
+
+  // ---------------------------------------------------------------------------------------------
+
   std::ostream &operator<<(std::ostream &out, local_space const &x) {
     out << "Local space [orbital_set]:\n";
     auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces

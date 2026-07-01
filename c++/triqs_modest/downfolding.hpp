@@ -178,6 +178,67 @@ namespace triqs::modest {
     }
   };
 
+  /**
+   * @ingroup one_body_elements
+   * @brief Band-basis velocity matrix elements \f$ v^{\sigma}_{\nu\nu'\alpha}(\mathbf{k}) \f$ for transport.
+   *
+   * @details Optional companion of a @ref one_body_elements_on_grid, used to compute the Kubo transport
+   * distribution \f$ \Gamma_{\alpha\beta}(\omega,\Omega) \f$ and the transport function
+   * \f$ \Phi_{\alpha\beta}(\omega) \f$. The velocities are read from the `dft_transp_input` group of a
+   * dft_tools converter archive (\f$ v_{\nu\nu'\alpha} = \partial_{k_\alpha} H_{\nu\nu'} \f$ in the band basis).
+   *
+   * The velocities live on the (per-k) optics band window `band_window_optics`, which may differ from the band
+   * window `band_window` of the dispersion @ref band_dispersion. Transport traces are taken over the per-k
+   * intersection of the two windows.
+   */
+  struct band_velocities {
+    spin_kind_e spin_kind;                           ///< Spin kind of the one-body data.
+    nda::array<dcomplex, 5> v_k;                     ///< \f$ v^{\sigma}_{\alpha\nu\nu'}(\mathbf{k}) \f$: (n_k, n_sigma_data, 3, N_nu_max, N_nu_max). Cartesian index first so each \f$ v_\alpha(\mathbf{k}) \f$ is a contiguous matrix.
+    nda::array<long, 2> n_bands_per_k;               ///< Number of optics bands for each k-point and \f$ \sigma \f$ (from `band_window_optics`).
+    nda::array<long, 3> band_window;                 ///< [n_sigma_data, n_k, 2] 1-based inclusive [b_min, b_max] of the dispersion/A array.
+    nda::array<long, 3> band_window_optics;          ///< [n_sigma_data, n_k, 2] 1-based inclusive [b_min, b_max] of the velocity array.
+    std::vector<nda::matrix<double>> rot_symmetries; ///< Cartesian 3x3 rotations R used to symmetrize the velocity direction index.
+
+    /// Equality comparison operator.
+    bool operator==(band_velocities const &) const = default;
+
+    /// MPI broadcast
+    C2PY_IGNORE friend void mpi_broadcast(band_velocities &x, mpi::communicator c = {}, int root = 0) {
+      mpi::broadcast(x.spin_kind, c, root);
+      mpi::broadcast(x.v_k, c, root);
+      mpi::broadcast(x.n_bands_per_k, c, root);
+      mpi::broadcast(x.band_window, c, root);
+      mpi::broadcast(x.band_window_optics, c, root);
+      mpi::broadcast(x.rot_symmetries, c, root);
+    }
+
+    /**
+     * @brief Get \f$ v^{\sigma}_{\nu\nu'\alpha}(\mathbf{k}) \f$ for a given \f$ \mathbf{k} \f$ and \f$ \sigma \f$.
+     *
+     * @param sigma Spin index \f$ \sigma \f$.
+     * @param k_idx Index of the k-point in the grid.
+     * @return Const view of shape (3, N_nu, N_nu), sliced to the active optics bands. The leading index is the
+     * Cartesian direction, so `v(sigma, k)(alpha, _, _)` is a contiguous \f$ N_\nu \times N_\nu \f$ matrix.
+     */
+    [[nodiscard]] nda::array_const_view<dcomplex, 3> v(long sigma, long k_idx) const {
+      auto sigma_p = sigma_to_data_idx(spin_kind, sigma);
+      auto R_nu    = nda::range(n_bands_per_k(k_idx, sigma_p));
+      return v_k(k_idx, sigma_p, r_all, R_nu, R_nu);
+    }
+
+    /// Number of optics bands for a given k-point and spin \f$ \sigma \f$.
+    [[nodiscard]] long N_nu_v(long sigma, long k_idx) const { return n_bands_per_k(k_idx, sigma_to_data_idx(spin_kind, sigma)); }
+
+    /// Number of k-points in the grid.
+    [[nodiscard]] long n_k() const { return v_k.extent(0); }
+
+    /// Number of Cartesian directions stored (typically 3).
+    [[nodiscard]] long n_directions() const { return v_k.extent(2); }
+
+    /// Print information about a band_velocities object.
+    friend std::ostream &operator<<(std::ostream &out, band_velocities const &x);
+  };
+
   // ------------------------------------------------------------
   /**
    * @ingroup one_body_elements
@@ -188,6 +249,8 @@ namespace triqs::modest {
     local_space C_space;                               ///< Local \f$ \mathcal{C} \f$ space.
     downfolding_projector P;                           ///< Downfolding projector \f$ P \f$.
     std::optional<ibz_symmetry_ops> ibz_symm_ops = {}; ///< IBZ symmetrizer after a k-sum
+    std::optional<band_velocities> velocities    = {}; ///< Optional band-basis velocities for transport (see @ref band_velocities).
+    std::optional<double> cell_volume            = {}; ///< Optional unit-cell volume used to normalize transport quantities.
 
     /// Equality comparison operator.
     bool operator==(one_body_elements_on_grid const &) const = default;
@@ -198,6 +261,8 @@ namespace triqs::modest {
       mpi::broadcast(x.C_space, c, root);
       mpi::broadcast(x.P, c, root);
       mpi::broadcast(x.ibz_symm_ops, c, root);
+      mpi::broadcast(x.velocities, c, root);
+      mpi::broadcast(x.cell_volume, c, root);
     }
   };
 

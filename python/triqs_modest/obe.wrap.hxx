@@ -16,6 +16,8 @@ template <> constexpr bool c2py::is_wrapped<triqs::modest::downfolding_projector
 template <> inline constexpr auto c2py::tp_name<triqs::modest::downfolding_projector>     = "triqs_modest.obe.DownfoldingProjector";
 template <> constexpr bool c2py::is_wrapped<triqs::modest::downfolding_projector_ext>     = true;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::downfolding_projector_ext> = "triqs_modest.obe.DownfoldingProjectorExt";
+template <> constexpr bool c2py::is_wrapped<triqs::modest::band_velocities>               = true;
+template <> inline constexpr auto c2py::tp_name<triqs::modest::band_velocities>           = "triqs_modest.obe.BandVelocities";
 template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements_on_grid>     = true;
 template <> inline constexpr auto c2py::tp_name<triqs::modest::one_body_elements_on_grid> = "triqs_modest.obe.OneBodyElementsOnGrid";
 template <> constexpr bool c2py::is_wrapped<triqs::modest::one_body_elements_gw>          = true;
