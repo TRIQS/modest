@@ -192,11 +192,13 @@ namespace triqs::modest {
    * intersection of the two windows.
    */
   struct band_velocities {
-    spin_kind_e spin_kind;                           ///< Spin kind of the one-body data.
-    nda::array<dcomplex, 5> v_k;                     ///< \f$ v^{\sigma}_{\alpha\nu\nu'}(\mathbf{k}) \f$: (n_k, n_sigma_data, 3, N_nu_max, N_nu_max). Cartesian index first so each \f$ v_\alpha(\mathbf{k}) \f$ is a contiguous matrix.
+    spin_kind_e spin_kind; ///< Spin kind of the one-body data.
+    nda::array<dcomplex, 5>
+       v_k; ///< \f$ v^{\sigma}_{\alpha\nu\nu'}(\mathbf{k}) \f$: (n_k, n_sigma_data, 3, N_nu_max, N_nu_max). Cartesian index first so each \f$ v_\alpha(\mathbf{k}) \f$ is a contiguous matrix.
     nda::array<long, 2> n_bands_per_k;               ///< Number of optics bands for each k-point and \f$ \sigma \f$ (from `band_window_optics`).
     nda::array<long, 3> band_window;                 ///< [n_sigma_data, n_k, 2] 1-based inclusive [b_min, b_max] of the dispersion/A array.
     nda::array<long, 3> band_window_optics;          ///< [n_sigma_data, n_k, 2] 1-based inclusive [b_min, b_max] of the velocity array.
+    nda::array<long, 3> joint_window;                ///< [n_sigma_data, n_k, 3] precomputed intersection slices: (A_offset, v_offset, n_overlap).
     std::vector<nda::matrix<double>> rot_symmetries; ///< Cartesian 3x3 rotations R used to symmetrize the velocity direction index.
 
     /// Equality comparison operator.
@@ -209,6 +211,7 @@ namespace triqs::modest {
       mpi::broadcast(x.n_bands_per_k, c, root);
       mpi::broadcast(x.band_window, c, root);
       mpi::broadcast(x.band_window_optics, c, root);
+      mpi::broadcast(x.joint_window, c, root);
       mpi::broadcast(x.rot_symmetries, c, root);
     }
 

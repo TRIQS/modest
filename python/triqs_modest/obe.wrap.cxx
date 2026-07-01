@@ -798,6 +798,7 @@ static int synth_constructor_5(PyObject *self, PyObject *args, PyObject *kwargs)
   de("n_bands_per_k", self_c.n_bands_per_k, false);
   de("band_window", self_c.band_window, false);
   de("band_window_optics", self_c.band_window_optics, false);
+  de("joint_window", self_c.joint_window, false);
   de("rot_symmetries", self_c.rot_symmetries, false);
   return de.check();
 }
@@ -820,7 +821,9 @@ band_window : {par_3}
 
 band_window_optics : {par_4}
 
-rot_symmetries : {par_5}
+joint_window : {par_5}
+
+rot_symmetries : {par_6}
 
 )DOC",
    "par",
@@ -828,6 +831,7 @@ rot_symmetries : {par_5}
     c2py::python_typename<
        nda::basic_array<std::complex<double>, 5, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>(),
     c2py::python_typename<nda::basic_array<long, 2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>(),
+    c2py::python_typename<nda::basic_array<long, 3, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>(),
     c2py::python_typename<nda::basic_array<long, 3, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>(),
     c2py::python_typename<nda::basic_array<long, 3, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>(),
     c2py::python_typename<
@@ -878,7 +882,8 @@ constexpr auto _c2py_doc_member_19 =
 constexpr auto _c2py_doc_member_20 = R"DOC(Number of optics bands for each k-point and :math:`\sigma` (from `band_window_optics`).)DOC";
 constexpr auto _c2py_doc_member_21 = R"DOC([n_sigma_data, n_k, 2] 1-based inclusive [b_min, b_max] of the dispersion/A array.)DOC";
 constexpr auto _c2py_doc_member_22 = R"DOC([n_sigma_data, n_k, 2] 1-based inclusive [b_min, b_max] of the velocity array.)DOC";
-constexpr auto _c2py_doc_member_23 = R"DOC(Cartesian 3x3 rotations R used to symmetrize the velocity direction index.)DOC";
+constexpr auto _c2py_doc_member_23 = R"DOC([n_sigma_data, n_k, 3] precomputed intersection slices: (A_offset, v_offset, n_overlap).)DOC";
+constexpr auto _c2py_doc_member_24 = R"DOC(Cartesian 3x3 rotations R used to symmetrize the velocity direction index.)DOC";
 static PyObject *prop_get_dict_5(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<_c2py_cls_7> *)self)->_c);
   c2py::pydict dic;
@@ -887,6 +892,7 @@ static PyObject *prop_get_dict_5(PyObject *self, void *) {
   dic["n_bands_per_k"]      = self_c.n_bands_per_k;
   dic["band_window"]        = self_c.band_window;
   dic["band_window_optics"] = self_c.band_window_optics;
+  dic["joint_window"]       = self_c.joint_window;
   dic["rot_symmetries"]     = self_c.rot_symmetries;
   return dic.new_ref();
 }
@@ -902,7 +908,8 @@ constinit PyGetSetDef c2py::tp_getset<_c2py_cls_7>[] = {
    c2py::getsetdef_from_member<&_c2py_cls_7::n_bands_per_k, _c2py_cls_7>("n_bands_per_k", _c2py_doc_member_20),
    c2py::getsetdef_from_member<&_c2py_cls_7::band_window, _c2py_cls_7>("band_window", _c2py_doc_member_21),
    c2py::getsetdef_from_member<&_c2py_cls_7::band_window_optics, _c2py_cls_7>("band_window_optics", _c2py_doc_member_22),
-   c2py::getsetdef_from_member<&_c2py_cls_7::rot_symmetries, _c2py_cls_7>("rot_symmetries", _c2py_doc_member_23),
+   c2py::getsetdef_from_member<&_c2py_cls_7::joint_window, _c2py_cls_7>("joint_window", _c2py_doc_member_23),
+   c2py::getsetdef_from_member<&_c2py_cls_7::rot_symmetries, _c2py_cls_7>("rot_symmetries", _c2py_doc_member_24),
    {"n_directions", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::band_velocities::n_directions)>, nullptr, prop_doc_12, nullptr},
    {"n_k", c2py::getter_from_method<c2py::castmc<>(&triqs::modest::band_velocities::n_k)>, nullptr, prop_doc_13, nullptr},
    {"__dict__", (getter)prop_get_dict_5, nullptr, "", nullptr},
@@ -982,12 +989,12 @@ PyMethodDef c2py::tp_methods<_c2py_cls_8>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto _c2py_doc_member_24 = R"DOC(Band dispersion.)DOC";
-constexpr auto _c2py_doc_member_25 = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
-constexpr auto _c2py_doc_member_26 = R"DOC(Downfolding projector :math:`P`.)DOC";
-constexpr auto _c2py_doc_member_27 = R"DOC(IBZ symmetrizer after a k-sum)DOC";
-constexpr auto _c2py_doc_member_28 = R"DOC(Optional band-basis velocities for transport (see ``band_velocities).``)DOC";
-constexpr auto _c2py_doc_member_29 = R"DOC(Optional unit-cell volume used to normalize transport quantities.)DOC";
+constexpr auto _c2py_doc_member_25 = R"DOC(Band dispersion.)DOC";
+constexpr auto _c2py_doc_member_26 = R"DOC(Local :math:`\mathcal{C}` space.)DOC";
+constexpr auto _c2py_doc_member_27 = R"DOC(Downfolding projector :math:`P`.)DOC";
+constexpr auto _c2py_doc_member_28 = R"DOC(IBZ symmetrizer after a k-sum)DOC";
+constexpr auto _c2py_doc_member_29 = R"DOC(Optional band-basis velocities for transport (see ``band_velocities).``)DOC";
+constexpr auto _c2py_doc_member_30 = R"DOC(Optional unit-cell volume used to normalize transport quantities.)DOC";
 static PyObject *prop_get_dict_6(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<_c2py_cls_8> *)self)->_c);
   c2py::pydict dic;
@@ -1004,12 +1011,12 @@ static PyObject *prop_get_dict_6(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<_c2py_cls_8>[] = {
-   c2py::getsetdef_from_member<&_c2py_cls_8::H, _c2py_cls_8>("H", _c2py_doc_member_24),
-   c2py::getsetdef_from_member<&_c2py_cls_8::C_space, _c2py_cls_8>("C_space", _c2py_doc_member_25),
-   c2py::getsetdef_from_member<&_c2py_cls_8::P, _c2py_cls_8>("P", _c2py_doc_member_26),
-   c2py::getsetdef_from_member<&_c2py_cls_8::ibz_symm_ops, _c2py_cls_8>("ibz_symm_ops", _c2py_doc_member_27),
-   c2py::getsetdef_from_member<&_c2py_cls_8::velocities, _c2py_cls_8>("velocities", _c2py_doc_member_28),
-   c2py::getsetdef_from_member<&_c2py_cls_8::cell_volume, _c2py_cls_8>("cell_volume", _c2py_doc_member_29),
+   c2py::getsetdef_from_member<&_c2py_cls_8::H, _c2py_cls_8>("H", _c2py_doc_member_25),
+   c2py::getsetdef_from_member<&_c2py_cls_8::C_space, _c2py_cls_8>("C_space", _c2py_doc_member_26),
+   c2py::getsetdef_from_member<&_c2py_cls_8::P, _c2py_cls_8>("P", _c2py_doc_member_27),
+   c2py::getsetdef_from_member<&_c2py_cls_8::ibz_symm_ops, _c2py_cls_8>("ibz_symm_ops", _c2py_doc_member_28),
+   c2py::getsetdef_from_member<&_c2py_cls_8::velocities, _c2py_cls_8>("velocities", _c2py_doc_member_29),
+   c2py::getsetdef_from_member<&_c2py_cls_8::cell_volume, _c2py_cls_8>("cell_volume", _c2py_doc_member_30),
    {"__dict__", (getter)prop_get_dict_6, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -1063,8 +1070,8 @@ PyMethodDef c2py::tp_methods<_c2py_cls_9>[] = {
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
-constexpr auto _c2py_doc_member_30 = R"DOC()DOC";
 constexpr auto _c2py_doc_member_31 = R"DOC()DOC";
+constexpr auto _c2py_doc_member_32 = R"DOC()DOC";
 static PyObject *prop_get_dict_7(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<_c2py_cls_9> *)self)->_c);
   c2py::pydict dic;
@@ -1077,8 +1084,8 @@ static PyObject *prop_get_dict_7(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<_c2py_cls_9>[] = {
-   c2py::getsetdef_from_member<&_c2py_cls_9::C_space, _c2py_cls_9>("C_space", _c2py_doc_member_30),
-   c2py::getsetdef_from_member<&_c2py_cls_9::P, _c2py_cls_9>("P", _c2py_doc_member_31),
+   c2py::getsetdef_from_member<&_c2py_cls_9::C_space, _c2py_cls_9>("C_space", _c2py_doc_member_31),
+   c2py::getsetdef_from_member<&_c2py_cls_9::P, _c2py_cls_9>("P", _c2py_doc_member_32),
    {"__dict__", (getter)prop_get_dict_7, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 

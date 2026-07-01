@@ -261,22 +261,29 @@ namespace triqs::modest {
     return symm_ops;
   };
 
+  // Atomic-units -> Angstrom-based conversion for transport quantities. DFT codes such as Wien2k write band
+  // velocities in atomic units and lattice constants in Bohr; the downstream Onsager prefactors
+  // (triqs_modest.optics) assume eV*Angstrom velocities and Angstrom^3 volume, so we standardize on those at load.
+  static constexpr double BOHR_TO_ANG   = 0.529177210903;  // Bohr radius in Angstrom
+  static constexpr double HARTREE_TO_EV = 27.211386245988; // Hartree in eV
+
   //-------------------------------------------------------
-  // Conventional/primitive unit cell volume from lattice parameters (port of dft_tools cellvolume()).
+  // TODO: can we simplify this?
+  // Conventional/primitive unit cell volume from lattice parameters (ported from dft_tools)
   // Returns the *primitive* cell volume (vol_c / multiplicity). (internal)
   static double cellvolume(std::string const &lattice_type, nda::array<double, 1> const &constants, nda::array<double, 1> const &angles) {
     double ca = std::cos(angles(0)), cb = std::cos(angles(1)), cg = std::cos(angles(2));
     double vol_c = constants(0) * constants(1) * constants(2) * std::sqrt(1.0 + 2.0 * ca * cb * cg - ca * ca - cb * cb - cg * cg);
     static const std::map<std::string, double> det = {{"P", 1}, {"F", 4}, {"B", 2}, {"R", 3}, {"H", 1}, {"CXY", 2}, {"CYZ", 2}, {"CXZ", 2}};
-    auto it = det.find(lattice_type);
+    auto it                                        = det.find(lattice_type);
     if (it == det.end()) throw std::runtime_error{fmt::format("Unknown lattice type '{}' in cellvolume().", lattice_type)};
     return vol_c / it->second;
   }
 
   //-------------------------------------------------------
   double read_cell_volume_hdf5(std::string const &filename) {
-    auto root         = h5::proxy{filename, 'r'};
-    h5::group g_misc  = root["dft_misc_input"];
+    auto root        = h5::proxy{filename, 'r'};
+    h5::group g_misc = root["dft_misc_input"];
     // Wien2k: compute from lattice parameters; Elk: read cell_vol directly.
     if (g_misc.has_key("lattice_type")) {
       auto misc = root["dft_misc_input"];
@@ -287,34 +294,55 @@ namespace triqs::modest {
     } else if (g_misc.has_key("cell_vol")) {
       return as<double>(root["dft_misc_input"]["cell_vol"]);
     } else {
-      throw std::runtime_error{fmt::format("Cannot determine the cell volume from {}: neither lattice parameters "
-                                           "(lattice_type/lattice_constants/lattice_angles) nor cell_vol found in dft_misc_input.",
-                                           filename)};
+      throw std::runtime_error{
+         fmt::format("Cannot determine the cell volume from {}: neither lattice parameters "
+                     "(lattice_type/lattice_constants/lattice_angles) nor cell_vol found in dft_misc_input.",
+                     filename)};
     }
   }
 
   //-------------------------------------------------------
-  // Read band-basis velocities + band windows + BZ symmetries for transport. (internal)
-  // NOTE (verify against a real converter archive):
-  //   * velocities_k is assumed to be nested [spin][k] of complex (n_optics_bands, n_optics_bands, n_dir) arrays,
-  //     as written by the dft_tools Wien2k transport converter. The w90 path stores it as [k] (single spin).
-  //   * band_window_optics is assumed to be a single [n_sigma, n_k, 2] dataset (like dft_misc_input/band_window).
-  //   * rot_symmetries are Cartesian 3x3 real matrices acting on the velocity direction index.
-  //   These layout/unit assumptions must be confirmed once real transport data is available.
+  // Read a band window that may be stored either as a single (n_sigma, n_k, 2) dataset or as a list over
+  // spin of (n_k, 2) arrays (the dft_tools transport converter uses the latter).
+  static nda::array<long, 3> read_window_stacked(h5::proxy const &node) {
+    if (node.is_group()) {
+      auto per = to_vector<nda::array<long, 2>>(sort_keys_as_int(node));
+      long ns  = long(per.size());
+      long nk  = per[0].extent(0);
+      auto out = nda::array<long, 3>(ns, nk, 2);
+      for (long sp = 0; sp < ns; ++sp) out(sp, r_all, r_all) = per[sp];
+      return out;
+    }
+    return as<nda::array<long, 3>>(node);
+  }
+
+  //-------------------------------------------------------
+  // Read Cartesian 3x3 rotations stored either as a single (n_sym, 3, 3) dataset or as a list of matrices.
+  static std::vector<nda::matrix<double>> read_rot_symmetries(h5::proxy const &node) {
+    if (node.is_group()) return to_vector<nda::matrix<double>>(sort_keys_as_int(node));
+    auto arr = as<nda::array<double, 3>>(node);
+    std::vector<nda::matrix<double>> out;
+    out.reserve(arr.extent(0));
+    for (long i = 0; i < arr.extent(0); ++i) out.emplace_back(arr(i, r_all, r_all));
+    return out;
+  }
+
+  //-------------------------------------------------------
+  // Read band-basis velocities + band windows + BZ symmetries for transport.
   band_velocities read_band_velocities_hdf5(std::string const &filename, spin_kind_e spin_kind) {
     auto root = h5::proxy{filename, 'r'};
     if (!root.has_group("dft_transp_input")) {
-      throw std::runtime_error{fmt::format("The hdf5 file {} does not contain the group dft_transp_input. "
-                                           "Run the dft_tools transport converter (convert_transport_input) first.",
-                                           filename)};
+      throw std::runtime_error{
+         fmt::format("The hdf5 file {} does not contain the group dft_transp_input. "
+                     "Run the dft_tools transport converter (convert_transport_input) first.",
+                     filename)};
     }
 
-    // band windows: [n_sigma, n_k, 2], 1-based inclusive band bounds
-    auto band_window        = read_band_window(filename);
-    auto band_window_optics = as<nda::array<long, 3>>(root["dft_transp_input"]["band_window_optics"]);
-
-    auto n_sigma_data = band_window_optics.extent(0);
-    auto n_k          = band_window_optics.extent(1);
+    // Band windows: adapt to either a (n_sigma, n_k, 2) dataset or a list-over-spin of (n_k, 2) arrays.
+    auto band_window        = read_window_stacked(root["dft_misc_input"]["band_window"]);
+    auto band_window_optics = read_window_stacked(root["dft_transp_input"]["band_window_optics"]);
+    long n_sigma_data       = band_window_optics.extent(0);
+    long n_k                = band_window_optics.extent(1);
 
     // number of optics bands per (k, sigma) from band_window_optics, and the max for padding
     auto n_bands_per_k = nda::array<long, 2>(n_k, n_sigma_data);
@@ -326,9 +354,24 @@ namespace triqs::modest {
       }
     }
 
+    // Precompute the intersection ("joint") window between the dispersion/A window (band_window) and the
+    // velocity window (band_window_optics): (A_offset, v_offset, n_overlap) per (sigma, k). Done once here so
+    // the transport kernels can slice directly instead of recomputing the intersection at every k.
+    auto joint_window = nda::array<long, 3>(n_sigma_data, n_k, 3);
+    for (auto sp : range(n_sigma_data)) {
+      for (auto ik : range(n_k)) {
+        long b_lo               = std::max(band_window(sp, ik, 0), band_window_optics(sp, ik, 0));
+        long b_hi               = std::min(band_window(sp, ik, 1), band_window_optics(sp, ik, 1));
+        long n_ov               = (b_hi >= b_lo) ? b_hi - b_lo + 1 : 0;
+        joint_window(sp, ik, 0) = b_lo - band_window(sp, ik, 0);        // offset into the H/A array
+        joint_window(sp, ik, 1) = b_lo - band_window_optics(sp, ik, 0); // offset into the velocity array
+        joint_window(sp, ik, 2) = n_ov;                                 // number of overlapping bands
+      }
+    }
+
     // velocities: nested [spin][k] ragged arrays, padded into a dense (n_k, n_sigma, n_dir, N_nu_max, N_nu_max) block.
     // The converter stores each block direction-last (nb, nb, n_dir); we transpose to direction-first so that each
-    // v_alpha(k) is a contiguous (N_nu, N_nu) matrix (what the transport traces consume).
+    // v_alpha(k) is a contiguous (N_nu, N_nu) matrix
     auto v_k = nda::zeros<dcomplex>(n_k, n_sigma_data, 3, N_nu_max, N_nu_max);
     long sp  = 0;
     for (auto sp_proxy : sort_keys_as_int(root["dft_transp_input"]["velocities_k"])) {
@@ -343,19 +386,20 @@ namespace triqs::modest {
       ++sp;
     }
 
-    // Cartesian symmetry operations (3x3 real rotations)
-    auto rot_symmetries = to_vector<nda::matrix<double>>(sort_keys_as_int(root["dft_misc_input"]["rot_symmetries"]));
+    // Cartesian symmetry operations: adapt to either a (n_sym, 3, 3) dataset or a list of 3x3 matrices.
+    auto rot_symmetries = read_rot_symmetries(root["dft_misc_input"]["rot_symmetries"]);
 
     return band_velocities{.spin_kind          = spin_kind,
                            .v_k                = std::move(v_k),
                            .n_bands_per_k      = std::move(n_bands_per_k),
                            .band_window        = std::move(band_window),
                            .band_window_optics = std::move(band_window_optics),
+                           .joint_window       = std::move(joint_window),
                            .rot_symmetries     = std::move(rot_symmetries)};
   }
 
-  std::pair<double, one_body_elements_on_grid> read_obe_from_dft_converter_hdf5(std::string const &filename, double threshold,
-                                                                                bool diagonalize_hloc, bool read_velocities) {
+  std::pair<double, one_body_elements_on_grid> read_obe_from_dft_converter_hdf5(std::string const &filename, double threshold, bool diagonalize_hloc,
+                                                                                bool read_velocities) {
     auto g_dft = h5::proxy{filename, 'r'}["dft_input"];
 
     auto target_density = as<double>(g_dft["density_required"]);
@@ -432,10 +476,19 @@ namespace triqs::modest {
     auto obe_final = rotate_local_basis(U_rotations, std::move(obe));
 
     // Optionally attach transport data. Velocities live in the (Bloch) band basis, which is unaffected by the
-    // local-basis rotation applied above, so it is safe to attach them to the rotated obe.
+    // local-basis rotation applied above,
     if (read_velocities) {
-      obe_final.velocities  = read_band_velocities_hdf5(filename, spin_kind);
-      obe_final.cell_volume = read_cell_volume_hdf5(filename);
+      // HL: check for group and throw error if not present.
+      auto vel = read_band_velocities_hdf5(filename, spin_kind);
+      auto vol = read_cell_volume_hdf5(filename);
+      // Standardize transport units to eV*Angstrom (velocities) and Angstrom^3 (volume). Wien2k writes them in
+      // atomic units (Hartree*Bohr and Bohr^3); other converters are assumed to already be Angstrom-based.
+      if (dft_tools::dft_code_to_enum(as<std::string>(g_dft["dft_code"])) == DFTCode::Wien2k) {
+        vel.v_k *= HARTREE_TO_EV * BOHR_TO_ANG;         // Hartree*Bohr -> eV*Angstrom
+        vol *= BOHR_TO_ANG * BOHR_TO_ANG * BOHR_TO_ANG; // Bohr^3       -> Angstrom^3
+      }
+      obe_final.velocities  = std::move(vel);
+      obe_final.cell_volume = vol;
     }
 
     return {target_density, std::move(obe_final)};

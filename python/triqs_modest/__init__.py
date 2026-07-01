@@ -24,6 +24,8 @@ from .obe import *
 from .obe_tb import *
 from .post_processing import *
 from .rho_and_mu import *
+from .bubble import *
+from .optics import *
 from .utils import *
 from .utils.analyze_gfs import *
 from .utils.dc import *
