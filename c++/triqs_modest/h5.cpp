@@ -118,6 +118,7 @@ namespace triqs::modest {
     h5_read(subgroup, "n_bands_per_k", bv.n_bands_per_k);
     h5_read(subgroup, "band_window", bv.band_window);
     h5_read(subgroup, "band_window_optics", bv.band_window_optics);
+    h5_read(subgroup, "joint_window", bv.joint_window);
     // rot_symmetries stored as a stacked (n_sym, 3, 3) array
     nda::array<double, 3> R;
     h5_read(subgroup, "rot_symmetries", R);
@@ -131,6 +132,7 @@ namespace triqs::modest {
     h5_write(subgroup, "n_bands_per_k", bv.n_bands_per_k);
     h5_write(subgroup, "band_window", bv.band_window);
     h5_write(subgroup, "band_window_optics", bv.band_window_optics);
+    h5_write(subgroup, "joint_window", bv.joint_window);
     // stack rot_symmetries into a (n_sym, 3, 3) array for a simple, contiguous layout
     long n_sym = bv.rot_symmetries.size();
     auto R     = nda::array<double, 3>(n_sym, 3, 3);

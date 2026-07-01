@@ -1,0 +1,32 @@
+# Name of the package if any. Package.ModuleName will be the module name
+package_name = "triqs_modest"
+
+# The documentation string of the module.
+documentation = '''Bubble term of the current-current correlation function (the Kubo bubble).
+
+The MPI-parallel k-sum kernels that evaluate the (dressed) current-current bubble and their result structs:
+
+- ``transport_distribution`` -> ``transport_distribution_t`` (Gamma / Gamma_intra / Gamma_inter),
+- ``transport_function`` -> ``transport_function_t`` (bare-band Phi).
+
+The transport distribution
+
+.. math::
+
+    \Gamma_{\alpha\beta}(\omega,\Omega) = \frac{1}{V} \sum_{\mathbf{k}}
+        \mathrm{Tr}\left[ v_{\mathbf{k},\alpha} A_{\mathbf{k}}(\omega+\Omega)
+                          v_{\mathbf{k},\beta}  A_{\mathbf{k}}(\omega) \right],
+
+with the band-basis spectral function :math:`A = -(G-G^\dagger)/(2\pi i)`. The frequency integration
+producing the Onsager coefficients (conductivity, Seebeck, thermal conductivity) lives in
+``triqs_modest.optics``.'''
+
+# Namespace.
+# Only the classes/functions/enums declared in this namespace will be wrapped
+namespaces = "triqs triqs::modest"
+
+# Match/reject elements according to regex
+match_names = "triqs::modest::(transport_distribution|transport_distribution_t|transport_function|transport_function_t)"
+
+exclude_system_headers = false
+wrap_no_arg_methods_as_properties = true

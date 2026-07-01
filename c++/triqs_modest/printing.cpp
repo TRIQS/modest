@@ -98,6 +98,11 @@ namespace triqs::modest {
     out2 << obe.P;
     out1 << fmt::format("IBZ = {}\n", bool(obe.ibz_symm_ops));
     if (obe.ibz_symm_ops) { out2 << obe.ibz_symm_ops.value(); };
+    if (obe.velocities) {
+      out1 << "velocities:\n";
+      out2 << obe.velocities.value();
+    }
+    if (obe.cell_volume) { out1 << fmt::format("cell volume = {:.2f} Å³\n", obe.cell_volume.value()); }
     return out;
   }
 
