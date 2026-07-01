@@ -15,7 +15,13 @@ namespace triqs::modest {
  */
 
   C2PY_IGNORE std::pair<double, one_body_elements_on_grid> read_obe_from_dft_converter_hdf5(std::string const &filename, double threshold = 1.e-5,
-                                                                                            bool diagonalize_hloc = false);
+                                                                                            bool diagonalize_hloc = false, bool read_velocities = false);
+
+  /// Read band-basis velocities and band windows from the `dft_transp_input`/`dft_misc_input` groups (internal, rank-0).
+  C2PY_IGNORE band_velocities read_band_velocities_hdf5(std::string const &filename, spin_kind_e spin_kind);
+
+  /// Read (or compute) the unit-cell volume from the `dft_misc_input` group (internal, rank-0).
+  C2PY_IGNORE double read_cell_volume_hdf5(std::string const &filename);
 
   C2PY_IGNORE one_body_elements_on_grid read_partial_projectors_for_obe(std::string const &filename, one_body_elements_on_grid const &obe);
 
@@ -61,10 +67,13 @@ namespace triqs::modest {
    * @param filename Hdf5 file from dft_tools converter.
    * @param threshold Off-diagonal threshold for discovery of symmetries.
    * @param diagonalize_hloc Diagonalize the local non-interacting hamiltonian.
+   * @param read_velocities If true, also read the transport input (band-basis velocities, band windows,
+   *        symmetries) from `dft_transp_input`/`dft_misc_input` and the unit-cell volume, storing them in
+   *        `obe.velocities` and `obe.cell_volume` for optical-conductivity post-processing.
    * @return The total electron density and a one-body elements.
    */
   std::pair<double, one_body_elements_on_grid> one_body_elements_from_dft_converter(std::string const &filename, double threshold = 1.e-5,
-                                                                                    bool diagonalize_hloc = false);
+                                                                                    bool diagonalize_hloc = false, bool read_velocities = false);
 
   /**
    * @ingroup one_body_elements

@@ -110,6 +110,34 @@ namespace triqs::modest {
     h5_write(subgroup, "sigma_names", embed._sigma_names);
   }
 
+  // band_velocities
+  void h5_read(h5::group g, std::string const &name, band_velocities &bv) {
+    auto subgroup = g.open_group(name);
+    h5_read(subgroup, "spin_kind", bv.spin_kind);
+    h5_read(subgroup, "v_k", bv.v_k);
+    h5_read(subgroup, "n_bands_per_k", bv.n_bands_per_k);
+    h5_read(subgroup, "band_window", bv.band_window);
+    h5_read(subgroup, "band_window_optics", bv.band_window_optics);
+    // rot_symmetries stored as a stacked (n_sym, 3, 3) array
+    nda::array<double, 3> R;
+    h5_read(subgroup, "rot_symmetries", R);
+    bv.rot_symmetries.clear();
+    for (long i = 0; i < R.extent(0); ++i) bv.rot_symmetries.push_back(nda::matrix<double>{R(i, r_all, r_all)});
+  }
+  void h5_write(h5::group g, std::string const &name, band_velocities const &bv) {
+    auto subgroup = g.create_group(name);
+    h5_write(subgroup, "spin_kind", bv.spin_kind);
+    h5_write(subgroup, "v_k", bv.v_k);
+    h5_write(subgroup, "n_bands_per_k", bv.n_bands_per_k);
+    h5_write(subgroup, "band_window", bv.band_window);
+    h5_write(subgroup, "band_window_optics", bv.band_window_optics);
+    // stack rot_symmetries into a (n_sym, 3, 3) array for a simple, contiguous layout
+    long n_sym = bv.rot_symmetries.size();
+    auto R     = nda::array<double, 3>(n_sym, 3, 3);
+    for (long i = 0; i < n_sym; ++i) R(i, r_all, r_all) = bv.rot_symmetries[i];
+    h5_write(subgroup, "rot_symmetries", R);
+  }
+
   // one_body_elements_on_grid
   void h5_read(h5::group g, std::string const &name, one_body_elements_on_grid &obe) {
     auto subgroup = g.open_group(name);
@@ -117,6 +145,17 @@ namespace triqs::modest {
     h5_read(subgroup, "C_space", obe.C_space);
     h5_read(subgroup, "P", obe.P);
     //h5_read(subgroup, "ibz_symm_ops", obe.ibz_symm_ops);
+    // optional transport data (absent in files written before transport support)
+    if (subgroup.has_key("velocities")) {
+      band_velocities bv;
+      h5_read(subgroup, "velocities", bv);
+      obe.velocities = std::move(bv);
+    }
+    if (subgroup.has_key("cell_volume")) {
+      double v = 0.0;
+      h5_read(subgroup, "cell_volume", v);
+      obe.cell_volume = v;
+    }
   }
   void h5_write(h5::group g, std::string const &name, one_body_elements_on_grid const &obe) {
     auto subgroup = g.create_group(name);
@@ -124,6 +163,9 @@ namespace triqs::modest {
     h5_write(subgroup, "C_space", obe.C_space);
     h5_write(subgroup, "P", obe.P);
     //h5_write(subgroup, "ibz_symm_ops", obe.ibz_symm_ops);
+    // optional transport data (only written when present)
+    if (obe.velocities) h5_write(subgroup, "velocities", *obe.velocities);
+    if (obe.cell_volume) h5_write(subgroup, "cell_volume", *obe.cell_volume);
   }
 
   // spectral function containers
