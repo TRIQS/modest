@@ -247,8 +247,8 @@ static const auto _c2py_doc_0 = _c2py_fun_0.doc(
 Compute the Kubo transport distribution :math:`\Gamma_{\alpha\beta}(\omega,\Omega)`.
 
 The band-basis spectral function :math:`A_{\mathbf{k}}(\omega)` is built with the rank-reduced Woodbury
-fast path when `obe.H.matrix_valued == false` (diagonal H(k) + rank-M self-energy), and by a direct
-N_ν × N_ν inversion otherwise. Requires `obe.velocities` and `obe.cell_volume` (see
+identity (diagonal H(k) + rank-M self-energy); a matrix-valued H(k) is not supported. Requires
+`obe.velocities` and `obe.cell_volume` (see
 `one_body_elements_from_dft_converter(..., read_velocities=true)`). MPI-parallel over k-points.
 
 Parameters

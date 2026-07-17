@@ -67,8 +67,8 @@ namespace triqs::modest {
    * @brief Compute the Kubo transport distribution \f$ \Gamma_{\alpha\beta}(\omega,\Omega) \f$.
    *
    * The band-basis spectral function \f$ A_{\mathbf{k}}(\omega) \f$ is built with the rank-reduced Woodbury
-   * fast path when `obe.H.matrix_valued == false` (diagonal H(k) + rank-M self-energy), and by a direct
-   * N_ν × N_ν inversion otherwise. Requires `obe.velocities` and `obe.cell_volume` (see
+   * identity (diagonal H(k) + rank-M self-energy); a matrix-valued H(k) is not supported. Requires
+   * `obe.velocities` and `obe.cell_volume` (see
    * `one_body_elements_from_dft_converter(..., read_velocities=true)`). MPI-parallel over k-points.
    *
    * @param obe One-body elements on grid, carrying the optional band velocities and cell volume.
