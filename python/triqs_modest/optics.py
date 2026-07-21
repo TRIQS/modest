@@ -46,7 +46,13 @@ __all__ = ["optical_conductivity", "OpticalConductivity"]
 _KB_EV = _cst.physical_constants["Boltzmann constant in eV/K"][0]
 _CONVERT_TO_SI = _cst.e**2 / _cst.hbar * 1e5  # [Angstrom^-1] -> [10^3 Ohm^-1 cm^-1]
 _SEEBECK_FACTOR = _KB_EV * 1e6                # (k_B/e) in uV/K
-_KAPPA_FACTOR = _CONVERT_TO_SI * _KB_EV       # (W/m/K)
+# Note the extra 1e5 vs _CONVERT_TO_SI. It is NOT a second SI conversion; it undoes an output-unit
+# reduction baked into _CONVERT_TO_SI. The full-SI conductivity prefactor is e^2/hbar * 1e10 (the 1e10
+# is the Angstrom^-1 -> m^-1 of Gamma), giving sigma in S/m. But we REPORT sigma in 10^3 Ohm^-1 cm^-1
+# = 1e5 S/m — a unit 1e5x larger than S/m — so _CONVERT_TO_SI = e^2/hbar * 1e5 is that full prefactor
+# divided by 1e5, i.e. 1e5 SHORT of S/m. kappa is reported in genuine SI, W/(m K), and its Onsager form
+# needs the conductivity as a true S/m number, i.e. the full 1e10 prefactor = _CONVERT_TO_SI * 1e5.
+_KAPPA_FACTOR = _CONVERT_TO_SI * 1e5 * _KB_EV  # (W/m/K)
 
 _DC_TOL = 1e-10   # |Omega| below which Omega is treated as the DC (Omega=0) point
 _A0_TOL = 1e-15   # |A_0| below which S/kappa are undefined (returned as NaN)
