@@ -5,7 +5,6 @@
 
 #pragma once
 #include "./density.hpp"
-#include "utils/scoped_timer.hpp"
 #include <triqs/mesh.hpp>
 #include "utils/gf_supp.hpp"
 
@@ -155,7 +154,6 @@ namespace triqs::modest {
     // NOTE: Is there any reason why sigma loop should be the external one?
     // Internal is favorable for maximum parallelization.
     mpi::communicator comm = {};
-    auto timer = scoped_timer{comm.rank() == 0};
 #pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                                                            \
    shared(comm, r_all, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_static)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {

@@ -181,7 +181,6 @@ TEST(obe_tb, sr2moo4_wannier90) { // NOLINT
   auto [dft_density, obe_dft] = one_body_elements_from_dft_converter("./ref_data_lfs/sr2moo4.ref.h5");
   double mu_dft               = 0;
   {
-    //scoped_timer timer;
     //mu_dft = find_chemical_potential(dft_density, obe_dft, Sigma_dyn, Sigma_static);
     //auto gloc_dft               = gloc(obe_dft, mu_dft, Sigma_dyn, Sigma_static);
   }
@@ -192,7 +191,6 @@ TEST(obe_tb, sr2moo4_wannier90) { // NOLINT
   // check mu finding
   double mu_tb = 0;
   {
-    scoped_timer timer;
     mu_tb = find_chemical_potential(2.0, obe_tb, Sigma_dyn, Sigma_static, opt);
   }
   //EXPECT_NEAR(mu_tb, mu_dft, 1e-4);
