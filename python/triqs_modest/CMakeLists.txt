@@ -23,7 +23,7 @@ foreach(module_src ${module_sources})
 
   c2py_add_module(${module_name}
     DIR ${module_dir}
-    LINK_LIBRARIES ${PROJECT_NAME}_c ${PROJECT_NAME}_warnings triqs_py)
+    LINK_LIBRARIES ${PROJECT_NAME}_c ${PROJECT_NAME}_warnings)
   add_library(${PROJECT_NAME}::${module_name} ALIAS ${module_name})
   add_dependencies(${PROJECT_NAME}_python_modules ${module_name})
   install(TARGETS ${module_name} DESTINATION ${PYTHON_LIB_DEST}/${module_dir})
