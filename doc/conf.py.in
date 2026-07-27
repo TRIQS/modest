@@ -102,7 +102,6 @@ html_context = {
     'versions': [
         ['unstable', 'https://triqs.github.io/@PROJECT_NAME@/unstable/'],
         ['4.0.x',    'https://triqs.github.io/@PROJECT_NAME@/4.0.x/'],
-        ['3.3.x',    'https://triqs.github.io/@PROJECT_NAME@/3.3.x/'],
     ],
 }
 
