@@ -5,7 +5,6 @@
 
 #pragma once
 #include "./density.hpp"
-#include "utils/scoped_timer.hpp"
 #include <triqs/mesh.hpp>
 #include "utils/gf_supp.hpp"
 
@@ -151,7 +150,6 @@ namespace triqs::modest {
     // Embedding decomposition from structure of Sigma
     auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
 
-    auto timer = scoped_timer{};
     // ---------
     // NOTE: Is there any reason why sigma loop should be the external one?
     // Internal is favorable for maximum parallelization.
