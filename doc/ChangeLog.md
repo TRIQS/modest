@@ -1,5 +1,24 @@
 # Changelog
 
+## Version 4.0.1
+
+ModEST version 4.0.1 is a patch release that pins the c2py build dependency to
+the 0.9.x release branch, keeping a fresh build compatible with the released
+triqs 4.0.x, and updates the documentation.
+
+We thank all contributors: Thomas Hahn, Alexander Hampel, Nils Wentzell
+
+Find below an itemized list of changes in this release.
+
+### deps
+* Pin c2py to the 0.9.x release branch for the 4.0.x release
+
+### doc
+* Add a Zenodo DOI badge to the README
+* Fix the documentation website URLs to not use the `triqs_` prefix
+* Drop 3.3.x from the documentation version switcher, as there is no 3.3.x release branch
+
+
 ## Version 4.0.0
 
 This is the first public release of ModEST, the Modular Electronic Structure
