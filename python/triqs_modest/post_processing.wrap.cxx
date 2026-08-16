@@ -172,20 +172,17 @@ const std::string c2py::tp_doc<_c2py_cls_1> =
 
 // projected_spectral_function
 static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
+   c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, double mu,
+                 const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
+                 double broadening) { return triqs::modest::projected_spectral_function(obe, mu, Sigma_w, broadening); },
+              "obe", "mu", "Sigma_w", "broadening"_a = 0.01),
    c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, const triqs::modest::downfolding_projector &Proj, double mu,
                  const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
                  double broadening) { return triqs::modest::projected_spectral_function(obe, Proj, mu, Sigma_w, broadening); },
               "obe", "Proj", "mu", "Sigma_w", "broadening"_a = 0.01)};
 
-// spectral_function
-static auto const _c2py_fun_1 =
-   c2py::dispatcher_f_kw_t{c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, double mu,
-                                         const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
-                                         double broadening) { return triqs::modest::spectral_function(obe, mu, Sigma_w, broadening); },
-                                      "obe", "mu", "Sigma_w", "broadening"_a = 0.01)};
-
 // spectral_function_on_high_symmetry_path
-static auto const _c2py_fun_2 = c2py::dispatcher_f_kw_t{
+static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
    c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, double mu,
                  const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
                  double broadening) { return triqs::modest::spectral_function_on_high_symmetry_path(obe, mu, Sigma_w, broadening); },
@@ -193,41 +190,17 @@ static auto const _c2py_fun_2 = c2py::dispatcher_f_kw_t{
 
 static const auto _c2py_doc_0 =
    _c2py_fun_0.doc(R"DOC(
-Compute the atom- and orbital-resolved spectral function (interacting density of states).
+[1] Compute the atom- and orbital-resolved spectral function (interacting density of states).
 
-Parameters
-----------
-obe : {par_0}
-   One-body elements on grid created from one_body_elements_with_partial_projectors.
-Proj : {par_1}
-   Downfolding projector defined in the correlated space using to upfold the DMFT self-energies.
-mu : {par_2}
-   Chemical potential.
-Sigma_w : {par_3}
-   Self-energy in real-frequencies.
-broadening : {par_4}
-   Spectral broadening.
+Common case: `obe.P` is also the projector that upfolds the self-energy.
+Uses the rank-reduced Woodbury fast path when `obe.H.matrix_valued == false`.
 
-Returns
--------
-{ret_0}
-   Atom- and orbital-resolved spectral function.
-)DOC",
-                   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
-                    {c2py::python_typename<const triqs::modest::downfolding_projector &>()},
-                    {c2py::python_typename<double>()},
-                    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
-                    {c2py::python_typename<double>()}},
-                   {c2py::python_typename<triqs::modest::spectral_function_w>()});
-static const auto _c2py_doc_1 = _c2py_fun_1.doc(
-   R"DOC(
-Compute the k-summed band-resolved spectral function matrix.
+------
 
-The returned array has shape (n_sigma, n_omega, n_bands, n_bands), with
+[2] Two-projector overload: uses a downfolding projector to upfold Σ and a partial projector project G_{'}() into the
+W space instead of the C space.
 
-\f[
-  A(\omega) = -\frac{1}{2\pi i}\left[G(\omega) - G^{\dagger}(\omega)\right].
-\f]
+------
 
 Parameters
 ----------
@@ -239,19 +212,22 @@ Sigma_w : {par_2}
    Self-energy in real-frequencies.
 broadening : {par_3}
    Spectral broadening.
+Proj : {par_4}
+   Downfolding projector defined in the correlated space used to upfold the DMFT self-energies.
 
 Returns
 -------
 {ret_0}
-   Band-resolved spectral function matrix.
+   Atom- and orbital-resolved spectral function.
 )DOC",
-   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
-    {c2py::python_typename<double>()},
-    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
-    {c2py::python_typename<double>()}},
-   {c2py::python_typename<nda::basic_array<double, 4, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>()});
-static const auto _c2py_doc_2 =
-   _c2py_fun_2.doc(R"DOC(
+                   {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
+                    {c2py::python_typename<double>()},
+                    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+                    {c2py::python_typename<double>()},
+                    {c2py::python_typename<const triqs::modest::downfolding_projector &>()}},
+                   {c2py::python_typename<triqs::modest::spectral_function_w>()});
+static const auto _c2py_doc_1 =
+   _c2py_fun_1.doc(R"DOC(
 Compute momentum-resolved spectral function :math:`A^\sigma(k, \omega)` along high-symmetry path.
 
 Parameters
@@ -279,8 +255,7 @@ Returns
 
 static PyMethodDef module_methods[] = {
    {"projected_spectral_function", (PyCFunction)c2py::pyfkw<_c2py_fun_0>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_0.c_str()},
-   {"spectral_function", (PyCFunction)c2py::pyfkw<_c2py_fun_1>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_1.c_str()},
-   {"spectral_function_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<_c2py_fun_2>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_2.c_str()},
+   {"spectral_function_on_high_symmetry_path", (PyCFunction)c2py::pyfkw<_c2py_fun_1>, METH_VARARGS | METH_KEYWORDS, _c2py_doc_1.c_str()},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
