@@ -3,7 +3,7 @@
 #include "utils/gf_supp.hpp"
 #include <triqs/mesh.hpp>
 #include "downfolding.hpp"
-#include "gloc_fixed_grid.hpp"
+#include "./lattice_gf_helpers.hpp"
 
 namespace triqs::modest {
 

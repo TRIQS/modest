@@ -10,6 +10,7 @@
 #include <itertools/omp_chunk.hpp>
 #include <triqs/lattice/brillouin_zone.hpp>
 #include "./downfolding.hpp"
+#include "./lattice_gf_helpers.hpp"
 #include <triqs/experimental/utility/root_finder.hpp>
 
 namespace triqs::modest {
@@ -148,36 +149,25 @@ namespace triqs::modest {
   template <typename Mesh>
   double density_for_matrix_valued_impl(one_body_elements_on_grid const &obe, double mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
                                         nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
-    // nda::array<nda::matrix<double>, 2> const &Sigma_DC) {
     auto const &mesh = Sigma_dynamic(0, 0).mesh();
     auto beta        = mesh.beta();
+    auto result      = gf{mesh}; // tr(G_full − G_KS) per ω, summed over (k, σ).
 
-    auto result = gf{mesh}; // Compute the correction term on all dlr mesh points
+    // Reuse the direct N_ν × N_ν inversion helper.  Returns a callable (k, σ) → gf on (mesh, {N_ν, N_ν}).
+    auto glatt_at_k = detail::lattice_gf_at_k(obe, mu, Sigma_dynamic, Sigma_static);
 
-    auto PSP = [&](auto &iw, auto &k_idx, auto &sigma) {
-      auto N_nu             = obe.H.N_nu(sigma, k_idx);
-      auto out              = nda::zeros<dcomplex>(N_nu, N_nu);
-      auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
-      for (auto &&[alpha, R] : enumerated_sub_slices(embedding_decomp)) {
-        auto P = obe.P.P(sigma, k_idx)(R, r_all);
-        out(r_all, r_all) += dagger(P) * nda::matrix<dcomplex>{Sigma_dynamic(alpha, sigma).data()(iw, r_all, r_all) + Sigma_static(alpha, sigma)} * P;
-      }
-      return out;
-    };
-
-    auto Glatt = [&](auto &k_idx, auto &sigma) {
-      using nda::linalg::inv;
-      auto out = gf{mesh};
-      for (auto &&[n, w] : enumerate(mesh)) {
-        out.data()(n) = trace(inv(w + mu - obe.H.H(sigma, k_idx) - PSP(n, k_idx, sigma)) - inv(w + mu - obe.H.H(sigma, k_idx)));
-      }
-      return out;
-    };
-
-    mpi::communicator comm = {}; // for now using default comm in MPI
-#pragma omp parallel for collapse(2) reduction(gf_sum : result) default(none) shared(obe, Glatt, comm)
+    mpi::communicator comm = {};
+#pragma omp parallel for collapse(2) reduction(gf_sum : result) default(none) shared(obe, mu, mesh, glatt_at_k, comm, r_all)
     for (auto k_idx : mpi::chunk(range(obe.H.n_k()), comm)) {
-      for (auto sigma : range(obe.C_space.n_sigma())) { result.data() += obe.H.k_weights(k_idx) * Glatt(k_idx, sigma).data(); }
+      for (auto sigma : range(obe.C_space.n_sigma())) {
+        using nda::linalg::inv;
+        auto G_band = glatt_at_k(k_idx, sigma); // gf on (mesh, {N_ν, N_ν})
+        auto Hk     = obe.H.H(sigma, k_idx);
+        for (auto &&[n, w] : enumerate(mesh)) {
+          result.data()(n) += obe.H.k_weights(k_idx)
+             * (trace(G_band.data()(n, r_all, r_all)) - trace(inv(nda::matrix<dcomplex>{w + mu - Hk})));
+        }
+      }
     }
     result = mpi::all_reduce(result);
     return density_nk(obe, mu, beta) + real(density(result));

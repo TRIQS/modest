@@ -152,13 +152,6 @@ namespace triqs::modest {
   }
   // -------------------------------------------------------------------------------------------
 
-  // fnt case to be implemented
-  //nda::array<nda::matrix<dcomplex>, 2> impurity_levels(one_body_elements const &one_body) {
-  //   // return H_k.get_R({0, 0, 0}); // GET R = 0 member.
-  // }
-
-  // -------------------------------------------------------------------------
-
   nda::array<dcomplex, 3> detail::G0_C_k_sigma(one_body_elements_on_grid const &obe, double mu, long k_idx, long sigma,
                                                std::vector<dcomplex> const &omegas, bool mu_derivative) {
     // Using Woodbury formula

@@ -4,34 +4,12 @@
 // See LICENSE in the root of this distribution for details.
 
 #include "./postprocess.hpp"
+#include "./lattice_gf_helpers.hpp"
 #include <iostream>
 #include <atomic>
 #include <stdexcept>
 
 namespace triqs::modest {
-
-  namespace detail {
-
-    // Upfold self-energy for ALL frequencies at once for a given (k, sigma)
-    // Returns array of shape (n_w, N_nu, N_nu)
-    auto upfold_self_energy_all_freq(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, auto const &Sigma_w, long k_idx,
-                                     long sigma_idx) {
-      auto N_nu = obe.H.N_nu(sigma_idx, k_idx);
-      auto n_w  = Sigma_w(0, 0).mesh().size();
-      auto out  = nda::zeros<dcomplex>(n_w, N_nu, N_nu);
-
-      for (auto &&[alpha, R] : enumerated_sub_slices(get_struct(Sigma_w).dims(r_all, 0) | tl::to<std::vector>())) {
-        auto P         = Proj.P(sigma_idx, k_idx)(R, r_all);
-        auto Pdag      = dagger(P);
-        auto Sigma_blk = Sigma_w(alpha, sigma_idx).data();
-
-        // Batch over all frequencies
-        for (auto n : range(n_w)) { out(n, r_all, r_all) += Pdag * nda::matrix<dcomplex>{Sigma_blk(n, r_all, r_all)} * P; }
-      }
-      return out;
-    }
-
-  } // namespace detail
 
   spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening) {

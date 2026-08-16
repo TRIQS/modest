@@ -5,6 +5,7 @@
 
 #pragma once
 #include "./density.hpp"
+#include "./lattice_gf_helpers.hpp"
 #include <triqs/mesh.hpp>
 #include "utils/gf_supp.hpp"
 
@@ -15,57 +16,6 @@ namespace triqs::modest {
    initializer(omp_priv = make_block2_gf(omp_orig(0, 0).mesh(), get_struct(omp_orig)))
 #pragma omp declare reduction(block2_gf_sum : block2_gf<dlr_imfreq, matrix_valued> : omp_out += omp_in)                                              \
    initializer(omp_priv = make_block2_gf(omp_orig(0, 0).mesh(), get_struct(omp_orig)))
-
-  namespace detail {
-
-    template <typename Mesh>
-    constexpr auto upfold_self_energy_at_freq(one_body_elements_on_grid const &obe, downfolding_projector const &Proj,
-                                              block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                                              nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, long w_idx, long k_idx, long sigma_idx) {
-      auto N_nu = obe.H.N_nu(sigma_idx, k_idx);
-      auto out  = nda::zeros<dcomplex>(N_nu, N_nu);
-      for (auto &&[alpha, R] : enumerated_sub_slices(get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>())) {
-        auto P = Proj.P(sigma_idx, k_idx)(R, r_all);
-        out(r_all, r_all) +=
-           dagger(P) * nda::matrix<dcomplex>{Sigma_dynamic(alpha, sigma_idx).data()(w_idx, r_all, r_all) + Sigma_static(alpha, sigma_idx)} * P;
-      }
-      return out;
-    }
-
-    // --------------------------------------------------------------------
-    template <typename Mesh>
-    constexpr auto local_gf_at_k(one_body_elements_on_grid const &obe, double const &mu, downfolding_projector const &Proj,
-                                 block2_gf<Mesh, matrix_valued> const &Sigma_dynamic, nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
-      return [&](auto const &k_idx, auto const &sigma_idx) {
-        using nda::linalg::inv;
-        auto const n_M   = obe.C_space.dim();
-        auto const &mesh = Sigma_dynamic(0, 0).mesh();
-        auto out         = gf{mesh, {n_M, n_M}};
-        auto P           = obe.P.P(sigma_idx, k_idx);
-        for (auto &&[n, w] : enumerate(mesh)) {
-          auto PSP                    = upfold_self_energy_at_freq(obe, Proj, Sigma_dynamic, Sigma_static, n, k_idx, sigma_idx);
-          out.data()(n, r_all, r_all) = P * inv(w + mu - obe.H.H(sigma_idx, k_idx) - PSP) * dagger(P);
-        }
-        return out;
-      };
-    }
-
-    template <typename Mesh>
-    constexpr auto lattice_gf_at_k(one_body_elements_on_grid const &obe, double const &mu, block2_gf<Mesh, matrix_valued> const &Sigma_dynamic,
-                                   nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static) {
-      return [&](auto const &k_idx, auto const &sigma_idx) {
-        using nda::linalg::inv;
-        auto const &mesh = Sigma_dynamic(0, 0).mesh();
-        auto N_nu        = obe.H.N_nu(sigma_idx, k_idx);
-        auto Glatt       = gf{mesh, {N_nu, N_nu}};
-        for (auto &&[n, w] : enumerate(mesh)) {
-          auto PSP                      = upfold_self_energy_at_freq(obe, obe.P, Sigma_dynamic, Sigma_static, n, k_idx, sigma_idx);
-          Glatt.data()(n, r_all, r_all) = inv(w + mu - obe.H.H(sigma_idx, k_idx) - PSP);
-        }
-        return Glatt;
-      };
-    }
-  } // namespace detail
 
   /** @cond DOXYGEN_SKIP_THIS */
   /**
