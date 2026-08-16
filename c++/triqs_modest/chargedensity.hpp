@@ -38,13 +38,14 @@ namespace triqs::modest {
     auto glatt_at_k = detail::lattice_gf_at_k(obe, mu, Sigma_dynamic, Sigma_static);
 
     // loop over k and σ
-    // TODO: parallelize over k and gather
-    for (auto k_idx : range(n_k)) {
+    mpi::communicator comm = {}; // for now using default comm in MPI
+    for (auto k_idx : mpi::chunk(range(n_k), comm)) {
       for (auto const &sigma : range(n_sigma)) {
         auto r_window                                = nda::range(0, obe.H.N_nu(sigma, k_idx));
         N_nu_nup_k(k_idx, sigma, r_window, r_window) = density(glatt_at_k(k_idx, sigma));
       }
     }
+    N_nu_nup_k = mpi::all_reduce(N_nu_nup_k, comm);
 
     return N_nu_nup_k;
   }
