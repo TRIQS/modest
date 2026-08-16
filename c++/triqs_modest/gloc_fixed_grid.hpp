@@ -4,7 +4,6 @@
 // See LICENSE in the root of this distribution for details.
 
 #pragma once
-#include "./density.hpp"
 #include "./lattice_gf_helpers.hpp"
 #include <triqs/mesh.hpp>
 #include "utils/gf_supp.hpp"
@@ -90,37 +89,39 @@ namespace triqs::modest {
     // intercept if the dispersion in obe is matrix valued. The Woodbury offers no performance gain for this case.
     if (obe.H.matrix_valued) return gloc_for_matrix_valued_dispersion_impl(obe, mu, Sigma_dynamic, Sigma_static);
 
-    auto n_sigma     = Sigma_dynamic.size2();
-    auto M           = obe.C_space.dim();
-    auto n_kpts      = long(obe.H.n_k());
     auto const &mesh = Sigma_dynamic(0, 0).mesh();
+    auto n_sigma     = Sigma_dynamic.size2();
+    auto n_kpts      = long(obe.H.n_k());
     auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
-    auto omegas      = mesh | tl::to<std::vector<dcomplex>>();
+    auto wb          = detail::make_woodbury_setup(Sigma_dynamic, Sigma_static);
+    auto n_w         = long(wb.omegas.size());
 
-    // Embedding decomposition from structure of Sigma
-    auto embedding_decomp = get_struct(Sigma_dynamic).dims(r_all, 0) | tl::to<std::vector>();
-
-    // ---------
-    // NOTE: Is there any reason why sigma loop should be the external one?
-    // Internal is favorable for maximum parallelization.
     mpi::communicator comm = {};
-#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none)                                                            \
-   shared(comm, r_all, n_kpts, n_sigma, obe, mu, omegas, mesh, M, embedding_decomp, Sigma_dynamic, Sigma_static)
+#pragma omp parallel for collapse(2) reduction(block2_gf_sum : gloc_result) default(none) shared(comm, r_all, n_kpts, n_sigma, n_w, obe, mu, wb)
     for (auto k_idx : mpi::chunk(range(n_kpts), comm)) {
       for (auto sigma : range(n_sigma)) {
-        auto Y = detail::G0_C_k_sigma(obe, mu, k_idx, sigma, omegas, false);
-        for (auto &&[n, om] : itertools::enumerate(mesh)) {
-          auto Y1 = Y(n, r_all, r_all);
-          auto B  = detail::calc_inv_G_G0(M, embedding_decomp, Sigma_dynamic, Sigma_static, om, sigma, Y1, Y1);
-          gloc_result(0, sigma).data()(n, r_all, r_all) += obe.H.k_weights(k_idx) * B;
+        auto bare        = detail::compute_bare_projected(obe, obe.P, mu, k_idx, sigma, wb.omegas, wb.active);
+        auto const &Sa_n = wb.Sa_per_sigma[sigma];
+        auto w_k         = obe.H.k_weights(k_idx);
+
+        // Σ ≡ 0 short-circuit: G_loc^C = G0_PP, no correction.
+        if (wb.active.rank == 0) {
+          for (auto n : range(n_w)) gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * bare.G0_PP(n, r_all, r_all);
+          continue;
+        }
+
+        for (auto n : range(n_w)) {
+          // Rank-reduced Woodbury:  G_loc += w_k · ( G0_PP + L · K · R ), L = G0_PQ, R = G0_QPdag.
+          auto Sa      = nda::matrix<dcomplex>{Sa_n(n, r_all, r_all)};
+          auto Yaa     = nda::matrix<dcomplex>{bare.G0_QQ(n, r_all, r_all)};
+          auto KR      = detail::apply_K(Sa, Yaa, bare.G0_QPdag(n, r_all, r_all));
+          auto L_n     = nda::matrix<dcomplex>{bare.G0_PQ(n, r_all, r_all)};
+          auto contrib = nda::matrix<dcomplex>{bare.G0_PP(n, r_all, r_all) + L_n * KR};
+          gloc_result(0, sigma).data()(n, r_all, r_all) += w_k * contrib;
         }
       }
-      // No normalization: the Pk are in obe ALREADY normalized.
     }
     gloc_result = mpi::all_reduce(gloc_result);
-
-    // FIXME :: the IBZ should work on a proper gf_view with atomic decomposition
-    // CHANGE IBZ accordingly ...
     if (auto const &S = obe.ibz_symm_ops; S) gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition());
     return gloc_result;
   }
