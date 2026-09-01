@@ -2,9 +2,10 @@
 // This file is part of TRIQS/modest and is licensed under the terms of GPLv3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later
 // See LICENSE in the root of this distribution for details.
-
+#include "./obe_tb.hpp"
 #include "./downfolding.hpp"
 #include "./embedding.hpp"
+#include "./postprocess.hpp"
 #include <algorithm>
 #include <fmt/base.h>
 #include <triqs/utility/report_stream.hpp>
@@ -89,6 +90,28 @@ namespace triqs::modest {
     return out;
   }
 
+  std::ostream &operator<<(std::ostream &out, one_body_elements_tb const &obe) {
+    auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = triqs::utility::indented_ostream(out, 4);
+    out << "One body elements tight-binding: Fourier representation of one-body dispersion [one_body_elements_tb]\n";
+    out1 << "H^σ(k):\n";
+    for (auto &h : obe.H) { out2 << h; }
+    out1 << "C_space:\n";
+    out2 << obe.C_space;
+    return out;
+  }
+
+  std::ostream &operator<<(std::ostream &out, one_body_elements_gw const &obe) {
+    auto out1 = triqs::utility::indented_ostream(out, 2); // same stream, but shifted by 2 spaces
+    auto out2 = triqs::utility::indented_ostream(out, 4);
+    out << "One body elements GW: [one_body_elements_gw]\n";
+    out1 << "C_space:\n";
+    out2 << obe.C_space;
+    out1 << "P:\n";
+    out2 << obe.P;
+    return out;
+  }
+
   // ------------------------------ PRINTING -------------------------------------------------------------
 
   auto format_as(embedding::imp_block_t const &p) {
@@ -166,6 +189,26 @@ namespace triqs::modest {
 
   std::ostream &operator<<(std::ostream &out, embedding const &E) {
     out << E.description(false);
+    return out;
+  }
+
+  // ---------------------------------------------------------------------------------------------
+
+  std::ostream &operator<<(std::ostream &out, spectral_function_w const &x) {
+    out << "Spectral functions on a real-frequency mesh [spectral_function_w]:\n";
+    auto out1 = triqs::utility::indented_ostream(out, 2);
+    out1 << fmt::format("total[σ, ω]            A^σ(ω)         shape = {}\n", x.total.shape());
+    out1 << fmt::format("projected[σ, ω, m, m'] A^σ_mm'(ω)     shape = {}\n", x.projected.shape());
+    return out;
+  }
+
+  // ---------------------------------------------------------------------------------------------
+
+  std::ostream &operator<<(std::ostream &out, spectral_function_kw const &x) {
+    out << "Momentum-resolved spectral functions on a real-frequency mesh [spectral_function_kw]:\n";
+    auto out1 = triqs::utility::indented_ostream(out, 2);
+    out1 << fmt::format("total[σ, k, ω]              A^σ(k, ω)       shape = {}\n", x.total.shape());
+    out1 << fmt::format("projected[σ, k, ω, m]       A^σ_mm(k, ω)    shape = {}\n", x.projected.shape());
     return out;
   }
 
