@@ -25,15 +25,25 @@ using c2py::operator""_a;
 // ==================== module functions ====================
 
 // charge_density_correction
-static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{c2py::cfun(
-   [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
-      const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
-      const nda::basic_array<
-         nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
-         nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static) {
-     return triqs::modest::charge_density_correction<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static);
-   },
-   "obe", "mu", "Sigma_dynamic", "Sigma_static")};
+static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
+         const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static) {
+        return triqs::modest::charge_density_correction<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static);
+      },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static"),
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_on_grid &obe, double mu,
+         const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static) {
+        return triqs::modest::charge_density_correction<triqs::mesh::dlr_imfreq>(obe, mu, Sigma_dynamic, Sigma_static);
+      },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static")};
 
 // gloc
 static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
@@ -71,9 +81,23 @@ static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
         return triqs::modest::gloc<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
       },
       "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_tb &obe, double mu,
+         const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         const triqs::experimental::lattice::bz_int_options &opt) {
+        return triqs::modest::gloc<triqs::mesh::dlr_imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
+      },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
    c2py::cfun([](const triqs::mesh::imfreq &mesh, const triqs::modest::one_body_elements_tb &obe, double mu,
                  const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::imfreq>(mesh, obe, mu, opt); },
-              "mesh", "obe", "mu", "opt")};
+              "mesh", "obe", "mu", "opt"),
+   c2py::cfun(
+      [](const triqs::mesh::dlr_imfreq &mesh, const triqs::modest::one_body_elements_tb &obe, double mu,
+         const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::dlr_imfreq>(mesh, obe, mu, opt); },
+      "mesh", "obe", "mu", "opt")};
 
 static const auto _c2py_doc_0 = _c2py_fun_0.doc(
    R"DOC(
@@ -99,7 +123,8 @@ Returns
 )DOC",
    {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},
     {c2py::python_typename<double>()},
-    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
     {c2py::python_typename<const nda::basic_array<
        nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
        nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()}},
@@ -125,7 +150,7 @@ using the Woodbury formula which allows us to perform the matrix inversion in th
 
 ------
 
-[3, 4, 5, 6] Compute the local Green's function without a self-energy.
+[3, 4, 5, 6, 7, 8] Compute the local Green's function without a self-energy.
 
 See other overloads (gloc) for more details.
 
@@ -156,10 +181,10 @@ Returns
 [2] : {ret_1}
    :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function in the full :math:`\mathcal{C}` space.
 
-[3, 5, 6] : {ret_2}
+[3, 5, 7] : {ret_2}
    :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
 
-[4] : {ret_3}
+[4, 6, 8] : {ret_3}
    :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
 )DOC",
    {{c2py::python_typename<const triqs::modest::one_body_elements_on_grid &>()},

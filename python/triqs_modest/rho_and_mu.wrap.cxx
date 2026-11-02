@@ -54,9 +54,23 @@ static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
         return triqs::modest::density<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
       },
       "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_tb &obe, double mu,
+         const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         const triqs::experimental::lattice::bz_int_options &opt) {
+        return triqs::modest::density<triqs::mesh::dlr_imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
+      },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
    c2py::cfun([](const triqs::modest::one_body_elements_tb &obe, double mu, const triqs::mesh::imfreq &mesh,
                  const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::density<triqs::mesh::imfreq>(obe, mu, mesh, opt); },
-              "obe", "mu", "mesh", "opt")};
+              "obe", "mu", "mesh", "opt"),
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_tb &obe, double mu, const triqs::mesh::dlr_imfreq &mesh,
+         const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::density<triqs::mesh::dlr_imfreq>(obe, mu, mesh, opt); },
+      "obe", "mu", "mesh", "opt")};
 
 // density_nk
 static auto const _c2py_fun_1 = c2py::dispatcher_f_kw_t{
@@ -102,9 +116,26 @@ static auto const _c2py_fun_2 = c2py::dispatcher_f_kw_t{
       },
       "target_density", "obe", "Sigma_dynamic", "Sigma_static", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
    c2py::cfun(
+      [](const double target_density, const triqs::modest::one_body_elements_tb &obe,
+         const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         const triqs::experimental::lattice::bz_int_options &opt, std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential<triqs::mesh::dlr_imfreq>(target_density, obe, Sigma_dynamic, Sigma_static, opt, method,
+                                                                               precision, verbosity);
+      },
+      "target_density", "obe", "Sigma_dynamic", "Sigma_static", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
       [](const double target_density, const triqs::modest::one_body_elements_tb &obe, const triqs::mesh::imfreq &mesh,
          const triqs::experimental::lattice::bz_int_options &opt, std::string method, double precision, bool verbosity) {
         return triqs::modest::find_chemical_potential<triqs::mesh::imfreq>(target_density, obe, mesh, opt, method, precision, verbosity);
+      },
+      "target_density", "obe", "mesh", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+   c2py::cfun(
+      [](const double target_density, const triqs::modest::one_body_elements_tb &obe, const triqs::mesh::dlr_imfreq &mesh,
+         const triqs::experimental::lattice::bz_int_options &opt, std::string method, double precision, bool verbosity) {
+        return triqs::modest::find_chemical_potential<triqs::mesh::dlr_imfreq>(target_density, obe, mesh, opt, method, precision, verbosity);
       },
       "target_density", "obe", "mesh", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true)};
 
@@ -114,11 +145,11 @@ static const auto _c2py_doc_0 = _c2py_fun_0.doc(
 
 ------
 
-[3] Compute the density of the lattice Green's function with a self-energy.
+[3, 4] Compute the density of the lattice Green's function with a self-energy.
 
 ------
 
-[4] Compute the density of the lattice Green's function without a self-energy.
+[5, 6] Compute the density of the lattice Green's function without a self-energy.
 
 ------
 
@@ -150,7 +181,7 @@ Returns
        nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
        nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
     {c2py::python_typename<const triqs::experimental::lattice::bz_int_options &>()},
-    {c2py::python_typename<const triqs::mesh::imfreq &>()}},
+    {c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()}},
    {c2py::python_typename<double>()});
 static const auto _c2py_doc_1 = _c2py_fun_1.doc(R"DOC(
 Compute number of particles :math:`n = \sum f(\beta(\varepsilon(k) - μ))`.
@@ -161,7 +192,7 @@ static const auto _c2py_doc_2 = _c2py_fun_2.doc(
 
 ------
 
-[2, 3, 4, 5] Find the chemical potenital from the local Green's function and self-energy given a target density.
+[2, 3, 4, 5, 6, 7] Find the chemical potenital from the local Green's function and self-energy given a target density.
 
 ------
 
@@ -205,7 +236,7 @@ Returns
        nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
        nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
     {c2py::python_typename<const triqs::experimental::lattice::bz_int_options &>()},
-    {c2py::python_typename<const triqs::mesh::imfreq &>()}},
+    {c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()}},
    {c2py::python_typename<double>()});
 //--------------------- module function table  -----------------------------
 
