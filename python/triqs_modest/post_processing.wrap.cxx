@@ -15,6 +15,7 @@
 #define C2PY_VERSION_MINOR 1
 
 #include <c2py/c2py.hpp>
+#include <c2py/serialization/h5.hpp>
 
 using c2py::operator""_a;
 
@@ -41,8 +42,8 @@ static int synth_constructor_0(PyObject *self, PyObject *args, PyObject *kwargs)
     return -1;
   }
   auto &self_c = *(((c2py::wrap<_c2py_cls_0> *)self)->_c);
-  de("data", self_c.data, false);
-  de("proj_data", self_c.proj_data, false);
+  de("total", self_c.total, false);
+  de("projected", self_c.projected, false);
   return de.check();
 }
 
@@ -54,29 +55,31 @@ const std::string c2py::tp_ctor_doc<_c2py_cls_0> = c2py::replace_tags(
 
 Parameters
 ----------
-data : {par_0}
+total : {par_0}
 
-proj_data : {par_1}
+projected : {par_1}
 
 )DOC",
    "par",
    {c2py::python_typename<nda::basic_array<double, 3, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>(),
-    c2py::python_typename<nda::basic_array<double, 5, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>()});
+    c2py::python_typename<nda::basic_array<double, 4, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>>()});
 
 // ----- Method table ----
 template <>
 PyMethodDef c2py::tp_methods<_c2py_cls_0>[] = {
-
+   {"__write_hdf5__", c2py::tpxx_write_h5<_c2py_cls_0>, METH_VARARGS, "  "},
+   {"__getstate__", c2py::getstate_h5<_c2py_cls_0>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_h5<_c2py_cls_0>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
 constexpr auto _c2py_doc_member_0 = R"DOC(:math:`A^\sigma(k,\omega)`.)DOC";
-constexpr auto _c2py_doc_member_1 = R"DOC(:math:`A^\sigma(k,\omega)`.)DOC";
+constexpr auto _c2py_doc_member_1 = R"DOC(:math:`A^\sigma_{mm}(k,\omega)` (diagonal in :math:`m`).)DOC";
 static PyObject *prop_get_dict_0(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<_c2py_cls_0> *)self)->_c);
   c2py::pydict dic;
-  dic["data"]      = self_c.data;
-  dic["proj_data"] = self_c.proj_data;
+  dic["total"]     = self_c.total;
+  dic["projected"] = self_c.projected;
   return dic.new_ref();
 }
 
@@ -84,8 +87,8 @@ static PyObject *prop_get_dict_0(PyObject *self, void *) {
 
 template <>
 constinit PyGetSetDef c2py::tp_getset<_c2py_cls_0>[] = {
-   c2py::getsetdef_from_member<&_c2py_cls_0::data, _c2py_cls_0>("data", _c2py_doc_member_0),
-   c2py::getsetdef_from_member<&_c2py_cls_0::proj_data, _c2py_cls_0>("proj_data", _c2py_doc_member_1),
+   c2py::getsetdef_from_member<&_c2py_cls_0::total, _c2py_cls_0>("total", _c2py_doc_member_0),
+   c2py::getsetdef_from_member<&_c2py_cls_0::projected, _c2py_cls_0>("projected", _c2py_doc_member_1),
    {"__dict__", (getter)prop_get_dict_0, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -112,7 +115,7 @@ static int synth_constructor_1(PyObject *self, PyObject *args, PyObject *kwargs)
   }
   auto &self_c = *(((c2py::wrap<_c2py_cls_1> *)self)->_c);
   de("total", self_c.total, false);
-  de("per_theta", self_c.per_theta, false);
+  de("projected", self_c.projected, false);
   return de.check();
 }
 
@@ -126,7 +129,7 @@ Parameters
 ----------
 total : {par_0}
 
-per_theta : {par_1}
+projected : {par_1}
 
 )DOC",
    "par",
@@ -136,7 +139,9 @@ per_theta : {par_1}
 // ----- Method table ----
 template <>
 PyMethodDef c2py::tp_methods<_c2py_cls_1>[] = {
-
+   {"__write_hdf5__", c2py::tpxx_write_h5<_c2py_cls_1>, METH_VARARGS, "  "},
+   {"__getstate__", c2py::getstate_h5<_c2py_cls_1>, METH_NOARGS, ""},
+   {"__setstate__", c2py::setstate_h5<_c2py_cls_1>, METH_O, ""},
    {nullptr, nullptr, 0, nullptr} // Sentinel
 };
 
@@ -146,7 +151,7 @@ static PyObject *prop_get_dict_1(PyObject *self, void *) {
   auto &self_c = *(((c2py::wrap<_c2py_cls_1> *)self)->_c);
   c2py::pydict dic;
   dic["total"]     = self_c.total;
-  dic["per_theta"] = self_c.per_theta;
+  dic["projected"] = self_c.projected;
   return dic.new_ref();
 }
 
@@ -155,7 +160,7 @@ static PyObject *prop_get_dict_1(PyObject *self, void *) {
 template <>
 constinit PyGetSetDef c2py::tp_getset<_c2py_cls_1>[] = {
    c2py::getsetdef_from_member<&_c2py_cls_1::total, _c2py_cls_1>("total", _c2py_doc_member_2),
-   c2py::getsetdef_from_member<&_c2py_cls_1::per_theta, _c2py_cls_1>("per_theta", _c2py_doc_member_3),
+   c2py::getsetdef_from_member<&_c2py_cls_1::projected, _c2py_cls_1>("projected", _c2py_doc_member_3),
    {"__dict__", (getter)prop_get_dict_1, nullptr, "", nullptr},
    {nullptr, nullptr, nullptr, nullptr, nullptr}};
 
@@ -167,10 +172,10 @@ const std::string c2py::tp_doc<_c2py_cls_1> =
 
 // projected_spectral_function
 static auto const _c2py_fun_0 = c2py::dispatcher_f_kw_t{
-   c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe_theta, const triqs::modest::downfolding_projector &Proj, double mu,
+   c2py::cfun([](const triqs::modest::one_body_elements_on_grid &obe, const triqs::modest::downfolding_projector &Proj, double mu,
                  const triqs::gfs::block_gf<triqs::mesh::refreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_w,
-                 double broadening) { return triqs::modest::projected_spectral_function(obe_theta, Proj, mu, Sigma_w, broadening); },
-              "obe_theta", "Proj", "mu", "Sigma_w", "broadening"_a = 0.01)};
+                 double broadening) { return triqs::modest::projected_spectral_function(obe, Proj, mu, Sigma_w, broadening); },
+              "obe", "Proj", "mu", "Sigma_w", "broadening"_a = 0.01)};
 
 // spectral_function
 static auto const _c2py_fun_1 =
@@ -192,8 +197,8 @@ Compute the atom- and orbital-resolved spectral function (interacting density of
 
 Parameters
 ----------
-obe_theta : {par_0}
-   One-body elements on grid created from one_body_elements_with_theta_projectors.
+obe : {par_0}
+   One-body elements on grid created from one_body_elements_with_partial_projectors.
 Proj : {par_1}
    Downfolding projector defined in the correlated space using to upfold the DMFT self-energies.
 mu : {par_2}
@@ -332,6 +337,13 @@ extern "C" __attribute__((visibility("default"))) PyObject *PyInit_post_processi
   _add_type(_c2py_cls_0, "SpectralFunctionKw");
   _add_type(_c2py_cls_1, "SpectralFunctionW");
 #undef _add_type
+
+  c2py::pyref module = c2py::pyref::module("h5.formats");
+  if (not module) return nullptr;
+  c2py::pyref register_class = module.attr("register_class");
+
+  register_h5_type<_c2py_cls_0>(register_class);
+  register_h5_type<_c2py_cls_1>(register_class);
 
   return m;
 }

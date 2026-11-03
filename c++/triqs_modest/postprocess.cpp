@@ -4,59 +4,37 @@
 // See LICENSE in the root of this distribution for details.
 
 #include "./postprocess.hpp"
+#include "./lattice_gf_helpers.hpp"
 #include <iostream>
 #include <atomic>
 #include <stdexcept>
 
 namespace triqs::modest {
 
-  namespace detail {
-
-    // Upfold self-energy for ALL frequencies at once for a given (k, sigma)
-    // Returns array of shape (n_w, N_nu, N_nu)
-    auto upfold_self_energy_all_freq(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, auto const &Sigma_w, long k_idx,
-                                     long sigma_idx) {
-      auto N_nu = obe.H.N_nu(sigma_idx, k_idx);
-      auto n_w  = Sigma_w(0, 0).mesh().size();
-      auto out  = nda::zeros<dcomplex>(n_w, N_nu, N_nu);
-
-      for (auto &&[alpha, R] : enumerated_sub_slices(get_struct(Sigma_w).dims(r_all, 0) | tl::to<std::vector>())) {
-        auto P         = Proj.P(sigma_idx, k_idx)(R, r_all);
-        auto Pdag      = dagger(P);
-        auto Sigma_blk = Sigma_w(alpha, sigma_idx).data();
-
-        // Batch over all frequencies
-        for (auto n : range(n_w)) { out(n, r_all, r_all) += Pdag * nda::matrix<dcomplex>{Sigma_blk(n, r_all, r_all)} * P; }
-      }
-      return out;
-    }
-
-  } // namespace detail
-
-  spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe_theta, downfolding_projector const &Proj, double mu,
+  spectral_function_w projected_spectral_function(one_body_elements_on_grid const &obe, downfolding_projector const &Proj, double mu,
                                                   block2_gf<mesh::refreq, matrix_valued> const &Sigma_w, double broadening) {
     using nda::linalg::inv;
 
     auto const &mesh = Sigma_w(0, 0).mesh();
-    auto n_sigma     = obe_theta.C_space.n_sigma();
-    auto n_k         = obe_theta.H.n_k();
-    auto n_M         = obe_theta.C_space.dim();
+    auto n_sigma     = obe.C_space.n_sigma();
+    auto n_k         = obe.H.n_k();
+    auto n_M         = obe.C_space.dim();
     auto n_w         = mesh.size();
     auto im          = dcomplex(0, 1.0);
     auto delta       = im * broadening;
 
     // Accumulate local Green's function over k-points
-    auto gloc_result = make_block2_gf(mesh, obe_theta.C_space.Gc_block_shape());
+    auto gloc_result = make_block2_gf(mesh, obe.C_space.Gc_block_shape());
 
     for (auto k_idx : range(n_k)) {
       for (auto sigma : range(n_sigma)) {
-        auto P    = obe_theta.P.P(sigma, k_idx);
+        auto P    = obe.P.P(sigma, k_idx);
         auto Pdag = dagger(P);
-        auto H_k  = obe_theta.H.H(sigma, k_idx);
-        auto w_k  = obe_theta.H.k_weights(k_idx);
+        auto H_k  = obe.H.H(sigma, k_idx);
+        auto w_k  = obe.H.k_weights(k_idx);
 
         // Precompute upfolded self-energy for all frequencies
-        auto PSP_all = detail::upfold_self_energy_all_freq(obe_theta, Proj, Sigma_w, k_idx, sigma);
+        auto PSP_all = detail::upfold_self_energy_all_freq(obe, Proj, Sigma_w, k_idx, sigma);
 
         for (auto &&[n, w] : enumerate(mesh)) {
           auto G_k = nda::matrix<dcomplex>{inv(w + delta + mu - H_k - PSP_all(n, r_all, r_all))};
@@ -65,22 +43,22 @@ namespace triqs::modest {
       }
     }
 
-    if (auto const &S = obe_theta.ibz_symm_ops; S) { gloc_result = S->symmetrize(gloc_result, obe_theta.C_space.atomic_decomposition()); }
+    if (auto const &S = obe.ibz_symm_ops; S) { gloc_result = S->symmetrize(gloc_result, obe.C_space.atomic_decomposition()); }
 
     // Extract spectral functions from local Green's function
     auto total     = nda::zeros<double>(n_sigma, n_w);
-    auto per_theta = nda::zeros<double>(n_sigma, n_w, n_M, n_M);
+    auto projected = nda::zeros<double>(n_sigma, n_w, n_M, n_M);
 
     for (auto sigma : range(n_sigma)) {
       auto const &G = gloc_result(0, sigma).data();
       for (auto &&[n, w] : enumerate(mesh)) {
         auto g                            = nda::matrix<dcomplex>{G(n, r_all, r_all)};
         total(sigma, n)                   = (-1.0 / M_PI) * imag(trace(g));
-        per_theta(sigma, n, r_all, r_all) = real(im * (g - dagger(g)) / (2 * M_PI));
+        projected(sigma, n, r_all, r_all) = real(im * (g - dagger(g)) / (2 * M_PI));
       }
     }
 
-    return {.total = total, .per_theta = per_theta};
+    return {.total = total, .projected = projected};
   }
 
   nda::array<double, 4> spectral_function(one_body_elements_on_grid const &obe, double mu, block2_gf<mesh::refreq, matrix_valued> const &Sigma_w,
@@ -125,10 +103,10 @@ namespace triqs::modest {
     auto n_M         = obe.C_space.dim();
     auto delta       = dcomplex(0, broadening);
 
-    auto data      = nda::zeros<double>(n_sigma, n_k, n_w);
-    auto proj_data = nda::zeros<double>(n_sigma, n_k, n_w, n_M, n_M);
+    auto total     = nda::zeros<double>(n_sigma, n_k, n_w);
+    auto projected = nda::zeros<double>(n_sigma, n_k, n_w, n_M);
 
-#pragma omp parallel for default(none) shared(n_k, n_sigma, n_w, obe, mu, delta, Sigma_w, broadening, mesh, data, proj_data, r_all)
+#pragma omp parallel for default(none) shared(n_k, n_sigma, n_M, obe, mu, delta, Sigma_w, mesh, total, projected, r_all)
     for (auto k_idx : range(n_k)) {
       for (auto sigma : range(n_sigma)) {
         auto P    = obe.P.P(sigma, k_idx);
@@ -142,16 +120,16 @@ namespace triqs::modest {
           auto G_k = inv(w + delta + mu - H_k - PSP_all(n, r_all, r_all));
 
           // Total spectral function from trace
-          data(sigma, k_idx, n) = (-1.0 / M_PI) * imag(trace(G_k));
+          total(sigma, k_idx, n) = (-1.0 / M_PI) * imag(trace(G_k));
 
-          // Orbital-resolved from projection
-          auto PGP                                 = P * nda::matrix<dcomplex>{G_k} * Pdag;
-          proj_data(sigma, k_idx, n, r_all, r_all) = (-1.0 / M_PI) * imag(PGP);
+          // Orbital-resolved from projection, diagonal in m
+          auto PGP = nda::matrix<dcomplex>{P * nda::matrix<dcomplex>{G_k} * Pdag};
+          for (auto m : range(n_M)) projected(sigma, k_idx, n, m) = (-1.0 / M_PI) * imag(PGP(m, m));
         }
       }
     }
 
-    return {.data = data, .proj_data = proj_data};
+    return {.total = total, .projected = projected};
   }
 
 } // namespace triqs::modest

@@ -71,9 +71,9 @@ namespace triqs::modest {
   //-------------------------------------------------------
   // Enumerate the different reading modes for the obe factory functions.
   enum class ReadMode {
-    Correlated,      // reads bands, projectors, and correlated shells from "dft_input"
-    ThetaProjectors, // read bands ands shells from "dft_input" and projectors from "dft_parproj_input" ("proj_mat_all")
-    Bands            // read bands and projectors from "dft_bands_input"
+    Correlated,        // reads bands, projectors, and correlated shells from "dft_input"
+    PartialProjectors, // read bands ands shells from "dft_input" and projectors from "dft_parproj_input" ("proj_mat_all")
+    Bands              // read bands and projectors from "dft_bands_input"
   };
 
   //-------------------------------------------------------
@@ -101,9 +101,9 @@ namespace triqs::modest {
              })
          | tl::to<std::vector<cmat_t>>();
     };
-    return (mode == ReadMode::Correlated)  ? read_mats(root["dft_input"], "rot_mat", "rot_mat_time_inv") :
-       (mode == ReadMode::ThetaProjectors) ? read_mats(root["dft_parproj_input"], "rot_mat_all", "rot_mat_all_time_inv") :
-                                             throw std::runtime_error("This should not happen!");
+    return (mode == ReadMode::Correlated)    ? read_mats(root["dft_input"], "rot_mat", "rot_mat_time_inv") :
+       (mode == ReadMode::PartialProjectors) ? read_mats(root["dft_parproj_input"], "rot_mat_all", "rot_mat_all_time_inv") :
+                                               throw std::runtime_error("This should not happen!");
   }
 
   //-------------------------------------------------------
@@ -115,9 +115,9 @@ namespace triqs::modest {
       if (m == ReadMode::Correlated || m == ReadMode::Bands) {
         return (m == ReadMode::Correlated) ? as<nda::array<dcomplex, 5>>(root["dft_input"]["proj_mat"]) :
                                              as<nda::array<dcomplex, 5>>(root["dft_bands_input"]["proj_mat"]);
-      } else if (m == ReadMode::ThetaProjectors) {
+      } else if (m == ReadMode::PartialProjectors) {
         auto tmp = as<nda::array<dcomplex, 6>>(root["dft_parproj_input"]["proj_mat_all"]);
-        // FIXME: The θ projectors have an extra dimesion called ir. Not sure why it is there...
+        // FIXME: The partial projectors have an extra dimesion called ir. Not sure why it is there...
         return nda::array<dcomplex, 5>{tmp(r_all, r_all, r_all, 0, r_all, r_all)};
       } else {
         throw std::runtime_error{"This should not happen!"};
@@ -151,7 +151,7 @@ namespace triqs::modest {
   // Read band dispersion and k-weights according to ReadMode. (internal)
   std::tuple<nda::array<dcomplex, 4>, nda::matrix<long>, nda::array<double, 1>> read_bands_and_weights(std::string filename, ReadMode mode) {
     auto root = h5::proxy{filename, 'r'};
-    if (mode == ReadMode::Correlated || mode == ReadMode::ThetaProjectors) {
+    if (mode == ReadMode::Correlated || mode == ReadMode::PartialProjectors) {
       auto g_dft = root["dft_input"];
       return {as<nda::array<dcomplex, 4>>(g_dft["hopping"]), as<nda::matrix<long>>(g_dft["n_orbitals"]),
               as<nda::array<double, 1>>(g_dft["bz_weights"])};
@@ -355,7 +355,7 @@ namespace triqs::modest {
     return {target_density, std::move(obe_final)};
   }
 
-  one_body_elements_on_grid read_theta_projectors_for_obe(const std::string &filename, const one_body_elements_on_grid &obe) {
+  one_body_elements_on_grid read_partial_projectors_for_obe(const std::string &filename, const one_body_elements_on_grid &obe) {
     //check for group and throw error
     auto h5root = h5::proxy{filename, 'r'};
     if (!h5root.has_group("dft_parproj_input")) {
@@ -363,7 +363,7 @@ namespace triqs::modest {
     }
 
     // all the atomic shells
-    auto atomic_shells = read_atomic_shells(filename, ReadMode::ThetaProjectors);
+    auto atomic_shells = read_atomic_shells(filename, ReadMode::PartialProjectors);
 
     // The decomposition and rotations must be embedded from the C spcae to the W space
     auto new_block_decomposition = detail::inject_to_new_space(obe.C_space.atoms_block_decomposition(), obe.C_space.atomic_shells(), atomic_shells);
@@ -371,29 +371,29 @@ namespace triqs::modest {
     // The local space expanded from C to W
     auto W_space = local_space{obe.C_space.spin_kind(), atomic_shells, new_block_decomposition, {}, {}};
 
-    // rotation matrices using ThetaProjector mode
-    auto rot_mats = read_rotation_matrices(filename, ReadMode::ThetaProjectors);
+    // rotation matrices using PartialProjectors mode
+    auto rot_mats = read_rotation_matrices(filename, ReadMode::PartialProjectors);
 
     // read and rotate projectors
-    auto atom_decomp = W_space.atomic_decomposition() | tl::to<std::vector<long>>();
-    auto P_k         = load_rotate_and_format_projectors(filename, ReadMode::ThetaProjectors, rot_mats, atom_decomp);
-    auto theta_proj  = downfolding_projector{.spin_kind = obe.C_space.spin_kind(), .P_k = std::move(P_k), .n_bands_per_k = obe.H.n_bands_per_k};
+    auto atom_decomp  = W_space.atomic_decomposition() | tl::to<std::vector<long>>();
+    auto P_k          = load_rotate_and_format_projectors(filename, ReadMode::PartialProjectors, rot_mats, atom_decomp);
+    auto partial_proj = downfolding_projector{.spin_kind = obe.C_space.spin_kind(), .P_k = std::move(P_k), .n_bands_per_k = obe.H.n_bands_per_k};
 
     // create a new IBZ symmetrizer that spans all atoms instead of just the correlated atoms
-    auto symm_ops = (obe.ibz_symm_ops) ? std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::ThetaProjectors)) :
+    auto symm_ops = (obe.ibz_symm_ops) ? std::optional<ibz_symmetry_ops>(read_ibz_symmetry_ops(filename, ReadMode::PartialProjectors)) :
                                          std::optional<ibz_symmetry_ops>{};
-    return one_body_elements_on_grid{.H = obe.H, .C_space = W_space, .P = theta_proj, .ibz_symm_ops = symm_ops};
+    return one_body_elements_on_grid{.H = obe.H, .C_space = W_space, .P = partial_proj, .ibz_symm_ops = symm_ops};
   }
 
   //-------------------------------------------------------
-  // Prepare one-body elements with the Θ projectors.
-  one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe) {
+  // Prepare one-body elements with the partial projectors.
+  one_body_elements_on_grid one_body_elements_with_partial_projectors(std::string const &filename, one_body_elements_on_grid const &obe) {
 
     mpi::communicator comm = {};
     int root               = 0;
     one_body_elements_on_grid obe_final;
 
-    if (comm.rank() == root) { obe_final = read_theta_projectors_for_obe(filename, obe); }
+    if (comm.rank() == root) { obe_final = read_partial_projectors_for_obe(filename, obe); }
 
     mpi::broadcast(obe_final, comm, root);
     return obe_final;
