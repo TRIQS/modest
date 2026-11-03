@@ -71,6 +71,42 @@ TEST(obe_tb, lco_wannier90) { // NOLINT
   for (auto sigma : nda::range(n_sigma)) { EXPECT_ARRAY_NEAR(impurity_levels(obe_dft)(0, sigma), impurity_levels(obe_tb)(0, sigma), 1e-8); }
 }
 
+TEST(obe_tb, lco_wannier90_dlr) { // NOLINT
+
+  std::vector<atomic_orbs> atomic_shells;
+  long dim = 1;
+  atomic_shells.emplace_back(dim, 2, 0, 0);
+
+  one_body_elements_tb obe_tb = one_body_elements_from_wannier90("./ref_data/lco", spin_kind_e::NonPolarized, atomic_shells);
+  double beta                 = 10.;
+  auto dlr_mesh               = mesh::dlr_imfreq{beta, triqs::mesh::Fermion, w_max, eps};
+
+  long n_sigma      = 2;
+  auto Sigma        = gfs::gf<mesh::dlr_imfreq>{dlr_mesh, {dim, dim}};
+  auto Sigma_block2 = make_block2_gf(1, n_sigma, Sigma);
+  nda::array<nda::matrix<dcomplex>, 2> Sigma_static(1, n_sigma);
+  for (auto sigma : nda::range(n_sigma)) { Sigma_static(0, sigma) = nda::matrix<dcomplex>::zeros(dim, dim); }
+
+  auto [dft_density, obe_dft] = one_body_elements_from_dft_converter("./ref_data/lco_wannier.ref.h5");
+  double mu_dft               = find_chemical_potential(dft_density, obe_dft, beta);
+  auto gloc_dft               = gloc(dlr_mesh, obe_dft, mu_dft);
+
+  bz_int_options opt = {.k_grid = {7, 7, 7}, .k_grid_max = {7, 7, 7}, .run_adaptive = false};
+  auto gloc_tb       = gloc(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
+  auto gloc_tb_zero  = gloc(dlr_mesh, obe_tb, mu_dft, opt);
+  for (auto iw : dlr_mesh) {
+    EXPECT_COMPLEX_NEAR(gloc_tb(0, 0)[iw](0, 0), gloc_dft(0, 0)[iw](0, 0), 1e-5);
+    EXPECT_COMPLEX_NEAR(gloc_tb_zero(0, 0)[iw](0, 0), gloc_dft(0, 0)[iw](0, 0), 1e-5);
+  }
+
+  double n = density(obe_tb, mu_dft, Sigma_block2, Sigma_static, opt);
+  EXPECT_NEAR(n, 1.0, 1e-4);
+  EXPECT_NEAR(density(obe_tb, mu_dft, dlr_mesh, opt), 1.0, 1e-4);
+
+  EXPECT_NEAR(find_chemical_potential(n, obe_tb, Sigma_block2, Sigma_static, opt), mu_dft, 1e-4);
+  EXPECT_NEAR(find_chemical_potential(n, obe_tb, dlr_mesh, opt, "dichotomy", 1.e-5, false), mu_dft, 1e-4);
+}
+
 // ----------------------------- SVO with t2g only test -----------------------------------------
 
 #if LFS

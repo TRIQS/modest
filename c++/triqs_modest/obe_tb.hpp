@@ -336,6 +336,26 @@ namespace triqs::modest {
   template double find_chemical_potential(double const target_density, one_body_elements_tb const &obe, mesh::imfreq const &mesh,
                                           bz_int_options const &opt, std::string method, double precision, bool verbosity);
 
+  template block2_gf<mesh::dlr_imfreq, matrix_valued> gloc(one_body_elements_tb const &obe, double mu,
+                                                           block2_gf<mesh::dlr_imfreq, matrix_valued> const &Sigma_dynamic,
+                                                           nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, bz_int_options const &opt);
+
+  template block2_gf<mesh::dlr_imfreq, matrix_valued> gloc(mesh::dlr_imfreq const &mesh, one_body_elements_tb const &obe, double mu,
+                                                           bz_int_options const &opt);
+
+  template double density(one_body_elements_tb const &obe, double mu, block2_gf<mesh::dlr_imfreq, matrix_valued> const &Sigma_dynamic,
+                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, bz_int_options const &opt);
+
+  template double density(one_body_elements_tb const &obe, double mu, mesh::dlr_imfreq const &mesh, bz_int_options const &opt);
+
+  template double find_chemical_potential(double const target_density, one_body_elements_tb const &obe,
+                                          block2_gf<mesh::dlr_imfreq, matrix_valued> const &Sigma_dynamic,
+                                          nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static, bz_int_options const &opt, std::string method,
+                                          double precision, bool verbosity);
+
+  template double find_chemical_potential(double const target_density, one_body_elements_tb const &obe, mesh::dlr_imfreq const &mesh,
+                                          bz_int_options const &opt, std::string method, double precision, bool verbosity);
+
   /** @endcond */
 
 } // namespace triqs::modest

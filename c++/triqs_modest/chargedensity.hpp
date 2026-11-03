@@ -53,4 +53,8 @@ namespace triqs::modest {
                                                              block2_gf<imfreq, matrix_valued> const &Sigma_dynamic,
                                                              nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
 
+  template nda::array<dcomplex, 4> charge_density_correction(one_body_elements_on_grid const &obe, double mu,
+                                                             block2_gf<dlr_imfreq, matrix_valued> const &Sigma_dynamic,
+                                                             nda::array<nda::matrix<dcomplex>, 2> const &Sigma_static);
+
 } // namespace triqs::modest

@@ -29,7 +29,7 @@ template <> inline constexpr auto c2py::tp_name<_c2py_cls_0> = "triqs_modest.obe
 static const auto _c2py_init_0                               = c2py::dispatcher_c_kw_t{
    c2py::c_constructor<_c2py_cls_0, std::vector<triqs::experimental::lattice::tb_hk>, triqs::modest::local_space>("H_sigma", "ls"),
    c2py::c_constructor<_c2py_cls_0, std::vector<triqs::experimental::lattice::tb_hk>, triqs::modest::spin_kind_e,
-                       std::vector<triqs::modest::atomic_orbs>>("H_sigma", "spin_kind", "atomic_shells")};
+                                                     std::vector<triqs::modest::atomic_orbs>>("H_sigma", "spin_kind", "atomic_shells")};
 template <> constexpr initproc c2py::tp_init<_c2py_cls_0> = c2py::pyfkw_constructor<_c2py_init_0>;
 template <>
 const std::string c2py::tp_ctor_doc<_c2py_cls_0> = _c2py_init_0.doc(R"DOC(
@@ -109,9 +109,23 @@ static auto const _c2py_fun_2 = c2py::dispatcher_f_kw_t{
         return triqs::modest::density<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
       },
       "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_tb &obe, double mu,
+         const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         const triqs::experimental::lattice::bz_int_options &opt) {
+        return triqs::modest::density<triqs::mesh::dlr_imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
+      },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
    c2py::cfun([](const triqs::modest::one_body_elements_tb &obe, double mu, const triqs::mesh::imfreq &mesh,
                  const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::density<triqs::mesh::imfreq>(obe, mu, mesh, opt); },
-              "obe", "mu", "mesh", "opt")};
+              "obe", "mu", "mesh", "opt"),
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_tb &obe, double mu, const triqs::mesh::dlr_imfreq &mesh,
+         const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::density<triqs::mesh::dlr_imfreq>(obe, mu, mesh, opt); },
+      "obe", "mu", "mesh", "opt")};
 
 // extend_to_spin
 static auto const _c2py_fun_3 =
@@ -132,9 +146,26 @@ static auto const _c2py_fun_4 =
          },
          "target_density", "obe", "Sigma_dynamic", "Sigma_static", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
       c2py::cfun(
+         [](const double target_density, const triqs::modest::one_body_elements_tb &obe,
+            const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+            const nda::basic_array<
+               nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>,
+               2, nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+            const triqs::experimental::lattice::bz_int_options &opt, std::string method, double precision, bool verbosity) {
+           return triqs::modest::find_chemical_potential<triqs::mesh::dlr_imfreq>(target_density, obe, Sigma_dynamic, Sigma_static, opt, method,
+                                                                                  precision, verbosity);
+         },
+         "target_density", "obe", "Sigma_dynamic", "Sigma_static", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+      c2py::cfun(
          [](const double target_density, const triqs::modest::one_body_elements_tb &obe, const triqs::mesh::imfreq &mesh,
             const triqs::experimental::lattice::bz_int_options &opt, std::string method, double precision, bool verbosity) {
            return triqs::modest::find_chemical_potential<triqs::mesh::imfreq>(target_density, obe, mesh, opt, method, precision, verbosity);
+         },
+         "target_density", "obe", "mesh", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true),
+      c2py::cfun(
+         [](const double target_density, const triqs::modest::one_body_elements_tb &obe, const triqs::mesh::dlr_imfreq &mesh,
+            const triqs::experimental::lattice::bz_int_options &opt, std::string method, double precision, bool verbosity) {
+           return triqs::modest::find_chemical_potential<triqs::mesh::dlr_imfreq>(target_density, obe, mesh, opt, method, precision, verbosity);
          },
          "target_density", "obe", "mesh", "opt", "method"_a = "dichotomy", "precision"_a = 1.e-5, "verbosity"_a = true)};
 
@@ -155,9 +186,23 @@ static auto const _c2py_fun_6 = c2py::dispatcher_f_kw_t{
         return triqs::modest::gloc<triqs::mesh::imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
       },
       "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
+   c2py::cfun(
+      [](const triqs::modest::one_body_elements_tb &obe, double mu,
+         const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &Sigma_dynamic,
+         const nda::basic_array<
+            nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
+            nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &Sigma_static,
+         const triqs::experimental::lattice::bz_int_options &opt) {
+        return triqs::modest::gloc<triqs::mesh::dlr_imfreq>(obe, mu, Sigma_dynamic, Sigma_static, opt);
+      },
+      "obe", "mu", "Sigma_dynamic", "Sigma_static", "opt"),
    c2py::cfun([](const triqs::mesh::imfreq &mesh, const triqs::modest::one_body_elements_tb &obe, double mu,
                  const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::imfreq>(mesh, obe, mu, opt); },
-              "mesh", "obe", "mu", "opt")};
+              "mesh", "obe", "mu", "opt"),
+   c2py::cfun(
+      [](const triqs::mesh::dlr_imfreq &mesh, const triqs::modest::one_body_elements_tb &obe, double mu,
+         const triqs::experimental::lattice::bz_int_options &opt) { return triqs::modest::gloc<triqs::mesh::dlr_imfreq>(mesh, obe, mu, opt); },
+      "mesh", "obe", "mu", "opt")};
 
 // impurity_levels
 static auto const _c2py_fun_7 =
@@ -210,11 +255,11 @@ Returns
 static const auto _c2py_doc_1 = _c2py_fun_1.doc(R"DOC()DOC");
 static const auto _c2py_doc_2 = _c2py_fun_2.doc(
    R"DOC(
-[1] Compute the density of the lattice Green's function with a self-energy.
+[1, 2] Compute the density of the lattice Green's function with a self-energy.
 
 ------
 
-[2] Compute the density of the lattice Green's function without a self-energy.
+[3, 4] Compute the density of the lattice Green's function without a self-energy.
 
 ------
 
@@ -240,12 +285,13 @@ Returns
 )DOC",
    {{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
     {c2py::python_typename<double>()},
-    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
     {c2py::python_typename<const nda::basic_array<
        nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
        nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
     {c2py::python_typename<const triqs::experimental::lattice::bz_int_options &>()},
-    {c2py::python_typename<const triqs::mesh::imfreq &>()}},
+    {c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()}},
    {c2py::python_typename<double>()});
 static const auto _c2py_doc_3 = _c2py_fun_3.doc(R"DOC()DOC");
 static const auto _c2py_doc_4 = _c2py_fun_4.doc(
@@ -280,7 +326,8 @@ Returns
 )DOC",
    {{c2py::python_typename<const double>()},
     {c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
-    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
     {c2py::python_typename<const nda::basic_array<
        nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
        nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
@@ -288,7 +335,7 @@ Returns
     {c2py::python_typename<std::string>()},
     {c2py::python_typename<double>()},
     {c2py::python_typename<bool>()},
-    {c2py::python_typename<const triqs::mesh::imfreq &>()}},
+    {c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()}},
    {c2py::python_typename<double>()});
 static const auto _c2py_doc_5 = _c2py_fun_5.doc(R"DOC(
 Convert a tight binding Hamiltonian to its superlattice equivalent.
@@ -333,18 +380,23 @@ mesh : {par_5}
 
 Returns
 -------
-{ret_0}
+[1, 3] : {ret_0}
+   :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
+
+[2, 4] : {ret_1}
    :math:`G_{\mathrm{loc}}^{\sigma}`, the local Green's function.
 )DOC",
    {{c2py::python_typename<const triqs::modest::one_body_elements_tb &>()},
     {c2py::python_typename<double>()},
-    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
+    {c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>(),
+     c2py::python_typename<const triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2> &>()},
     {c2py::python_typename<const nda::basic_array<
        nda::basic_array<std::complex<double>, 2, nda::C_layout, 'M', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>>, 2,
        nda::C_layout, 'A', nda::heap_basic<nda::mem::mallocator<nda::mem::AddressSpace::Host>>> &>()},
     {c2py::python_typename<const triqs::experimental::lattice::bz_int_options &>()},
-    {c2py::python_typename<const triqs::mesh::imfreq &>()}},
-   {c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>()});
+    {c2py::python_typename<const triqs::mesh::imfreq &>(), c2py::python_typename<const triqs::mesh::dlr_imfreq &>()}},
+   {c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>(),
+    c2py::python_typename<triqs::gfs::block_gf<triqs::mesh::dlr_imfreq, triqs::gfs::matrix_valued, nda::C_layout, 2>>()});
 static const auto _c2py_doc_7 = _c2py_fun_7.doc(
    R"DOC(
 Compute the atomic (impurity) levels from an obe.
