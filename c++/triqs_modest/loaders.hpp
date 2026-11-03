@@ -17,7 +17,7 @@ namespace triqs::modest {
   C2PY_IGNORE std::pair<double, one_body_elements_on_grid> read_obe_from_dft_converter_hdf5(std::string const &filename, double threshold = 1.e-5,
                                                                                             bool diagonalize_hloc = false);
 
-  C2PY_IGNORE one_body_elements_on_grid read_theta_projectors_for_obe(std::string const &filename, one_body_elements_on_grid const &obe);
+  C2PY_IGNORE one_body_elements_on_grid read_partial_projectors_for_obe(std::string const &filename, one_body_elements_on_grid const &obe);
 
   C2PY_IGNORE one_body_elements_on_grid read_data_on_high_symm_path_for_obe(std::string const &filename, one_body_elements_on_grid const &obe);
 
@@ -68,7 +68,7 @@ namespace triqs::modest {
 
   /**
    * @ingroup one_body_elements
-   * @brief Create a one-body elements with the \f$ \Theta \f$ projectors.
+   * @brief Create a one-body elements with partial (all-atom) projectors.
    *
    * @details Using the data from the "dft_parproj_input" group, the local space, downfolding projectors,
    * and optional IBZ symmetry ops are prepared to create a one-body elements. This object is
@@ -76,9 +76,9 @@ namespace triqs::modest {
    *
    * @param filename Hdf5 file from DFTtools converter with "dft_parproj_input" group.
    * @param obe One-body elements that was used in the DMFT calculation.
-   * @return One-body elements using the \f$ \Theta \f$ projectors.
+   * @return One-body elements using the partial projectors.
    */
-  one_body_elements_on_grid one_body_elements_with_theta_projectors(std::string const &filename, one_body_elements_on_grid const &obe);
+  one_body_elements_on_grid one_body_elements_with_partial_projectors(std::string const &filename, one_body_elements_on_grid const &obe);
 
   /**
    * @ingroup one_body_elements

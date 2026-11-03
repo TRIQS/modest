@@ -6,6 +6,7 @@
 #include <h5/h5.hpp>
 #include "downfolding.hpp"
 #include "embedding.hpp"
+#include "postprocess.hpp"
 #include <H5Tpublic.h> // HDF5 type creation API
 
 template <> h5::hid_t h5::detail::hid_t_of<triqs::modest::embedding::imp_block_t>() {
@@ -124,4 +125,34 @@ namespace triqs::modest {
     h5_write(subgroup, "P", obe.P);
     //h5_write(subgroup, "ibz_symm_ops", obe.ibz_symm_ops);
   }
+
+  // spectral function containers
+  void h5_read(h5::group g, std::string const &name, spectral_function_w &Aw) {
+    auto subgroup = g.open_group(name);
+    assert_hdf5_format(g, Aw);
+    h5_read(subgroup, "total", Aw.total);
+    h5_read(subgroup, "projected", Aw.projected);
+  }
+
+  void h5_write(h5::group g, std::string const &name, spectral_function_w const &Aw) {
+    auto subgroup = g.create_group(name);
+    write_hdf5_format(g, Aw);
+    h5_write(subgroup, "total", Aw.total);
+    h5_write(subgroup, "projected", Aw.projected);
+  }
+
+  void h5_read(h5::group g, std::string const &name, spectral_function_kw &Akw) {
+    auto subgroup = g.open_group(name);
+    assert_hdf5_format(g, Akw);
+    h5_read(subgroup, "total", Akw.total);
+    h5_read(subgroup, "projected", Akw.projected);
+  }
+
+  void h5_write(h5::group g, std::string const &name, spectral_function_kw const &Akw) {
+    auto subgroup = g.create_group(name);
+    write_hdf5_format(g, Akw);
+    h5_write(subgroup, "total", Akw.total);
+    h5_write(subgroup, "projected", Akw.projected);
+  }
+
 } // namespace triqs::modest
